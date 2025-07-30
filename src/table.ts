@@ -10,17 +10,34 @@ import { isNullOrUndefined } from "./utility/guards.js";
 import { type TableToColumnsMap, type TableToObject } from "./utility/types.js";
 
 
-type ColumnType<TDbType extends DbType> = Column<TDbType, TDbType extends PgDbType ? PgColumnType : string, string>;
-type ColumnsObjectType<TDbType extends DbType> = { [key: string]: ColumnType<TDbType> };
-type TableType<TDbType extends DbType, TColumns extends ColumnsObjectType<TDbType>> = Table<TDbType, TColumns, string, string | undefined>;
-type TablesObjectType<TDbType extends DbType> = { [key: string]: TableType<TDbType, ColumnsObjectType<TDbType>> };
+type ColumnType<TDbType extends DbType, TTableName extends string = string> = Column<TDbType, TDbType extends PgDbType ? PgColumnType : string, string, TTableName>;
+type ColumnsObjectType<TDbType extends DbType, TTableName extends string = string> = { [key: string]: ColumnType<TDbType, TTableName> };
+type TableType<TDbType extends DbType, TColumns extends ColumnsObjectType<TDbType>, TTableName extends string = string> = Table<TDbType, TColumns, TTableName, string | undefined>;
+type TablesObjectType<TDbType extends DbType, TTableName extends string = string> = { [key: string]: TableType<TDbType, ColumnsObjectType<TDbType>, TTableName> };
 
 class ForeignKey {
     constructor(public column: string, public references: { table: string; column: string | 'self-parent' | 'self-child' }) { }
 }
 
-class Column<TDbType extends DbType, TColumnType extends TDbType extends PgDbType ? PgColumnType : string, TColumnName extends string = string> {
-    constructor(public name: TColumnName, public type: TColumnType, public defaultValue?: string, public isNullable: boolean = false) { }
+class Column<
+    TDbType extends DbType,
+    TColumnType extends TDbType extends PgDbType ? PgColumnType : string,
+    TColumnName extends string = string,
+    TTableName extends string = string
+> {
+
+    tableName?: TTableName;
+
+    constructor(
+        public name: TColumnName,
+        public type: TColumnType,
+        public defaultValue?: string,
+        public isNullable: boolean = false
+    ) { }
+
+    setTableName(val: TTableName) {
+        this.tableName = val;
+    }
 }
 
 class Table<
@@ -101,8 +118,8 @@ class Table<
 }
 
 function pgTable<
-    TColumns extends ColumnsObjectType<PgDbType>,
-    TTableName extends string = string
+    TTableName extends string,
+    TColumns extends ColumnsObjectType<PgDbType, TTableName>
 >(
     name: TTableName,
     columns: TColumns,
@@ -110,6 +127,9 @@ function pgTable<
     uniqueKeys?: (string[])[],
     foreignKeys?: ForeignKey[]
 ) {
+
+    Object.entries(columns).forEach(ent => ent[1].setTableName(name));
+
     return new Table<PgDbType, TColumns, TTableName>(
         name,
         columns,
