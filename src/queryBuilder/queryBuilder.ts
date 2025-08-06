@@ -1,8 +1,7 @@
 import { DbType, PgDbType } from "../db.js";
 import { PgColumnType } from "../postgresql/dataTypes.js";
-import { Column, ColumnsObjectType, ColumnType, Table, TablesObjectType, TableType } from "../table.js";
+import { ColumnType, Table, type QueryColumn, type QueryTable, type QueryTablesObjectType, type QueryTableSpecsType, type TableToColumnsMap, type TableToObject } from "../table.js";
 import { isNullOrUndefined } from "../utility/guards.js";
-import { type TableToColumnsMap, type TableToObject } from "../utility/types.js";
 import { ComparableColumn } from "./comparableColumn.js";
 import { ComparisonOperation } from "./comparisonOperation.js";
 import { IExecuteableQuery } from "./interfaces/IExecuteableQuery.js";
@@ -25,7 +24,7 @@ import { ISelectQuery } from "./interfaces/ISelectQuery.js";
 
 class QueryBuilder<
     TDbType extends DbType,
-    TTables extends TablesObjectType<TDbType>,
+    TTables extends QueryTablesObjectType<TDbType>, // turn this type to keyed querytable object
     TResult extends { [key: string]: ColumnType<TDbType> } | undefined = undefined
 >
     implements
@@ -43,71 +42,83 @@ class QueryBuilder<
     }
 
 
-    select<TSelectResult extends { [key: string]: ColumnType<TDbType> | Record<PropertyKey, ColumnType<TDbType>> }>(
-        cb: (cols: TableToColumnsMap<TTables>) => TSelectResult
-    ): IExecuteableQuery<TDbType, TSelectResult> {
+    select<
+        TSelectResult extends { [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined> | Record<PropertyKey, QueryColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined>> }>(
+            cb: (cols: TableToColumnsMap<TTables>) => TSelectResult
+        ): IExecuteableQuery<TDbType, TSelectResult> {
         return this as unknown as IExecuteableQuery<TDbType, TSelectResult>;
     };
 
 
-    innerJoin<TInnerJoinTable extends Table<TDbType, any, any, any>>(
+    innerJoin<
+        TInnerJoinAs extends string | undefined,
+        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, TInnerJoinAs>,
+        TInnerJoinResult extends
+        TInnerJoinTable extends Table<TDbType, infer TColumns, infer TTableName> ?
+        QueryTable<
+            TDbType,
+            Table<TDbType, TColumns, TTableName>,
+            { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], QueryTableSpecsType, string | undefined> }
+        > : TInnerJoinTable
+
+    >(
         table: TInnerJoinTable,
-        cb: (cols: TableToColumnsMap<TTables & TableToObject<TInnerJoinTable>>) => ComparisonOperation
+        cb: (cols: TableToColumnsMap<TTables & TableToObject<TInnerJoinResult>>) => ComparisonOperation
     ):
-        IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinTable>> &
-        ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinTable>> {
+        IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>> &
+        ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>> {
 
-        const newTables = { ...this.tables, [table.name]: table };
+        // const newTables = { ...this.tables, [table.name]: table };
 
-        return new QueryBuilder(newTables) as unknown as
-            IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinTable>> &
-            ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinTable>>
+        return this as unknown as
+            IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>> &
+            ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>>
     }
 
 
-    leftJoin<TLeftJoinTable extends Table<TDbType, any, any>>(
-        table: TLeftJoinTable,
-        cb: (cols: TableToColumnsMap<TTables & TableToObject<TLeftJoinTable>>) => ComparisonOperation
-    ):
-        IJoinQuery<TDbType, TTables & TableToObject<TLeftJoinTable>> &
-        ISelectQuery<TDbType, TTables & TableToObject<TLeftJoinTable>> {
+    // leftJoin<TLeftJoinTable extends Table<TDbType, any, any>>(
+    //     table: TLeftJoinTable,
+    //     cb: (cols: TableToColumnsMap<TTables & TableToObject<TLeftJoinTable>>) => ComparisonOperation
+    // ):
+    //     IJoinQuery<TDbType, TTables & TableToObject<TLeftJoinTable>> &
+    //     ISelectQuery<TDbType, TTables & TableToObject<TLeftJoinTable>> {
 
-        const newTables = { ...this.tables, [table.name]: table };
+    //     const newTables = { ...this.tables, [table.name]: table };
 
-        return new QueryBuilder(newTables) as unknown as
-            IJoinQuery<TDbType, TTables & TableToObject<TLeftJoinTable>> &
-            ISelectQuery<TDbType, TTables & TableToObject<TLeftJoinTable>>
-    }
-
-
-    rightJoin<TRightJoinTable extends Table<TDbType, any, any>>(
-        table: TRightJoinTable,
-        cb: (cols: TableToColumnsMap<TTables & TableToObject<TRightJoinTable>>) => ComparisonOperation
-    ):
-        IJoinQuery<TDbType, TTables & TableToObject<TRightJoinTable>> &
-        ISelectQuery<TDbType, TTables & TableToObject<TRightJoinTable>> {
-
-        const newTables = { ...this.tables, [table.name]: table };
-
-        return new QueryBuilder(newTables) as unknown as
-            IJoinQuery<TDbType, TTables & TableToObject<TRightJoinTable>> &
-            ISelectQuery<TDbType, TTables & TableToObject<TRightJoinTable>>
-    }
+    //     return new QueryBuilder(newTables) as unknown as
+    //         IJoinQuery<TDbType, TTables & TableToObject<TLeftJoinTable>> &
+    //         ISelectQuery<TDbType, TTables & TableToObject<TLeftJoinTable>>
+    // }
 
 
-    fullJoin<TFullJoinTable extends Table<TDbType, any, any>>(
-        table: TFullJoinTable,
-        cb: (cols: TableToColumnsMap<TTables & TableToObject<TFullJoinTable>>) => ComparisonOperation
-    ):
-        IJoinQuery<TDbType, TTables & TableToObject<TFullJoinTable>> &
-        ISelectQuery<TDbType, TTables & TableToObject<TFullJoinTable>> {
+    // rightJoin<TRightJoinTable extends Table<TDbType, any, any>>(
+    //     table: TRightJoinTable,
+    //     cb: (cols: TableToColumnsMap<TTables & TableToObject<TRightJoinTable>>) => ComparisonOperation
+    // ):
+    //     IJoinQuery<TDbType, TTables & TableToObject<TRightJoinTable>> &
+    //     ISelectQuery<TDbType, TTables & TableToObject<TRightJoinTable>> {
 
-        const newTables = { ...this.tables, [table.name]: table };
+    //     const newTables = { ...this.tables, [table.name]: table };
 
-        return new QueryBuilder(newTables) as unknown as
-            IJoinQuery<TDbType, TTables & TableToObject<TFullJoinTable>> &
-            ISelectQuery<TDbType, TTables & TableToObject<TFullJoinTable>>
-    }
+    //     return new QueryBuilder(newTables) as unknown as
+    //         IJoinQuery<TDbType, TTables & TableToObject<TRightJoinTable>> &
+    //         ISelectQuery<TDbType, TTables & TableToObject<TRightJoinTable>>
+    // }
+
+
+    // fullJoin<TFullJoinTable extends Table<TDbType, any, any>>(
+    //     table: TFullJoinTable,
+    //     cb: (cols: TableToColumnsMap<TTables & TableToObject<TFullJoinTable>>) => ComparisonOperation
+    // ):
+    //     IJoinQuery<TDbType, TTables & TableToObject<TFullJoinTable>> &
+    //     ISelectQuery<TDbType, TTables & TableToObject<TFullJoinTable>> {
+
+    //     const newTables = { ...this.tables, [table.name]: table };
+
+    //     return new QueryBuilder(newTables) as unknown as
+    //         IJoinQuery<TDbType, TTables & TableToObject<TFullJoinTable>> &
+    //         ISelectQuery<TDbType, TTables & TableToObject<TFullJoinTable>>
+    // }
 
     exec(): { [K in keyof TResult as K]: number } {
         if (isNullOrUndefined(this.colsSelection)) {
