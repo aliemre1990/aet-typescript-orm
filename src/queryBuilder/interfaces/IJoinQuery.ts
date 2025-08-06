@@ -25,7 +25,7 @@ interface IJoinQuery<
         TInnerJoinTable
     >(
         table: TInnerJoinTable,
-        cb: (cols: TableToColumnsMap<TableToObject<TTables[string]> & TableToObject<TInnerJoinResult>>) => ComparisonOperation
+        cb: (cols: TableToColumnsMap<TTables & TableToObject<TInnerJoinResult>>) => ComparisonOperation
     ):
         IJoinQuery<
             TDbType,
