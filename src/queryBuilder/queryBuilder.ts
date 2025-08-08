@@ -65,7 +65,7 @@ class QueryBuilder<
 
     >(
         table: TInnerJoinTable,
-        cb: (cols: TableToColumnsMap<TTables[string] & TableToObject<TInnerJoinResult>>) => ComparisonOperation
+        cb: (cols: TableToColumnsMap<TTables & TableToObject<TInnerJoinResult>>) => ComparisonOperation
     ):
         IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>> &
         ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>> {

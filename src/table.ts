@@ -101,8 +101,8 @@ class Table<
     TTableName extends string = string,
     TQueryColumns extends QueryColumnsObjectType<TDbType, QueryTableSpecsType<string>> = { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], QueryTableSpecsType, undefined> }
 > implements
-    ISelectQuery<TDbType, TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>>>,
-    IJoinQuery<TDbType, TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>>> {
+    ISelectQuery<TDbType, QueryTablesObjectType<TDbType>>,
+    IJoinQuery<TDbType, QueryTablesObjectType<TDbType>> {
 
     constructor(
         public name: TTableName,
@@ -128,17 +128,17 @@ class Table<
     select<
         TSelectResult extends { [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined> | Record<PropertyKey, QueryColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined>> }
     >(
-        cb: (cols: TableToColumnsMap<{ [key: string]: QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined> }>) => TSelectResult
+        cb: (cols: TableToColumnsMap<{ [key: string]: QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, QueryColumnsObjectType<TDbType, QueryTableSpecsType>, undefined> }>) => TSelectResult
     ): IExecuteableQuery<TDbType, TSelectResult> {
 
         const queryColumns = Object.entries(this.columns)
             .reduce((prev, ent) => {
                 prev[ent[1].name] = new QueryColumn(ent[1]);
                 return prev;
-            }, {} as QueryColumnsObjectType<TDbType, QueryTableSpecsType>) as TQueryColumns;
+            }, {} as QueryColumnsObjectType<TDbType, QueryTableSpecsType>);
 
 
-        const tables = { [this.name]: new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>(this, queryColumns) };
+        const tables = { [this.name]: new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, QueryColumnsObjectType<TDbType, QueryTableSpecsType>, undefined>(this, queryColumns) };
 
         return new QueryBuilder(tables).select(cb);
     }

@@ -13,16 +13,15 @@ interface IJoinQuery<
     innerJoin<
         TInnerJoinAs extends string | undefined,
         TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, TInnerJoinAs>,
-        TInnerJoinResult extends TInnerJoinTable extends Table<TDbType, infer TColumns, infer TTableName> ?
+        TInnerJoinResult extends
+        TInnerJoinTable extends Table<TDbType, infer TColumns, infer TTableName> ?
         QueryTable<
             TDbType,
             TColumns,
             TTableName,
             Table<TDbType, TColumns, TTableName>,
-            { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], QueryTableSpecsType, string | undefined> },
-            undefined
-        > :
-        TInnerJoinTable
+            { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], QueryTableSpecsType, string | undefined> }
+        > : TInnerJoinTable
     >(
         table: TInnerJoinTable,
         cb: (cols: TableToColumnsMap<TTables & TableToObject<TInnerJoinResult>>) => ComparisonOperation
