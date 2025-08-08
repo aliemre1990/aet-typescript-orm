@@ -5,17 +5,17 @@ import { Column, ForeignKey, pgTable } from "./table.js";
 const usersTable = pgTable(
     'users',
     {
-        id: new Column('id', pgColumnTypes.PgSerialType),
-        userName: new Column('userName', pgColumnTypes.PgVarcharType)
+        id: new Column('id', pgColumnTypes.serial),
+        userName: new Column('userName', pgColumnTypes.varchar)
     }
 )
 
 const customersTable = pgTable(
     'customers',
     {
-        customerId: new Column('id', pgColumnTypes.PgSerialType),
-        name: new Column('name', pgColumnTypes.PgVarcharType),
-        createdBy: new Column('createdBy', pgColumnTypes.PgIntType)
+        customerId: new Column('id', pgColumnTypes.serial),
+        name: new Column('name', pgColumnTypes.varchar),
+        createdBy: new Column('createdBy', pgColumnTypes.int)
     },
     undefined,
     undefined,
@@ -28,9 +28,9 @@ const customersTable = pgTable(
 const ordersTable = pgTable(
     'orders',
     {
-        orderId: new Column('id', pgColumnTypes.PgSerialType),
-        customerId: new Column('customerId', pgColumnTypes.PgIntType),
-        createdBy: new Column('createdBy', pgColumnTypes.PgIntType)
+        orderId: new Column('id', pgColumnTypes.serial),
+        customerId: new Column('customerId', pgColumnTypes.int),
+        createdBy: new Column('createdBy', pgColumnTypes.int)
     },
     undefined,
     undefined,
@@ -43,9 +43,9 @@ const ordersTable = pgTable(
 const shipmentsTable = pgTable(
     'shipments',
     {
-        id: new Column('id', pgColumnTypes.PgSerialType),
-        orderId: new Column('orderId', pgColumnTypes.PgSerialType),
-        createdBy: new Column('createdBy', pgColumnTypes.PgIntType)
+        id: new Column('id', pgColumnTypes.serial),
+        orderId: new Column('orderId', pgColumnTypes.int),
+        createdBy: new Column('createdBy', pgColumnTypes.int)
     },
     undefined,
     undefined,
@@ -73,13 +73,13 @@ const res2 = customersTable
     .exec();
 
 
-const rese = customersTable
+const res3 = customersTable
     .innerJoin(usersTable, (cols) => cols.users.id)
     .innerJoin(usersTable.as("parentUsers"), (cols) => {
         type t = typeof cols;
         return cols.parentUsers.id
     })
-    .select(cols => ({ asdf: cols.customers.id, asdsfxc: cols.users.userName, cdf: cols.parentUsers }))
+    .select(cols => ({ p: cols.parentUsers, asdf: cols.customers, asdsfxc: cols.users.userName }))
     .exec();
 // const res2 = customersTable.innerJoin(usersTable,(cols)=> cols.customers.id).select(cols=>({userId:cols.users.id,customerId:cols.customers.id})).exec();
 

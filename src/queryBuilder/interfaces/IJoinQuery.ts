@@ -1,7 +1,7 @@
 import { DbType, PgDbType } from "../../db.js";
 import { PgColumnType } from "../../postgresql/dataTypes.js";
-import { Column, Table, TablesObjectType } from "../../table.js";
-import type { TableToColumnsMap, TableToObject } from "../../utility/types.js";
+import type { Table, TablesObjectType } from "../../table.js";
+import type { TableToColumnsMap, TableToObject } from "../../types.js";
 import { ComparableColumn } from "../comparableColumn.js";
 import { ComparisonOperation } from "../comparisonOperation.js";
 import { ISelectQuery } from "./ISelectQuery.js";
@@ -11,7 +11,7 @@ interface IJoinQuery<
     TTables extends TablesObjectType<TDbType>,
 > {
 
-    innerJoin<TInnerJoinTable extends Table<any, any, any, any>>(
+    innerJoin<TInnerJoinTable extends Table<TDbType, any, any, any>>(
         table: TInnerJoinTable, cb: (cols: TableToColumnsMap<TTables & TableToObject<TInnerJoinTable>>) => ComparisonOperation
     ):
         IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinTable>> &

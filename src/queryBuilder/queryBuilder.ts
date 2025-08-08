@@ -1,8 +1,8 @@
 import { DbType, PgDbType } from "../db.js";
 import { PgColumnType } from "../postgresql/dataTypes.js";
-import { Column, ColumnsObjectType, ColumnType, Table, TablesObjectType, TableType } from "../table.js";
+import type { ColumnTableSpecs, ColumnType, Table, TablesObjectType } from "../table.js";
+import type { ColumnsToResultMap, TableToColumnsMap, TableToObject } from "../types.js";
 import { isNullOrUndefined } from "../utility/guards.js";
-import { type TableToColumnsMap, type TableToObject } from "../utility/types.js";
 import { ComparableColumn } from "./comparableColumn.js";
 import { ComparisonOperation } from "./comparisonOperation.js";
 import { IExecuteableQuery } from "./interfaces/IExecuteableQuery.js";
@@ -43,7 +43,7 @@ class QueryBuilder<
     }
 
 
-    select<TSelectResult extends { [key: string]: ColumnType<TDbType> | Record<PropertyKey, ColumnType<TDbType>> }>(
+    select<TSelectResult extends { [key: string]: ColumnType<TDbType, ColumnTableSpecs, string | undefined> | Record<PropertyKey, ColumnType<TDbType, ColumnTableSpecs, string | undefined>> }>(
         cb: (cols: TableToColumnsMap<TTables>) => TSelectResult
     ): IExecuteableQuery<TDbType, TSelectResult> {
         return this as unknown as IExecuteableQuery<TDbType, TSelectResult>;
@@ -109,7 +109,7 @@ class QueryBuilder<
             ISelectQuery<TDbType, TTables & TableToObject<TFullJoinTable>>
     }
 
-    exec(): { [K in keyof TResult as K]: number } {
+    exec(): ColumnsToResultMap<TDbType, TResult> {
         if (isNullOrUndefined(this.colsSelection)) {
             throw Error();
         }

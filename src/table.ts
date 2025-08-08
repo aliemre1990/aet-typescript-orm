@@ -6,12 +6,15 @@ import type { IExecuteableQuery } from "./queryBuilder/interfaces/IExecuteableQu
 import { IJoinQuery } from "./queryBuilder/interfaces/IJoinQuery.js";
 import { ISelectQuery } from "./queryBuilder/interfaces/ISelectQuery.js";
 import { QueryBuilder } from "./queryBuilder/queryBuilder.js";
+import type { TableToColumnsMap, TableToObject } from "./types.js";
 import { isNullOrUndefined } from "./utility/guards.js";
-import { type TableToColumnsMap, type TableToObject } from "./utility/types.js";
 
 
-type ColumnType<TDbType extends DbType, TTableName extends string = string> = Column<TDbType, TDbType extends PgDbType ? PgColumnType : string, string, TTableName>;
-type ColumnsObjectType<TDbType extends DbType, TTableName extends string = string> = { [key: string]: ColumnType<TDbType, TTableName> };
+
+type ColumnTableSpecs = { tableName: string, tableAs?: string }
+
+type ColumnType<TDbType extends DbType, TTableSpecs extends ColumnTableSpecs | undefined = ColumnTableSpecs | undefined, TAs extends string | undefined = string | undefined> = Column<TDbType, TDbType extends PgDbType ? PgColumnType : string, string, TTableSpecs, TAs>;
+type ColumnsObjectType<TDbType extends DbType, TTableSpecs extends ColumnTableSpecs | undefined = undefined, TAs extends string | undefined = string | undefined> = { [key: string]: ColumnType<TDbType, TTableSpecs, TAs> };
 type TableType<TDbType extends DbType, TColumns extends ColumnsObjectType<TDbType>, TTableName extends string = string> = Table<TDbType, TColumns, TTableName, string | undefined>;
 type TablesObjectType<TDbType extends DbType, TTableName extends string = string> = { [key: string]: TableType<TDbType, ColumnsObjectType<TDbType>, TTableName> };
 
@@ -22,21 +25,27 @@ class ForeignKey {
 class Column<
     TDbType extends DbType,
     TColumnType extends TDbType extends PgDbType ? PgColumnType : string,
-    TColumnName extends string = string,
-    TTableName extends string = string
-> {
+    TColumnName extends string,
+    TTableSpecs extends ColumnTableSpecs | undefined = undefined,
+    TAs extends string | undefined = undefined
 
-    tableName?: TTableName;
+> {
 
     constructor(
         public name: TColumnName,
         public type: TColumnType,
         public defaultValue?: string,
+        public tableSpecs?: ColumnTableSpecs,
+        public asName?: TAs,
         public isNullable: boolean = false
     ) { }
 
-    setTableName(val: TTableName) {
-        this.tableName = val;
+    setTableSpecs<TTableSpecs extends ColumnTableSpecs>(val: TTableSpecs) {
+        return new Column<TDbType, TColumnType, TColumnName, TTableSpecs, TAs>(this.name, this.type, this.defaultValue, val, this.asName, this.isNullable);
+    }
+
+    as<TAs extends string>(val: TAs) {
+        return new Column<TDbType, TColumnType, TColumnName, TTableSpecs, TAs>(this.name, this.type, this.defaultValue, this.tableSpecs, val, this.isNullable);
     }
 }
 
@@ -62,19 +71,24 @@ class Table<
     }
 
     as<TAs extends string>(asName: TAs) {
-        return new Table(this.name, this.columns, this.primaryKeys, this.uniqueKeys, this.foreignKeys, asName);
+        const newColumns = Object.entries(this.columns).reduce((prev, curr) => {
+            prev[curr[0]] = new Column(curr[1].name, curr[1].type, curr[1].defaultValue, { tableName: this.name, tableAs: asName }, curr[1].asName, curr[1].isNullable);
+            return prev;
+        }, {} as ColumnsObjectType<TDbType, { tableName: TTableName, tableAs: TAs }>) as { [K in keyof TColumns]: Column<TDbType, TColumns[K]["type"], TColumns[K]["name"], { tableName: TTableName, tableAs: TAs }, TColumns[K]["asName"]> };
+
+        return new Table(this.name, newColumns, this.primaryKeys, this.uniqueKeys, this.foreignKeys, asName);
     }
 
 
     select<
-        TSelectResult extends { [key: string]: ColumnType<TDbType> | Record<PropertyKey, ColumnType<TDbType>> }
+        TSelectResult extends { [key: string]: ColumnType<TDbType, ColumnTableSpecs, string | undefined> | Record<PropertyKey, ColumnType<TDbType, ColumnTableSpecs, string | undefined>> }
     >(
         cb: (cols: TableToColumnsMap<{ [key: string]: Table<TDbType, TColumns, TTableName, TAs> }>) => TSelectResult
     ): IExecuteableQuery<TDbType, TSelectResult> {
 
         const tables: { [x: string]: Table<TDbType, any, any, any> } = isNullOrUndefined(this.asName) ? { [this.name]: this } : { [this.asName as string]: this };
 
-        return new QueryBuilder(tables).select(cb);
+        return new QueryBuilder<TDbType, typeof tables>(tables).select(cb);
     }
 
     innerJoin<TInnerJoinTable extends Table<TDbType, any, any, any>>(
@@ -119,7 +133,7 @@ class Table<
 
 function pgTable<
     TTableName extends string,
-    TColumns extends ColumnsObjectType<PgDbType, TTableName>
+    TColumns extends ColumnsObjectType<PgDbType, { tableName: TTableName }, undefined>
 >(
     name: TTableName,
     columns: TColumns,
@@ -128,7 +142,10 @@ function pgTable<
     foreignKeys?: ForeignKey[]
 ) {
 
-    Object.entries(columns).forEach(ent => ent[1].setTableName(name));
+    Object.entries(columns).reduce((prev, curr) => {
+        prev[curr[0]] = curr[1].setTableSpecs({ tableName: name })
+        return prev;
+    }, {} as ColumnsObjectType<PgDbType, { tableName: TTableName }>) as TColumns;
 
     return new Table<PgDbType, TColumns, TTableName>(
         name,
@@ -143,7 +160,8 @@ export type {
     ColumnType,
     ColumnsObjectType,
     TableType,
-    TablesObjectType
+    TablesObjectType,
+    ColumnTableSpecs
 }
 
 export {
