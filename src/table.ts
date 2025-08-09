@@ -138,22 +138,20 @@ class Table<
             }, {} as QueryColumnsObjectType<TDbType, QueryTableSpecsType>);
 
 
-        const tables = { [this.name]: new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, QueryColumnsObjectType<TDbType, QueryTableSpecsType>, undefined>(this, queryColumns) };
+        const tables = { [this.name]: new QueryTable<TDbType, any, any, any, any>(this, queryColumns) };
 
         return new QueryBuilder(tables).select(cb);
     }
 
     innerJoin<
-        TInnerJoinAs extends string | undefined,
-        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, TInnerJoinAs>,
-        TInnerJoinResult extends TInnerJoinTable extends Table<TDbType, infer TInnerColumns, infer TInnerTableName> ?
+        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any>,
+        TInnerJoinResult extends TInnerJoinTable extends Table<TDbType, any, any> ?
         QueryTable<
             TDbType,
-            TInnerColumns,
-            TInnerTableName,
-            Table<TDbType, TInnerColumns, TInnerTableName>,
-            { [K in keyof TInnerColumns]: QueryColumn<TDbType, TInnerColumns[K], QueryTableSpecsType, string | undefined> },
-            undefined
+            any,
+            any,
+            any,
+            any
         > :
         TInnerJoinTable
 
@@ -200,11 +198,13 @@ class Table<
             prev[curr[0]] = new QueryColumn(curr[1]);
             return prev;
         }, {} as QueryColumnsObjectType<TDbType, QueryTableSpecsType>) as TQueryColumns
+
+        const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>(this, queryColumns);
         const tables = {
-            [this.name]: new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>(this, queryColumns)
+            [this.name]: queryTable
         };
 
-        return new QueryBuilder(tables).innerJoin(table, cb);
+        return new QueryBuilder<TDbType, TableToObject<typeof queryTable>>(tables as TableToObject<typeof queryTable>).innerJoin(table, cb);
     }
 
 

@@ -11,16 +11,15 @@ interface IJoinQuery<
 > {
 
     innerJoin<
-        TInnerJoinAs extends string | undefined,
-        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, TInnerJoinAs>,
+        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any>,
         TInnerJoinResult extends
-        TInnerJoinTable extends Table<TDbType, infer TColumns, infer TTableName> ?
+        TInnerJoinTable extends Table<TDbType, any, any> ?
         QueryTable<
             TDbType,
-            TColumns,
-            TTableName,
-            Table<TDbType, TColumns, TTableName>,
-            { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], QueryTableSpecsType, string | undefined> }
+            any,
+            any,
+            any,
+            any
         > : TInnerJoinTable
     >(
         table: TInnerJoinTable,
