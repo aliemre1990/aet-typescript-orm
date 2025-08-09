@@ -1,6 +1,6 @@
 import { DbType, PgDbType } from "../db.js";
 import { PgColumnType } from "../postgresql/dataTypes.js";
-import type { ColumnTableSpecs, ColumnType, Table, TablesObjectType } from "../table.js";
+import type { ColumnsObjectType, ColumnTableSpecs, ColumnType, Table, TablesObjectType } from "../table.js";
 import type { ColumnsToResultMap, TableToColumnsMap, TableToObject } from "../types.js";
 import { isNullOrUndefined } from "../utility/guards.js";
 import { ComparableColumn } from "./comparableColumn.js";
@@ -50,16 +50,17 @@ class QueryBuilder<
     };
 
 
-    innerJoin<TInnerJoinTable extends Table<TDbType, any, any, any>>(
+    innerJoin<TInnerJoinTable extends Table<TDbType, ColumnsObjectType<TDbType>, string, string | undefined>>(
         table: TInnerJoinTable,
         cb: (cols: TableToColumnsMap<TTables & TableToObject<TInnerJoinTable>>) => ComparisonOperation
     ):
         IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinTable>> &
         ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinTable>> {
 
-        const newTables = { ...this.tables, [table.name]: table };
+        const innerJoinTable = { [table.asName === undefined ? table.name : table.asName]: table };
+        const newTables = { ...this.tables, ...innerJoinTable };
 
-        return new QueryBuilder(newTables) as unknown as
+        return new QueryBuilder(newTables) as
             IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinTable>> &
             ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinTable>>
     }
