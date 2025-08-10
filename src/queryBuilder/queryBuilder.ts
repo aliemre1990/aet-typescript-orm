@@ -50,14 +50,14 @@ class QueryBuilder<
     };
 
 
-    innerJoin<TInnerJoinTable extends Table<TDbType, ColumnsObjectType<TDbType>, string, string | undefined>>(
+    innerJoin<TInnerJoinTable extends Table<TDbType, any, any, any>>(
         table: TInnerJoinTable,
         cb: (cols: TableToColumnsMap<TTables & TableToObject<TInnerJoinTable>>) => ComparisonOperation
     ):
         IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinTable>> &
         ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinTable>> {
 
-        const innerJoinTable = { [table.asName === undefined ? table.name : table.asName]: table };
+        const innerJoinTable: TableToObject<TInnerJoinTable> = { [table.asName === undefined ? table.name : table.asName]: table };
         const newTables = { ...this.tables, ...innerJoinTable };
 
         return new QueryBuilder(newTables) as
