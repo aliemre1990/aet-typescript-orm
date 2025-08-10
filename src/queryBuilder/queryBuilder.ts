@@ -43,7 +43,7 @@ class QueryBuilder<
     }
 
 
-    select<TSelectResult extends { [key: string]: ColumnType<TDbType, ColumnTableSpecs, string | undefined> | Record<PropertyKey, ColumnType<TDbType, ColumnTableSpecs, string | undefined>> }>(
+    select<TSelectResult extends { [key: string]: ColumnType<TDbType, ColumnTableSpecs, string | undefined> | Record<string, ColumnType<TDbType, ColumnTableSpecs, string | undefined>> }>(
         cb: (cols: TableToColumnsMap<TTables>) => TSelectResult
     ): IExecuteableQuery<TDbType, TSelectResult> {
         return this as unknown as IExecuteableQuery<TDbType, TSelectResult>;

@@ -18,7 +18,7 @@ type TableToObject<TTable extends Table<any, any, any, any>> = {
 
 
 
-type ColumnsToResultMap<TDbType extends DbType, T extends { [key: string]: ColumnType<TDbType, any, any> | Record<PropertyKey, ColumnType<TDbType, any, any>> } | undefined> =
+type ColumnsToResultMap<TDbType extends DbType, T extends { [key: string]: ColumnType<TDbType, any, any> | Record<string, ColumnType<TDbType, any, any>> } | undefined> =
     T extends undefined ? undefined :
     // Individual columns
     {
@@ -28,16 +28,21 @@ type ColumnsToResultMap<TDbType extends DbType, T extends { [key: string]: Colum
     }
     // Nested column objects - flattened
     & {
-        [K in keyof T as T[K] extends Record<PropertyKey, ColumnType<TDbType, any, any>> ?
-        keyof T[K] extends string ?
-        T[K][keyof T[K]] extends ColumnType<TDbType, infer TTableSpecs, any> ?
-        `${(TTableSpecs extends { tableAs: string } ? TTableSpecs["tableAs"] : string & K)}${Capitalize<T[K][keyof T[K]]["name"] & string>}`
-        : never
-        : never
-        : never]:
-        T[K] extends Record<PropertyKey, ColumnType<TDbType, any, any>> ?
-        T[K][keyof T[K]] extends ColumnType<TDbType, any, any> ? PgTypeToJsType<T[K][keyof T[K]]["type"]> : never
-        : never
+        [K in keyof T as T[K] extends Record<string, ColumnType<TDbType, infer TTableSpecs, any>> ?
+        TTableSpecs extends { tableAs: string } ? TTableSpecs["tableAs"] : K : never]: {
+            [C in keyof T[K]as T[K][C] extends ColumnType<TDbType, any, any> ? C : never]:
+            T[K][C] extends ColumnType<TDbType, any, any> ? PgTypeToJsType<T[K][C]["type"]> : never
+
+        }
+        // keyof T[K] extends string ?
+        // T[K][keyof T[K]] extends ColumnType<TDbType, infer TTableSpecs, any> ?
+        // `${(TTableSpecs extends { tableAs: string } ? TTableSpecs["tableAs"] : string & K)}${Capitalize<T[K][keyof T[K]]["name"] & string>}`
+        // : never
+        // : never
+        // : never]:
+        // T[K] extends Record<PropertyKey, ColumnType<TDbType, any, any>> ?
+        // T[K][keyof T[K]] extends ColumnType<TDbType, any, any> ? PgTypeToJsType<T[K][keyof T[K]]["type"]> : never
+        // : never
     }
 
 type GetColumnType<TDbType extends DbType> = TDbType extends PgDbType ? PgColumnType : string;

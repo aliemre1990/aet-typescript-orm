@@ -4,7 +4,7 @@ import type { ColumnsToResultMap } from "../../types.js"
 
 interface IExecuteableQuery<
     TDbType extends DbType,
-    TResult extends { [key: string]: ColumnType<TDbType, ColumnTableSpecs, string | undefined> | Record<PropertyKey, ColumnType<TDbType, ColumnTableSpecs, string | undefined>> } | undefined = undefined
+    TResult extends { [key: string]: ColumnType<TDbType, ColumnTableSpecs, string | undefined> | Record<string, ColumnType<TDbType, ColumnTableSpecs, string | undefined>> } | undefined = undefined
 > {
     exec: () => ColumnsToResultMap<TDbType, TResult>
 }

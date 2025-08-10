@@ -8,7 +8,7 @@ interface ISelectQuery<
     TDbType extends DbType,
     TTables extends TablesObjectType<TDbType>
 > {
-    select<TSelectResult extends { [key: string]: ColumnType<TDbType> | Record<PropertyKey, ColumnType<TDbType>> }>(
+    select<TSelectResult extends { [key: string]: ColumnType<TDbType> | Record<string, ColumnType<TDbType>> }>(
         cb: (cols: TableToColumnsMap<TTables>) => TSelectResult): IExecuteableQuery<TDbType, TSelectResult>
 }
 
