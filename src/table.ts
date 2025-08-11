@@ -11,7 +11,7 @@ import { isNullOrUndefined } from "./utility/guards.js";
 // Create a mapping of table names to their column names
 type TableToColumnsMap<T extends { [key: string]: QueryTable<any, any, any, any, any, any> }, TIsComparableColumn extends boolean = false, TColumn = null> = {
     [K in keyof T]: {
-        [C in keyof T[K]["table"]["columns"]as T[K]["table"]["columns"][C]["name"]]: QueryColumn<DbType, T[K]["table"]["columns"][C], QueryTableSpecsType, string | undefined>;
+        [C in keyof T[K]["columns"]as T[K]["columns"][C] extends QueryColumn<any, any, any, any> ? T[K]["columns"][C]["column"]["name"] : never]: T[K]["columns"][C] extends QueryColumn<any, any, any, any> ? T[K]["columns"][C] : never;
     }
 };
 
