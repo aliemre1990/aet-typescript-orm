@@ -103,7 +103,7 @@ class Table<
     }
 
 
-    leftJoin<TLeftJoinTable extends Table<TDbType, any, any>>(
+    leftJoin<TLeftJoinTable extends Table<TDbType, any, any, any>>(
         table: TLeftJoinTable,
         cb: (cols: TableToColumnsMap<TableToObject<Table<TDbType, TColumns, TTableName>> & TableToObject<TLeftJoinTable>>) => ComparisonOperation
     ) {
@@ -112,7 +112,7 @@ class Table<
         return new QueryBuilder(tables).innerJoin(table, cb);
     }
 
-    rightJoin<TRightJoinTable extends Table<TDbType, any, any>>(
+    rightJoin<TRightJoinTable extends Table<TDbType, any, any, any>>(
         table: TRightJoinTable,
         cb: (cols: TableToColumnsMap<TableToObject<Table<TDbType, TColumns, TTableName>> & TableToObject<TRightJoinTable>>) => ComparisonOperation
     ) {
@@ -121,7 +121,7 @@ class Table<
         return new QueryBuilder(tables).innerJoin(table, cb);
     }
 
-    fullJoin<TFullJoinTable extends Table<TDbType, any, any>>(
+    fullJoin<TFullJoinTable extends Table<TDbType, any, any, any>>(
         table: TFullJoinTable,
         cb: (cols: TableToColumnsMap<TableToObject<Table<TDbType, TColumns, TTableName>> & TableToObject<TFullJoinTable>>) => ComparisonOperation
     ) {

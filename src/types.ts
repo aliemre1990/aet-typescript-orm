@@ -11,8 +11,8 @@ type TableToColumnsMap<T extends { [key: string]: Table<any, any, any, any> }, T
     }
 };
 
-type TableToObject<TTable extends Table<any, any, any, any>> = {
-    [K in TTable["asName"]as K extends undefined ? TTable["name"] : K]: TTable
+type TableToObject<TTable extends Table<any, any, any, string | undefined>> = {
+    [K in TTable["asName"] extends undefined ? TTable["name"] : TTable["asName"] & string]: TTable
 }
 
 

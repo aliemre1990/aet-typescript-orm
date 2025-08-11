@@ -1,5 +1,6 @@
 import { pgColumnTypes } from "./postgresql/dataTypes.js";
 import { Column, ForeignKey, pgTable } from "./table.js";
+import type { TableToObject } from "./types.js";
 
 
 const usersTable = pgTable(
@@ -73,13 +74,17 @@ const res2 = customersTable
     .exec();
 
 
+const tbl = usersTable.as("users2");
+type t = TableToObject<typeof tbl>;
+
 const res3 = customersTable
-    .innerJoin(usersTable, (cols) => cols.users.id)
+    .innerJoin(usersTable.as("users2"), (cols) => cols.users2.id)
     .innerJoin(usersTable.as("parentUsers"), (cols) => {
         type t = typeof cols;
+
         return cols.parentUsers.id
     })
-    .select(cols => ({ p: cols.parentUsers, asdf: cols.customers, asdsfxc: cols.users.userName }))
+    .select(cols => ({ p: cols.parentUsers, asdf: cols.customers, asdsfxc: cols.users2 }))
     .exec();
 // const res2 = customersTable.innerJoin(usersTable,(cols)=> cols.customers.id).select(cols=>({userId:cols.users.id,customerId:cols.customers.id})).exec();
 
