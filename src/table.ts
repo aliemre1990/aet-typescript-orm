@@ -10,27 +10,27 @@ import { isNullOrUndefined } from "./utility/guards.js";
 
 // Create a mapping of table names to their column names
 type TableToColumnsMap<T extends { [key: string]: QueryTable<any, any, any, any, any, any> }, TIsComparableColumn extends boolean = false, TColumn = null> = {
-    [K in keyof T as T[K]["asName"] extends undefined ? T[K]["table"]["name"] : T[K]["asName"]]: {
-        [C in keyof T[K]["table"]["columns"]as T[K]["table"]["columns"][C]["name"]]: TIsComparableColumn extends false ? QueryColumn<DbType, T[K]["table"]["columns"][C], QueryTableSpecsType, string | undefined> : TColumn extends Column<infer TDbType, infer TColumnName, infer TColumnType, infer TTableSpecs> ? ComparableColumn<TDbType, TColumnName, TColumnType, TTableSpecs> : never;
+    [K in keyof T]: {
+        [C in keyof T[K]["table"]["columns"]as T[K]["table"]["columns"][C]["name"]]: QueryColumn<DbType, T[K]["table"]["columns"][C], QueryTableSpecsType, string | undefined>;
     }
 };
 
-type TableToObject<TTable extends QueryTable<any, any, any, any, any, any>> = {
-    [K in TTable["asName"]as K extends undefined ? TTable["table"]["name"] : K]: TTable
+type TableToObject<TTable extends QueryTable<any, any, string, Table<any, any, string>, any, string | undefined>> = {
+    [K in TTable["asName"]as K extends undefined ? TTable["table"]["name"] : TTable["asName"] & string]: TTable
 }
 
 type GetColumnType<TDbType extends DbType> = TDbType extends PgDbType ? PgColumnType : string;
 
 
 type TableSpecsType<TTableName extends string = string> = { tableName: TTableName }
-type QueryTableSpecsType<TAsName extends string = string> = { asTableName: TAsName }
+type QueryTableSpecsType<TTableName extends string = string, TAsName extends string = string> = { tableName: TTableName, asTableName?: TAsName }
 
 type ColumnType<TDbType extends DbType> = Column<TDbType, GetColumnType<TDbType>, string, TableSpecsType>;
 type ColumnsObjectType<TDbType extends DbType> = { [key: string]: ColumnType<TDbType> };
 type TableType<TDbType extends DbType, TColumns extends ColumnsObjectType<TDbType>, TTableName extends string = string> = Table<TDbType, TColumns, TTableName>;
 type TablesObjectType<TDbType extends DbType> = { [key: string]: TableType<TDbType, ColumnsObjectType<TDbType>> };
 type QueryTablesObjectType<TDbType extends DbType, TAsName extends string | undefined = string | undefined> = { [key: string]: QueryTable<TDbType, ColumnsObjectType<TDbType>, string, TableType<TDbType, ColumnsObjectType<TDbType>>, QueryColumnsObjectType<TDbType, QueryTableSpecsType>, TAsName> }
-type QueryColumnsObjectType<TDbType extends DbType, TQTableSpecs extends QueryTableSpecsType> = { [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, TQTableSpecs, string | undefined> }
+type QueryColumnsObjectType<TDbType extends DbType, TQTableSpecs extends QueryTableSpecsType | undefined = undefined> = { [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, TQTableSpecs, string | undefined> }
 
 class ForeignKey {
     constructor(public column: string, public references: { table: string; column: string | 'self-parent' | 'self-child' }) { }
@@ -39,7 +39,7 @@ class ForeignKey {
 class QueryColumn<
     TDbType extends DbType,
     TColumn extends ColumnType<TDbType>,
-    TQTableSpecs extends QueryTableSpecsType,
+    TQTableSpecs extends QueryTableSpecsType | undefined = undefined,
     TAsName extends string | undefined = undefined
 > {
 
@@ -68,7 +68,13 @@ class QueryTable<
     constructor(public table: TTable, public columns: TQColumns, public asName?: TAsName) { }
 
     as<TAsName extends string>(val: TAsName) {
-        return new QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>(this.table, this.columns, val);
+        const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
+            prev[curr[0]] = new QueryColumn(curr[1].column, curr[1].asName);
+            return prev;
+
+        }, {} as QueryColumnsObjectType<TDbType, QueryTableSpecsType>) as { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], { tableName: TTableName, asTableName: TAsName }, undefined> };
+
+        return new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, typeof queryColumns, TAsName>(this.table, queryColumns, val);
     }
 
 }
@@ -77,7 +83,7 @@ class Column<
     TDbType extends DbType,
     TColumnType extends GetColumnType<TDbType>,
     TColumnName extends string,
-    TTableSpecs extends TableSpecsType
+    TTableSpecs extends TableSpecsType | undefined = undefined
 > {
 
     tableSpecs?: TTableSpecs;
@@ -99,10 +105,10 @@ class Table<
     TDbType extends DbType,
     TColumns extends ColumnsObjectType<TDbType>,
     TTableName extends string = string,
-    TQueryColumns extends QueryColumnsObjectType<TDbType, QueryTableSpecsType<string>> = { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], QueryTableSpecsType, undefined> }
+    TQueryColumns extends QueryColumnsObjectType<TDbType, QueryTableSpecsType<string>> = { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], { tableName: TTableName }, undefined> }
 > implements
     ISelectQuery<TDbType, QueryTablesObjectType<TDbType>>,
-    IJoinQuery<TDbType, QueryTablesObjectType<TDbType>> {
+    IJoinQuery<TDbType, TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>>> {
 
     constructor(
         public name: TTableName,
@@ -119,7 +125,7 @@ class Table<
             prev[curr[0]] = new QueryColumn(curr[1]);
             return prev;
 
-        }, {} as QueryColumnsObjectType<TDbType, QueryTableSpecsType>) as { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], QueryTableSpecsType, undefined> };
+        }, {} as QueryColumnsObjectType<TDbType, { tableName: TTableName, asTableName: TAsName }>) as { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], { tableName: TTableName, asTableName: TAsName }, undefined> };
 
         return new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, typeof queryColumns, TAsName>(this, queryColumns, val);
     }
@@ -144,12 +150,12 @@ class Table<
     }
 
     innerJoin<
-        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any>,
-        TInnerJoinResult extends TInnerJoinTable extends Table<TDbType, any, any> ?
+        TInnerJoinTable extends Table<TDbType, any, string> | QueryTable<TDbType, any, string, any, any, string | undefined>,
+        TInnerJoinResult extends TInnerJoinTable extends Table<TDbType, any, string> ?
         QueryTable<
             TDbType,
             any,
-            any,
+            string,
             any,
             any
         > :
@@ -170,28 +176,7 @@ class Table<
                 > &
                 TableToObject<TInnerJoinResult>
             >) => ComparisonOperation
-    ): IJoinQuery<TDbType,
-        TableToObject<
-            QueryTable<
-                TDbType,
-                TColumns,
-                TTableName,
-                Table<TDbType, TColumns, TTableName>,
-                TQueryColumns
-            >> &
-        TableToObject<TInnerJoinResult>
-    > &
-        ISelectQuery<TDbType,
-            TableToObject<
-                QueryTable<
-                    TDbType,
-                    TColumns,
-                    TTableName,
-                    Table<TDbType, TColumns, TTableName>,
-                    TQueryColumns
-                >> &
-            TableToObject<TInnerJoinResult>
-        > {
+    ) {
 
 
         const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
