@@ -51,13 +51,13 @@ class QueryBuilder<
 
 
     innerJoin<
-        TInnerJoinTable extends Table<TDbType, any, string> | QueryTable<TDbType, any, string, any, any, string | undefined>,
+        TInnerJoinTable extends Table<TDbType, any, string> | QueryTable<TDbType, any, any, any, any, string | undefined>,
         TInnerJoinResult extends
         TInnerJoinTable extends Table<TDbType, any, string> ?
         QueryTable<
             TDbType,
             any,
-            string,
+            any,
             any,
             any
         > : TInnerJoinTable
