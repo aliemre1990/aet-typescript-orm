@@ -160,7 +160,7 @@ class Table<
             TInnerCols,
             TInnerTableName,
             Table<TDbType, TInnerCols, TInnerTableName>,
-            { [K in keyof TInnerCols]: QueryColumn<TDbType, TInnerCols[K], QueryTableSpecsType> }
+            { [K in keyof TInnerCols]: QueryColumn<TDbType, TInnerCols[K], { tableName: TInnerTableName }> }
         > :
         TInnerJoinTable
 
