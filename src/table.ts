@@ -251,7 +251,6 @@ export type {
     QueryTablesObjectType,
     TableSpecsType,
     QueryTableSpecsType,
-    QueryColumn,
     QueryColumnsObjectType,
     TableToColumnsMap,
     TableToObject,
@@ -262,6 +261,7 @@ export {
     Table,
     QueryTable,
     Column,
+    QueryColumn,
     ForeignKey,
     pgTable
 }

@@ -1,6 +1,6 @@
 import { DbType, PgDbType } from "../db.js";
 import { PgColumnType } from "../postgresql/dataTypes.js";
-import { ColumnType, Table, type ColumnsObjectType, type QueryColumn, type QueryColumnsObjectType, type QueryTable, type QueryTablesObjectType, type QueryTableSpecsType, type TableToColumnsMap, type TableToObject } from "../table.js";
+import { ColumnType, QueryColumn, QueryTable, Table, type ColumnsObjectType, type QueryColumnsObjectType, type QueryTablesObjectType, type QueryTableSpecsType, type TableToColumnsMap, type TableToObject } from "../table.js";
 import { isNullOrUndefined } from "../utility/guards.js";
 import { ComparableColumn } from "./comparableColumn.js";
 import { ComparisonOperation } from "./comparisonOperation.js";
@@ -51,17 +51,18 @@ class QueryBuilder<
 
 
     innerJoin<
+        TInnerJoinTableQueryTableSpecs extends QueryTableSpecsType,
         TInnerJoinTableAs extends string | undefined,
         TInnerJoinTableName extends string,
         TInnerJoinColumns extends ColumnsObjectType<TDbType>,
-        TInnerJoinTable extends Table<TDbType, TInnerJoinColumns, TInnerJoinTableName> | QueryTable<TDbType, TInnerJoinColumns, TInnerJoinTableName, Table<TDbType, TInnerJoinColumns, TInnerJoinTableName>, { [K in keyof TInnerJoinColumns]: QueryColumn<TDbType, TInnerJoinColumns[K], QueryTableSpecsType, string | undefined> }, TInnerJoinTableAs>,
+        TInnerJoinTable extends Table<TDbType, TInnerJoinColumns, TInnerJoinTableName> | QueryTable<TDbType, TInnerJoinColumns, TInnerJoinTableName, Table<TDbType, TInnerJoinColumns, TInnerJoinTableName>, { [K in keyof TInnerJoinColumns]: QueryColumn<TDbType, TInnerJoinColumns[K], TInnerJoinTableQueryTableSpecs, string | undefined> }, TInnerJoinTableAs>,
         TInnerJoinResult extends TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
         QueryTable<
             TDbType,
             TInnerCols,
             TInnerTableName,
             Table<TDbType, TInnerCols, TInnerTableName>,
-            { [K in keyof TInnerCols]: QueryColumn<TDbType, TInnerCols[K],  { tableName: TInnerTableName }> }
+            { [K in keyof TInnerCols]: QueryColumn<TDbType, TInnerCols[K], { tableName: TInnerTableName }> }
         > :
         TInnerJoinTable
 
@@ -72,9 +73,27 @@ class QueryBuilder<
         IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>> &
         ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>> {
 
-        // const newTables = { ...this.tables, [table.name]: table };
+        let innerJoinTable: TInnerJoinResult;
+        if ("table" in table) {
+            innerJoinTable = table as TInnerJoinResult;
+        } else if ("name" in table) {
 
-        return this as unknown as
+            const innerQueryColumns = Object.entries(table.columns).reduce((prev, curr) => {
+                prev[curr[0]] = new QueryColumn(curr[1]);
+                return prev;
+            }, {} as QueryColumnsObjectType<TDbType>)
+
+            innerJoinTable = new QueryTable(table, innerQueryColumns) as TInnerJoinResult;
+        } else {
+            throw Error('Invalid inner join table type.');
+        }
+
+
+        const innerJoinTableKeyed = { [innerJoinTable.asName === undefined ? innerJoinTable.table.name : innerJoinTable.asName]: innerJoinTable } as TableToObject<TInnerJoinResult>
+
+        const newTables = { ...this.tables, ...innerJoinTableKeyed };
+
+        return new QueryBuilder(newTables) as
             IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>> &
             ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>>
     }
