@@ -11,7 +11,7 @@ import { isNullOrUndefined } from "./utility/guards.js";
 // Create a mapping of table names to their column names
 type TableToColumnsMap<T extends { [key: string]: QueryTable<DbType, ColumnsObjectType<DbType>, string, Table<DbType, ColumnsObjectType<DbType>, string>, QueryColumnsObjectType<DbType>, string | undefined> }, TIsComparableColumn extends boolean = false, TColumn = null> = {
     [K in keyof T]: {
-        [C in keyof T[K]["columns"]as T[K]["columns"][C] extends QueryColumn<any, any, any, any> ? T[K]["columns"][C]["column"]["name"] : never]: T[K]["columns"][C] extends QueryColumn<any, any, any, any> ? T[K]["columns"][C] : never;
+        [C in keyof T[K]["columns"]as T[K]["columns"][C] extends QueryColumn<DbType, any, any, any> ? T[K]["columns"][C]["column"]["name"] : never]: T[K]["columns"][C] extends QueryColumn<DbType, any, any, any> ? T[K]["columns"][C] : never;
     }
 };
 
@@ -30,7 +30,7 @@ type ColumnsObjectType<TDbType extends DbType> = { [key: string]: ColumnType<TDb
 type TableType<TDbType extends DbType, TColumns extends ColumnsObjectType<TDbType>, TTableName extends string = string> = Table<TDbType, TColumns, TTableName>;
 type TablesObjectType<TDbType extends DbType> = { [key: string]: TableType<TDbType, ColumnsObjectType<TDbType>> };
 type QueryTablesObjectType<TDbType extends DbType, TAsName extends string | undefined = string | undefined> = { [key: string]: QueryTable<TDbType, ColumnsObjectType<TDbType>, string, TableType<TDbType, ColumnsObjectType<TDbType>>, QueryColumnsObjectType<TDbType, QueryTableSpecsType>, TAsName> }
-type QueryColumnsObjectType<TDbType extends DbType, TQTableSpecs extends QueryTableSpecsType | undefined = QueryTableSpecsType | undefined> = { [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, TQTableSpecs, string | undefined> }
+type QueryColumnsObjectType<TDbType extends DbType, TQTableSpecs extends QueryTableSpecsType = QueryTableSpecsType> = { [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, TQTableSpecs, string | undefined> }
 
 class ForeignKey {
     constructor(public column: string, public references: { table: string; column: string | 'self-parent' | 'self-child' }) { }
@@ -39,7 +39,7 @@ class ForeignKey {
 class QueryColumn<
     TDbType extends DbType,
     TColumn extends ColumnType<TDbType>,
-    TQTableSpecs extends QueryTableSpecsType | undefined = undefined,
+    TQTableSpecs extends QueryTableSpecsType,
     TAsName extends string | undefined = undefined
 > {
 
@@ -105,7 +105,7 @@ class Table<
     TDbType extends DbType,
     TColumns extends ColumnsObjectType<TDbType>,
     TTableName extends string = string,
-    TQueryColumns extends QueryColumnsObjectType<TDbType, QueryTableSpecsType<string>> = { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], { tableName: TTableName }, undefined> }
+    TQueryColumns extends QueryColumnsObjectType<TDbType, QueryTableSpecsType> = { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], QueryTableSpecsType, undefined> }
 > implements
     ISelectQuery<TDbType, TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>>>,
     IJoinQuery<TDbType, TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>>> {
