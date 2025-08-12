@@ -83,7 +83,7 @@ class Column<
     TDbType extends DbType,
     TColumnType extends GetColumnType<TDbType>,
     TColumnName extends string,
-    TTableSpecs extends TableSpecsType | undefined = undefined
+    TTableSpecs extends TableSpecsType
 > {
 
     tableSpecs?: TTableSpecs;
@@ -105,7 +105,7 @@ class Table<
     TDbType extends DbType,
     TColumns extends ColumnsObjectType<TDbType>,
     TTableName extends string = string,
-    TQueryColumns extends QueryColumnsObjectType<TDbType, QueryTableSpecsType> = { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], QueryTableSpecsType, undefined> }
+    TQueryColumns extends QueryColumnsObjectType<TDbType, QueryTableSpecsType> = { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], { tableName: TTableName }, undefined> }
 > implements
     ISelectQuery<TDbType, TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>>>,
     IJoinQuery<TDbType, TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>>> {
