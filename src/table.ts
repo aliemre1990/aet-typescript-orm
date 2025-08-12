@@ -11,12 +11,12 @@ import { isNullOrUndefined } from "./utility/guards.js";
 // Create a mapping of table names to their column names
 type TableToColumnsMap<T extends { [key: string]: QueryTable<DbType, ColumnsObjectType<DbType>, string, Table<DbType, ColumnsObjectType<DbType>, string>, QueryColumnsObjectType<DbType>, string | undefined> }, TIsComparableColumn extends boolean = false, TColumn = null> = {
     [K in keyof T]: {
-        [C in keyof T[K]["columns"]as T[K]["columns"][C] extends QueryColumn<DbType, any, any, any> ? T[K]["columns"][C]["column"]["name"] : never]: T[K]["columns"][C] extends QueryColumn<DbType, any, any, any> ? T[K]["columns"][C] : never;
+        [C in keyof T[K]["columns"]as T[K]["columns"][C]["column"]["name"]]: T[K]["columns"][C];
     }
 };
 
 type TableToObject<TTable extends QueryTable<DbType, ColumnsObjectType<DbType>, string, Table<DbType, ColumnsObjectType<DbType>, string>, QueryColumnsObjectType<DbType>, string | undefined>> = {
-    [K in TTable["asName"]as K extends undefined ? TTable["table"]["name"] : TTable["asName"] & string]: TTable
+    [K in TTable["asName"] extends undefined ? TTable["table"]["name"] : TTable["asName"] & string]: TTable
 }
 
 type GetColumnType<TDbType extends DbType> = TDbType extends PgDbType ? PgColumnType : string;
@@ -107,8 +107,8 @@ class Table<
     TTableName extends string = string,
     TQueryColumns extends QueryColumnsObjectType<TDbType, QueryTableSpecsType> = { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], { tableName: TTableName }, undefined> }
 > implements
-    ISelectQuery<TDbType, TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>>>,
-    IJoinQuery<TDbType, TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>>> {
+    ISelectQuery<TDbType, TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>>>,
+    IJoinQuery<TDbType, TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>>> {
 
     constructor(
         public name: TTableName,
@@ -150,10 +150,11 @@ class Table<
     }
 
     innerJoin<
+        TInnerJoinTableQueryTableSpecs extends QueryTableSpecsType,
         TInnerJoinTableAs extends string | undefined,
         TInnerJoinTableName extends string,
         TInnerJoinColumns extends ColumnsObjectType<TDbType>,
-        TInnerJoinTable extends Table<TDbType, TInnerJoinColumns, TInnerJoinTableName> | QueryTable<TDbType, TInnerJoinColumns, TInnerJoinTableName, Table<TDbType, TInnerJoinColumns, TInnerJoinTableName>, { [K in keyof TInnerJoinColumns]: QueryColumn<TDbType, TInnerJoinColumns[K], QueryTableSpecsType, string | undefined> }, TInnerJoinTableAs>,
+        TInnerJoinTable extends Table<TDbType, TInnerJoinColumns, TInnerJoinTableName> | QueryTable<TDbType, TInnerJoinColumns, TInnerJoinTableName, Table<TDbType, TInnerJoinColumns, TInnerJoinTableName>, { [K in keyof TInnerJoinColumns]: QueryColumn<TDbType, TInnerJoinColumns[K], TInnerJoinTableQueryTableSpecs, string | undefined> }, TInnerJoinTableAs>,
         TInnerJoinResult extends TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
         QueryTable<
             TDbType,

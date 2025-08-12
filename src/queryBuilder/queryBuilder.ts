@@ -88,8 +88,9 @@ class QueryBuilder<
             throw Error('Invalid inner join table type.');
         }
 
-
-        const innerJoinTableKeyed = { [innerJoinTable.asName === undefined ? innerJoinTable.table.name : innerJoinTable.asName]: innerJoinTable } as TableToObject<TInnerJoinResult>
+        const innerJoinTableKeyed = {
+            [innerJoinTable.asName === undefined ? innerJoinTable.table.name : innerJoinTable.asName]: innerJoinTable
+        } as TableToObject<TInnerJoinResult>
 
         const newTables = { ...this.tables, ...innerJoinTableKeyed };
 

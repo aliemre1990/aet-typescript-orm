@@ -95,6 +95,7 @@ const rese = customersTable
     })
     .innerJoin(usersTable.as("parentUsers"), (cols) => {
         type t = typeof cols;
+        type t2 = typeof cols.users.id;
         return cols.parentUsers.id
     })
     .select(cols => {
