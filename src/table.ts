@@ -9,13 +9,13 @@ import { QueryBuilder } from "./queryBuilder/queryBuilder.js";
 import { isNullOrUndefined } from "./utility/guards.js";
 
 // Create a mapping of table names to their column names
-type TableToColumnsMap<T extends { [key: string]: QueryTable<DbType, any, string, Table<DbType, any, string>, any, string | undefined> }, TIsComparableColumn extends boolean = false, TColumn = null> = {
+type TableToColumnsMap<T extends { [key: string]: QueryTable<DbType, ColumnsObjectType<DbType>, string, Table<DbType, ColumnsObjectType<DbType>, string>, QueryColumnsObjectType<DbType>, string | undefined> }, TIsComparableColumn extends boolean = false, TColumn = null> = {
     [K in keyof T]: {
         [C in keyof T[K]["columns"]as T[K]["columns"][C] extends QueryColumn<any, any, any, any> ? T[K]["columns"][C]["column"]["name"] : never]: T[K]["columns"][C] extends QueryColumn<any, any, any, any> ? T[K]["columns"][C] : never;
     }
 };
 
-type TableToObject<TTable extends QueryTable<DbType, any, string, Table<DbType, any, string>, any, string | undefined>> = {
+type TableToObject<TTable extends QueryTable<DbType, ColumnsObjectType<DbType>, string, Table<DbType, ColumnsObjectType<DbType>, string>, QueryColumnsObjectType<DbType>, string | undefined>> = {
     [K in TTable["asName"]as K extends undefined ? TTable["table"]["name"] : TTable["asName"] & string]: TTable
 }
 
@@ -30,7 +30,7 @@ type ColumnsObjectType<TDbType extends DbType> = { [key: string]: ColumnType<TDb
 type TableType<TDbType extends DbType, TColumns extends ColumnsObjectType<TDbType>, TTableName extends string = string> = Table<TDbType, TColumns, TTableName>;
 type TablesObjectType<TDbType extends DbType> = { [key: string]: TableType<TDbType, ColumnsObjectType<TDbType>> };
 type QueryTablesObjectType<TDbType extends DbType, TAsName extends string | undefined = string | undefined> = { [key: string]: QueryTable<TDbType, ColumnsObjectType<TDbType>, string, TableType<TDbType, ColumnsObjectType<TDbType>>, QueryColumnsObjectType<TDbType, QueryTableSpecsType>, TAsName> }
-type QueryColumnsObjectType<TDbType extends DbType, TQTableSpecs extends QueryTableSpecsType | undefined = undefined> = { [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, TQTableSpecs, string | undefined> }
+type QueryColumnsObjectType<TDbType extends DbType, TQTableSpecs extends QueryTableSpecsType | undefined = QueryTableSpecsType | undefined> = { [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, TQTableSpecs, string | undefined> }
 
 class ForeignKey {
     constructor(public column: string, public references: { table: string; column: string | 'self-parent' | 'self-child' }) { }
@@ -61,7 +61,7 @@ class QueryTable<
     TColumns extends ColumnsObjectType<TDbType>,
     TTableName extends string,
     TTable extends Table<TDbType, TColumns, TTableName>,
-    TQColumns extends QueryColumnsObjectType<TDbType, QueryTableSpecsType>,
+    TQColumns extends QueryColumnsObjectType<TDbType>,
     TAsName extends string | undefined = undefined
 > {
 
@@ -146,18 +146,20 @@ class Table<
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>(this, queryColumns);
         const tables = { [this.name]: queryTable };
 
-        return new QueryBuilder(tables as TableToObject<typeof queryTable>).select(cb);
+        return new QueryBuilder<TDbType, TableToObject<typeof queryTable>>(tables as TableToObject<typeof queryTable>).select(cb);
     }
 
     innerJoin<
-        TInnerJoinTable extends Table<TDbType, any, string> | QueryTable<TDbType, any, string, any, any, string | undefined>,
-        TInnerJoinResult extends TInnerJoinTable extends Table<TDbType, any, string> ?
+        TInnerJoinTableName extends string,
+        TInnerJoinColumns extends ColumnsObjectType<TDbType>,
+        TInnerJoinTable extends Table<TDbType, TInnerJoinColumns, TInnerJoinTableName> | QueryTable<TDbType, TInnerJoinColumns, TInnerJoinTableName, Table<TDbType, TInnerJoinColumns, TInnerJoinTableName>, { [K in keyof TInnerJoinColumns]: QueryColumn<TDbType, TInnerJoinColumns[K], QueryTableSpecsType, string | undefined> }, string | undefined>,
+        TInnerJoinResult extends TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
         QueryTable<
             TDbType,
-            any,
-            string,
-            any,
-            any
+            TInnerCols,
+            TInnerTableName,
+            Table<TDbType, TInnerCols, TInnerTableName>,
+            { [K in keyof TInnerCols]: QueryColumn<TDbType, TInnerCols[K], QueryTableSpecsType> }
         > :
         TInnerJoinTable
 
@@ -187,7 +189,7 @@ class Table<
             [this.name]: queryTable
         };
 
-        return new QueryBuilder(tables as TableToObject<typeof queryTable>).innerJoin(table, cb);
+        return new QueryBuilder<TDbType, TableToObject<typeof queryTable>>(tables as TableToObject<typeof queryTable>).innerJoin(table, cb);
     }
 
 

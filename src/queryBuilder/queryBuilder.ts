@@ -1,6 +1,6 @@
 import { DbType, PgDbType } from "../db.js";
 import { PgColumnType } from "../postgresql/dataTypes.js";
-import { ColumnType, Table, type QueryColumn, type QueryTable, type QueryTablesObjectType, type QueryTableSpecsType, type TableToColumnsMap, type TableToObject } from "../table.js";
+import { ColumnType, Table, type ColumnsObjectType, type QueryColumn, type QueryColumnsObjectType, type QueryTable, type QueryTablesObjectType, type QueryTableSpecsType, type TableToColumnsMap, type TableToObject } from "../table.js";
 import { isNullOrUndefined } from "../utility/guards.js";
 import { ComparableColumn } from "./comparableColumn.js";
 import { ComparisonOperation } from "./comparisonOperation.js";
@@ -51,16 +51,18 @@ class QueryBuilder<
 
 
     innerJoin<
-        TInnerJoinTable extends Table<TDbType, any, string> | QueryTable<TDbType, any, any, any, any, string | undefined>,
-        TInnerJoinResult extends
-        TInnerJoinTable extends Table<TDbType, any, string> ?
+        TInnerJoinTableName extends string,
+        TInnerJoinColumns extends ColumnsObjectType<TDbType>,
+        TInnerJoinTable extends Table<TDbType, TInnerJoinColumns, TInnerJoinTableName> | QueryTable<TDbType, TInnerJoinColumns, TInnerJoinTableName, Table<TDbType, TInnerJoinColumns, TInnerJoinTableName>, { [K in keyof TInnerJoinColumns]: QueryColumn<TDbType, TInnerJoinColumns[K]> }, string | undefined>,
+        TInnerJoinResult extends TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
         QueryTable<
             TDbType,
-            any,
-            any,
-            any,
-            any
-        > : TInnerJoinTable
+            TInnerCols,
+            TInnerTableName,
+            Table<TDbType, TInnerCols, TInnerTableName>,
+            { [K in keyof TInnerCols]: QueryColumn<TDbType, TInnerCols[K],QueryTableSpecsType> }
+        > :
+        TInnerJoinTable
 
     >(
         table: TInnerJoinTable,

@@ -1,5 +1,5 @@
 import { pgColumnTypes } from "./postgresql/dataTypes.js";
-import { Column, ForeignKey, pgTable, type QueryColumn } from "./table.js";
+import { Column, ForeignKey, pgTable, QueryTable, type QueryColumn, type TableToColumnsMap, type TableToObject } from "./table.js";
 
 
 const usersTable = pgTable(
@@ -55,9 +55,15 @@ const shipmentsTable = pgTable(
     ]
 );
 
-const res = customersTable.select(cols => ({ id: cols.customers.name.as("customerName") })).exec();
+
+const res = customersTable.select(cols => {
+    type t = typeof cols;
+
+    return ({ id: cols.customers.name.as("customerName") })
+}).exec();
 const res2 = customersTable
     .innerJoin(usersTable, (cols) => {
+        type t = typeof cols;
 
         return cols.users.id
     })
@@ -68,7 +74,11 @@ const res2 = customersTable
         return cols.orders.id
 
     })
-    .innerJoin(shipmentsTable, (cols) => cols.shipments.orderId)
+    .innerJoin(shipmentsTable, (cols) => {
+        type t = typeof cols;
+
+        return cols.shipments.orderId;
+    })
     .select(cols => ({ asdf: cols.customers.id, asdsfxc: cols.orders.customerId }))
     .exec();
 
@@ -78,7 +88,11 @@ const res2 = customersTable
 // type t2 = typeof queryColumns;
 
 const rese = customersTable
-    .innerJoin(usersTable, (cols) => cols.users.id)
+    .innerJoin(usersTable, (cols) => {
+        type t = typeof cols;
+
+        return cols.users.id;
+    })
     .innerJoin(usersTable.as("parentUsers"), (cols) => {
         type t = typeof cols;
         return cols.parentUsers.id
