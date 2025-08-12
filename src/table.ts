@@ -107,8 +107,10 @@ class Table<
     TTableName extends string = string,
     TQueryColumns extends QueryColumnsObjectType<TDbType, QueryTableSpecsType> = { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], { tableName: TTableName }, undefined> }
 > implements
-    ISelectQuery<TDbType, TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>>>,
-    IJoinQuery<TDbType, TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>>> {
+    // ISelectQuery<TDbType, TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>>>,
+    ISelectQuery<TDbType, any>,
+    // IJoinQuery<TDbType, TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>>> {
+    IJoinQuery<TDbType, any> {
 
     constructor(
         public name: TTableName,
@@ -191,7 +193,7 @@ class Table<
             [this.name]: queryTable
         };
 
-        return new QueryBuilder<TDbType, TableToObject<typeof queryTable>>(tables as TableToObject<typeof queryTable>).innerJoin(table, cb);
+        return new QueryBuilder<TDbType, TableToObject<typeof queryTable>>(tables as TableToObject<typeof queryTable>).innerJoin(table as any, cb);
     }
 
 

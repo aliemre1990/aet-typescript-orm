@@ -29,10 +29,7 @@ interface IJoinQuery<
         table: TInnerJoinTable,
         cb: (cols: TableToColumnsMap<TTables & TableToObject<TInnerJoinResult>>) => ComparisonOperation
     ):
-        IJoinQuery<
-            TDbType,
-            TTables &
-            TableToObject<TInnerJoinResult>
+        IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>
         > &
         ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>>
 

@@ -28,8 +28,8 @@ class QueryBuilder<
     TResult extends { [key: string]: ColumnType<TDbType> } | undefined = undefined
 >
     implements
-    ISelectQuery<TDbType, TTables>,
-    IJoinQuery<TDbType, TTables> {
+    ISelectQuery<TDbType, any>,
+    IJoinQuery<TDbType, any> {
 
     colsSelection?: TResult;
 
@@ -81,7 +81,7 @@ class QueryBuilder<
             const innerQueryColumns = Object.entries(table.columns).reduce((prev, curr) => {
                 prev[curr[0]] = new QueryColumn(curr[1]);
                 return prev;
-            }, {} as QueryColumnsObjectType<TDbType>)
+            }, {} as QueryColumnsObjectType<TDbType>);
 
             innerJoinTable = new QueryTable(table, innerQueryColumns) as TInnerJoinResult;
         } else {
