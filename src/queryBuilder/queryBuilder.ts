@@ -1,6 +1,7 @@
 import { DbType, PgDbType } from "../db.js";
 import { PgColumnType } from "../postgresql/dataTypes.js";
 import { ColumnType, QueryColumn, QueryTable, Table, type ColumnsObjectType, type QueryColumnsObjectType, type QueryTablesObjectType, type QueryTableSpecsType, type TableToColumnsMap, type TableToObject } from "../table.js";
+import type { JoinType } from "../types.js";
 import { isNullOrUndefined } from "../utility/guards.js";
 import { ComparableColumn } from "./comparableColumn.js";
 import { ComparisonOperation } from "./comparisonOperation.js";
@@ -50,7 +51,7 @@ class QueryBuilder<
     };
 
 
-    innerJoin<
+    join<
         TInnerJoinTableQueryTableSpecs extends QueryTableSpecsType,
         TInnerJoinTableAs extends string | undefined,
         TInnerJoinTableName extends string,
@@ -67,6 +68,7 @@ class QueryBuilder<
         TInnerJoinTable
 
     >(
+        type: JoinType,
         table: TInnerJoinTable,
         cb: (cols: TableToColumnsMap<TTables & TableToObject<TInnerJoinResult>>) => ComparisonOperation
     ):

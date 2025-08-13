@@ -1,21 +1,22 @@
 import { pgColumnTypes } from "./postgresql/dataTypes.js";
 import { Column, ForeignKey, pgTable, QueryTable, type QueryColumn, type TableToColumnsMap, type TableToObject } from "./table.js";
+import type { UnionToTupleOrdered } from "./utility/types.js";
 
 
 const usersTable = pgTable(
     'users',
     {
-        id: new Column('id', pgColumnTypes.PgSerialType),
-        userName: new Column('userName', pgColumnTypes.PgVarcharType)
+        id: new Column('id', pgColumnTypes.serial),
+        userName: new Column('userName', pgColumnTypes.varchar)
     }
 )
 
 const customersTable = pgTable(
     'customers',
     {
-        customerId: new Column('id', pgColumnTypes.PgSerialType),
-        name: new Column('name', pgColumnTypes.PgVarcharType),
-        createdBy: new Column('createdBy', pgColumnTypes.PgIntType)
+        customerId: new Column('id', pgColumnTypes.serial),
+        name: new Column('name', pgColumnTypes.varchar),
+        createdBy: new Column('createdBy', pgColumnTypes.int)
     },
     undefined,
     undefined,
@@ -28,9 +29,9 @@ const customersTable = pgTable(
 const ordersTable = pgTable(
     'orders',
     {
-        orderId: new Column('id', pgColumnTypes.PgSerialType),
-        customerId: new Column('customerId', pgColumnTypes.PgIntType),
-        createdBy: new Column('createdBy', pgColumnTypes.PgIntType)
+        orderId: new Column('id', pgColumnTypes.serial),
+        customerId: new Column('customerId', pgColumnTypes.int),
+        createdBy: new Column('createdBy', pgColumnTypes.int)
     },
     undefined,
     undefined,
@@ -43,9 +44,9 @@ const ordersTable = pgTable(
 const shipmentsTable = pgTable(
     'shipments',
     {
-        id: new Column('id', pgColumnTypes.PgSerialType),
-        orderId: new Column('orderId', pgColumnTypes.PgSerialType),
-        createdBy: new Column('createdBy', pgColumnTypes.PgIntType)
+        id: new Column('id', pgColumnTypes.serial),
+        orderId: new Column('orderId', pgColumnTypes.serial),
+        createdBy: new Column('createdBy', pgColumnTypes.int)
     },
     undefined,
     undefined,
@@ -62,19 +63,19 @@ const res = customersTable.select(cols => {
     return ({ id: cols.customers.name.as("customerName") })
 }).exec();
 const res2 = customersTable
-    .innerJoin(usersTable, (cols) => {
+    .join('INNER', usersTable, (cols) => {
         type t = typeof cols;
 
         return cols.users.id
     })
-    .innerJoin(ordersTable, (cols) => {
+    .join('INNER', ordersTable, (cols) => {
         type t = typeof cols;
 
 
         return cols.orders.id
 
     })
-    .innerJoin(shipmentsTable, (cols) => {
+    .join('INNER', shipmentsTable, (cols) => {
         type t = typeof cols;
 
         return cols.shipments.orderId;
@@ -87,13 +88,16 @@ const res2 = customersTable
 // const queryColumns = tbl.columns;
 // type t2 = typeof queryColumns;
 
+// type cols = typeof usersTable.columns[keyof typeof usersTable.columns];
+// type typleCols = UnionToTupleOrdered<cols>;
+
 const rese = customersTable
-    .innerJoin(usersTable, (cols) => {
+    .join('INNER', usersTable, (cols) => {
         type t = typeof cols;
 
         return cols.users.id;
     })
-    .innerJoin(usersTable.as("parentUsers"), (cols) => {
+    .join('INNER', usersTable.as("parentUsers"), (cols) => {
         type t = typeof cols;
         type t2 = typeof cols.users.id;
         return cols.parentUsers.id

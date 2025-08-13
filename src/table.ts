@@ -6,6 +6,7 @@ import type { IExecuteableQuery } from "./queryBuilder/interfaces/IExecuteableQu
 import { IJoinQuery } from "./queryBuilder/interfaces/IJoinQuery.js";
 import { ISelectQuery } from "./queryBuilder/interfaces/ISelectQuery.js";
 import { QueryBuilder } from "./queryBuilder/queryBuilder.js";
+import type { JoinType } from "./types.js";
 import { isNullOrUndefined } from "./utility/guards.js";
 
 // Create a mapping of table names to their column names
@@ -151,7 +152,7 @@ class Table<
         return new QueryBuilder<TDbType, TableToObject<typeof queryTable>>(tables as TableToObject<typeof queryTable>).select(cb);
     }
 
-    innerJoin<
+    join<
         TInnerJoinTableQueryTableSpecs extends QueryTableSpecsType,
         TInnerJoinTableAs extends string | undefined,
         TInnerJoinTableName extends string,
@@ -168,6 +169,7 @@ class Table<
         TInnerJoinTable
 
     >(
+        type: JoinType,
         table: TInnerJoinTable,
         cb: (cols:
             TableToColumnsMap<
@@ -193,7 +195,7 @@ class Table<
             [this.name]: queryTable
         };
 
-        return new QueryBuilder<TDbType, TableToObject<typeof queryTable>>(tables as TableToObject<typeof queryTable>).innerJoin(table as any, cb);
+        return new QueryBuilder<TDbType, TableToObject<typeof queryTable>>(tables as TableToObject<typeof queryTable>).join(type, table as any, cb);
     }
 
 
