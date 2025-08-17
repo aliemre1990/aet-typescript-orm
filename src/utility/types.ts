@@ -17,6 +17,13 @@ type UnionToTupleOrdered<T> = UnionToIntersection<
     ? [...UnionToTupleOrdered<Exclude<T, W>>, W]
     : [];
 
+type DeepPrettify<T> = T extends Function
+    ? T
+    : T extends object
+    ? { [K in keyof T]: DeepPrettify<T[K]> }
+    : T;
+
 export type {
-    UnionToTupleOrdered
+    UnionToTupleOrdered,
+    DeepPrettify
 }

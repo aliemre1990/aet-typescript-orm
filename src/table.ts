@@ -1,5 +1,5 @@
 import { DbType, PgDbType } from "./db.js";
-import { PgColumnType } from "./postgresql/dataTypes.js";
+import { PgColumnType, type PgTypeToJsType } from "./postgresql/dataTypes.js";
 import { ComparableColumn } from "./queryBuilder/comparableColumn.js";
 import { ComparisonOperation } from "./queryBuilder/comparisonOperation.js";
 import type { IExecuteableQuery } from "./queryBuilder/interfaces/IExecuteableQuery.js";
@@ -7,9 +7,34 @@ import { IJoinQuery } from "./queryBuilder/interfaces/IJoinQuery.js";
 import { ISelectQuery } from "./queryBuilder/interfaces/ISelectQuery.js";
 import { QueryBuilder } from "./queryBuilder/queryBuilder.js";
 import type { JoinType } from "./types.js";
-import { isNullOrUndefined } from "./utility/guards.js";
+import type { DeepPrettify } from "./utility/types.js";
 
-// Create a mapping of table names to their column names
+
+
+type TResultShape<TDbType extends DbType> = {
+    [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined> | TResultShape<TDbType>;
+};
+
+type ColumnsToResultMap<TDbType extends DbType, T extends TResultShape<TDbType> | null> =
+    T extends null ? null :
+    DeepPrettify<{
+        [K in keyof T as T[K] extends QueryColumn<TDbType, any, any, any> ?
+        T[K]["asName"] extends undefined ? K : T[K]["asName"] & string : never]:
+        T[K] extends QueryColumn<TDbType, any, any, any> ? PgTypeToJsType<T[K]["column"]["type"]> : never
+    }
+        &
+    {
+        [K in keyof T as T[K] extends { [key: string]: QueryColumn<TDbType, any, infer TTableSpecs, any> } ?
+        TTableSpecs extends { asTableName: string } ? TTableSpecs["asTableName"] : K : never]:
+        T[K] extends { [key: string]: QueryColumn<TDbType, any, any, any> } ? ColumnsToResultMap<TDbType, T[K]> : never
+    }
+        &
+    {
+        [K in keyof T as T[K] extends TResultShape<TDbType> ? K : never]:
+        T[K] extends TResultShape<TDbType> ? ColumnsToResultMap<TDbType, T[K]> : never
+    }
+    >
+
 type TableToColumnsMap<T extends { [key: string]: QueryTable<DbType, ColumnsObjectType<DbType>, string, Table<DbType, ColumnsObjectType<DbType>, string>, QueryColumnsObjectType<DbType>, string | undefined> }, TIsComparableColumn extends boolean = false, TColumn = null> = {
     [K in keyof T]: {
         [C in keyof T[K]["columns"]as T[K]["columns"][C]["column"]["name"]]: T[K]["columns"][C];
@@ -135,7 +160,7 @@ class Table<
 
 
     select<
-        TSelectResult extends { [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined> | Record<PropertyKey, QueryColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined>> }
+        TSelectResult extends TResultShape<TDbType>
     >(
         cb: (cols: TableToColumnsMap<TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>>>) => TSelectResult
     ) {
@@ -259,7 +284,9 @@ export type {
     QueryColumnsObjectType,
     TableToColumnsMap,
     TableToObject,
-    GetColumnType
+    GetColumnType,
+    ColumnsToResultMap,
+    TResultShape
 }
 
 export {

@@ -1,6 +1,6 @@
 import { DbType, PgDbType } from "../db.js";
 import { PgColumnType } from "../postgresql/dataTypes.js";
-import { ColumnType, QueryColumn, QueryTable, Table, type ColumnsObjectType, type QueryColumnsObjectType, type QueryTablesObjectType, type QueryTableSpecsType, type TableToColumnsMap, type TableToObject } from "../table.js";
+import { ColumnType, QueryColumn, QueryTable, Table, type ColumnsObjectType, type ColumnsToResultMap, type QueryColumnsObjectType, type QueryTablesObjectType, type QueryTableSpecsType, type TableToColumnsMap, type TableToObject, type TResultShape } from "../table.js";
 import type { JoinType } from "../types.js";
 import { isNullOrUndefined } from "../utility/guards.js";
 import { ComparableColumn } from "./comparableColumn.js";
@@ -26,7 +26,7 @@ import { ISelectQuery } from "./interfaces/ISelectQuery.js";
 class QueryBuilder<
     TDbType extends DbType,
     TTables extends QueryTablesObjectType<TDbType>, // turn this type to keyed querytable object
-    TResult extends { [key: string]: ColumnType<TDbType> } | undefined = undefined
+    TResult extends TResultShape<TDbType> | null = null
 >
     implements
     ISelectQuery<TDbType, any>,
@@ -44,10 +44,11 @@ class QueryBuilder<
 
 
     select<
-        TSelectResult extends { [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined> | Record<PropertyKey, QueryColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined>> }>(
-            cb: (cols: TableToColumnsMap<TTables>) => TSelectResult
-        ): IExecuteableQuery<TDbType, TSelectResult> {
-        return this as unknown as IExecuteableQuery<TDbType, TSelectResult>;
+        TSelectResult extends TResultShape<TDbType>
+    >(
+        cb: (cols: TableToColumnsMap<TTables>) => TSelectResult
+    ): IExecuteableQuery<TDbType, TTables, TSelectResult> {
+        return this as unknown as IExecuteableQuery<TDbType, TTables, TSelectResult>;
     };
 
 
@@ -146,7 +147,7 @@ class QueryBuilder<
     //         ISelectQuery<TDbType, TTables & TableToObject<TFullJoinTable>>
     // }
 
-    exec(): { [K in keyof TResult as K]: number } {
+    exec(): TResult extends null ? null : ColumnsToResultMap<TDbType, TResult> {
         if (isNullOrUndefined(this.colsSelection)) {
             throw Error();
         }

@@ -1,12 +1,13 @@
 import { DbType, PgDbType } from "../../db.js";
 import { PgColumnType } from "../../postgresql/dataTypes.js";
-import { Column, type ColumnsObjectType, type ColumnType, type QueryColumn, type QueryTableSpecsType, type TableType } from "../../table.js";
+import { Column, type ColumnsObjectType, type ColumnsToResultMap, type ColumnType, type QueryColumn, type QueryTablesObjectType, type QueryTableSpecsType, type TableType, type TResultShape } from "../../table.js";
 
 interface IExecuteableQuery<
     TDbType extends DbType,
-    TResult extends { [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined> | Record<PropertyKey, QueryColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined>> } | null = null
+    TTables extends QueryTablesObjectType<TDbType>,
+    TResult extends  TResultShape<TDbType> | null = null
 > {
-    exec: () => { [K in keyof TResult as K]: number }
+    exec: () => TResult extends null ? null : ColumnsToResultMap<TDbType, TResult>
 }
 
 export type {

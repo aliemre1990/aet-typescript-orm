@@ -80,7 +80,7 @@ const res2 = customersTable
 
         return cols.shipments.orderId;
     })
-    .select(cols => ({ asdf: cols.customers.id, asdsfxc: cols.orders.customerId }))
+    .select(cols => ({ asdf: cols.customers.id, asdsfxc: cols.orders.customerId, customerName: cols.customers.name }))
     .exec();
 
 // const tbl = usersTable.as("parentUsers");
@@ -104,7 +104,14 @@ const rese = customersTable
     })
     .select(cols => {
         type t = typeof cols;
-        return ({ asdf: cols.customers.id, asdsfxc: cols.users.userName, cdf: cols.parentUsers })
+        return ({
+            asdf: cols.customers.id,
+            asdsfxc: cols.users.userName.as("username1"),
+            cdf: {
+                parentUserId: cols.parentUsers.id,
+                customers: cols.customers
+            }
+        })
     }
     )
     .exec();

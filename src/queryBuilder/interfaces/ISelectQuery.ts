@@ -1,6 +1,5 @@
-import { DbType, PgDbType } from "../../db.js";
-import { PgColumnType } from "../../postgresql/dataTypes.js";
-import { Column, Table, TablesObjectType, type ColumnsObjectType, type ColumnType, type QueryColumn, type QueryTablesObjectType, type QueryTableSpecsType, type TableSpecsType, type TableToColumnsMap, type TableType } from "../../table.js";
+import { DbType } from "../../db.js";
+import { type QueryTablesObjectType, type TableToColumnsMap, type TResultShape } from "../../table.js";
 import { IExecuteableQuery } from "./IExecuteableQuery.js";
 
 interface ISelectQuery<
@@ -8,9 +7,9 @@ interface ISelectQuery<
     TTables extends QueryTablesObjectType<TDbType>
 > {
     select<
-        TSelectResult extends { [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined> | Record<PropertyKey, QueryColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined>> }
+        TSelectResult extends TResultShape<TDbType>
     >(
-        cb: (cols: TableToColumnsMap<TTables>) => TSelectResult): IExecuteableQuery<TDbType, TSelectResult>
+        cb: (cols: TableToColumnsMap<TTables>) => TSelectResult): IExecuteableQuery<TDbType, TTables, TSelectResult>
 }
 
 export type {
