@@ -42,9 +42,14 @@ class QueryBuilder<
         this.colsSelection = colsSelection;
     }
 
-
+    select<TCb extends undefined>():
+        IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined>
     select<
-        TCb extends ((cols: TableToColumnsMap<TTables>) => TResultShape<TDbType>) | undefined
+        TCb extends ((cols: TableToColumnsMap<TTables>) => TResultShape<TDbType>)
+    >(cb: TCb | undefined):
+        IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined>
+    select<
+        TCb extends ((cols: TableToColumnsMap<TTables>) => TResultShape<TDbType>)
     >(
         cb?: TCb
     ): IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined> {

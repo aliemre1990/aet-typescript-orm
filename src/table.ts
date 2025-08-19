@@ -17,8 +17,8 @@ type TablesToResultMap<TDbType extends DbType, T extends QueryTablesObjectType<T
     T extends undefined ? undefined :
     UnionToTupleOrdered<T[keyof T]>["length"] extends 1 ? {
         [K in keyof T as T[K] extends QueryTable<TDbType, any, any, any, any, any> ? keyof T[K]["columns"] : never]:
-        T[K]["columns"][keyof T[K]["columns"]] extends QueryColumn<TDbType, any, any, any> ?
-        PgTypeToJsType<T[K]["columns"][keyof T[K]["columns"]]["column"]["type"]> : never
+        T[K] extends QueryTable<TDbType, any, any, any, any, any> ? T[K]["columns"][keyof T[K]["columns"]] extends QueryColumn<TDbType, any, any, any> ?
+        PgTypeToJsType<T[K]["columns"][keyof T[K]["columns"]]["column"]["type"]> : never : never
     } : never
 
 
@@ -165,12 +165,17 @@ class Table<
         return new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, typeof queryColumns, TAsName>(this, queryColumns, val);
     }
 
-
+    select<TCb extends undefined>():
+        IExecuteableQuery<TDbType, TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>>, TCb extends (cols: any) => infer TR ? TR : undefined>
     select<
-        TCb extends ((cols: TableToColumnsMap<TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>>>) => TResultShape<TDbType>) | undefined
+        TCb extends ((cols: TableToColumnsMap<TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>>>) => TResultShape<TDbType>)
+    >(cb: TCb):
+        IExecuteableQuery<TDbType, TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>>, TCb extends (cols: any) => infer TR ? TR : undefined>
+    select<
+        TCb extends ((cols: TableToColumnsMap<TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>>>) => TResultShape<TDbType>)
     >(
         cb?: TCb
-    ): IExecuteableQuery<TDbType, TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>>, TCb extends (cols: any) => infer TR ? TR : undefined> {
+    ) {
 
         const queryColumns = Object.entries(this.columns)
             .reduce((prev, ent) => {
