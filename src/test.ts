@@ -64,11 +64,10 @@ const res = customersTable.select(cols => {
     return ({ id: cols.customers.name.as("customerName") })
 }).exec();
 
-const select = customersTable.select;
-type t = ReturnType<typeof select>;
-type t2 = t extends IExecuteableQuery<any,any, infer TResultShape> ? TResultShape : never;
 
 const res5 = customersTable.select().exec();
+
+const res6 = customersTable.join('INNER', usersTable, (cols) => cols.users.id).select().exec();
 
 const res2 = customersTable
     .join('INNER', usersTable, (cols) => {

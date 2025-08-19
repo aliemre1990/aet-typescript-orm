@@ -25,5 +25,6 @@ type DeepPrettify<T> = T extends Function
 
 export type {
     UnionToTupleOrdered,
-    DeepPrettify
+    DeepPrettify,
+    UnionToIntersection
 }

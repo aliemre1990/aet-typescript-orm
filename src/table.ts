@@ -7,20 +7,31 @@ import { IJoinQuery } from "./queryBuilder/interfaces/IJoinQuery.js";
 import { ISelectQuery } from "./queryBuilder/interfaces/ISelectQuery.js";
 import { QueryBuilder } from "./queryBuilder/queryBuilder.js";
 import type { JoinType } from "./types.js";
-import type { DeepPrettify, UnionToTupleOrdered } from "./utility/types.js";
+import type { DeepPrettify, UnionToIntersection, UnionToTupleOrdered } from "./utility/types.js";
 
 type TResultShape<TDbType extends DbType> = {
     [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined> | TResultShape<TDbType>;
 };
 
+
+type FlattenColumnResults<T> = T extends Record<string, any>
+    ? UnionToIntersection<T[keyof T]>
+    : never;
+
+
 type TablesToResultMap<TDbType extends DbType, T extends QueryTablesObjectType<TDbType>> =
     T extends undefined ? undefined :
-    UnionToTupleOrdered<T[keyof T]>["length"] extends 1 ? {
-        [K in keyof T as T[K] extends QueryTable<TDbType, any, any, any, any, any> ? keyof T[K]["columns"] : never]:
-        T[K] extends QueryTable<TDbType, any, any, any, any, any> ? T[K]["columns"][keyof T[K]["columns"]] extends QueryColumn<TDbType, any, any, any> ?
-        PgTypeToJsType<T[K]["columns"][keyof T[K]["columns"]]["column"]["type"]> : never : never
-    } : never
+    UnionToTupleOrdered<T[keyof T]>["length"] extends 2 ?
+    DeepPrettify<
+        FlattenColumnResults<{
+            [K in keyof T as T[K] extends QueryTable<TDbType, any, any, any, any, any> ? K : never]:
+            {
+                [C in keyof T[K]["columns"]]: PgTypeToJsType<T[K]["columns"][C]["column"]["type"]>
+            }
 
+        }>> : never;
+//  [C in keyof T[keyof T]["columns"]as T[keyof T]["columns"][C] extends QueryColumn<TDbType, any, any, any> ? C : never]:
+//       PgTypeToJsType<T[keyof T]["columns"][C]["column"]["type"]>
 
 type ColumnsToResultMap<TDbType extends DbType, T extends TResultShape<TDbType> | undefined> =
     T extends undefined ? undefined :
