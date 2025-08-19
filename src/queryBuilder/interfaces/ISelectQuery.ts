@@ -7,9 +7,9 @@ interface ISelectQuery<
     TTables extends QueryTablesObjectType<TDbType>
 > {
     select<
-        TSelectResult extends TResultShape<TDbType>
+        TCb extends ((cols: TableToColumnsMap<TTables>) => TResultShape<TDbType>) | undefined
     >(
-        cb: (cols: TableToColumnsMap<TTables>) => TSelectResult): IExecuteableQuery<TDbType, TTables, TSelectResult>
+        cb?: TCb): IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined>
 }
 
 export type {

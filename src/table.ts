@@ -7,16 +7,23 @@ import { IJoinQuery } from "./queryBuilder/interfaces/IJoinQuery.js";
 import { ISelectQuery } from "./queryBuilder/interfaces/ISelectQuery.js";
 import { QueryBuilder } from "./queryBuilder/queryBuilder.js";
 import type { JoinType } from "./types.js";
-import type { DeepPrettify } from "./utility/types.js";
-
-
+import type { DeepPrettify, UnionToTupleOrdered } from "./utility/types.js";
 
 type TResultShape<TDbType extends DbType> = {
     [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined> | TResultShape<TDbType>;
 };
 
-type ColumnsToResultMap<TDbType extends DbType, T extends TResultShape<TDbType> | null> =
-    T extends null ? null :
+type TablesToResultMap<TDbType extends DbType, T extends QueryTablesObjectType<TDbType>> =
+    T extends undefined ? undefined :
+    UnionToTupleOrdered<T[keyof T]>["length"] extends 1 ? {
+        [K in keyof T as T[K] extends QueryTable<TDbType, any, any, any, any, any> ? keyof T[K]["columns"] : never]:
+        T[K]["columns"][keyof T[K]["columns"]] extends QueryColumn<TDbType, any, any, any> ?
+        PgTypeToJsType<T[K]["columns"][keyof T[K]["columns"]]["column"]["type"]> : never
+    } : never
+
+
+type ColumnsToResultMap<TDbType extends DbType, T extends TResultShape<TDbType> | undefined> =
+    T extends undefined ? undefined :
     DeepPrettify<{
         [K in keyof T as T[K] extends QueryColumn<TDbType, any, any, any> ?
         T[K]["asName"] extends undefined ? K : T[K]["asName"] & string : never]:
@@ -160,10 +167,10 @@ class Table<
 
 
     select<
-        TSelectResult extends TResultShape<TDbType>
+        TCb extends ((cols: TableToColumnsMap<TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>>>) => TResultShape<TDbType>) | undefined
     >(
-        cb: (cols: TableToColumnsMap<TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>>>) => TSelectResult
-    ) {
+        cb?: TCb
+    ): IExecuteableQuery<TDbType, TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>>, TCb extends (cols: any) => infer TR ? TR : undefined> {
 
         const queryColumns = Object.entries(this.columns)
             .reduce((prev, ent) => {
@@ -286,7 +293,8 @@ export type {
     TableToObject,
     GetColumnType,
     ColumnsToResultMap,
-    TResultShape
+    TResultShape,
+    TablesToResultMap
 }
 
 export {

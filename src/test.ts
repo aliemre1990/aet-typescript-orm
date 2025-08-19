@@ -1,4 +1,5 @@
 import { pgColumnTypes } from "./postgresql/dataTypes.js";
+import type { IExecuteableQuery } from "./queryBuilder/interfaces/IExecuteableQuery.js";
 import { Column, ForeignKey, pgTable, QueryTable, type QueryColumn, type TableToColumnsMap, type TableToObject } from "./table.js";
 import type { UnionToTupleOrdered } from "./utility/types.js";
 
@@ -62,6 +63,13 @@ const res = customersTable.select(cols => {
 
     return ({ id: cols.customers.name.as("customerName") })
 }).exec();
+
+const select = customersTable.select;
+type t = ReturnType<typeof select>;
+type t2 = t extends IExecuteableQuery<any,any, infer TResultShape> ? TResultShape : never;
+
+const res5 = customersTable.select().exec();
+
 const res2 = customersTable
     .join('INNER', usersTable, (cols) => {
         type t = typeof cols;
