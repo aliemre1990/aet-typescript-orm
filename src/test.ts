@@ -1,7 +1,6 @@
 import { pgColumnTypes } from "./postgresql/dataTypes.js";
-import type { IExecuteableQuery } from "./queryBuilder/interfaces/IExecuteableQuery.js";
-import { Column, ForeignKey, pgTable, QueryTable, type QueryColumn, type TableToColumnsMap, type TableToObject } from "./table.js";
-import type { UnionToTupleOrdered } from "./utility/types.js";
+import Column from "./table/coloum.js";
+import { ForeignKey, pgTable } from "./table/table.js";
 
 
 const usersTable = pgTable(
@@ -68,6 +67,10 @@ const res = customersTable.select(cols => {
 const res5 = customersTable.select().exec();
 
 const res6 = customersTable.join('INNER', usersTable, (cols) => cols.users.id).select().exec();
+const res7 = customersTable
+    .join('INNER', usersTable, (cols) => cols.users.id)
+    .join('INNER', usersTable.as('parentUsers'), (cols) => cols.users.id)
+    .select().exec();
 
 const res2 = customersTable
     .join('INNER', usersTable, (cols) => {

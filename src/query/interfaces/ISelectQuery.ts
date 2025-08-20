@@ -1,5 +1,7 @@
 import { DbType } from "../../db.js";
-import { type QueryTablesObjectType, type TableToColumnsMap, type TResultShape } from "../../table.js";
+import type { QueryTablesObjectType } from "../../table/types/utils.js";
+import type { TableToColumnsMap } from "../types/miscellaneous.js";
+import type { TResultShape } from "../types/result.js";
 import { IExecuteableQuery } from "./IExecuteableQuery.js";
 
 interface ISelectQuery<

@@ -1,13 +1,17 @@
-import { DbType, PgDbType } from "../db.js";
-import { PgColumnType } from "../postgresql/dataTypes.js";
-import { ColumnType, QueryColumn, QueryTable, Table, type ColumnsObjectType, type ColumnsToResultMap, type QueryColumnsObjectType, type QueryTablesObjectType, type QueryTableSpecsType, type TablesToResultMap, type TableToColumnsMap, type TableToObject, type TResultShape } from "../table.js";
+import { DbType } from "../db.js";
+import QueryColumn from "../table/queryColumn.js";
+import QueryTable from "../table/queryTable.js";
+import type Table from "../table/table.js";
+import type { QueryTableSpecsType } from "../table/types/tableSpecs.js";
+import type { ColumnsObjectType, QueryColumnsObjectType, QueryTablesObjectType } from "../table/types/utils.js";
 import type { JoinType } from "../types.js";
 import { isNullOrUndefined } from "../utility/guards.js";
-import { ComparableColumn } from "./comparableColumn.js";
 import { ComparisonOperation } from "./comparisonOperation.js";
 import { IExecuteableQuery } from "./interfaces/IExecuteableQuery.js";
 import { IJoinQuery } from "./interfaces/IJoinQuery.js";
 import { ISelectQuery } from "./interfaces/ISelectQuery.js";
+import type { TableToColumnsMap, TableToObject } from "./types/miscellaneous.js";
+import type { ColumnsToResultMap, TablesToResultMap, TResultShape } from "./types/result.js";
 
 // function getColsSelection<TTablesSelection extends Table[]>(tables: TTablesSelection) {
 //     let colsSelection: TableToColumnsMap<TTablesSelection, ComparableColumn> = Object.entries(tables).reduce((prev, curr) => {
@@ -106,51 +110,6 @@ class QueryBuilder<
             IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>> &
             ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>>
     }
-
-
-    // leftJoin<TLeftJoinTable extends Table<TDbType, any, any>>(
-    //     table: TLeftJoinTable,
-    //     cb: (cols: TableToColumnsMap<TTables & TableToObject<TLeftJoinTable>>) => ComparisonOperation
-    // ):
-    //     IJoinQuery<TDbType, TTables & TableToObject<TLeftJoinTable>> &
-    //     ISelectQuery<TDbType, TTables & TableToObject<TLeftJoinTable>> {
-
-    //     const newTables = { ...this.tables, [table.name]: table };
-
-    //     return new QueryBuilder(newTables) as unknown as
-    //         IJoinQuery<TDbType, TTables & TableToObject<TLeftJoinTable>> &
-    //         ISelectQuery<TDbType, TTables & TableToObject<TLeftJoinTable>>
-    // }
-
-
-    // rightJoin<TRightJoinTable extends Table<TDbType, any, any>>(
-    //     table: TRightJoinTable,
-    //     cb: (cols: TableToColumnsMap<TTables & TableToObject<TRightJoinTable>>) => ComparisonOperation
-    // ):
-    //     IJoinQuery<TDbType, TTables & TableToObject<TRightJoinTable>> &
-    //     ISelectQuery<TDbType, TTables & TableToObject<TRightJoinTable>> {
-
-    //     const newTables = { ...this.tables, [table.name]: table };
-
-    //     return new QueryBuilder(newTables) as unknown as
-    //         IJoinQuery<TDbType, TTables & TableToObject<TRightJoinTable>> &
-    //         ISelectQuery<TDbType, TTables & TableToObject<TRightJoinTable>>
-    // }
-
-
-    // fullJoin<TFullJoinTable extends Table<TDbType, any, any>>(
-    //     table: TFullJoinTable,
-    //     cb: (cols: TableToColumnsMap<TTables & TableToObject<TFullJoinTable>>) => ComparisonOperation
-    // ):
-    //     IJoinQuery<TDbType, TTables & TableToObject<TFullJoinTable>> &
-    //     ISelectQuery<TDbType, TTables & TableToObject<TFullJoinTable>> {
-
-    //     const newTables = { ...this.tables, [table.name]: table };
-
-    //     return new QueryBuilder(newTables) as unknown as
-    //         IJoinQuery<TDbType, TTables & TableToObject<TFullJoinTable>> &
-    //         ISelectQuery<TDbType, TTables & TableToObject<TFullJoinTable>>
-    // }
 
     exec(): TResult extends undefined ? TablesToResultMap<TDbType, TTables> : ColumnsToResultMap<TDbType, TResult> {
         if (isNullOrUndefined(this.colsSelection)) {

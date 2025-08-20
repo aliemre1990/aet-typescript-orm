@@ -1,9 +1,13 @@
 import { DbType, PgDbType } from "../../db.js";
 import { PgColumnType } from "../../postgresql/dataTypes.js";
-import { Column, Table, TablesObjectType, type ColumnsObjectType, type QueryColumn, type QueryColumnsObjectType, type QueryTable, type QueryTablesObjectType, type QueryTableSpecsType, type TableToColumnsMap, type TableToObject, type TableType } from "../../table.js";
+import type QueryColumn from "../../table/queryColumn.js";
+import type QueryTable from "../../table/queryTable.js";
+import type Table from "../../table/table.js";
+import type { ColumnsObjectType, QueryTablesObjectType, QueryTableSpecsType } from "../../table/types/utils.js";
 import type { JoinType } from "../../types.js";
 import { ComparableColumn } from "../comparableColumn.js";
 import { ComparisonOperation } from "../comparisonOperation.js";
+import type { TableToColumnsMap, TableToObject } from "../types/miscellaneous.js";
 import { ISelectQuery } from "./ISelectQuery.js";
 
 interface IJoinQuery<

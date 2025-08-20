@@ -23,8 +23,19 @@ type DeepPrettify<T> = T extends Function
     ? { [K in keyof T]: DeepPrettify<T[K]> }
     : T;
 
+
+type FlattenObject<T> = T extends object ?
+    DeepPrettify<UnionToIntersection<{
+        [K in keyof T]: T[K] extends object ? FlattenObject<T[K]> : { [P in K]: T[K] }
+    }[keyof T]>> : never
+    ;
+
+// type t1 = FlattenObject<{ a: { b: string, c: { d: string } } }>
+// type t = FlattenObject<{ a: { b: { c: { d: string, f: { g: string, h: string } } }, e: string } }>
+
 export type {
     UnionToTupleOrdered,
     DeepPrettify,
-    UnionToIntersection
+    UnionToIntersection,
+    FlattenObject
 }

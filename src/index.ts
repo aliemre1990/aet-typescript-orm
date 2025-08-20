@@ -1,4 +1,4 @@
-export * from './table.js';
+export * from './table/table.js';
 export * from './query.js';
 
-export * from './queryBuilder/_index.js'
+export * from './query/_index.js'

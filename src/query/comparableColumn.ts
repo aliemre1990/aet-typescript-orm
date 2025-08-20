@@ -1,6 +1,7 @@
 import { DbType, PgDbType } from "../db.js";
-import { PgColumnType } from "../postgresql/dataTypes.js";
-import { Column, type GetColumnType, type TableSpecsType } from "../table.js";
+import type Column from "../table/coloum.js";
+import type { TableSpecsType } from "../table/types/tableSpecs.js";
+import type { GetColumnType } from "../table/types/utils.js";
 import { ComparisonOperation } from "./comparisonOperation.js";
 
 class ComparableColumn<
