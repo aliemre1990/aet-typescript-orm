@@ -1,5 +1,5 @@
 import { pgColumnTypes } from "./postgresql/dataTypes.js";
-import Column from "./table/coloum.js";
+import Column from "./table/column.js";
 import { ForeignKey, pgTable } from "./table/table.js";
 
 

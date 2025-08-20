@@ -1,6 +1,6 @@
 import type { DbType, PgDbType } from "../../db.js";
 import type { PgColumnType } from "../../postgresql/dataTypes.js";
-import type Column from "../coloum.js";
+import type Column from "../column.js";
 import type QueryColumn from "../queryColumn.js";
 import type QueryTable from "../queryTable.js";
 import type Table from "../table.js";

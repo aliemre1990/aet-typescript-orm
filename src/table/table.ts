@@ -7,7 +7,7 @@ import { QueryBuilder } from "../query/queryBuilder.js";
 import type { TableToColumnsMap, TableToObject } from "../query/types/miscellaneous.js";
 import type { TResultShape } from "../query/types/result.js";
 import type { JoinType } from "../types.js";
-import type Column from "./coloum.js";
+import type Column from "./column.js";
 import QueryColumn from "./queryColumn.js";
 import QueryTable from "./queryTable.js";
 import type { QueryTableSpecsType, TableSpecsType } from "./types/tableSpecs.js";

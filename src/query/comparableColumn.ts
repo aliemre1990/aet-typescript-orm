@@ -1,5 +1,5 @@
 import { DbType, PgDbType } from "../db.js";
-import type Column from "../table/coloum.js";
+import type Column from "../table/column.js";
 import type { TableSpecsType } from "../table/types/tableSpecs.js";
 import type { GetColumnType } from "../table/types/utils.js";
 import { ComparisonOperation } from "./comparisonOperation.js";
