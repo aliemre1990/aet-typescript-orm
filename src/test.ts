@@ -1,5 +1,6 @@
 import { pgColumnTypes } from "./postgresql/dataTypes.js";
 import Column from "./table/column.js";
+import { pgParam } from "./table/queryColumn.js";
 import { ForeignKey, pgTable } from "./table/table.js";
 
 
@@ -66,10 +67,11 @@ const res = customersTable.select(cols => {
 
 const res5 = customersTable.select().exec();
 
+
 const res6 = customersTable.join('INNER', usersTable, (cols) => cols.users.id).select().exec();
 const res7 = customersTable
     .join('INNER', usersTable, (cols) => cols.users.id)
-    .join('INNER', usersTable.as('parentUsers'), (cols) => cols.users.id)
+    .join('INNER', usersTable.as('parentUsers'), (cols) => cols.users.id.equals(15))
     .select().exec();
 
 const res2 = customersTable

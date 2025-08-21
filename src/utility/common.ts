@@ -33,9 +33,20 @@ type FlattenObject<T> = T extends object ?
 // type t1 = FlattenObject<{ a: { b: string, c: { d: string } } }>
 // type t = FlattenObject<{ a: { b: { c: { d: string, f: { g: string, h: string } } }, e: string } }>
 
+type SingleKeyObject<T> = UnionToTupleOrdered<keyof T>["length"] extends 1 ? T : never;
+
+type SingleKey<T> = IsUnion<keyof T> extends true ? never : {} extends T ? never : T;
+
+type IsUnion<T, U extends T = T> =
+    (T extends any ?
+        (U extends T ? false : true)
+        : never) extends false ? false : true
+
 export type {
     UnionToTupleOrdered,
     DeepPrettify,
     UnionToIntersection,
-    FlattenObject
+    FlattenObject,
+    SingleKeyObject,
+    IsUnion
 }
