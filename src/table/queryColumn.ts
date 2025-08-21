@@ -45,46 +45,40 @@ class QueryColumn<
 
     equals<
         TQueryColumn extends QueryColumn<TDbType, any, any, any>,
-        TValueType extends PgTypeToJsType<TColumn["type"]>,
         TParamName extends string,
         TParamMedian extends undefined,
         TParam extends undefined
-    >(value: TValueType | TQueryColumn): ColumnComparisonOperation<
+    >(value: PgTypeToJsType<TColumn["type"]> | TQueryColumn): ColumnComparisonOperation<
         TDbType,
         QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
-        undefined,
-        TValueType
+        undefined
     >
     equals<
         TQueryColumn extends QueryColumn<TDbType, any, any, any>,
-        TValueType extends PgTypeToJsType<TColumn["type"]>,
         TParamMedian extends QueryParamMedian<TDbType, any>,
         TParamName extends TParamMedian extends QueryParamMedian<TDbType, infer U> ? U : never,
-        TParam extends QueryParam<TDbType, TParamName, TValueType>
+        TParam extends QueryParam<TDbType, TParamName, PgTypeToJsType<TColumn["type"]>>
     >(value: TParamMedian
     ): ColumnComparisonOperation<
         TDbType,
         QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
-        [TParam],
-        TValueType
+        [TParam]
     >
     equals<
         TQueryColumn extends QueryColumn<TDbType, any, any, any>,
-        TValueType extends PgTypeToJsType<TColumn["type"]>,
         TParamMedian extends QueryParamMedian<TDbType, any>,
         TParamName extends TParamMedian extends QueryParamMedian<TDbType, infer U> ? U : never,
-        TParam extends QueryParam<TDbType, TParamName, TValueType> | undefined
+        TParam extends QueryParam<TDbType, TParamName, PgTypeToJsType<TColumn["type"]>> | undefined,
     >
-        (value: TValueType | TParamMedian | TQueryColumn) {
+        (value: PgTypeToJsType<TColumn["type"]> | TParamMedian | TQueryColumn) {
 
         if (value instanceof QueryParamMedian) {
-            const param = new QueryParam<TDbType, TParamName, TValueType>(value.name);
+            const param = new QueryParam<TDbType, TParamName, PgTypeToJsType<TColumn["type"]>>(value.name);
 
             return new ColumnComparisonOperation<
                 TDbType,
                 QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
-                TParam extends undefined ? undefined : [TParam],
-                TValueType
+                TParam extends undefined ? undefined : [TParam]
             >(
                 this,
                 comparisonOperations.eq.name,
@@ -94,8 +88,7 @@ class QueryColumn<
             return new ColumnComparisonOperation<
                 TDbType,
                 QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
-                undefined,
-                TValueType
+                undefined
             >(
                 this,
                 comparisonOperations.eq.name,
@@ -106,12 +99,11 @@ class QueryColumn<
         return new ColumnComparisonOperation<
             TDbType,
             QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
-            undefined,
-            TValueType
+            undefined
         >(
             this,
             comparisonOperations.eq.name,
-            value as TValueType
+            value as PgTypeToJsType<TColumn["type"]>
         );
     }
 }

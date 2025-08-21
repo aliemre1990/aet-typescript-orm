@@ -27,7 +27,7 @@ class ColumnComparisonOperation<
     TDbType extends DbType,
     TQueryColumn extends QueryColumn<TDbType, any, any, any>,
     TParams extends QueryParam<TDbType, any, any>[] | undefined,
-    TValueType extends PgTypeToJsType<TQueryColumn["column"]["type"]> | undefined,
+    TValueType = PgTypeToJsType<TQueryColumn["column"]["type"]>,
 
 > {
     constructor(
