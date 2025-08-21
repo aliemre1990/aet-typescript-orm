@@ -35,7 +35,11 @@ type FlattenObject<T> = T extends object ?
 
 type SingleKeyObject<T> = UnionToTupleOrdered<keyof T>["length"] extends 1 ? T : never;
 
-type SingleKey<T> = IsUnion<keyof T> extends true ? never : {} extends T ? never : T;
+type SingleKeyObject2<T> = IsUnion<keyof T> extends true ? never : {} extends T ? never : T;
+
+type SingleKeyObject3<T> = {
+    [K in keyof T]: Pick<T, K> & { [P in Exclude<keyof T, K>]?: never }
+}[keyof T];
 
 type IsUnion<T, U extends T = T> =
     (T extends any ?

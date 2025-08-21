@@ -37,10 +37,15 @@ class ColumnOperation<
     ) { }
 
 }
-type ExactlyOne<T> = {
-    [K in keyof T]: Pick<T, K> & { [P in Exclude<keyof T, K>]?: never }
-}[keyof T];
 
+class QueryParamMedian<
+    TDbType extends DbType,
+    TName extends string
+> {
+    constructor(
+        public name: TName
+    ) { }
+}
 
 class QueryParam<
     TDbType extends DbType,
@@ -54,14 +59,11 @@ class QueryParam<
 
 
 function pgParam<
-    TName extends string,
-    TColumn extends ColumnType<PgDbType>,
-    TQueryColumn extends QueryColumn<DbType, TColumn, any, any>,
-    TValue extends PgTypeToJsType<TQueryColumn["column"]["type"]>
+    TName extends string
 >(
     name: TName
 ) {
-    return new QueryParam<PgDbType, TName, TValue>(name);
+    return new QueryParamMedian<PgDbType, TName>(name);
 }
 
 class QueryColumn<
@@ -87,19 +89,21 @@ class QueryColumn<
         TQueryColumn extends QueryColumn<TDbType, any, any, any>,
         TValueType extends PgTypeToJsType<TColumn["type"]>,
         TParamName extends string,
+        TParamMedian extends undefined,
         TParam extends undefined
     >(value: TValueType | TQueryColumn): ColumnOperation<
         TDbType,
         QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
-        TParam,
+        undefined,
         TValueType
     >
     equals<
         TQueryColumn extends QueryColumn<TDbType, any, any, any>,
         TValueType extends PgTypeToJsType<TColumn["type"]>,
-        TParamName extends string,
+        TParamMedian extends QueryParamMedian<TDbType, any>,
+        TParamName extends TParamMedian extends QueryParamMedian<TDbType, infer U> ? U : never,
         TParam extends QueryParam<TDbType, TParamName, TValueType>
-    >(value: TParam
+    >(value: TParamMedian
     ): ColumnOperation<
         TDbType,
         QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
@@ -109,26 +113,54 @@ class QueryColumn<
     equals<
         TQueryColumn extends QueryColumn<TDbType, any, any, any>,
         TValueType extends PgTypeToJsType<TColumn["type"]>,
-        TParamName extends string,
+        TParamMedian extends QueryParamMedian<TDbType, any>,
+        TParamName extends TParamMedian extends QueryParamMedian<TDbType, infer U> ? U : never,
         TParam extends QueryParam<TDbType, TParamName, TValueType> | undefined
     >
-        (value: TValueType | TParam | TQueryColumn) {
+        (value: TValueType | TParamMedian | TQueryColumn) {
+
+        if (value instanceof QueryParamMedian) {
+            const param = new QueryParam<TDbType, TParamName, TValueType>(value.name);
+
+            return new ColumnOperation<
+                TDbType,
+                QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
+                TParam extends undefined ? undefined : [TParam],
+                TValueType
+            >(
+                this,
+                comparisonOperations.eq.name,
+                [param] as TParam extends undefined ? undefined : [TParam]
+            )
+        } else if (value instanceof QueryColumn) {
+            return new ColumnOperation<
+                TDbType,
+                QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
+                undefined,
+                TValueType
+            >(
+                this,
+                comparisonOperations.eq.name,
+                value as TQueryColumn
+            )
+        }
 
         return new ColumnOperation<
             TDbType,
             QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
-            TParam extends undefined ? undefined : [TParam],
+            undefined,
             TValueType
         >(
             this,
             comparisonOperations.eq.name,
-            [value] as TParam extends undefined ? undefined : [TParam]
-        )
+            value as TValueType
+        );
     }
 }
 
 export default QueryColumn;
 
 export {
+    ColumnOperation,
     pgParam
 }
