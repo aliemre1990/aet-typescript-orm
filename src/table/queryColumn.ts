@@ -1,62 +1,20 @@
 import type { DbType, PgDbType } from "../db.js";
-import type { PgColumnType, PgTypeToJsType } from "../postgresql/dataTypes.js";
-import type { SingleKeyObject } from "../utility/common.js";
+import type { PgColumnType, PgTypeToJsType, PgValueTypes } from "../postgresql/dataTypes.js";
+import ColumnComparisonOperation, { comparisonOperations } from "../query/comparison.js";
 import type { ColumnType, QueryTableSpecsType } from "./types/utils.js";
 
-const comparisonOperations = {
-    eq: { name: 'EQ' },
-    ne: { name: 'NE' },
-    gt: { name: 'GT' },
-    gte: { name: 'GTE' },
-    lt: { name: 'LT' },
-    lte: { name: 'LTE' },
-    like: { name: 'LIKE' },
-    iLike: { name: 'ILIKE' },
-    in: { name: 'IN' },
-    notIn: { name: 'NOTIN' },
-    isNull: { name: 'ISNULL' },
-    isNotNull: { name: 'ISNOTNULL' },
-    between: { name: 'BETWEEN' },
-    exists: { name: 'EXISTS' },
-    notExists: { name: 'NOTEXISTS' }
-} as const;
 
-type ComparisonOperation = (typeof comparisonOperations)[keyof typeof comparisonOperations]["name"];
-
-class ColumnOperation<
-    TDbType extends DbType,
-    TQueryColumn extends QueryColumn<TDbType, any, any, any>,
-    TParams extends [QueryParam<TDbType, any, any>] | undefined,
-    TValueType extends PgTypeToJsType<TQueryColumn["column"]["type"]> | undefined,
-
-> {
-    constructor(
-        public column: TQueryColumn,
-        public operation: ComparisonOperation,
-        public value?: TParams | TValueType | QueryColumn<TDbType, any, any, any> | [TValueType | QueryColumn<TDbType, any, any, any>]
-    ) { }
-
-}
-
-class QueryParamMedian<
-    TDbType extends DbType,
-    TName extends string
-> {
-    constructor(
-        public name: TName
-    ) { }
+class QueryParamMedian<TDbType extends DbType, TName extends string> {
+    constructor(public name: TName) { }
 }
 
 class QueryParam<
     TDbType extends DbType,
     TName extends string,
-    TValue extends string | number | boolean | Date | Buffer | object | null
+    TValue extends PgValueTypes
 > {
-    constructor(
-        public name: TName
-    ) { }
+    constructor(public name: TName) { }
 }
-
 
 function pgParam<
     TName extends string
@@ -91,7 +49,7 @@ class QueryColumn<
         TParamName extends string,
         TParamMedian extends undefined,
         TParam extends undefined
-    >(value: TValueType | TQueryColumn): ColumnOperation<
+    >(value: TValueType | TQueryColumn): ColumnComparisonOperation<
         TDbType,
         QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
         undefined,
@@ -104,7 +62,7 @@ class QueryColumn<
         TParamName extends TParamMedian extends QueryParamMedian<TDbType, infer U> ? U : never,
         TParam extends QueryParam<TDbType, TParamName, TValueType>
     >(value: TParamMedian
-    ): ColumnOperation<
+    ): ColumnComparisonOperation<
         TDbType,
         QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
         [TParam],
@@ -122,7 +80,7 @@ class QueryColumn<
         if (value instanceof QueryParamMedian) {
             const param = new QueryParam<TDbType, TParamName, TValueType>(value.name);
 
-            return new ColumnOperation<
+            return new ColumnComparisonOperation<
                 TDbType,
                 QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
                 TParam extends undefined ? undefined : [TParam],
@@ -133,7 +91,7 @@ class QueryColumn<
                 [param] as TParam extends undefined ? undefined : [TParam]
             )
         } else if (value instanceof QueryColumn) {
-            return new ColumnOperation<
+            return new ColumnComparisonOperation<
                 TDbType,
                 QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
                 undefined,
@@ -145,7 +103,7 @@ class QueryColumn<
             )
         }
 
-        return new ColumnOperation<
+        return new ColumnComparisonOperation<
             TDbType,
             QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
             undefined,
@@ -161,6 +119,7 @@ class QueryColumn<
 export default QueryColumn;
 
 export {
-    ColumnOperation,
-    pgParam
+    pgParam,
+    QueryParam,
+    QueryParamMedian
 }

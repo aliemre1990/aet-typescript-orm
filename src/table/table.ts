@@ -1,4 +1,6 @@
 import { DbType, PgDbType } from "../db.js";
+import type { PgValueTypes } from "../postgresql/dataTypes.js";
+import type ColumnComparisonOperation from "../query/comparison.js";
 import { ComparisonOperation } from "../query/comparisonOperation.js";
 import type { IExecuteableQuery } from "../query/interfaces/IExecuteableQuery.js";
 import { IJoinQuery } from "../query/interfaces/IJoinQuery.js";
@@ -8,7 +10,7 @@ import type { TableToColumnsMap, TableToObject } from "../query/types/miscellane
 import type { TResultShape } from "../query/types/result.js";
 import type { JoinType } from "../types.js";
 import type Column from "./column.js";
-import QueryColumn from "./queryColumn.js";
+import QueryColumn, { type QueryParam } from "./queryColumn.js";
 import QueryTable from "./queryTable.js";
 import type { QueryTableSpecsType, TableSpecsType } from "./types/tableSpecs.js";
 import type { ColumnsObjectType, GetColumnType, QueryColumnsObjectType } from "./types/utils.js";
@@ -86,7 +88,8 @@ class Table<
             Table<TDbType, TInnerCols, TInnerTableName>,
             { [K in keyof TInnerCols]: QueryColumn<TDbType, TInnerCols[K], { tableName: TInnerTableName }> }
         > :
-        TInnerJoinTable
+        TInnerJoinTable,
+        TJoinParams extends QueryParam<TDbType, string, PgValueTypes>[] | undefined = undefined
 
     >(
         type: JoinType,
@@ -103,7 +106,7 @@ class Table<
                     >
                 > &
                 TableToObject<TInnerJoinResult>
-            >) => ComparisonOperation
+            >) => ColumnComparisonOperation<TDbType, any, TJoinParams, any>
     ) {
         const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
             prev[curr[0]] = new QueryColumn(curr[1]);
@@ -115,7 +118,7 @@ class Table<
             [this.name]: queryTable
         };
 
-        return new QueryBuilder<TDbType, TableToObject<typeof queryTable>>(tables as TableToObject<typeof queryTable>).join(type, table as any, cb);
+        return new QueryBuilder<TDbType, TableToObject<typeof queryTable>, undefined, TJoinParams>(tables as TableToObject<typeof queryTable>).join(type, table as any, cb);
     }
 }
 

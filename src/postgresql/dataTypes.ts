@@ -157,9 +157,12 @@ type PgTypeToJsType<T extends PgColumnType> =
     T extends 'LANGUAGE_HANDLER' | 'INTERNAL' | 'OPAQUE' | 'FDW_HANDLER' | 'INDEX_AM_HANDLER' | 'TSM_HANDLER' | 'TABLE_AM_HANDLER' ? any :
     unknown;
 
+type PgValueTypes = string | number | bigint | boolean | Date | Buffer | object | null;
+
 export type {
     PgColumnType,
-    PgTypeToJsType
+    PgTypeToJsType,
+    PgValueTypes
 }
 
 

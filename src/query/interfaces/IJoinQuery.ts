@@ -1,11 +1,13 @@
 import { DbType, PgDbType } from "../../db.js";
-import { PgColumnType } from "../../postgresql/dataTypes.js";
+import { PgColumnType, type PgValueTypes } from "../../postgresql/dataTypes.js";
+import type { QueryParam } from "../../table/queryColumn.js";
 import type QueryColumn from "../../table/queryColumn.js";
 import type QueryTable from "../../table/queryTable.js";
 import type Table from "../../table/table.js";
 import type { ColumnsObjectType, QueryTablesObjectType, QueryTableSpecsType } from "../../table/types/utils.js";
 import type { JoinType } from "../../types.js";
 import { ComparableColumn } from "../comparableColumn.js";
+import type ColumnComparisonOperation from "../comparison.js";
 import { ComparisonOperation } from "../comparisonOperation.js";
 import type { TableToColumnsMap, TableToObject } from "../types/miscellaneous.js";
 import { ISelectQuery } from "./ISelectQuery.js";
@@ -13,6 +15,7 @@ import { ISelectQuery } from "./ISelectQuery.js";
 interface IJoinQuery<
     TDbType extends DbType,
     TTables extends QueryTablesObjectType<TDbType>,
+    TParams extends QueryParam<TDbType, string, PgValueTypes>[] | undefined = undefined
 > {
 
     join<
@@ -29,15 +32,15 @@ interface IJoinQuery<
             Table<TDbType, TInnerCols, TInnerTableName>,
             { [K in keyof TInnerCols]: QueryColumn<TDbType, TInnerCols[K], { tableName: TInnerTableName }> }
         > :
-        TInnerJoinTable
+        TInnerJoinTable,
+        TJoinParams extends QueryParam<TDbType, string, PgValueTypes>[] | undefined = undefined
     >(
         type: JoinType,
         table: TInnerJoinTable,
-        cb: (cols: TableToColumnsMap<TTables & TableToObject<TInnerJoinResult>>) => ComparisonOperation
+        cb: (cols: TableToColumnsMap<TTables & TableToObject<TInnerJoinResult>>) => ColumnComparisonOperation<TDbType, any, TJoinParams, any>
     ):
-        IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>
-        > &
-        ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>>
+        IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? never : TParams), ...(TJoinParams extends undefined ? never : TJoinParams)]> &
+        ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? never : TParams), ...(TJoinParams extends undefined ? never : TJoinParams)]>
 
     // leftJoin<TLeftJoinTable extends Table<any, any, any, any>>(
     //     table: TLeftJoinTable, cb: (cols: TableToColumnsMap<TTables & TableToObject<TLeftJoinTable>>) => ComparisonOperation

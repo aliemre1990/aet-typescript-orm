@@ -5,6 +5,7 @@ import type QueryTable from "../../table/queryTable.js";
 import type { ColumnType, QueryTablesObjectType, QueryTableSpecsType } from "../../table/types/utils.js";
 import type { IsPlural, ToSingular } from "../../utility/string.js";
 import type { DeepPrettify, FlattenObject, UnionToTupleOrdered } from "../../utility/common.js";
+import type { QueryParam } from "../../table/queryColumn.js";
 
 type TResultShape<TDbType extends DbType> = {
     [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined> | TResultShape<TDbType>;
@@ -52,9 +53,17 @@ type ColumnsToResultMap<TDbType extends DbType, T extends TResultShape<TDbType> 
     }
     >
 
+// Convert array of QueryParam to object type
+type QueryParamsToObject<T extends readonly QueryParam<any, any, any>[] | undefined> = T extends undefined ?
+    undefined :
+    T extends readonly QueryParam<any, any, any>[] ? {
+        [K in T[number]as K extends QueryParam<any, infer Name, any> ? Name : never]:
+        K extends QueryParam<any, any, infer ValueType> ? ValueType : never
+    } : undefined;
 
 export type {
     TResultShape,
     TablesToResultMap,
-    ColumnsToResultMap
+    ColumnsToResultMap,
+    QueryParamsToObject
 }

@@ -1,6 +1,7 @@
 import { pgColumnTypes } from "./postgresql/dataTypes.js";
+import type ColumnComparisonOperation from "./query/comparison.js";
 import Column from "./table/column.js";
-import { pgParam, type ColumnOperation } from "./table/queryColumn.js";
+import { pgParam } from "./table/queryColumn.js";
 import { ForeignKey, pgTable } from "./table/table.js";
 
 
@@ -68,11 +69,11 @@ const res = customersTable.select(cols => {
 const res5 = customersTable.select().exec();
 
 
-const res6 = customersTable.join('INNER', usersTable, (cols) => cols.users.id).select().exec();
+const res6 = customersTable.join('INNER', usersTable, (cols) => cols.users.id.equals(1)).select().exec();
 const res7 = customersTable
     .join('INNER', usersTable, (cols) => {
 
-        const res = cols.users.id.equals(1);
+        const res = cols.users.id.equals(pgParam("param"));
 
         return res;
 
@@ -82,9 +83,9 @@ const res7 = customersTable
         const res = cols.users.id.equals(pgParam("asdf"));
 
         type t = typeof res;
-        type t2 = t extends ColumnOperation<infer TDbType, infer TQueryColumn, infer TParams, infer TValueType> ? TParams : never;
+        type t2 = t extends ColumnComparisonOperation<infer TDbType, infer TQueryColumn, infer TParams, infer TValueType> ? TParams : never;
 
-        return cols.users.id.equals(pgParam("asdf"))
+        return res;
 
     })
     .select().exec();
@@ -93,19 +94,19 @@ const res2 = customersTable
     .join('INNER', usersTable, (cols) => {
         type t = typeof cols;
 
-        return cols.users.id
+        return cols.users.id.equals(1);
     })
     .join('INNER', ordersTable, (cols) => {
         type t = typeof cols;
 
 
-        return cols.orders.id
+        return cols.orders.id.equals(1);
 
     })
     .join('INNER', shipmentsTable, (cols) => {
         type t = typeof cols;
 
-        return cols.shipments.orderId;
+        return cols.shipments.orderId.equals(1);
     })
     .select(cols => ({ asdf: cols.customers.id, asdsfxc: cols.orders.customerId, customerName: cols.customers.name }))
     .exec();
@@ -122,12 +123,12 @@ const rese = customersTable
     .join('INNER', usersTable, (cols) => {
         type t = typeof cols;
 
-        return cols.users.id;
+        return cols.users.id.equals(1);
     })
     .join('INNER', usersTable.as("parentUsers"), (cols) => {
         type t = typeof cols;
         type t2 = typeof cols.users.id;
-        return cols.parentUsers.id
+        return cols.parentUsers.id.equals(1);
     })
     .select(cols => {
         type t = typeof cols;
