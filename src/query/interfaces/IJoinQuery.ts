@@ -39,8 +39,8 @@ interface IJoinQuery<
         table: TInnerJoinTable,
         cb: (cols: TableToColumnsMap<TTables & TableToObject<TInnerJoinResult>>) => ColumnComparisonOperation<TDbType, any, TJoinParams, any>
     ):
-        IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? never : TParams), ...(TJoinParams extends undefined ? never : TJoinParams)]> &
-        ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? never : TParams), ...(TJoinParams extends undefined ? never : TJoinParams)]>
+        IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? [] : TParams), ...(TJoinParams extends undefined ? [] : TJoinParams)]> &
+        ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? [] : TParams), ...(TJoinParams extends undefined ? [] : TJoinParams)]>
 
     // leftJoin<TLeftJoinTable extends Table<any, any, any, any>>(
     //     table: TLeftJoinTable, cb: (cols: TableToColumnsMap<TTables & TableToObject<TLeftJoinTable>>) => ComparisonOperation

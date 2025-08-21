@@ -74,7 +74,7 @@ const res6 = customersTable.join('INNER', usersTable, (cols) => cols.users.id.eq
 const res7 = customersTable
     .join('INNER', usersTable, (cols) => {
 
-        const res = cols.users.id.equals(1);
+        const res = cols.users.id.equals(pgParam("zart"));
         type t = typeof res;
         type t2 = t extends ColumnComparisonOperation<infer TDbType, infer TQueryColumn, infer TParams, infer TValueType> ? TParams : never;
 

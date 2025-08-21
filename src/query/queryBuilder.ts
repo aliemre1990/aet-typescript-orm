@@ -36,8 +36,8 @@ class QueryBuilder<
     TParams extends QueryParam<TDbType, string, PgValueTypes>[] | undefined = undefined
 >
     implements
-    ISelectQuery<TDbType, any>,
-    IJoinQuery<TDbType, any> {
+    ISelectQuery<TDbType, any, any>,
+    IJoinQuery<TDbType, any, any> {
 
     colsSelection?: TResult;
 
@@ -85,8 +85,8 @@ class QueryBuilder<
         table: TInnerJoinTable,
         cb: (cols: TableToColumnsMap<TTables & TableToObject<TInnerJoinResult>>) => ColumnComparisonOperation<TDbType, any, TJoinParams, any>
     ):
-        IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? never : TParams), ...(TJoinParams extends undefined ? never : TJoinParams)]> &
-        ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? never : TParams), ...(TJoinParams extends undefined ? never : TJoinParams)]> {
+        IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? [] : TParams), ...(TJoinParams extends undefined ? [] : TJoinParams)]> &
+        ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? [] : TParams), ...(TJoinParams extends undefined ? [] : TJoinParams)]> {
         let innerJoinTable: TInnerJoinResult;
         if ("table" in table) {
             innerJoinTable = table as TInnerJoinResult;
@@ -109,8 +109,8 @@ class QueryBuilder<
         const newTables = { ...this.tables, ...innerJoinTableKeyed };
 
         return new QueryBuilder(newTables) as
-            IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? never : TParams), ...(TJoinParams extends undefined ? never : TJoinParams)]> &
-            ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? never : TParams), ...(TJoinParams extends undefined ? never : TJoinParams)]>
+            IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? [] : TParams), ...(TJoinParams extends undefined ? [] : TJoinParams)]> &
+            ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? [] : TParams), ...(TJoinParams extends undefined ? [] : TJoinParams)]>
     }
 
     exec(params?: QueryParamsToObject<TParams>): TResult extends undefined ? TablesToResultMap<TDbType, TTables> : ColumnsToResultMap<TDbType, TResult> {
