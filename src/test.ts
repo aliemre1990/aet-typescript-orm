@@ -89,6 +89,8 @@ const res7 = customersTable
             cols.users.userName.equals(pgParam("hdf")),
             and(cols.customers.createdBy.equals(235), cols.customers.name.equals(pgParam("customerName")))
         );
+
+        // return res1;
         type tp = typeof res1;
         type tp1 = tp extends ColumnLogicalOperation<any, infer TOps> ? TOps : never;
         type tp2 = tp1[1];

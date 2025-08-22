@@ -6,6 +6,8 @@ import type { ColumnType, QueryTablesObjectType, QueryTableSpecsType } from "../
 import type { IsPlural, ToSingular } from "../../utility/string.js";
 import type { DeepPrettify, FlattenObject, UnionToTupleOrdered } from "../../utility/common.js";
 import type { QueryParam } from "../../table/queryColumn.js";
+import type ColumnComparisonOperation from "../comparison.js";
+import type ColumnLogicalOperation from "../logicalOperations.js";
 
 type TResultShape<TDbType extends DbType> = {
     [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined> | TResultShape<TDbType>;
@@ -61,9 +63,15 @@ type QueryParamsToObject<T extends readonly QueryParam<any, any, any>[] | undefi
         K extends QueryParam<any, any, infer ValueType> ? ValueType : never
     } : undefined;
 
+type InferParamsFromOps<T extends ColumnComparisonOperation<DbType, any, any> | ColumnLogicalOperation<DbType, any>> =
+    T extends ColumnComparisonOperation<DbType, any, infer TParams> ? TParams 
+    // :    T extends ColumnLogicalOperation<DbType, infer TOps> ? [...InferParamsFromOps<TOps[0]>,...InferParamsFromOps<Exclude<TOps, 0>> ] 
+    : never;
+
 export type {
     TResultShape,
     TablesToResultMap,
     ColumnsToResultMap,
-    QueryParamsToObject
+    QueryParamsToObject,
+    InferParamsFromOps
 }

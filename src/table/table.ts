@@ -1,13 +1,13 @@
 import { DbType, PgDbType } from "../db.js";
 import type { PgValueTypes } from "../postgresql/dataTypes.js";
 import type ColumnComparisonOperation from "../query/comparison.js";
-import { ComparisonOperation } from "../query/comparisonOperation.js";
 import type { IExecuteableQuery } from "../query/interfaces/IExecuteableQuery.js";
 import { IJoinQuery } from "../query/interfaces/IJoinQuery.js";
 import { ISelectQuery } from "../query/interfaces/ISelectQuery.js";
+import type ColumnLogicalOperation from "../query/logicalOperations.js";
 import { QueryBuilder } from "../query/queryBuilder.js";
 import type { TableToColumnsMap, TableToObject } from "../query/types/miscellaneous.js";
-import type { TResultShape } from "../query/types/result.js";
+import type { InferParamsFromOps, TResultShape } from "../query/types/result.js";
 import type { JoinType } from "../types.js";
 import type Column from "./column.js";
 import QueryColumn, { type QueryParam } from "./queryColumn.js";
@@ -89,7 +89,7 @@ class Table<
             { [K in keyof TInnerCols]: QueryColumn<TDbType, TInnerCols[K], { tableName: TInnerTableName }> }
         > :
         TInnerJoinTable,
-        TJoinParams extends QueryParam<TDbType, string, PgValueTypes>[] | undefined = undefined
+        TCbResult extends ColumnComparisonOperation<TDbType, any, any> | ColumnLogicalOperation<TDbType, any>
 
     >(
         type: JoinType,
@@ -106,7 +106,7 @@ class Table<
                     >
                 > &
                 TableToObject<TInnerJoinResult>
-            >) => ColumnComparisonOperation<TDbType, any, TJoinParams, any>
+            >) => TCbResult
     ) {
         const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
             prev[curr[0]] = new QueryColumn(curr[1]);
@@ -118,7 +118,7 @@ class Table<
             [this.name]: queryTable
         };
 
-        return new QueryBuilder<TDbType, TableToObject<typeof queryTable>, undefined, TJoinParams>(tables as TableToObject<typeof queryTable>).join(type, table as any, cb);
+        return new QueryBuilder<TDbType, TableToObject<typeof queryTable>, undefined, InferParamsFromOps<TCbResult>>(tables as TableToObject<typeof queryTable>).join(type, table as any, cb);
     }
 }
 

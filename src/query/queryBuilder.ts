@@ -11,8 +11,9 @@ import type ColumnComparisonOperation from "./comparison.js";
 import { IExecuteableQuery } from "./interfaces/IExecuteableQuery.js";
 import { IJoinQuery } from "./interfaces/IJoinQuery.js";
 import { ISelectQuery } from "./interfaces/ISelectQuery.js";
+import type ColumnLogicalOperation from "./logicalOperations.js";
 import type { TableToColumnsMap, TableToObject } from "./types/miscellaneous.js";
-import type { ColumnsToResultMap, QueryParamsToObject, TablesToResultMap, TResultShape } from "./types/result.js";
+import type { ColumnsToResultMap, InferParamsFromOps, QueryParamsToObject, TablesToResultMap, TResultShape } from "./types/result.js";
 
 // function getColsSelection<TTablesSelection extends Table[]>(tables: TTablesSelection) {
 //     let colsSelection: TableToColumnsMap<TTablesSelection, ComparableColumn> = Object.entries(tables).reduce((prev, curr) => {
@@ -78,14 +79,14 @@ class QueryBuilder<
             { [K in keyof TInnerCols]: QueryColumn<TDbType, TInnerCols[K], { tableName: TInnerTableName }> }
         > :
         TInnerJoinTable,
-        TJoinParams extends QueryParam<TDbType, string, PgValueTypes>[] | undefined = undefined
+        TCbResult extends ColumnComparisonOperation<TDbType, any, any> | ColumnLogicalOperation<TDbType, any>
     >(
         type: JoinType,
         table: TInnerJoinTable,
-        cb: (cols: TableToColumnsMap<TTables & TableToObject<TInnerJoinResult>>) => ColumnComparisonOperation<TDbType, any, TJoinParams, any>
+        cb: (cols: TableToColumnsMap<TTables & TableToObject<TInnerJoinResult>>) => TCbResult
     ):
-        IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? [] : TParams), ...(TJoinParams extends undefined ? [] : TJoinParams)]> &
-        ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? [] : TParams), ...(TJoinParams extends undefined ? [] : TJoinParams)]> {
+        IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? [] : TParams), ...(InferParamsFromOps<TCbResult> extends undefined ? [] : InferParamsFromOps<TCbResult>)]> &
+        ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? [] : TParams), ...(InferParamsFromOps<TCbResult> extends undefined ? [] : InferParamsFromOps<TCbResult>)]> {
         let innerJoinTable: TInnerJoinResult;
         if ("table" in table) {
             innerJoinTable = table as TInnerJoinResult;
@@ -108,8 +109,8 @@ class QueryBuilder<
         const newTables = { ...this.tables, ...innerJoinTableKeyed };
 
         return new QueryBuilder(newTables) as
-            IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? [] : TParams), ...(TJoinParams extends undefined ? [] : TJoinParams)]> &
-            ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? [] : TParams), ...(TJoinParams extends undefined ? [] : TJoinParams)]>
+            IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? [] : TParams), ...(InferParamsFromOps<TCbResult> extends undefined ? [] : InferParamsFromOps<TCbResult>)]> &
+            ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? [] : TParams), ...(InferParamsFromOps<TCbResult> extends undefined ? [] : InferParamsFromOps<TCbResult>)]>
     }
 
     exec(params?: QueryParamsToObject<TParams>): TResult extends undefined ? TablesToResultMap<TDbType, TTables> : ColumnsToResultMap<TDbType, TResult> {
