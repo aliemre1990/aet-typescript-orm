@@ -63,10 +63,23 @@ type QueryParamsToObject<T extends readonly QueryParam<any, any, any>[] | undefi
         K extends QueryParam<any, any, infer ValueType> ? ValueType : never
     } : undefined;
 
+
+
+type InferParamsFromOpsArray<T extends readonly (ColumnComparisonOperation<DbType, any, any> | ColumnLogicalOperation<DbType, any>)[]> =
+    T extends readonly [infer First, ...infer Rest] ?
+        First extends ColumnComparisonOperation<DbType, any, any> | ColumnLogicalOperation<DbType, any> ?
+            Rest extends readonly (ColumnComparisonOperation<DbType, any, any> | ColumnLogicalOperation<DbType, any>)[] ?
+                [...(InferParamsFromOps<First> extends QueryParam<DbType,any,any>[] ? InferParamsFromOps<First> : []), ...InferParamsFromOpsArray<Rest>] :
+                InferParamsFromOps<First> extends  QueryParam<DbType,any,any>[] ? InferParamsFromOps<First> : [] :
+            [] :
+        [];
+
 type InferParamsFromOps<T extends ColumnComparisonOperation<DbType, any, any> | ColumnLogicalOperation<DbType, any>> =
-    T extends ColumnComparisonOperation<DbType, any, infer TParams> ? TParams 
-    // :    T extends ColumnLogicalOperation<DbType, infer TOps> ? [...InferParamsFromOps<TOps[0]>,...InferParamsFromOps<Exclude<TOps, 0>> ] 
-    : never;
+    T extends ColumnComparisonOperation<DbType, any, infer TParams> ? 
+        TParams extends any[] ? TParams : [] :
+    T extends ColumnLogicalOperation<DbType, infer TOps> ? 
+        InferParamsFromOpsArray<TOps> :
+    never;
 
 export type {
     TResultShape,

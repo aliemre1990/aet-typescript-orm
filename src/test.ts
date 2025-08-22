@@ -75,41 +75,49 @@ const res6 = customersTable.join('INNER', usersTable, (cols) => cols.users.id.eq
 const res7 = customersTable
     .join('INNER', usersTable, (cols) => {
 
-        const res = cols.users.id.equals(pgParam("zart"));
-        type t = typeof res;
-        type t2 = t extends ColumnComparisonOperation<infer TDbType, infer TQueryColumn, infer TParams, infer TValueType> ? TParams : never;
+        const res1 = and(
+            cols.users.id.equals(pgParam("logic1111")),
+            cols.users.userName.equals(pgParam("logic22222")),
+            and(cols.customers.createdBy.equals(235), cols.customers.name.equals(pgParam("logicCustomerName555")))
+        );
 
-        return res;
+        return res1;
+
+        // const res = cols.users.id.equals(pgParam("zart"));
+        // type t = typeof res;
+        // type t2 = t extends ColumnComparisonOperation<infer TDbType, infer TQueryColumn, infer TParams, infer TValueType> ? TParams : never;
+
+        // return res;
 
     })
     .join('INNER', usersTable.as('parentUsers'), (cols) => {
 
         const res1 = and(
-            cols.users.id.equals(pgParam("zcxvds")),
-            cols.users.userName.equals(pgParam("hdf")),
-            and(cols.customers.createdBy.equals(235), cols.customers.name.equals(pgParam("customerName")))
+            cols.users.id.equals(pgParam("logic1")),
+            cols.users.userName.equals(pgParam("logic2")),
+            and(cols.customers.createdBy.equals(235), cols.customers.name.equals(pgParam("logicCustomerName")))
         );
 
-        // return res1;
-        type tp = typeof res1;
-        type tp1 = tp extends ColumnLogicalOperation<any, infer TOps> ? TOps : never;
-        type tp2 = tp1[1];
-        type tp3 = tp2 extends ColumnComparisonOperation<any, any, infer TParams, any> ? TParams : never;
+        return res1;
+        // type tp = typeof res1;
+        // type tp1 = tp extends ColumnLogicalOperation<any, infer TOps> ? TOps : never;
+        // type tp2 = tp1[1];
+        // type tp3 = tp2 extends ColumnComparisonOperation<any, any, infer TParams, any> ? TParams : never;
 
-        type tp4 = tp1[0];
-        type tp5 = tp4 extends ColumnComparisonOperation<any, any, infer TParams, any> ? TParams : never;
+        // type tp4 = tp1[0];
+        // type tp5 = tp4 extends ColumnComparisonOperation<any, any, infer TParams, any> ? TParams : never;
 
-        type tp6 = tp1[2];
-        type tp7 = tp6 extends ColumnLogicalOperation<any, infer TOps> ? TOps : never;
-        type tp8 = tp7[1];
-        type tp9 = tp8 extends ColumnComparisonOperation<any, any, infer TParams, any> ? TParams : never;
+        // type tp6 = tp1[2];
+        // type tp7 = tp6 extends ColumnLogicalOperation<any, infer TOps> ? TOps : never;
+        // type tp8 = tp7[1];
+        // type tp9 = tp8 extends ColumnComparisonOperation<any, any, infer TParams, any> ? TParams : never;
 
-        const res = cols.users.id.equals(pgParam("asdf"));
+        // const res = cols.users.id.equals(pgParam("asdf"));
 
-        type t = typeof res;
-        type t2 = t extends ColumnComparisonOperation<infer TDbType, infer TQueryColumn, infer TParams, infer TValueType> ? TParams : never;
+        // type t = typeof res;
+        // type t2 = t extends ColumnComparisonOperation<infer TDbType, infer TQueryColumn, infer TParams, infer TValueType> ? TParams : never;
 
-        return res;
+        // return res;
 
     })
     .join('INNER', ordersTable, (cols) => cols.users.userName.equals(pgParam("ali")))
