@@ -8,7 +8,6 @@ import type { ColumnsObjectType, QueryColumnsObjectType, QueryTablesObjectType }
 import type { JoinType } from "../types.js";
 import { isNullOrUndefined } from "../utility/guards.js";
 import type ColumnComparisonOperation from "./comparison.js";
-import { ComparisonOperation } from "./comparisonOperation.js";
 import { IExecuteableQuery } from "./interfaces/IExecuteableQuery.js";
 import { IJoinQuery } from "./interfaces/IJoinQuery.js";
 import { ISelectQuery } from "./interfaces/ISelectQuery.js";

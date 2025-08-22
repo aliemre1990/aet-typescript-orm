@@ -1,6 +1,7 @@
 import { pgColumnTypes } from "./postgresql/dataTypes.js";
 import type ColumnComparisonOperation from "./query/comparison.js";
 import type { IJoinQuery } from "./query/interfaces/IJoinQuery.js";
+import ColumnLogicalOperation, { and } from "./query/logicalOperations.js";
 import Column from "./table/column.js";
 import { pgParam } from "./table/queryColumn.js";
 import { ForeignKey, pgTable } from "./table/table.js";
@@ -82,6 +83,24 @@ const res7 = customersTable
 
     })
     .join('INNER', usersTable.as('parentUsers'), (cols) => {
+
+        const res1 = and(
+            cols.users.id.equals(pgParam("zcxvds")),
+            cols.users.userName.equals(pgParam("hdf")),
+            and(cols.customers.createdBy.equals(235), cols.customers.name.equals(pgParam("customerName")))
+        );
+        type tp = typeof res1;
+        type tp1 = tp extends ColumnLogicalOperation<any, infer TOps> ? TOps : never;
+        type tp2 = tp1[1];
+        type tp3 = tp2 extends ColumnComparisonOperation<any, any, infer TParams, any> ? TParams : never;
+
+        type tp4 = tp1[0];
+        type tp5 = tp4 extends ColumnComparisonOperation<any, any, infer TParams, any> ? TParams : never;
+
+        type tp6 = tp1[2];
+        type tp7 = tp6 extends ColumnLogicalOperation<any, infer TOps> ? TOps : never;
+        type tp8 = tp7[1];
+        type tp9 = tp8 extends ColumnComparisonOperation<any, any, infer TParams, any> ? TParams : never;
 
         const res = cols.users.id.equals(pgParam("asdf"));
 

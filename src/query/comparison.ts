@@ -35,7 +35,6 @@ class ColumnComparisonOperation<
         public operation: ComparisonOperation,
         public value?: TParams | TValueType | QueryColumn<TDbType, any, any, any> | [TValueType | QueryColumn<TDbType, any, any, any>]
     ) { }
-
 }
 
 export default ColumnComparisonOperation;

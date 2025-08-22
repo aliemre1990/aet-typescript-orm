@@ -6,9 +6,7 @@ import type QueryTable from "../../table/queryTable.js";
 import type Table from "../../table/table.js";
 import type { ColumnsObjectType, QueryTablesObjectType, QueryTableSpecsType } from "../../table/types/utils.js";
 import type { JoinType } from "../../types.js";
-import { ComparableColumn } from "../comparableColumn.js";
 import type ColumnComparisonOperation from "../comparison.js";
-import { ComparisonOperation } from "../comparisonOperation.js";
 import type { TableToColumnsMap, TableToObject } from "../types/miscellaneous.js";
 import { ISelectQuery } from "./ISelectQuery.js";
 
@@ -41,24 +39,6 @@ interface IJoinQuery<
     ):
         IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? [] : TParams), ...(TJoinParams extends undefined ? [] : TJoinParams)]> &
         ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? [] : TParams), ...(TJoinParams extends undefined ? [] : TJoinParams)]>
-
-    // leftJoin<TLeftJoinTable extends Table<any, any, any, any>>(
-    //     table: TLeftJoinTable, cb: (cols: TableToColumnsMap<TTables & TableToObject<TLeftJoinTable>>) => ComparisonOperation
-    // ):
-    //     IJoinQuery<TDbType, TTables & TableToObject<TLeftJoinTable>> &
-    //     ISelectQuery<TDbType, TTables & TableToObject<TLeftJoinTable>>
-
-    // rightJoin<TRightJoinTable extends Table<any, any, any, any>>(
-    //     table: TRightJoinTable, cb: (cols: TableToColumnsMap<TTables & TableToObject<TRightJoinTable>>) => ComparisonOperation
-    // ):
-    //     IJoinQuery<TDbType, TTables & TableToObject<TRightJoinTable>> &
-    //     ISelectQuery<TDbType, TTables & TableToObject<TRightJoinTable>>
-
-    // fullJoin<TFullJoinTable extends Table<any, any, any, any>>(
-    //     table: TFullJoinTable, cb: (cols: TableToColumnsMap<TTables & TableToObject<TFullJoinTable>>) => ComparisonOperation
-    // ):
-    //     IJoinQuery<TDbType, TTables & TableToObject<TFullJoinTable>> &
-    //     ISelectQuery<TDbType, TTables & TableToObject<TFullJoinTable>>
 }
 
 export type {
