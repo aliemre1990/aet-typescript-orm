@@ -1,13 +1,13 @@
 import type { DbType } from "../../db.js";
 import type { PgTypeToJsType } from "../../postgresql/dataTypes.js";
-import type QueryColumn from "../../table/queryColumn.js";
-import type QueryTable from "../../table/queryTable.js";
+import type QueryColumn from "../queryColumn.js";
 import type { ColumnType, QueryTablesObjectType, QueryTableSpecsType } from "../../table/types/utils.js";
 import type { IsPlural, ToSingular } from "../../utility/string.js";
 import type { DeepPrettify, FlattenObject, UnionToTupleOrdered } from "../../utility/common.js";
-import type { QueryParam } from "../../table/queryColumn.js";
+import type { QueryParam } from "../queryColumn.js";
 import type ColumnComparisonOperation from "../comparison.js";
 import type ColumnLogicalOperation from "../logicalOperations.js";
+import type QueryTable from "../queryTable.js";
 
 type TResultShape<TDbType extends DbType> = {
     [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined> | TResultShape<TDbType>;
@@ -67,18 +67,18 @@ type QueryParamsToObject<T extends readonly QueryParam<any, any, any>[] | undefi
 
 type InferParamsFromOpsArray<T extends readonly (ColumnComparisonOperation<DbType, any, any> | ColumnLogicalOperation<DbType, any>)[]> =
     T extends readonly [infer First, ...infer Rest] ?
-        First extends ColumnComparisonOperation<DbType, any, any> | ColumnLogicalOperation<DbType, any> ?
-            Rest extends readonly (ColumnComparisonOperation<DbType, any, any> | ColumnLogicalOperation<DbType, any>)[] ?
-                [...(InferParamsFromOps<First> extends QueryParam<DbType,any,any>[] ? InferParamsFromOps<First> : []), ...InferParamsFromOpsArray<Rest>] :
-                InferParamsFromOps<First> extends  QueryParam<DbType,any,any>[] ? InferParamsFromOps<First> : [] :
-            [] :
-        [];
+    First extends ColumnComparisonOperation<DbType, any, any> | ColumnLogicalOperation<DbType, any> ?
+    Rest extends readonly (ColumnComparisonOperation<DbType, any, any> | ColumnLogicalOperation<DbType, any>)[] ?
+    [...(InferParamsFromOps<First> extends QueryParam<DbType, any, any>[] ? InferParamsFromOps<First> : []), ...InferParamsFromOpsArray<Rest>] :
+    InferParamsFromOps<First> extends QueryParam<DbType, any, any>[] ? InferParamsFromOps<First> : [] :
+    [] :
+    [];
 
 type InferParamsFromOps<T extends ColumnComparisonOperation<DbType, any, any> | ColumnLogicalOperation<DbType, any>> =
-    T extends ColumnComparisonOperation<DbType, any, infer TParams> ? 
-        TParams extends any[] ? TParams : [] :
-    T extends ColumnLogicalOperation<DbType, infer TOps> ? 
-        InferParamsFromOpsArray<TOps> :
+    T extends ColumnComparisonOperation<DbType, any, infer TParams> ?
+    TParams extends any[] ? TParams : [] :
+    T extends ColumnLogicalOperation<DbType, infer TOps> ?
+    InferParamsFromOpsArray<TOps> :
     never;
 
 export type {

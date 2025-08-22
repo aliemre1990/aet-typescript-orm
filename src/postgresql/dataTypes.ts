@@ -157,12 +157,40 @@ type PgTypeToJsType<T extends PgColumnType> =
     T extends 'LANGUAGE_HANDLER' | 'INTERNAL' | 'OPAQUE' | 'FDW_HANDLER' | 'INDEX_AM_HANDLER' | 'TSM_HANDLER' | 'TABLE_AM_HANDLER' ? any :
     unknown;
 
+type JsTypeToPgTypes<T> =
+    T extends number ?
+    'SMALLINT' | 'INTEGER' | 'SERIAL' | 'SMALLSERIAL' | 'DECIMAL' | 'NUMERIC' | 'REAL' | 'DOUBLE PRECISION' | 'MONEY' | 'OID' | 'REGPROC' | 'REGPROCEDURE' | 'REGOPER' | 'REGOPERATOR' | 'REGCLASS' | 'REGTYPE' | 'REGROLE' | 'REGNAMESPACE' | 'REGCONFIG' | 'REGDICTIONARY' :
+    T extends bigint ?
+    'BIGINT' | 'BIGSERIAL' :
+    T extends string ?
+    'VARCHAR' | 'CHAR' | 'TEXT' | 'INTERVAL' | 'ENUM' | 'CIDR' | 'INET' | 'MACADDR' | 'MACADDR8' | 'BIT' | 'BIT VARYING' | 'TSVECTOR' | 'TSQUERY' | 'UUID' | 'XML' | 'CSTRING' :
+    T extends boolean ?
+    'BOOLEAN' :
+    T extends Date ?
+    'TIMESTAMP' | 'TIMESTAMP WITH TIME ZONE' | 'TIMESTAMP WITHOUT TIME ZONE' | 'DATE' | 'TIME' | 'TIME WITH TIME ZONE' | 'TIME WITHOUT TIME ZONE' :
+    T extends Buffer ?
+    'BYTEA' :
+    T extends object ?
+    'POINT' | 'LINE' | 'LSEG' | 'BOX' | 'PATH' | 'POLYGON' | 'CIRCLE' | 'COMPOSITE' | 'INT4RANGE' | 'INT8RANGE' | 'NUMRANGE' | 'TSRANGE' | 'TSTZRANGE' | 'DATERANGE' | 'RECORD' :
+    T extends any[] ?
+    'ARRAY' :
+    T extends Function ?
+    'TRIGGER' | 'EVENT_TRIGGER' :
+    T extends void ?
+    'VOID' :
+    T extends null ?
+    PgColumnType : // null can be any type
+    T extends any ?
+    'JSON' | 'JSONB' | 'DOMAIN' | 'ANY' | 'ANYARRAY' | 'ANYNONARRAY' | 'ANYENUM' | 'ANYRANGE' | 'ANYCOMPATIBLE' | 'ANYCOMPATIBLEARRAY' | 'ANYCOMPATIBLENONARRAY' | 'ANYCOMPATIBLERANGE' | 'ANYELEMENT' | 'LANGUAGE_HANDLER' | 'INTERNAL' | 'OPAQUE' | 'FDW_HANDLER' | 'INDEX_AM_HANDLER' | 'TSM_HANDLER' | 'TABLE_AM_HANDLER' :
+    never;
+
 type PgValueTypes = string | number | bigint | boolean | Date | Buffer | object | null;
 
 export type {
     PgColumnType,
     PgTypeToJsType,
-    PgValueTypes
+    PgValueTypes,
+    JsTypeToPgTypes
 }
 
 

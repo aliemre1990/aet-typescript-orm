@@ -1,19 +1,19 @@
-import { DbType } from "../db.js";
+import { DbType, type PgDbType } from "../db.js";
 import type { PgValueTypes } from "../postgresql/dataTypes.js";
-import QueryColumn, { type QueryParam } from "../table/queryColumn.js";
-import QueryTable from "../table/queryTable.js";
+import QueryColumn, { type QueryParam } from "./queryColumn.js";
 import type Table from "../table/table.js";
 import type { QueryTableSpecsType } from "../table/types/tableSpecs.js";
 import type { ColumnsObjectType, QueryColumnsObjectType, QueryTablesObjectType } from "../table/types/utils.js";
 import type { JoinType } from "../types.js";
 import { isNullOrUndefined } from "../utility/guards.js";
 import type ColumnComparisonOperation from "./comparison.js";
-import { IExecuteableQuery } from "./interfaces/IExecuteableQuery.js";
-import { IJoinQuery } from "./interfaces/IJoinQuery.js";
-import { ISelectQuery } from "./interfaces/ISelectQuery.js";
+import { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
+import { IJoinQuery } from "./_interfaces/IJoinQuery.js";
+import { ISelectQuery } from "./_interfaces/ISelectQuery.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
-import type { TableToColumnsMap, TableToObject } from "./types/miscellaneous.js";
-import type { ColumnsToResultMap, InferParamsFromOps, QueryParamsToObject, TablesToResultMap, TResultShape } from "./types/result.js";
+import type { TableToColumnsMap, TableToObject } from "./_types/miscellaneous.js";
+import type { ColumnsToResultMap, InferParamsFromOps, QueryParamsToObject, TablesToResultMap, TResultShape } from "./_types/result.js";
+import QueryTable from "./queryTable.js";
 
 // function getColsSelection<TTablesSelection extends Table[]>(tables: TTablesSelection) {
 //     let colsSelection: TableToColumnsMap<TTablesSelection, ComparableColumn> = Object.entries(tables).reduce((prev, curr) => {
@@ -33,7 +33,7 @@ class QueryBuilder<
     TDbType extends DbType,
     TTables extends QueryTablesObjectType<TDbType>, // turn this type to keyed querytable object
     TResult extends TResultShape<TDbType> | undefined = undefined,
-    TParams extends QueryParam<TDbType, string, PgValueTypes>[] | undefined = undefined
+    TParams extends QueryParam<TDbType, string, TDbType extends PgDbType ? PgValueTypes : never>[] | undefined = undefined
 >
     implements
     ISelectQuery<TDbType, any, any>,

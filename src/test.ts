@@ -1,11 +1,10 @@
 import { pgColumnTypes } from "./postgresql/dataTypes.js";
 import type ColumnComparisonOperation from "./query/comparison.js";
-import type { IJoinQuery } from "./query/interfaces/IJoinQuery.js";
+import type { IJoinQuery } from "./query/_interfaces/IJoinQuery.js";
 import ColumnLogicalOperation, { and } from "./query/logicalOperations.js";
+import { param } from "./query/param.js";
 import Column from "./table/column.js";
-import { pgParam } from "./table/queryColumn.js";
 import { ForeignKey, pgTable } from "./table/table.js";
-
 
 const usersTable = pgTable(
     'users',
@@ -71,19 +70,19 @@ const res = customersTable.select(cols => {
 const res5 = customersTable.select().exec();
 
 
-const res6 = customersTable.join('INNER', usersTable, (cols) => cols.users.id.equals(pgParam("ali"))).select().exec();
+const res6 = customersTable.join('INNER', usersTable, (cols) => cols.users.id.eq(param("ali"))).select().exec();
 const res7 = customersTable
     .join('INNER', usersTable, (cols) => {
 
         const res1 = and(
-            cols.users.id.equals(pgParam("logic1111")),
-            cols.users.userName.equals(pgParam("logic22222")),
-            and(cols.customers.createdBy.equals(235), cols.customers.name.equals(pgParam("logicCustomerName555")))
+            cols.users.id.eq(param("logic1111")),
+            cols.users.userName.eq(param("logic22222")),
+            and(cols.customers.createdBy.eq(235), cols.customers.name.eq(param("logicCustomerName555")), and(cols.users.id.eq(param("userId"))))
         );
 
         return res1;
 
-        // const res = cols.users.id.equals(pgParam("zart"));
+        // const res = cols.users.id.equals(param("zart"));
         // type t = typeof res;
         // type t2 = t extends ColumnComparisonOperation<infer TDbType, infer TQueryColumn, infer TParams, infer TValueType> ? TParams : never;
 
@@ -93,9 +92,10 @@ const res7 = customersTable
     .join('INNER', usersTable.as('parentUsers'), (cols) => {
 
         const res1 = and(
-            cols.users.id.equals(pgParam("logic1")),
-            cols.users.userName.equals(pgParam("logic2")),
-            and(cols.customers.createdBy.equals(235), cols.customers.name.equals(pgParam("logicCustomerName")))
+            cols.users.id.eq(cols.customers.id),
+            cols.users.id.eq(param("logic1")),
+            cols.users.userName.eq(param("logic2")),
+            and(cols.customers.createdBy.eq(235), cols.customers.name.eq(param("logicCustomerName")))
         );
 
         return res1;
@@ -120,26 +120,26 @@ const res7 = customersTable
         // return res;
 
     })
-    .join('INNER', ordersTable, (cols) => cols.users.userName.equals(pgParam("ali")))
+    .join('INNER', ordersTable, (cols) => cols.users.userName.eq(param("ali")))
     .select().exec();
 
 const res2 = customersTable
     .join('INNER', usersTable, (cols) => {
         type t = typeof cols;
 
-        return cols.users.id.equals(1);
+        return cols.users.id.eq(1);
     })
     .join('INNER', ordersTable, (cols) => {
         type t = typeof cols;
 
 
-        return cols.orders.id.equals(1);
+        return cols.orders.id.eq(1);
 
     })
     .join('INNER', shipmentsTable, (cols) => {
         type t = typeof cols;
 
-        return cols.shipments.orderId.equals(1);
+        return cols.shipments.orderId.eq(1);
     })
     .select(cols => ({ asdf: cols.customers.id, asdsfxc: cols.orders.customerId, customerName: cols.customers.name }))
     .exec();
@@ -156,12 +156,12 @@ const rese = customersTable
     .join('INNER', usersTable, (cols) => {
         type t = typeof cols;
 
-        return cols.users.id.equals(1);
+        return cols.users.id.eq(1);
     })
     .join('INNER', usersTable.as("parentUsers"), (cols) => {
         type t = typeof cols;
         type t2 = typeof cols.users.id;
-        return cols.parentUsers.id.equals(1);
+        return cols.parentUsers.id.eq(1);
     })
     .select(cols => {
         type t = typeof cols;

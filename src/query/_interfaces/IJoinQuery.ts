@@ -1,21 +1,21 @@
 import { DbType, PgDbType } from "../../db.js";
 import { PgColumnType, type PgValueTypes } from "../../postgresql/dataTypes.js";
-import type { QueryParam } from "../../table/queryColumn.js";
-import type QueryColumn from "../../table/queryColumn.js";
-import type QueryTable from "../../table/queryTable.js";
+import type { QueryParam } from "../queryColumn.js";
+import type QueryColumn from "../queryColumn.js";
 import type Table from "../../table/table.js";
 import type { ColumnsObjectType, QueryTablesObjectType, QueryTableSpecsType } from "../../table/types/utils.js";
 import type { JoinType } from "../../types.js";
 import type ColumnComparisonOperation from "../comparison.js";
 import type ColumnLogicalOperation from "../logicalOperations.js";
-import type { TableToColumnsMap, TableToObject } from "../types/miscellaneous.js";
-import type { InferParamsFromOps } from "../types/result.js";
+import type { TableToColumnsMap, TableToObject } from "../_types/miscellaneous.js";
+import type { InferParamsFromOps } from "../_types/result.js";
 import { ISelectQuery } from "./ISelectQuery.js";
+import type QueryTable from "../queryTable.js";
 
 interface IJoinQuery<
     TDbType extends DbType,
     TTables extends QueryTablesObjectType<TDbType>,
-    TParams extends QueryParam<TDbType, string, PgValueTypes>[] | undefined = undefined
+    TParams extends QueryParam<TDbType, string, TDbType extends PgDbType ? PgValueTypes : never>[] | undefined = undefined
 > {
 
     join<

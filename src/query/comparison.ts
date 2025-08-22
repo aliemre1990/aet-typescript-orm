@@ -1,11 +1,13 @@
-import type { DbType } from "../db.js";
-import type { PgTypeToJsType } from "../postgresql/dataTypes.js";
-import type { QueryParam } from "../table/queryColumn.js";
-import type QueryColumn from "../table/queryColumn.js";
+import type { DbType, PgDbType } from "../db.js";
+import type { JsTypeToPgTypes, PgTypeToJsType } from "../postgresql/dataTypes.js";
+import type Column from "../table/column.js";
+import type { GetColumnTypeFromDbType } from "./_types/miscellaneous.js";
+import type { QueryParam } from "./queryColumn.js";
+import type QueryColumn from "./queryColumn.js";
 
 const comparisonOperations = {
     eq: { name: 'EQ' },
-    ne: { name: 'NE' },
+    neq: { name: 'NEQ' },
     gt: { name: 'GT' },
     gte: { name: 'GTE' },
     lt: { name: 'LT' },
@@ -27,8 +29,8 @@ class ColumnComparisonOperation<
     TDbType extends DbType,
     TQueryColumn extends QueryColumn<TDbType, any, any, any>,
     TParams extends QueryParam<TDbType, any, any>[] | undefined,
-    TValueType = PgTypeToJsType<TQueryColumn["column"]["type"]>,
-
+    TValueType = GetColumnTypeFromDbType<TDbType, TQueryColumn extends QueryColumn<TDbType, infer TCol, any, any> ? TCol : never>,
+    TAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any> | undefined = undefined
 > {
     constructor(
         public column: TQueryColumn,

@@ -1,7 +1,7 @@
 import type { DbType } from "../db.js";
-import QueryColumn from "./queryColumn.js";
-import Table from "./table.js";
-import type { ColumnsObjectType, QueryColumnsObjectType, QueryTableSpecsType } from "./types/utils.js";
+import QueryColumn from "../query/queryColumn.js";
+import type Table from "../table/table.js";
+import type { ColumnsObjectType, QueryColumnsObjectType, QueryTableSpecsType } from "../table/types/utils.js";
 
 class QueryTable<
     TDbType extends DbType,

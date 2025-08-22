@@ -1,19 +1,19 @@
 import { DbType, PgDbType } from "../db.js";
 import type { PgValueTypes } from "../postgresql/dataTypes.js";
 import type ColumnComparisonOperation from "../query/comparison.js";
-import type { IExecuteableQuery } from "../query/interfaces/IExecuteableQuery.js";
-import { IJoinQuery } from "../query/interfaces/IJoinQuery.js";
-import { ISelectQuery } from "../query/interfaces/ISelectQuery.js";
+import type { IExecuteableQuery } from "../query/_interfaces/IExecuteableQuery.js";
+import { IJoinQuery } from "../query/_interfaces/IJoinQuery.js";
+import { ISelectQuery } from "../query/_interfaces/ISelectQuery.js";
 import type ColumnLogicalOperation from "../query/logicalOperations.js";
 import { QueryBuilder } from "../query/queryBuilder.js";
-import type { TableToColumnsMap, TableToObject } from "../query/types/miscellaneous.js";
-import type { InferParamsFromOps, TResultShape } from "../query/types/result.js";
+import type { TableToColumnsMap, TableToObject } from "../query/_types/miscellaneous.js";
+import type { InferParamsFromOps, TResultShape } from "../query/_types/result.js";
 import type { JoinType } from "../types.js";
 import type Column from "./column.js";
-import QueryColumn, { type QueryParam } from "./queryColumn.js";
-import QueryTable from "./queryTable.js";
+import QueryColumn, { type QueryParam } from "../query/queryColumn.js";
 import type { QueryTableSpecsType, TableSpecsType } from "./types/tableSpecs.js";
 import type { ColumnsObjectType, GetColumnType, QueryColumnsObjectType } from "./types/utils.js";
+import QueryTable from "../query/queryTable.js";
 
 class ForeignKey {
     constructor(public column: string, public references: { table: string; column: string | 'self-parent' | 'self-child' }) { }
