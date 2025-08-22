@@ -93,7 +93,7 @@ const res7 = customersTable
 
         const res1 = and(
             cols.users.id.eq(cols.customers.id),
-            cols.users.id.eq(param("logic1")),
+            cols.users.id.neq(param("logic1")),
             cols.users.userName.eq(param("logic2")),
             and(cols.customers.createdBy.eq(235), cols.customers.name.eq(param("logicCustomerName")))
         );

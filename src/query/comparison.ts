@@ -35,7 +35,7 @@ class ColumnComparisonOperation<
     constructor(
         public column: TQueryColumn,
         public operation: ComparisonOperation,
-        public value?: TParams | TValueType | QueryColumn<TDbType, any, any, any> | [TValueType | QueryColumn<TDbType, any, any, any>]
+        public value?: TParams | TValueType | TAppliedQColumn | [TValueType | QueryColumn<TDbType, any, any, any>]
     ) { }
 }
 
