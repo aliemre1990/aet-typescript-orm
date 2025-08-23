@@ -80,7 +80,7 @@ type InferParamsFromOpsArray<T extends readonly any[]> =
 type AccumulateParams<TParams extends QueryParam<any, any, any>[] | undefined, TCbResult extends ColumnComparisonOperation<any, any, any> | ColumnLogicalOperation<any, any>> =
     TParams extends undefined ?
     InferParamsFromOps<TCbResult>["length"] extends 0 ? undefined : InferParamsFromOps<TCbResult> :
-    TParams extends QueryParam<any, any, any>[] ? [...TParams, ...(InferParamsFromOps<TCbResult>["length"] extends 0 ? [] : InferParamsFromOps<TCbResult>)] :
+    TParams extends QueryParam<any, any, any>[] ? [...TParams, ...InferParamsFromOps<TCbResult>] :
     never;
 
 export type {
