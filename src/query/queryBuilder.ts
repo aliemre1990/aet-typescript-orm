@@ -12,7 +12,7 @@ import { IJoinQuery } from "./_interfaces/IJoinQuery.js";
 import { ISelectQuery } from "./_interfaces/ISelectQuery.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
 import type { TableToColumnsMap, TableToObject } from "./_types/miscellaneous.js";
-import type { ColumnsToResultMap, InferParamsFromOps, QueryParamsToObject, TablesToResultMap, TResultShape } from "./_types/result.js";
+import type { AccumulateParams, ColumnsToResultMap, InferParamsFromOps, QueryParamsToObject, TablesToResultMap, TResultShape } from "./_types/result.js";
 import QueryTable from "./queryTable.js";
 
 // function getColsSelection<TTablesSelection extends Table[]>(tables: TTablesSelection) {
@@ -85,8 +85,8 @@ class QueryBuilder<
         table: TInnerJoinTable,
         cb: (cols: TableToColumnsMap<TTables & TableToObject<TInnerJoinResult>>) => TCbResult
     ):
-        IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? [] : TParams), ...(InferParamsFromOps<TCbResult> extends undefined ? [] : InferParamsFromOps<TCbResult>)]> &
-        ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? [] : TParams), ...(InferParamsFromOps<TCbResult> extends undefined ? [] : InferParamsFromOps<TCbResult>)]> {
+        IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, AccumulateParams<TParams, TCbResult>> &
+        ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>,AccumulateParams<TParams, TCbResult>> {
         let innerJoinTable: TInnerJoinResult;
         if ("table" in table) {
             innerJoinTable = table as TInnerJoinResult;
@@ -109,8 +109,8 @@ class QueryBuilder<
         const newTables = { ...this.tables, ...innerJoinTableKeyed };
 
         return new QueryBuilder(newTables) as
-            IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? [] : TParams), ...(InferParamsFromOps<TCbResult> extends undefined ? [] : InferParamsFromOps<TCbResult>)]> &
-            ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? [] : TParams), ...(InferParamsFromOps<TCbResult> extends undefined ? [] : InferParamsFromOps<TCbResult>)]>
+            IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, AccumulateParams<TParams, TCbResult>> &
+            ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, AccumulateParams<TParams, TCbResult>>
     }
 
     exec(params?: QueryParamsToObject<TParams>): TResult extends undefined ? TablesToResultMap<TDbType, TTables> : ColumnsToResultMap<TDbType, TResult> {

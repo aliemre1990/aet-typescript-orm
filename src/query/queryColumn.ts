@@ -1,12 +1,12 @@
-import type { DbType, PgDbType } from "../db.js";
-import type { PgColumnType, PgTypeToJsType, PgValueTypes } from "../postgresql/dataTypes.js";
-import ColumnComparisonOperation, { comparisonOperations } from "./comparison.js";
+import type { DbType } from "../db.js";
 import QueryParam from "./param.js";
 import { QueryParamMedian } from "./param.js";
 import type { ColumnType, QueryTableSpecsType } from "../table/types/utils.js";
-import Equals from "./comparisons/Equals.js";
-import NotEquals from "./comparisons/NotEquals.js";
-import GreaterThan from "./comparisons/GreaterThan.js";
+import gte from "./comparisons/gte.js";
+import gt from "./comparisons/gt.js";
+import neq from "./comparisons/neq.js";
+import eq from "./comparisons/eq.js";
+
 
 class QueryColumn<
     TDbType extends DbType,
@@ -16,23 +16,13 @@ class QueryColumn<
 > {
 
     qTableSpecs?: TQTableSpecs;
-    private _equalsOperator: Equals<TDbType, TColumn, TQTableSpecs, TAsName>;
-    private _notEqualsOperator: NotEquals<TDbType, TColumn, TQTableSpecs, TAsName>;
-    private _greaterThanOperator: GreaterThan<TDbType, TColumn, TQTableSpecs, TAsName>;
 
-    neq: typeof this._notEqualsOperator.neq;
-    eq: typeof this._equalsOperator.eq;
-    gt: typeof this._greaterThanOperator.gt;
+    eq: typeof eq = eq;
+    neq: typeof neq = neq;
+    gt: typeof gt = gt;
+    gte: typeof gte = gte;
 
-    constructor(public column: TColumn, public asName?: TAsName) {
-        this._equalsOperator = new Equals<TDbType, TColumn, TQTableSpecs, TAsName>(this);
-        this._notEqualsOperator = new NotEquals<TDbType, TColumn, TQTableSpecs, TAsName>(this);
-        this._greaterThanOperator = new GreaterThan<TDbType, TColumn, TQTableSpecs, TAsName>(this);
-
-        this.neq = this._notEqualsOperator.neq;
-        this.eq = this._equalsOperator.eq;
-        this.gt = this._greaterThanOperator.gt;
-    }
+    constructor(public column: TColumn, public asName?: TAsName) { }
 
     as<TAsName extends string>(val: TAsName) {
         return new QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>(this.column, val);
@@ -42,6 +32,8 @@ class QueryColumn<
         this.qTableSpecs = val;
     }
 }
+QueryColumn.prototype.gte = gte;
+
 
 export default QueryColumn;
 

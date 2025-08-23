@@ -118,7 +118,7 @@ class Table<
             [this.name]: queryTable
         };
 
-        return new QueryBuilder<TDbType, TableToObject<typeof queryTable>, undefined, InferParamsFromOps<TCbResult>>(tables as TableToObject<typeof queryTable>)
+        return new QueryBuilder<TDbType, TableToObject<typeof queryTable>, undefined, undefined>(tables as TableToObject<typeof queryTable>)
             .join(type, table as any, cb);
     }
 }

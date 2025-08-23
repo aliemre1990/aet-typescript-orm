@@ -29,8 +29,8 @@ class ColumnComparisonOperation<
     TDbType extends DbType,
     TQueryColumn extends QueryColumn<TDbType, any, any, any>,
     TParams extends QueryParam<TDbType, any, any>[] | undefined,
-    TValueType = GetColumnTypeFromDbType<TDbType, TQueryColumn extends QueryColumn<TDbType, infer TCol, any, any> ? TCol : never>,
-    TAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any> | undefined = undefined
+    TAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any> | undefined = undefined,
+    TValueType = GetColumnTypeFromDbType<TDbType, TQueryColumn extends QueryColumn<TDbType, infer TCol, any, any> ? TCol : never>
 > {
     constructor(
         public column: TQueryColumn,

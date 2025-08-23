@@ -65,20 +65,22 @@ type QueryParamsToObject<T extends readonly QueryParam<any, any, any>[] | undefi
 
 
 
-type InferParamsFromOpsArray<T extends readonly (ColumnComparisonOperation<DbType, any, any> | ColumnLogicalOperation<DbType, any>)[]> =
-    T extends readonly [infer First, ...infer Rest] ?
-    First extends ColumnComparisonOperation<DbType, any, any> | ColumnLogicalOperation<DbType, any> ?
-    Rest extends readonly (ColumnComparisonOperation<DbType, any, any> | ColumnLogicalOperation<DbType, any>)[] ?
-    [...(InferParamsFromOps<First> extends QueryParam<DbType, any, any>[] ? InferParamsFromOps<First> : []), ...InferParamsFromOpsArray<Rest>] :
-    InferParamsFromOps<First> extends QueryParam<DbType, any, any>[] ? InferParamsFromOps<First> : [] :
-    [] :
+type InferParamsFromOps<T> =
+    T extends ColumnComparisonOperation<any, any, infer TParams> ?
+    TParams extends readonly QueryParam<any, any, any>[] ? TParams : [] :
+    T extends ColumnLogicalOperation<any, infer TOps> ?
+    InferParamsFromOpsArray<TOps> :
     [];
 
-type InferParamsFromOps<T extends ColumnComparisonOperation<DbType, any, any> | ColumnLogicalOperation<DbType, any>> =
-    T extends ColumnComparisonOperation<DbType, any, infer TParams> ?
-    TParams extends any[] ? TParams : [] :
-    T extends ColumnLogicalOperation<DbType, infer TOps> ?
-    InferParamsFromOpsArray<TOps> :
+type InferParamsFromOpsArray<T extends readonly any[]> =
+    T extends readonly [infer First, ...infer Rest] ?
+    [...InferParamsFromOps<First>, ...InferParamsFromOpsArray<Rest>] :
+    [];
+
+type AccumulateParams<TParams extends QueryParam<any, any, any>[] | undefined, TCbResult extends ColumnComparisonOperation<any, any, any> | ColumnLogicalOperation<any, any>> =
+    TParams extends undefined ?
+    InferParamsFromOps<TCbResult>["length"] extends 0 ? undefined : InferParamsFromOps<TCbResult> :
+    TParams extends QueryParam<any, any, any>[] ? [...TParams, ...(InferParamsFromOps<TCbResult>["length"] extends 0 ? [] : InferParamsFromOps<TCbResult>)] :
     never;
 
 export type {
@@ -86,5 +88,6 @@ export type {
     TablesToResultMap,
     ColumnsToResultMap,
     QueryParamsToObject,
-    InferParamsFromOps
+    InferParamsFromOps,
+    AccumulateParams
 }

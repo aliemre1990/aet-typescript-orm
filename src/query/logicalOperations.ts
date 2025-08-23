@@ -18,14 +18,14 @@ class ColumnLogicalOperation<
 
 
 function and<
-    TComparisons extends (ColumnComparisonOperation<any, any, any, any> | ColumnLogicalOperation<any, any>)[],
+    TComparisons extends (ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>)[],
     TDbType extends DbType = TComparisons extends (ColumnComparisonOperation<infer TDbType1, any, any, any> | ColumnLogicalOperation<infer TDbType2, any>)[] ? TDbType1 & TDbType2 : never
 >(...ops: TComparisons) {
     return new ColumnLogicalOperation<TDbType, TComparisons>(logicalOperations.and.name, ops);
 }
 
 function or<
-    TComparisons extends (ColumnComparisonOperation<any, any, any, any> | ColumnLogicalOperation<any, any>)[],
+    TComparisons extends (ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>)[],
     TDbType extends DbType = TComparisons extends (ColumnComparisonOperation<infer TDbType1, any, any, any> | ColumnLogicalOperation<infer TDbType2, any>)[] ? TDbType1 & TDbType2 : never
 >(...ops: TComparisons) {
     return new ColumnLogicalOperation<TDbType, TComparisons>(logicalOperations.or.name, ops);

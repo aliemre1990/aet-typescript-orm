@@ -8,7 +8,7 @@ import type { JoinType } from "../../types.js";
 import type ColumnComparisonOperation from "../comparison.js";
 import type ColumnLogicalOperation from "../logicalOperations.js";
 import type { TableToColumnsMap, TableToObject } from "../_types/miscellaneous.js";
-import type { InferParamsFromOps } from "../_types/result.js";
+import type { AccumulateParams, InferParamsFromOps } from "../_types/result.js";
 import { ISelectQuery } from "./ISelectQuery.js";
 import type QueryTable from "../queryTable.js";
 
@@ -39,8 +39,8 @@ interface IJoinQuery<
         table: TInnerJoinTable,
         cb: (cols: TableToColumnsMap<TTables & TableToObject<TInnerJoinResult>>) => TCbResult
     ):
-        IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? [] : TParams), ...(InferParamsFromOps<TCbResult> extends undefined ? [] : InferParamsFromOps<TCbResult>)]> &
-        ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, [...(TParams extends undefined ? [] : TParams), ...(InferParamsFromOps<TCbResult> extends undefined ? [] : InferParamsFromOps<TCbResult>)]>
+        IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, AccumulateParams<TParams, TCbResult>> &
+        ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, AccumulateParams<TParams, TCbResult>>
 
 }
 
