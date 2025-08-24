@@ -13,11 +13,7 @@ function gt<
     TColumn extends ColumnType<TDbType>,
     TQTableSpecs extends QueryTableSpecsType,
     TAsName extends string | undefined,
-    TParamName extends string,
-    TParamMedian extends undefined,
-    TParam extends undefined,
     TValueType extends TDbType extends PgDbType ? PgTypeToJsType<TColumn["type"]> : never,
-    TAppliedQColumn extends undefined,
 >(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, value: TValueType): ColumnComparisonOperation<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
@@ -29,9 +25,6 @@ function gt<
     TColumn extends ColumnType<TDbType>,
     TQTableSpecs extends QueryTableSpecsType,
     TAsName extends string | undefined,
-    TParamName extends string,
-    TParamMedian extends undefined,
-    TParam extends undefined,
     TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
     TAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any>,
 >(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, value: TAppliedQColumn): ColumnComparisonOperation<
@@ -48,14 +41,13 @@ function gt<
     TParamMedian extends QueryParamMedian<any>,
     TParamName extends TParamMedian extends QueryParamMedian<infer U> ? U : never,
     TParam extends QueryParam<TDbType, TParamName, TValueType>,
-    TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
-    TAppliedQColumn extends undefined
+    TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>
 >(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, value: TParamMedian
 ): ColumnComparisonOperation<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     [TParam],
-    TAppliedQColumn
+    undefined
 >
 function gt<
     TDbType extends DbType,

@@ -41,6 +41,7 @@ const res7 = customersTable
 
         const res1 = and(
             cols.users.id.eq(cols.customers.id),
+            cols.users.id.eq(10),
             cols.users.id.gt(param("parent1")),
             cols.users.userName.gt(param("parent2")),
             and(cols.customers.createdBy.gt(235), cols.customers.name.gt(param("parent3")))
@@ -61,14 +62,16 @@ const res7 = customersTable
         // type t2 = t extends ColumnComparisonOperation<infer TDbType, infer TQueryColumn, infer TParams, infer TValueType> ? TParams : never;
     })
     .join('INNER', ordersTable, (cols) => cols.users.userName.eq(param("ali")))
-    // .select().exec();
+    .select().exec();
 
 type tp1 = typeof res7;
 type tp2 = tp1 extends IJoinQuery<infer TDbType, infer TSelectedColumns, infer TParams> ? TParams : never;
 type tp3 = tp2[5];
 
-
-const res2 = customersTable
+/**
+ * 
+ */
+const SingleLevelSelectWithJoins = customersTable
     .join('INNER', usersTable, (cols) => {
         type t = typeof cols;
 
@@ -76,7 +79,6 @@ const res2 = customersTable
     })
     .join('INNER', ordersTable, (cols) => {
         type t = typeof cols;
-
 
         return cols.orders.id.eq(1);
 
@@ -86,17 +88,16 @@ const res2 = customersTable
 
         return cols.shipments.orderId.eq(1);
     })
-    .select(cols => ({ asdf: cols.customers.id, asdsfxc: cols.orders.customerId, customerName: cols.customers.name }))
-    .exec();
+    .select(cols => ({ id: cols.customers.id, orderCustomerId: cols.orders.customerId, customerName: cols.customers.name }))
+    .exec;
+type SingleLevelSelectWithJoinsResult = { id: number, orderCustomerId: number, customerName: string }
+type SingleLevelSelectWithJoinsTest = AssertTrue<AssertEqual<SingleLevelSelectWithJoinsResult, ReturnType<typeof SingleLevelSelectWithJoins>>>;
 
-// const tbl = usersTable.as("parentUsers");
-// type t = typeof tbl;
-// const queryColumns = tbl.columns;
-// type t2 = typeof queryColumns;
-
-// type cols = typeof usersTable.columns[keyof typeof usersTable.columns];
-// type typleCols = UnionToTupleOrdered<cols>;
-
+type SingleLevelSelectWithJoinsParams = typeof SingleLevelSelectWithJoins extends (params: infer TParams) => any ? TParams : never;
+type SingleLevelSelectWithJoinsParamsTest = AssertTrue<AssertEqual<undefined, SingleLevelSelectWithJoinsParams>>;
+/**
+ * 
+ */
 const MultiLevelSelectWithJoins = customersTable
     .join('INNER', usersTable, (cols) => cols.users.id.eq(1))
     .join('INNER', usersTable.as("parentUsers"), (cols) => cols.parentUsers.id.eq(1))
@@ -121,5 +122,4 @@ type multiLevelSelectWithJoinsExpectedResult = {
         }
     }
 }
-
-type Test1 = AssertTrue<AssertEqual<multiLevelSelectWithJoinsExpectedResult, ReturnType<typeof MultiLevelSelectWithJoins>>>
+type MultiLevelSelectWithJoinsTest = AssertTrue<AssertEqual<multiLevelSelectWithJoinsExpectedResult, ReturnType<typeof MultiLevelSelectWithJoins>>>
