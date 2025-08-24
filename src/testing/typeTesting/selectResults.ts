@@ -1,7 +1,8 @@
 import type { IExecuteableQuery } from "../../query/_interfaces/IExecuteableQuery.js";
 import type { IJoinQuery } from "../../query/_interfaces/IJoinQuery.js";
 import type { InferParamsFromOps } from "../../query/_types/result.js";
-import { and } from "../../query/logicalOperations.js";
+import type ColumnComparisonOperation from "../../query/comparison.js";
+import ColumnLogicalOperation, { and } from "../../query/logicalOperations.js";
 import { param } from "../../query/param.js";
 import { customersTable, ordersTable, shipmentsTable, usersTable } from "./_tables.js";
 import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
@@ -23,13 +24,28 @@ const res7 = customersTable
         const res1 = and(
             cols.users.id.eq(param("user1")),
             cols.users.id.gte(param("user2")),
-            cols.users.userName.eq(param("user3")),
+            cols.users.userName.neq(cols.customers.name),
+            cols.users.id.between(param("leftValue"), cols.customers.id),
             and(cols.customers.createdBy.eq(235), cols.customers.name.eq(param("user4")), and(cols.users.id.eq(param("user5"))))
         );
+
+        type tp = typeof res1;
+        type bettp = tp extends ColumnLogicalOperation<any, infer TOps> ? TOps[3] : never;
+        type betparam = bettp extends ColumnComparisonOperation<any, any, infer TParams, any> ? TParams : never;
+
 
         type infered = InferParamsFromOps<typeof res1>;
 
         return res1;
+
+
+        // const res = cols.users.id.between(param("leftValue"), param("rightValue"))
+        // type tpBet = typeof res;
+        // type inferLParam = tpBet extends ColumnComparisonOperation<any, any, infer TParam, any> ? TParam : never;
+        // type inferCol = tpBet extends ColumnComparisonOperation<any, any, any, infer TCol, any> ? TCol : never;
+
+        // const neq1 = cols.users.userName.neq(cols.customers.name);
+        // type infered2 = (typeof neq1) extends ColumnComparisonOperation<any, any, any, infer TAppQ, any> ? TAppQ : never;
 
         // const res = cols.users.id.eq(param("zart"));
         // type t = typeof res;
@@ -43,14 +59,17 @@ const res7 = customersTable
         const res1 = and(
             cols.users.id.eq(cols.customers.id),
             cols.users.id.eq(10),
+            cols.users.id.between(param("leftValue2"), cols.customers.id),
             cols.users.id.gt(param("parent1")),
             cols.users.userName.gt(param("parent2")),
+            cols.users.userName.between(cols.customers.name, cols.users.userName),
             and(cols.customers.createdBy.gt(235), cols.customers.name.gt(param("parent3")))
         );
 
         type infered = InferParamsFromOps<typeof res1>;
 
         return res1;
+
         // type tp = typeof res1;
         // type tp1 = tp extends ColumnLogicalOperation<any, infer TOps> ? TOps : never;
         // type tp2 = tp1[3] extends ColumnLogicalOperation<any, infer TOps2> ? TOps2 : never;

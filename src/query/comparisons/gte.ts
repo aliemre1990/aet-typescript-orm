@@ -13,7 +13,7 @@ function gte<
     TColumn extends ColumnType<TDbType>,
     TQTableSpecs extends QueryTableSpecsType,
     TAsName extends string | undefined,
-    TValueType extends TDbType extends PgDbType ? PgTypeToJsType<TColumn["type"]> : never
+    TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
 >(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, value: TValueType): ColumnComparisonOperation<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
@@ -31,7 +31,7 @@ function gte<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     undefined,
-    TAppliedQColumn
+    [TAppliedQColumn]
 >
 function gte<
     TDbType extends DbType,
@@ -79,11 +79,11 @@ function gte<
             TDbType,
             QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
             undefined,
-            TAppliedQColumn
+            TAppliedQColumn extends undefined ? undefined : [TAppliedQColumn]
         >(
             this,
             comparisonOperations.gte.name,
-            value as TAppliedQColumn
+            [value] as TAppliedQColumn extends undefined ? undefined : [TAppliedQColumn]
         )
     }
 

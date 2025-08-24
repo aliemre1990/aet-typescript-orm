@@ -29,13 +29,21 @@ class ColumnComparisonOperation<
     TDbType extends DbType,
     TQueryColumn extends QueryColumn<TDbType, any, any, any>,
     TParams extends QueryParam<TDbType, any, any>[] | undefined,
-    TAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any> | undefined = undefined,
+    TAppliedQColumns extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any>[] | undefined = undefined,
     TValueType = GetColumnTypeFromDbType<TDbType, TQueryColumn extends QueryColumn<TDbType, infer TCol, any, any> ? TCol : never>
 > {
     constructor(
         public column: TQueryColumn,
         public operation: ComparisonOperation,
-        public value?: TParams | TValueType | TAppliedQColumn | (TValueType | QueryColumn<TDbType, any, any, any> | QueryParam<TDbType, any, any>)[]
+        public value?:
+            TParams |
+            TValueType |
+            TAppliedQColumns |
+            (
+                TValueType |
+                (TAppliedQColumns extends QueryColumn<any, any, any, any>[] ? TAppliedQColumns[number] : never) |
+                (TParams extends QueryParam<any, any, any>[] ? TParams[number] : never)
+            )[]
     ) { }
 }
 

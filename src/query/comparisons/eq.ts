@@ -30,7 +30,7 @@ function eq<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     undefined,
-    TAppliedQColumn
+    [TAppliedQColumn]
 >
 function eq<
     TDbType extends DbType,
@@ -64,36 +64,23 @@ function eq<
     if (value instanceof QueryParamMedian) {
         const param = new QueryParam<TDbType, TParamName extends string ? TParamName : never, TValueType>(value.name);
 
-        return new ColumnComparisonOperation<
-            TDbType,
-            QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
-            TParam extends undefined ? undefined : [TParam]
-        >(
+        return new ColumnComparisonOperation(
             this,
             comparisonOperations.eq.name,
-            [param] as TParam extends undefined ? undefined : [TParam]
+            [param]
         )
     } else if (value instanceof QueryColumn) {
-        return new ColumnComparisonOperation<
-            TDbType,
-            QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
-            undefined,
-            TAppliedQColumn
-        >(
+        return new ColumnComparisonOperation(
             this,
             comparisonOperations.eq.name,
-            value as TAppliedQColumn
+            [value]
         )
     }
 
-    return new ColumnComparisonOperation<
-        TDbType,
-        QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
-        undefined
-    >(
+    return new ColumnComparisonOperation(
         this,
         comparisonOperations.eq.name,
-        value as TValueType
+        value
     );
 }
 

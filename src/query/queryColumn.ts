@@ -6,6 +6,7 @@ import gte from "./comparisons/gte.js";
 import gt from "./comparisons/gt.js";
 import neq from "./comparisons/neq.js";
 import eq from "./comparisons/eq.js";
+import between from "./comparisons/between.js";
 
 
 class QueryColumn<
@@ -21,6 +22,8 @@ class QueryColumn<
     neq: typeof neq = neq;
     gt: typeof gt = gt;
     gte: typeof gte = gte;
+
+    between: typeof between = between;
 
     constructor(public column: TColumn, public asName?: TAsName) { }
 

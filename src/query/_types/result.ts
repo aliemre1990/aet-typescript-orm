@@ -66,7 +66,7 @@ type QueryParamsToObject<T extends readonly QueryParam<any, any, any>[] | undefi
 
 
 type InferParamsFromOps<T> =
-    T extends ColumnComparisonOperation<any, any, infer TParams> ?
+    T extends ColumnComparisonOperation<any, any, infer TParams, any> ?
     TParams extends readonly QueryParam<any, any, any>[] ? TParams : [] :
     T extends ColumnLogicalOperation<any, infer TOps> ?
     InferParamsFromOpsArray<TOps> :
@@ -74,7 +74,7 @@ type InferParamsFromOps<T> =
 
 type InferParamsFromOpsArray<T extends readonly any[]> =
     T extends readonly [infer First, ...infer Rest] ?
-    First extends ColumnComparisonOperation<any, any, infer TParams> ?
+    First extends ColumnComparisonOperation<any, any, infer TParams, any> ?
     TParams extends readonly QueryParam<any, any, any>[] ?
     [...TParams, ...InferParamsFromOpsArray<Rest>] :
     InferParamsFromOpsArray<Rest> :
