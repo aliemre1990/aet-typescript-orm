@@ -54,16 +54,16 @@ function gte<
     TColumn extends ColumnType<TDbType>,
     TQTableSpecs extends QueryTableSpecsType,
     TAsName extends string | undefined,
-    TParamMedian extends QueryParamMedian<any>,
-    TParamName extends TParamMedian extends QueryParamMedian<infer U> ? U : never,
-    TParam extends QueryParam<TDbType, TParamName, TValueType> | undefined,
+    TParamMedian extends QueryParamMedian<any> | undefined,
+    TParamName extends (TParamMedian extends QueryParamMedian<infer U> ? U : never) | undefined,
+    TParam extends TParamName extends string ? (QueryParam<TDbType, TParamName, TValueType>) : undefined,
     TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
     TAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any> | undefined
 >
     (this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, value: TValueType | TParamMedian | TAppliedQColumn) {
 
     if (value instanceof QueryParamMedian) {
-        const param = new QueryParam<TDbType, TParamName, TValueType>(value.name);
+        const param = new QueryParam<TDbType, TParamName extends string ? TParamName : never, TValueType>(value.name);
 
         return new ColumnComparisonOperation<
             TDbType,

@@ -74,8 +74,15 @@ type InferParamsFromOps<T> =
 
 type InferParamsFromOpsArray<T extends readonly any[]> =
     T extends readonly [infer First, ...infer Rest] ?
-    [...InferParamsFromOps<First>, ...InferParamsFromOpsArray<Rest>] :
+    First extends ColumnComparisonOperation<any, any, infer TParams> ?
+    TParams extends readonly QueryParam<any, any, any>[] ?
+    [...TParams, ...InferParamsFromOpsArray<Rest>] :
+    InferParamsFromOpsArray<Rest> :
+    First extends ColumnLogicalOperation<any, infer TOps> ?
+    [...InferParamsFromOpsArray<TOps>, ...InferParamsFromOpsArray<Rest>] :
+    InferParamsFromOpsArray<Rest> :
     [];
+
 
 type AccumulateParams<TParams extends QueryParam<any, any, any>[] | undefined, TCbResult extends ColumnComparisonOperation<any, any, any> | ColumnLogicalOperation<any, any>> =
     TParams extends undefined ?

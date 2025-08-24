@@ -1,3 +1,4 @@
+import type { IExecuteableQuery } from "../../query/_interfaces/IExecuteableQuery.js";
 import type { IJoinQuery } from "../../query/_interfaces/IJoinQuery.js";
 import type { InferParamsFromOps } from "../../query/_types/result.js";
 import { and } from "../../query/logicalOperations.js";
@@ -62,10 +63,11 @@ const res7 = customersTable
         // type t2 = t extends ColumnComparisonOperation<infer TDbType, infer TQueryColumn, infer TParams, infer TValueType> ? TParams : never;
     })
     .join('INNER', ordersTable, (cols) => cols.users.userName.eq(param("ali")))
-    .select().exec();
+    .select()
+    .exec();
 
 type tp1 = typeof res7;
-type tp2 = tp1 extends IJoinQuery<infer TDbType, infer TSelectedColumns, infer TParams> ? TParams : never;
+type tp2 = tp1 extends IExecuteableQuery<infer TDbType, infer TSelectedColumns, any, infer TParams> ? TParams : never;
 type tp3 = tp2[5];
 
 /**

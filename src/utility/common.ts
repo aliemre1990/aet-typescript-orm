@@ -46,11 +46,14 @@ type IsUnion<T, U extends T = T> =
         (U extends T ? false : true)
         : never) extends false ? false : true
 
+type IsAny<T> = 0 extends 1 & T ? true : false;
+
 export type {
     UnionToTupleOrdered,
     DeepPrettify,
     UnionToIntersection,
     FlattenObject,
     SingleKeyObject,
-    IsUnion
+    IsUnion,
+    IsAny
 }
