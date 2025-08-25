@@ -89,7 +89,7 @@ class Table<
             { [K in keyof TInnerCols]: QueryColumn<TDbType, TInnerCols[K], { tableName: TInnerTableName }> }
         > :
         TInnerJoinTable,
-        TCbResult extends ColumnComparisonOperation<TDbType, any, any> | ColumnLogicalOperation<TDbType, any>
+        TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>
 
     >(
         type: JoinType,
