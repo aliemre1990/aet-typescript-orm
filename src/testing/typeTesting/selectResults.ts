@@ -26,7 +26,7 @@ type SingleTableAutoSelectQueryTest = AssertTrue<AssertEqual<SingleTableAutoSele
  * 
  */
 const SingleTableJoinWithAutoSelectQuery = customersTable
-    .join('INNER', usersTable, (cols) => cols.users.id.eq(param("ali")))
+    .join('INNER', usersTable, (cols) => cols.users.id.eq(param("param1")))
     .select()
     .exec;
 
