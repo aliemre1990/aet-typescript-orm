@@ -1,32 +1,61 @@
-import type { IExecuteableQuery } from "../../query/_interfaces/IExecuteableQuery.js";
-import type { IJoinQuery } from "../../query/_interfaces/IJoinQuery.js";
 import type { InferParamsFromOps } from "../../query/_types/result.js";
 import type ColumnComparisonOperation from "../../query/comparison.js";
 import ColumnLogicalOperation, { and } from "../../query/logicalOperations.js";
 import { param } from "../../query/param.js";
+import type QueryColumn from "../../query/queryColumn.js";
+import type Column from "../../table/column.js";
+import type { TableSpecsType } from "../../table/types/tableSpecs.js";
 import { customersTable, ordersTable, shipmentsTable, usersTable } from "./_tables.js";
 import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
 
 const res = customersTable.select(cols => {
-    type t = typeof cols;
 
     return ({ id: cols.customers.name.as("customerName") })
 }).exec();
 
+/**
+ * 
+ */
+const SingleTableAutoSelectQuery = customersTable.select().exec;
 
-const res5 = customersTable.select().exec();
+type SingleTableAutoSelectQueryResult = { id: number; name: string; createdBy: number; };
+type SingleTableAutoSelectQueryReturnType = ReturnType<typeof SingleTableAutoSelectQuery>
+type SingleTableAutoSelectQueryTest = AssertTrue<AssertEqual<SingleTableAutoSelectQueryResult, SingleTableAutoSelectQueryReturnType>>;
 
+/**
+ * 
+ */
+const SingleTableJoinWithAutoSelectQuery = customersTable
+    .join('INNER', usersTable, (cols) => cols.users.id.eq(param("ali")))
+    .select()
+    .exec;
 
-const res6 = customersTable.join('INNER', usersTable, (cols) => cols.users.id.eq(param("ali"))).select().exec();
-const res7 = customersTable
+type SingleTableJoinWithAutoSelectQueryResult = {
+    customerId: number;
+    customerName: string;
+    customerCreatedBy: number;
+    userId: number;
+    userUserName: string;
+};
+type SingleTableJoinWithAutoSelectQueryReturnType = ReturnType<typeof SingleTableJoinWithAutoSelectQuery>;
+type SingleTableJoinWithAutoSelectQueryTest = AssertTrue<AssertEqual<SingleTableJoinWithAutoSelectQueryResult, SingleTableJoinWithAutoSelectQueryReturnType>>
+
+/**
+ * 
+ */
+const AutoSelectMultiJoins = customersTable
     .join('INNER', usersTable, (cols) => {
 
         const res1 = and(
-            cols.users.id.eq(param("user1")),
-            cols.users.id.gte(param("user2")),
-            cols.users.userName.neq(cols.customers.name),
-            cols.users.id.between(param("leftValue"), cols.customers.id),
-            and(cols.customers.createdBy.eq(235), cols.customers.name.eq(param("user4")), and(cols.users.id.eq(param("user5"))))
+            cols.users.id.eq(param("userParam1")),
+            cols.users.id.neq(param("userParam2")),
+            cols.users.userName.gt(param("userParam3")),
+            cols.users.id.between(param("userBetweenLeft"), param("userBetweenRight")),
+            and(
+                cols.users.id.eq(cols.customers.createdBy),
+                cols.customers.name.gte(param("userGteParam4")),
+                and(cols.users.id.eq(param("userEqParam1")))
+            )
         );
 
         type tp = typeof res1;
@@ -37,57 +66,75 @@ const res7 = customersTable
         type infered = InferParamsFromOps<typeof res1>;
 
         return res1;
-
-
-        // const res = cols.users.id.between(param("leftValue"), param("rightValue"))
-        // type tpBet = typeof res;
-        // type inferLParam = tpBet extends ColumnComparisonOperation<any, any, infer TParam, any> ? TParam : never;
-        // type inferCol = tpBet extends ColumnComparisonOperation<any, any, any, infer TCol, any> ? TCol : never;
-
-        // const neq1 = cols.users.userName.neq(cols.customers.name);
-        // type infered2 = (typeof neq1) extends ColumnComparisonOperation<any, any, any, infer TAppQ, any> ? TAppQ : never;
-
-        // const res = cols.users.id.eq(param("zart"));
-        // type t = typeof res;
-        // type t2 = t extends ColumnComparisonOperation<infer TDbType, infer TQueryColumn, infer TParams, infer TValueType> ? TParams : never;
-
-        // return res;
-
     })
     .join('INNER', usersTable.as('parentUsers'), (cols) => {
 
-        const res1 = and(
-            cols.users.id.eq(cols.customers.id),
-            cols.users.id.eq(10),
-            cols.users.id.between(param("leftValue2"), cols.customers.id),
-            cols.users.id.gt(param("parent1")),
-            cols.users.userName.gt(param("parent2")),
-            cols.users.userName.between(cols.customers.name, cols.users.userName),
-            and(cols.customers.createdBy.gt(235), cols.customers.name.gt(param("parent3")))
+        const comp = and(
+            cols.parentUsers.id.eq(cols.customers.id),
+            cols.parentUsers.id.eq(param("parentUserEq1")),
+            cols.parentUsers.id.between(param("parentUserBetLeft"), cols.customers.id),
+            cols.parentUsers.id.gt(param("parentUserGt2")),
+            cols.parentUsers.userName.neq(param("parentUserNeq3")),
+            cols.parentUsers.userName.between(cols.customers.name, cols.users.userName),
+            and(cols.customers.createdBy.gt(235), cols.parentUsers.userName.gt(param("innerParentUserParam1")))
         );
 
-        type infered = InferParamsFromOps<typeof res1>;
 
-        return res1;
+        return comp;
 
-        // type tp = typeof res1;
-        // type tp1 = tp extends ColumnLogicalOperation<any, infer TOps> ? TOps : never;
-        // type tp2 = tp1[3] extends ColumnLogicalOperation<any, infer TOps2> ? TOps2 : never;
-        // type tp4 = tp2[1] extends ColumnComparisonOperation<any, any, infer TParams, any> ? TParams : never;
-        // type tp3 = tp2 extends ColumnComparisonOperation<any, any, infer TParams, any> ? TParams : never;
 
-        // const res = cols.users.id.eq(param("asdf"));
+        type inferComparison = typeof comp;
+        type ops = inferComparison extends ColumnLogicalOperation<any, infer ops> ? ops : never;
 
-        // type t = typeof res;
-        // type t2 = t extends ColumnComparisonOperation<infer TDbType, infer TQueryColumn, infer TParams, infer TValueType> ? TParams : never;
+        /**
+         * 
+         */
+        type op0 = ops[0];
+        type op1AppliedColumnType = op0 extends ColumnComparisonOperation<any, any, any, infer TAppliedCol, any> ? TAppliedCol : never;
+        type op1ColumnType = op1AppliedColumnType[0] extends QueryColumn<any, infer TCol, any, any> ? TCol : never;
+
+        type op1ColumnResult = Column<"postgresql", "SERIAL", "id", TableSpecsType<"customers">>;
+        type op1Test = AssertTrue<AssertEqual<op1ColumnResult, op1ColumnType>>
+
+
     })
-    .join('INNER', ordersTable, (cols) => cols.users.userName.eq(param("ali")))
+    .join('INNER', ordersTable, (cols) => cols.users.userName.eq(cols.customers.name))
     .select()
-    .exec();
+    .exec;
 
-type tp1 = typeof res7;
-type tp2 = tp1 extends IExecuteableQuery<infer TDbType, infer TSelectedColumns, any, infer TParams> ? TParams : never;
-type tp3 = tp2[5];
+type AutoSelectMultiJoinsResult = {
+    customerId: number;
+    customerName: string;
+    customerCreatedBy: number;
+    userId: number;
+    userUserName: string;
+    parentUserId: number;
+    parentUserUserName: string;
+    orderId: number;
+    orderCustomerId: number;
+    orderCreatedBy: number;
+}
+type AutoSelectMultiJoinsReturnType = ReturnType<typeof AutoSelectMultiJoins>
+type AutoSelectMultiJoinsTest = AssertTrue<AssertEqual<AutoSelectMultiJoinsResult, AutoSelectMultiJoinsReturnType>>;
+
+type AutoSelectMultiJoinsParamsResult = {
+    userParam1: number;
+    userParam2: number;
+    userParam3: string;
+    userBetweenLeft: number;
+    userBetweenRight: number;
+    userGteParam4: string;
+    userEqParam1: number;
+    parentUserEq1: number;
+    parentUserBetLeft: number;
+    parentUserGt2: number;
+    parentUserNeq3: string;
+    innerParentUserParam1: string;
+} | undefined;
+type AutoSelectMultiJoinsParamsType = typeof AutoSelectMultiJoins extends (param: infer TParams) => any ? TParams : never;
+type AutoSelectMultiJoinsParamsText = AssertTrue<AssertEqual<AutoSelectMultiJoinsParamsResult, AutoSelectMultiJoinsParamsType>>
+
+
 
 /**
  * 

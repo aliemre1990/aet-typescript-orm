@@ -55,7 +55,6 @@ function eq<
     TAsName extends string | undefined,
     TParamMedian extends QueryParamMedian<any> | undefined,
     TParamName extends (TParamMedian extends QueryParamMedian<infer U> ? U : never) | undefined,
-    TParam extends TParamName extends string ? (QueryParam<TDbType, TParamName, TValueType>) : undefined,
     TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
     TAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any> | undefined
 >
@@ -69,18 +68,12 @@ function eq<
             comparisonOperations.eq.name,
             [param]
         )
-    } else if (value instanceof QueryColumn) {
-        return new ColumnComparisonOperation(
-            this,
-            comparisonOperations.eq.name,
-            [value]
-        )
     }
 
     return new ColumnComparisonOperation(
         this,
         comparisonOperations.eq.name,
-        value
+        [value]
     );
 }
 

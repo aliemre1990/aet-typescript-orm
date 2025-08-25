@@ -167,7 +167,7 @@ function between<
     (
         this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
         leftValue: TValueType | TLParamMedian | TLAppliedQColumn,
-        rightValue: TValueType | TRParamMedian | TLAppliedQColumn
+        rightValue: TValueType | TRParamMedian | TRAppliedQColumn
     ) {
 
     if (leftValue instanceof QueryParamMedian) {
@@ -179,50 +179,37 @@ function between<
             return new ColumnComparisonOperation(
                 this,
                 comparisonOperations.between.name,
-                [lParam, rParam] as TLParam extends undefined ? TRParam extends undefined ? undefined : [TRParam] : TRParam extends undefined ? [TLParam] : [TLParam, TRParam]
-            )
-        }
-
-        if (rightValue instanceof QueryColumn) {
-            return new ColumnComparisonOperation(
-                this,
-                comparisonOperations.between.name,
-                [lParam, rightValue]
+                [lParam, rParam]
             )
         }
 
         return new ColumnComparisonOperation(
             this,
             comparisonOperations.between.name,
-            [lParam, rightValue as TValueType]
+            [lParam, rightValue]
         )
 
     }
 
-    if (leftValue instanceof QueryColumn) {
-        if (rightValue instanceof QueryColumn) {
-            return new ColumnComparisonOperation(
-                this,
-                comparisonOperations.eq.name,
-                [leftValue, rightValue]
-            );
-        }
+    if (rightValue instanceof QueryParamMedian) {
+        const rParam = new QueryParam<TDbType, TRParamName extends string ? TRParamName : never, TValueType>(rightValue.name);
 
-        if (rightValue instanceof QueryParamMedian) {
-            const rParam = new QueryParam<TDbType, TRParamName extends string ? TRParamName : never, TValueType>(rightValue.name);
+        if (leftValue instanceof QueryParamMedian) {
+            const lParam = new QueryParam<TDbType, TLParamName extends string ? TLParamName : never, TValueType>(leftValue.name);
 
             return new ColumnComparisonOperation(
                 this,
                 comparisonOperations.eq.name,
-                [leftValue, rParam]
+                [lParam, rParam]
             );
         }
 
         return new ColumnComparisonOperation(
             this,
             comparisonOperations.eq.name,
-            [leftValue, rightValue]
+            [leftValue, rParam]
         );
+
     }
 
     return new ColumnComparisonOperation(
