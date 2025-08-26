@@ -8,57 +8,33 @@ import ColumnComparisonOperation, { comparisonOperations } from "../comparison.j
 import { QueryParam, QueryParamMedian } from "../queryColumn.js";
 import QueryColumn from "../queryColumn.js";
 
-function sqlIn<
-    TDbType extends DbType,
-    TColumn extends ColumnType<TDbType>,
-    TQTableSpecs extends QueryTableSpecsType,
-    TAsName extends string | undefined,
-    TValueType extends TDbType extends PgDbType ? PgTypeToJsType<TColumn["type"]> : never,
->(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, values: TValueType[]): ColumnComparisonOperation<
-    TDbType,
-    QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
-    undefined,
-    undefined
->
-function sqlIn<
-    TDbType extends DbType,
-    TColumn extends ColumnType<TDbType>,
-    TQTableSpecs extends QueryTableSpecsType,
-    TAsName extends string | undefined,
-    TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
-    TAppliedQColumns extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any>[],
->(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, valueCols: TAppliedQColumns): ColumnComparisonOperation<
-    TDbType,
-    QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
-    undefined,
-    TAppliedQColumns
->
+// Helper type to extract only QueryColumns from the mixed tuple
+type ExtractColumnsFromMix<T extends readonly unknown[]> =
+    T extends readonly [infer First, ...infer Rest] ?
+    First extends QueryColumn<any, any, any, any> ?
+    [First, ...ExtractColumnsFromMix<Rest>] :
+    ExtractColumnsFromMix<Rest> :
+    [];
+
 function sqlIn<
     TDbType extends DbType,
     TColumn extends ColumnType<TDbType>,
     TQTableSpecs extends QueryTableSpecsType,
     TAsName extends string | undefined,
     TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
-    TAppliedQColumns extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any>[],
->(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, values: TValueType[], valueCols: TAppliedQColumns): ColumnComparisonOperation<
+    TValues extends readonly (TValueType | QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any>)[]
+>(
+    this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
+    ...values: TValues
+): ColumnComparisonOperation<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     undefined,
-    TAppliedQColumns extends Array<infer T> ? UnionToTupleOrdered<T> : never
+    ExtractColumnsFromMix<TValues>, // Helper type to extract only the columns as tuple
+    TValueType
 >
-function sqlIn<
-    TDbType extends DbType,
-    TColumn extends ColumnType<TDbType>,
-    TQTableSpecs extends QueryTableSpecsType,
-    TAsName extends string | undefined,
-    TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
-    TAppliedQColumns extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any>[],
->(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, valueCols: TAppliedQColumns, values: TValueType[]): ColumnComparisonOperation<
-    TDbType,
-    QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
-    undefined,
-    TAppliedQColumns extends Array<infer T> ? UnionToTupleOrdered<T> : never
->
+
+
 function sqlIn<
     TDbType extends DbType,
     TColumn extends ColumnType<TDbType>,
@@ -84,9 +60,9 @@ function sqlIn<
     TParamName extends (TParamMedian extends QueryParamMedian<infer U> ? U : never) | undefined,
     TParam extends QueryParam<TDbType, TParamName extends undefined ? never : TParamName, TDbType extends PgDbType ? GetArrayEquivalentPgValueType<TValueType> : never>,
     TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
-    TAppliedQColumns extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any>[] | undefined
+    TValues extends readonly (TValueType | QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any>)[]
 >
-    (this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, values?: TValueType[], valueCols?: TAppliedQColumns, param?: TParamMedian) {
+    (this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, param?: TParamMedian, ...values: TValues) {
 
     if (param instanceof QueryParamMedian) {
         const paramRes = new QueryParam<TDbType, TParamName extends string ? TParamName : never, TDbType extends PgDbType ? GetArrayEquivalentPgValueType<TValueType> : never>(param.name);
@@ -102,12 +78,12 @@ function sqlIn<
         TDbType,
         QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
         undefined,
-        TAppliedQColumns extends Array<infer T> ? UnionToTupleOrdered<T> : never
+        ExtractColumnsFromMix<TValues>
     >
         (
             this,
             comparisonOperations.in.name,
-            [...(values === undefined ? [] : values), ...(valueCols === undefined ? [] : valueCols)] as any
+            values as any
         );
 }
 

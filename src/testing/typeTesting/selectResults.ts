@@ -60,6 +60,10 @@ const AutoSelectMultiJoins = customersTable
         );
 
         return res1;
+
+        // const inres = cols.users.id.sqlIn(1, cols.customers.id, 2, cols.users.id, cols.customers.id);
+        // type inrest = typeof inres extends ColumnComparisonOperation<any, any, any, infer TCols, any> ? TCols : never;
+        // type prm = inrest[1];
     })
     .join('INNER', usersTable.as('parentUsers'), (cols) => {
 
@@ -75,7 +79,6 @@ const AutoSelectMultiJoins = customersTable
 
 
         return comp;
-
 
         type inferComparison = typeof comp;
         type ops = inferComparison extends ColumnLogicalOperation<any, infer ops> ? ops : never;
