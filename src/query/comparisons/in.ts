@@ -3,6 +3,7 @@ import type { GetArrayEquivalentPgValueType, JsTypeToPgTypes, PgTypeToJsType } f
 import type Column from "../../table/column.js";
 import type { ColumnType, QueryTableSpecsType } from "../../table/types/utils.js";
 import type { UnionToTupleOrdered } from "../../utility/common.js";
+import { isNullOrUndefined } from "../../utility/guards.js";
 import type { GetColumnTypeFromDbType } from "../_types/miscellaneous.js";
 import ColumnComparisonOperation, { comparisonOperations } from "../comparison.js";
 import { QueryParam, QueryParamMedian } from "../queryColumn.js";
@@ -57,9 +58,7 @@ function sqlIn<
     TQTableSpecs extends QueryTableSpecsType,
     TAsName extends string | undefined,
     TParamMedian extends QueryParamMedian<any> | undefined,
-    TParamName extends (TParamMedian extends QueryParamMedian<infer U> ? U : never) | undefined,
-    TParam extends QueryParam<TDbType, TParamName extends undefined ? never : TParamName, TDbType extends PgDbType ? GetArrayEquivalentPgValueType<TValueType> : never>,
-    TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
+     TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
     TValues extends readonly (TValueType | QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any>)[]
 >
     (
@@ -68,8 +67,12 @@ function sqlIn<
         ...values: TValues
     ) {
 
+    if (isNullOrUndefined(param)) {
+        throw Error('In operation requires at least one value.');
+    }
+
     if (param instanceof QueryParamMedian) {
-        const paramRes = new QueryParam<TDbType, TParamName extends string ? TParamName : never, TDbType extends PgDbType ? GetArrayEquivalentPgValueType<TValueType> : never>(param.name);
+        const paramRes = new QueryParam(param.name);
 
         return new ColumnComparisonOperation(
             this,
