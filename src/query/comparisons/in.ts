@@ -58,12 +58,12 @@ function sqlIn<
     TQTableSpecs extends QueryTableSpecsType,
     TAsName extends string | undefined,
     TParamMedian extends QueryParamMedian<any> | undefined,
-     TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
+    TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
     TValues extends readonly (TValueType | QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any>)[]
 >
     (
         this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
-        param?: TParamMedian,
+        param: TParamMedian | TValues[number],
         ...values: TValues
     ) {
 
@@ -81,16 +81,11 @@ function sqlIn<
         )
     }
 
-    return new ColumnComparisonOperation<
-        TDbType,
-        QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
-        undefined,
-        ExtractColumnsFromMix<TValues>
-    >
+    return new ColumnComparisonOperation
         (
             this,
             comparisonOperations.in.name,
-            [param, ...values] as any
+            [param, ...values] 
         );
 }
 

@@ -55,6 +55,9 @@ const AutoSelectMultiJoins = customersTable
             )
         );
 
+        // const inres = cols.users.id.sqlIn(cols.customers.id, cols.users.id);
+
+
         return res1;
 
         // const inres = cols.users.id.sqlIn(1, cols.customers.id, 2, cols.users.id, cols.customers.id);
