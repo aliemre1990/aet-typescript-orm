@@ -54,16 +54,10 @@ const AutoSelectMultiJoins = customersTable
             and(
                 cols.users.id.eq(cols.customers.createdBy),
                 cols.customers.name.gte(param("userGteParam4")),
-                and(cols.users.id.eq(param("userEqParam1")))
+                and(cols.users.id.eq(param("userEqParam1"))),
+                cols.users.id.sqlIn(param("inParam"))
             )
         );
-
-        type tp = typeof res1;
-        type bettp = tp extends ColumnLogicalOperation<any, infer TOps> ? TOps[3] : never;
-        type betparam = bettp extends ColumnComparisonOperation<any, any, infer TParams, any> ? TParams : never;
-
-
-        type infered = InferParamsFromOps<typeof res1>;
 
         return res1;
     })
@@ -125,6 +119,7 @@ type AutoSelectMultiJoinsParamsResult = {
     userBetweenRight: number;
     userGteParam4: string;
     userEqParam1: number;
+    inParam: number[];
     parentUserEq1: number;
     parentUserBetLeft: number;
     parentUserGt2: number;

@@ -38,8 +38,8 @@ class ColumnComparisonOperation<
         public value?:
             (
                 TValueType |
-                (TAppliedQColumns extends QueryColumn<any, any, any, any>[] ? TAppliedQColumns[number] : never) |
-                (TParams extends QueryParam<any, any, any>[] ? TParams[number] : never)
+                (TAppliedQColumns extends QueryColumn<TDbType, any, any, any>[] ? TAppliedQColumns[number] : never) |
+                (TParams extends QueryParam<TDbType, any, any>[] ? TParams[number] : never)
             )[]
     ) { }
 }

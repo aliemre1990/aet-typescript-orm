@@ -184,13 +184,22 @@ type JsTypeToPgTypes<T> =
     'JSON' | 'JSONB' | 'DOMAIN' | 'ANY' | 'ANYARRAY' | 'ANYNONARRAY' | 'ANYENUM' | 'ANYRANGE' | 'ANYCOMPATIBLE' | 'ANYCOMPATIBLEARRAY' | 'ANYCOMPATIBLENONARRAY' | 'ANYCOMPATIBLERANGE' | 'ANYELEMENT' | 'LANGUAGE_HANDLER' | 'INTERNAL' | 'OPAQUE' | 'FDW_HANDLER' | 'INDEX_AM_HANDLER' | 'TSM_HANDLER' | 'TABLE_AM_HANDLER' :
     never;
 
-type PgValueTypes = string | number | bigint | boolean | Date | Buffer | object | null;
+type PgValueTypes = string | string[] | number | number[] | bigint | bigint[] | boolean | boolean[] | Date | Date[] | Buffer | object;
+
+type GetArrayEquivalentPgValueType<T> =
+    T extends string ? string[] :
+    T extends number ? number[] :
+    T extends bigint ? bigint[] :
+    T extends boolean ? boolean[] :
+    T extends Date ? Date[] :
+    T;
 
 export type {
     PgColumnType,
     PgTypeToJsType,
     PgValueTypes,
-    JsTypeToPgTypes
+    JsTypeToPgTypes,
+    GetArrayEquivalentPgValueType
 }
 
 

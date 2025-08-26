@@ -7,6 +7,7 @@ import gt from "./comparisons/gt.js";
 import neq from "./comparisons/neq.js";
 import eq from "./comparisons/eq.js";
 import between from "./comparisons/between.js";
+import sqlIn from "./comparisons/in.js";
 
 
 class QueryColumn<
@@ -22,6 +23,7 @@ class QueryColumn<
     neq: typeof neq = neq;
     gt: typeof gt = gt;
     gte: typeof gte = gte;
+    sqlIn: typeof sqlIn = sqlIn;
 
     between: typeof between = between;
 
