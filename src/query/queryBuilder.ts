@@ -114,8 +114,8 @@ class QueryBuilder<
     }
 
     exec(params?: QueryParamsToObject<TParams>): TResult extends undefined ? TablesToResultMap<TDbType, TTables> : ColumnsToResultMap<TDbType, TResult> {
-        if (isNullOrUndefined(this.colsSelection)) {
-            throw Error();
+        if (isNullOrUndefined(this?.colsSelection)) {
+            return {} as any;
         }
 
         return Object.keys(this.colsSelection).reduce((prev, curr) => { prev[curr] = 1; return prev; }, {} as any);

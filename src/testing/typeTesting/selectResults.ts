@@ -2,16 +2,12 @@ import type { InferParamsFromOps } from "../../query/_types/result.js";
 import type ColumnComparisonOperation from "../../query/comparison.js";
 import ColumnLogicalOperation, { and } from "../../query/logicalOperations.js";
 import { param } from "../../query/param.js";
-import type QueryColumn from "../../query/queryColumn.js";
+import QueryColumn from "../../query/queryColumn.js";
 import type Column from "../../table/column.js";
 import type { TableSpecsType } from "../../table/types/tableSpecs.js";
 import { customersTable, ordersTable, shipmentsTable, usersTable } from "./_tables.js";
 import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
 
-const res = customersTable.select(cols => {
-
-    return ({ id: cols.customers.name.as("customerName") })
-}).exec();
 
 /**
  * 
@@ -58,6 +54,8 @@ const AutoSelectMultiJoins = customersTable
                 cols.users.id.sqlIn(param("inParam"))
             )
         );
+
+        cols.users.id.sqlIn(1, 2, 3)
 
         return res1;
 

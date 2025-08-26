@@ -62,7 +62,11 @@ function sqlIn<
     TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
     TValues extends readonly (TValueType | QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any>)[]
 >
-    (this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, param?: TParamMedian, ...values: TValues) {
+    (
+        this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
+        param?: TParamMedian,
+        ...values: TValues
+    ) {
 
     if (param instanceof QueryParamMedian) {
         const paramRes = new QueryParam<TDbType, TParamName extends string ? TParamName : never, TDbType extends PgDbType ? GetArrayEquivalentPgValueType<TValueType> : never>(param.name);
@@ -83,7 +87,7 @@ function sqlIn<
         (
             this,
             comparisonOperations.in.name,
-            values as any
+            [param, ...values] as any
         );
 }
 
