@@ -22,7 +22,7 @@ type TablesToResultMap<TDbType extends DbType, TTables extends QueryTable<TDbTyp
         [
         T in TTables[number]as
         T extends QueryTable<TDbType, any, any, any, any, any> ?
-        T["asName"] extends undefined ? T["table"]["name"] : T["asName"]
+        T["asName"] extends undefined ? T["table"]["name"] : T["asName"] & string
         : never
         ]:
         {

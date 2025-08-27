@@ -10,6 +10,11 @@ import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
 
 const whereResult = customersTable.where((cols) => cols.customers.id.eq(1)).select().exec();
 
+const selectTable = customersTable.select().exec();
+const selectQTable = customersTable.as("cst").select().exec();
+
+const joinQTable = customersTable.as("cst").join("INNER", usersTable, (cols) => cols.users.id.eq(cols.cst.createdBy)).select().exec();
+
 /**
  * 
  */

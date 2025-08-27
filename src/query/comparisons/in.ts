@@ -1,8 +1,7 @@
 import type { DbType, PgDbType } from "../../db.js";
-import type { GetArrayEquivalentPgValueType, JsTypeToPgTypes, PgTypeToJsType } from "../../postgresql/dataTypes.js";
+import type { GetArrayEquivalentPgValueType, JsTypeToPgTypes } from "../../postgresql/dataTypes.js";
 import type Column from "../../table/column.js";
 import type { ColumnType, QueryTableSpecsType } from "../../table/types/utils.js";
-import type { UnionToTupleOrdered } from "../../utility/common.js";
 import { isNullOrUndefined } from "../../utility/guards.js";
 import type { GetColumnTypeFromDbType } from "../_types/miscellaneous.js";
 import ColumnComparisonOperation, { comparisonOperations } from "../comparison.js";
@@ -31,7 +30,7 @@ function sqlIn<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     undefined,
-    ExtractColumnsFromMix<TValues>, // Helper type to extract only the columns as tuple
+    ExtractColumnsFromMix<TValues>["length"] extends 0 ? undefined : ExtractColumnsFromMix<TValues>, // Helper type to extract only the columns as tuple
     TValueType
 >
 
@@ -85,7 +84,7 @@ function sqlIn<
         (
             this,
             comparisonOperations.in.name,
-            [param, ...values] 
+            [param, ...values]
         );
 }
 
