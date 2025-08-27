@@ -8,6 +8,7 @@ import type { TableSpecsType } from "../../table/types/tableSpecs.js";
 import { customersTable, ordersTable, shipmentsTable, usersTable } from "./_tables.js";
 import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
 
+const whereResult = customersTable.where((cols) => cols.customers.id.eq(1)).select().exec();
 
 /**
  * 
@@ -55,8 +56,9 @@ const AutoSelectMultiJoins = customersTable
             )
         );
 
-        // const inres = cols.users.id.sqlIn(cols.customers.id, cols.users.id);
-
+        const inres = cols.users.id.sqlIn(...[cols.customers.id, cols.users.id]);
+        type inrest = typeof inres extends ColumnComparisonOperation<any, any, any, infer TCols, any> ? TCols : never;
+        type prm = inrest[1];
 
         return res1;
 

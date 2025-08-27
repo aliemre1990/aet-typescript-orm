@@ -14,6 +14,7 @@ import QueryColumn, { type QueryParam } from "../query/queryColumn.js";
 import type { QueryTableSpecsType, TableSpecsType } from "./types/tableSpecs.js";
 import type { ColumnsObjectType, GetColumnType, QueryColumnsObjectType } from "./types/utils.js";
 import QueryTable from "../query/queryTable.js";
+import type { IWhereQuery } from "../query/_interfaces/IWhereQuery.js";
 
 class ForeignKey {
     constructor(public column: string, public references: { table: string; column: string | 'self-parent' | 'self-child' }) { }
@@ -28,7 +29,8 @@ class Table<
     // ISelectQuery<TDbType, TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>>>,
     ISelectQuery<TDbType, any>,
     // IJoinQuery<TDbType, TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>>> {
-    IJoinQuery<TDbType, any> {
+    IJoinQuery<TDbType, any>,
+    IWhereQuery<TDbType, any> {
 
     constructor(
         public name: TTableName,
@@ -68,7 +70,7 @@ class Table<
                 return prev;
             }, {} as QueryColumnsObjectType<TDbType, QueryTableSpecsType>) as TQueryColumns;
 
-        const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>(this, queryColumns);
+        const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>(this as any, queryColumns);
         const tables = { [this.name]: queryTable };
 
         return new QueryBuilder<TDbType, TableToObject<typeof queryTable>>(tables as TableToObject<typeof queryTable>).select(cb);
@@ -120,6 +122,22 @@ class Table<
 
         return new QueryBuilder<TDbType, TableToObject<typeof queryTable>, undefined, undefined>(tables as TableToObject<typeof queryTable>)
             .join(type, table as any, cb);
+    }
+
+    where<
+        TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>
+    >(cb: (cols: TableToColumnsMap<TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>>>) => TCbResult) {
+        const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
+            prev[curr[0]] = new QueryColumn(curr[1]);
+            return prev;
+        }, {} as QueryColumnsObjectType<TDbType, QueryTableSpecsType>) as TQueryColumns
+
+        const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>(this, queryColumns);
+        const tables = {
+            [this.name]: queryTable
+        };
+
+        return new QueryBuilder<TDbType, TableToObject<typeof queryTable>>(tables as TableToObject<typeof queryTable>).where(cb);
     }
 }
 
