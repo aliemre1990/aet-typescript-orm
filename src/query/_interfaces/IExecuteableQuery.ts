@@ -3,10 +3,11 @@ import type { PgValueTypes } from "../../postgresql/dataTypes.js";
 import type { QueryParam } from "../queryColumn.js";
 import type { QueryTablesObjectType } from "../../table/types/utils.js";
 import type { ColumnsToResultMap, QueryParamsToObject, TablesToResultMap, TResultShape } from "../_types/result.js";
+import type QueryTable from "../queryTable.js";
 
 interface IExecuteableQuery<
     TDbType extends DbType,
-    TTables extends QueryTablesObjectType<TDbType>,
+    TTables extends QueryTable<TDbType, any, any, any, any, any>[],
     TResult extends TResultShape<TDbType> | undefined = undefined,
     TParams extends QueryParam<TDbType, string, TDbType extends PgDbType ? PgValueTypes : never>[] | undefined = undefined
 > {

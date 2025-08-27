@@ -7,24 +7,21 @@ import type { ColumnsObjectType, QueryTablesObjectType, QueryTableSpecsType } fr
 import type { JoinType } from "../../types.js";
 import type ColumnComparisonOperation from "../comparison.js";
 import type ColumnLogicalOperation from "../logicalOperations.js";
-import type { TableToColumnsMap, TableToObject } from "../_types/miscellaneous.js";
+import type { TablesToObject, TableToColumnsMap, TableToObject } from "../_types/miscellaneous.js";
 import type { AccumulateParams, InferParamsFromOps } from "../_types/result.js";
 import { ISelectQuery } from "./ISelectQuery.js";
 import type QueryTable from "../queryTable.js";
 
 interface IJoinQuery<
     TDbType extends DbType,
-    TTables extends QueryTablesObjectType<TDbType>,
+    TTables extends QueryTable<TDbType, any, any, any, any, any>[],
     TParams extends QueryParam<TDbType, string, TDbType extends PgDbType ? PgValueTypes : never>[] | undefined = undefined
 > {
 
     join<
-        TInnerJoinTableQueryTableSpecs extends QueryTableSpecsType,
-        TInnerJoinTableAs extends string | undefined,
-        TInnerJoinTableName extends string,
-        TInnerJoinColumns extends ColumnsObjectType<TDbType>,
-        TInnerJoinTable extends Table<TDbType, TInnerJoinColumns, TInnerJoinTableName> | QueryTable<TDbType, TInnerJoinColumns, TInnerJoinTableName, Table<TDbType, TInnerJoinColumns, TInnerJoinTableName>, { [K in keyof TInnerJoinColumns]: QueryColumn<TDbType, TInnerJoinColumns[K], TInnerJoinTableQueryTableSpecs, string | undefined> }, TInnerJoinTableAs>,
-        TInnerJoinResult extends TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
+        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any>,
+        TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>,
+        TInnerJoinResult extends QueryTable<TDbType, any, any, any, any, any> = TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
         QueryTable<
             TDbType,
             TInnerCols,
@@ -33,14 +30,13 @@ interface IJoinQuery<
             { [K in keyof TInnerCols]: QueryColumn<TDbType, TInnerCols[K], { tableName: TInnerTableName }> }
         > :
         TInnerJoinTable,
-        TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>
     >(
         type: JoinType,
         table: TInnerJoinTable,
-        cb: (cols: TableToColumnsMap<TTables & TableToObject<TInnerJoinResult>>) => TCbResult
+        cb: (cols: TableToColumnsMap<TablesToObject<[...TTables, TInnerJoinResult]>>) => TCbResult
     ):
-        IJoinQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, AccumulateParams<TParams, TCbResult>> &
-        ISelectQuery<TDbType, TTables & TableToObject<TInnerJoinResult>, AccumulateParams<TParams, TCbResult>>
+        IJoinQuery<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
+        ISelectQuery<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>>
 
 }
 

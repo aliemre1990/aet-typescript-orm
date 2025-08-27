@@ -15,11 +15,22 @@ type TableToObject<TTable extends QueryTable<DbType, ColumnsObjectType<DbType>, 
     [K in TTable["asName"] extends undefined ? TTable["table"]["name"] : TTable["asName"] & string]: TTable
 }
 
+type TablesToObject<TTables extends QueryTable<DbType, any, any, any, any, any>[]> = {
+    [
+    T in TTables[number]as
+    T extends QueryTable<DbType, any, any, any, any, any> ?
+    T["asName"] extends undefined ?
+    T["table"]["name"] : T["asName"] & string
+    : never
+    ]: T
+}
+
 type GetColumnTypeFromDbType<TDbType extends DbType, TColumn extends Column<TDbType, any, any, any>> =
     TDbType extends PgDbType ? PgTypeToJsType<TColumn["type"]> : never;
 
 export type {
     TableToColumnsMap,
     TableToObject,
-    GetColumnTypeFromDbType
+    GetColumnTypeFromDbType,
+    TablesToObject
 }

@@ -6,7 +6,7 @@ import { IJoinQuery } from "../query/_interfaces/IJoinQuery.js";
 import { ISelectQuery } from "../query/_interfaces/ISelectQuery.js";
 import type ColumnLogicalOperation from "../query/logicalOperations.js";
 import { QueryBuilder } from "../query/queryBuilder.js";
-import type { TableToColumnsMap, TableToObject } from "../query/_types/miscellaneous.js";
+import type { TablesToObject, TableToColumnsMap, TableToObject } from "../query/_types/miscellaneous.js";
 import type { InferParamsFromOps, TResultShape } from "../query/_types/result.js";
 import type { JoinType } from "../types.js";
 import type Column from "./column.js";
@@ -27,10 +27,10 @@ class Table<
     TQueryColumns extends QueryColumnsObjectType<TDbType, QueryTableSpecsType> = { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], { tableName: TTableName }, undefined> }
 > implements
     // ISelectQuery<TDbType, TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>>>,
-    ISelectQuery<TDbType, any>,
+    ISelectQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>]>,
     // IJoinQuery<TDbType, TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>>> {
-    IJoinQuery<TDbType, any>,
-    IWhereQuery<TDbType, any> {
+    IJoinQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>]>,
+    IWhereQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>]> {
 
     constructor(
         public name: TTableName,
@@ -53,13 +53,13 @@ class Table<
     }
 
     select<TCb extends undefined>():
-        IExecuteableQuery<TDbType, TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>>, TCb extends (cols: any) => infer TR ? TR : undefined>
+        IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>], TCb extends (cols: any) => infer TR ? TR : undefined>
     select<
-        TCb extends ((cols: TableToColumnsMap<TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>>>) => TResultShape<TDbType>)
+        TCb extends ((cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>) => TResultShape<TDbType>)
     >(cb: TCb):
-        IExecuteableQuery<TDbType, TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>>, TCb extends (cols: any) => infer TR ? TR : undefined>
+        IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>], TCb extends (cols: any) => infer TR ? TR : undefined>
     select<
-        TCb extends ((cols: TableToColumnsMap<TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>>>) => TResultShape<TDbType>)
+        TCb extends ((cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>) => TResultShape<TDbType>)
     >(
         cb?: TCb
     ) {
@@ -71,18 +71,15 @@ class Table<
             }, {} as QueryColumnsObjectType<TDbType, QueryTableSpecsType>) as TQueryColumns;
 
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>(this as any, queryColumns);
-        const tables = { [this.name]: queryTable };
 
-        return new QueryBuilder<TDbType, TableToObject<typeof queryTable>>(tables as TableToObject<typeof queryTable>).select(cb);
+
+        return new QueryBuilder<TDbType, [typeof queryTable]>([queryTable]).select(cb);
     }
 
     join<
-        TInnerJoinTableQueryTableSpecs extends QueryTableSpecsType,
-        TInnerJoinTableAs extends string | undefined,
-        TInnerJoinTableName extends string,
-        TInnerJoinColumns extends ColumnsObjectType<TDbType>,
-        TInnerJoinTable extends Table<TDbType, TInnerJoinColumns, TInnerJoinTableName> | QueryTable<TDbType, TInnerJoinColumns, TInnerJoinTableName, Table<TDbType, TInnerJoinColumns, TInnerJoinTableName>, { [K in keyof TInnerJoinColumns]: QueryColumn<TDbType, TInnerJoinColumns[K], TInnerJoinTableQueryTableSpecs, string | undefined> }, TInnerJoinTableAs>,
-        TInnerJoinResult extends TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
+        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any>,
+        TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>,
+        TInnerJoinResult extends QueryTable<TDbType, any, any, any, any, any> = TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
         QueryTable<
             TDbType,
             TInnerCols,
@@ -91,23 +88,25 @@ class Table<
             { [K in keyof TInnerCols]: QueryColumn<TDbType, TInnerCols[K], { tableName: TInnerTableName }> }
         > :
         TInnerJoinTable,
-        TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>
 
     >(
         type: JoinType,
         table: TInnerJoinTable,
         cb: (cols:
             TableToColumnsMap<
-                TableToObject<
-                    QueryTable<
-                        TDbType,
-                        TColumns,
-                        TTableName,
-                        Table<TDbType, TColumns, TTableName>,
-                        TQueryColumns
-                    >
-                > &
-                TableToObject<TInnerJoinResult>
+                TablesToObject<
+                    [
+                        QueryTable<
+                            TDbType,
+                            TColumns,
+                            TTableName,
+                            Table<TDbType, TColumns, TTableName>,
+                            TQueryColumns
+                        >
+                        ,
+                        TInnerJoinResult
+                    ]
+                >
             >) => TCbResult
     ) {
         const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
@@ -116,28 +115,23 @@ class Table<
         }, {} as QueryColumnsObjectType<TDbType, QueryTableSpecsType>) as TQueryColumns
 
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>(this, queryColumns);
-        const tables = {
-            [this.name]: queryTable
-        };
 
-        return new QueryBuilder<TDbType, TableToObject<typeof queryTable>, undefined, undefined>(tables as TableToObject<typeof queryTable>)
-            .join(type, table as any, cb);
+
+        return new QueryBuilder<TDbType, [typeof queryTable]>([queryTable])
+            .join(type, table, cb);
     }
 
     where<
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>
-    >(cb: (cols: TableToColumnsMap<TableToObject<QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>>>) => TCbResult) {
+    >(cb: (cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>) => TCbResult) {
         const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
             prev[curr[0]] = new QueryColumn(curr[1]);
             return prev;
         }, {} as QueryColumnsObjectType<TDbType, QueryTableSpecsType>) as TQueryColumns
 
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>(this, queryColumns);
-        const tables = {
-            [this.name]: queryTable
-        };
 
-        return new QueryBuilder<TDbType, TableToObject<typeof queryTable>>(tables as TableToObject<typeof queryTable>).where(cb);
+        return new QueryBuilder<TDbType, [typeof queryTable]>([queryTable]).where(cb);
     }
 }
 

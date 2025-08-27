@@ -14,22 +14,35 @@ type TResultShape<TDbType extends DbType> = {
 };
 
 
-type TablesToResultMap<TDbType extends DbType, T extends QueryTablesObjectType<TDbType>> =
-    T extends undefined ? undefined :
-    UnionToTupleOrdered<T[keyof T]>["length"] extends 0 ?
-    undefined :
-    UnionToTupleOrdered<T[keyof T]>["length"] extends 1 ?
+type TablesToResultMap<TDbType extends DbType, TTables extends QueryTable<TDbType, any, any, any, any, any>[]> =
+    TTables extends undefined ? undefined :
+    TTables["length"] extends 0 ? undefined :
+    TTables["length"] extends 1 ?
     FlattenObject<{
-        [K in keyof T as T[K] extends QueryTable<TDbType, any, any, any, any, any> ? K : never]:
+        [
+        T in TTables[number]as
+        T extends QueryTable<TDbType, any, any, any, any, any> ?
+        T["asName"] extends undefined ? T["table"]["name"] : T["asName"]
+        : never
+        ]:
         {
-            [C in keyof T[K]["columns"]as T[K]["columns"][C]["column"]["name"]]: PgTypeToJsType<T[K]["columns"][C]["column"]["type"]>
+            [C in keyof T["columns"]as T["columns"][C]["column"]["name"]]: PgTypeToJsType<T["columns"][C]["column"]["type"]>
         }
 
     }> :
     FlattenObject<{
-        [K in keyof T as T[K] extends QueryTable<TDbType, any, any, any, any, any> ? K : never]:
+        [
+        T in TTables[number]as
+        T extends QueryTable<TDbType, any, any, any, any, any> ?
+        T["asName"] extends undefined ? T["table"]["name"] : T["asName"] & string
+        : never
+        ]:
         {
-            [C in keyof T[K]["columns"]as  `${IsPlural<K & string> extends true ? ToSingular<K & string> : K & string}${Capitalize<T[K]["columns"][C]["column"]["name"]>}`]: PgTypeToJsType<T[K]["columns"][C]["column"]["type"]>
+            [
+            C in keyof T["columns"]as
+            `${IsPlural<(T["asName"] extends undefined ? T["table"]["name"] : T["asName"]) & string> extends true ?
+            ToSingular<(T["asName"] extends undefined ? T["table"]["name"] : T["asName"]) & string> :
+            (T["asName"] extends undefined ? T["table"]["name"] : T["asName"]) & string}${Capitalize<T["columns"][C]["column"]["name"]>}`]: PgTypeToJsType<T["columns"][C]["column"]["type"]>
         }
     }>;
 //  [C in keyof T[keyof T]["columns"]as T[keyof T]["columns"][C] extends QueryColumn<TDbType, any, any, any> ? C : never]:
