@@ -2,8 +2,6 @@ import { DbType, PgDbType } from "../db.js";
 import type { PgValueTypes } from "../postgresql/dataTypes.js";
 import type ColumnComparisonOperation from "../query/comparison.js";
 import type { IExecuteableQuery } from "../query/_interfaces/IExecuteableQuery.js";
-import { IJoinQuery } from "../query/_interfaces/IJoinQuery.js";
-import { ISelectQuery } from "../query/_interfaces/ISelectQuery.js";
 import type ColumnLogicalOperation from "../query/logicalOperations.js";
 import { QueryBuilder } from "../query/queryBuilder.js";
 import type { TablesToObject, TableToColumnsMap, TableToObject } from "../query/_types/miscellaneous.js";
@@ -14,7 +12,9 @@ import QueryColumn, { type QueryParam } from "../query/queryColumn.js";
 import type { QueryTableSpecsType, TableSpecsType } from "./types/tableSpecs.js";
 import type { ColumnsObjectType, GetColumnType, QueryColumnsObjectType } from "./types/utils.js";
 import QueryTable from "../query/queryTable.js";
-import type { IWhereQuery } from "../query/_interfaces/IWhereQuery.js";
+import type IJoinClause from "../query/_interfaces/IJoinClause.js";
+import type ISelectClause from "../query/_interfaces/ISelectClause.js";
+import type IWhereClause from "../query/_interfaces/IWhereClause.js";
 
 class ForeignKey {
     constructor(public column: string, public references: { table: string; column: string | 'self-parent' | 'self-child' }) { }
@@ -26,9 +26,9 @@ class Table<
     TTableName extends string = string,
     TQueryColumns extends QueryColumnsObjectType<TDbType, QueryTableSpecsType> = { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], { tableName: TTableName }, undefined> }
 > implements
-    ISelectQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>]>,
-    IJoinQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>]>,
-    IWhereQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>]> {
+    ISelectClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>]>,
+    IJoinClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>]>,
+    IWhereClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>]> {
 
     constructor(
         public name: TTableName,

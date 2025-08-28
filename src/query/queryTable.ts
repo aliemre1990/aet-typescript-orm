@@ -4,9 +4,9 @@ import type Table from "../table/table.js";
 import type { ColumnsObjectType, QueryColumnsObjectType, QueryTableSpecsType } from "../table/types/utils.js";
 import type { JoinType } from "../types.js";
 import type { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
-import type { IJoinQuery } from "./_interfaces/IJoinQuery.js";
-import type { ISelectQuery } from "./_interfaces/ISelectQuery.js";
-import type { IWhereQuery } from "./_interfaces/IWhereQuery.js";
+import type IJoinClause from "./_interfaces/IJoinClause.js";
+import type ISelectClause from "./_interfaces/ISelectClause.js";
+import type IWhereClause from "./_interfaces/IWhereClause.js";
 import type { TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.js";
 import type { TResultShape } from "./_types/result.js";
 import type ColumnComparisonOperation from "./comparison.js";
@@ -21,9 +21,9 @@ class QueryTable<
     TQColumns extends QueryColumnsObjectType<TDbType>,
     TAsName extends string | undefined = undefined
 > implements
-    ISelectQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>,
-    IJoinQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>,
-    IWhereQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]> {
+    ISelectClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>,
+    IJoinClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>,
+    IWhereClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]> {
 
     constructor(public table: TTable, public columns: TQColumns, public asName?: TAsName) { }
 

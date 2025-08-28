@@ -8,39 +8,27 @@ import type { JoinType } from "../types.js";
 import { isNullOrUndefined } from "../utility/guards.js";
 import type ColumnComparisonOperation from "./comparison.js";
 import { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
-import { IJoinQuery } from "./_interfaces/IJoinQuery.js";
-import { ISelectQuery } from "./_interfaces/ISelectQuery.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
 import type { TablesToObject, TableToColumnsMap, TableToObject } from "./_types/miscellaneous.js";
 import type { AccumulateParams, ColumnsToResultMap, InferParamsFromOps, QueryParamsToObject, TablesToResultMap, TResultShape } from "./_types/result.js";
 import QueryTable from "./queryTable.js";
-import type { IWhereQuery } from "./_interfaces/IWhereQuery.js";
 import type Column from "../table/column.js";
-
-// function getColsSelection<TTablesSelection extends Table[]>(tables: TTablesSelection) {
-//     let colsSelection: TableToColumnsMap<TTablesSelection, ComparableColumn> = Object.entries(tables).reduce((prev, curr) => {
-//         prev[curr[1].name] = Object.entries(curr[1].columns.reduce((prevInner, currInner) => {
-//             prevInner[currInner.name] = new ComparableColumn(currInner);
-//             return prevInner;
-//         }, {} as any));
-
-//         return prev;
-//     }
-//         , {} as any);
-
-//     return colsSelection;
-// }
+import type IJoinClause from "./_interfaces/IJoinClause.js";
+import type ISelectClause from "./_interfaces/ISelectClause.js";
+import type IWhereClause from "./_interfaces/IWhereClause.js";
 
 class QueryBuilder<
     TDbType extends DbType,
     TTables extends QueryTable<TDbType, any, any, any, any, any>[],
     TResult extends TResultShape<TDbType> | undefined = undefined,
-    TParams extends QueryParam<TDbType, string, TDbType extends PgDbType ? PgValueTypes : never>[] | undefined = undefined
+    TParams extends QueryParam<TDbType, string, TDbType extends PgDbType ? PgValueTypes : never>[] | undefined = undefined,
+    TGroupColumns extends (QueryTable<TDbType, any, any, any, any, any> | QueryColumn<TDbType, any, any, any>)[] | undefined = undefined
+
 >
     implements
-    ISelectQuery<TDbType, TTables, any>,
-    IJoinQuery<TDbType, TTables, any>,
-    IWhereQuery<TDbType, TTables, any> {
+    ISelectClause<TDbType, TTables, any>,
+    IJoinClause<TDbType, TTables, any>,
+    IWhereClause<TDbType, TTables, any> {
 
     colsSelection?: TResult;
 
@@ -84,9 +72,9 @@ class QueryBuilder<
         table: TInnerJoinTable,
         cb: (cols: TableToColumnsMap<TablesToObject<[...TTables, TInnerJoinResult]>>) => TCbResult
     ):
-        IJoinQuery<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
-        ISelectQuery<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
-        IWhereQuery<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> {
+        IJoinClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
+        ISelectClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
+        IWhereClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> {
         let innerJoinTable: TInnerJoinResult;
         if ("table" in table) {
             innerJoinTable = table as TInnerJoinResult;
@@ -105,16 +93,16 @@ class QueryBuilder<
         const newTables = [...this.tables, innerJoinTable];
 
         return new QueryBuilder(newTables) as
-            IJoinQuery<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
-            ISelectQuery<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
-            IWhereQuery<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>>
+            IJoinClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
+            ISelectClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
+            IWhereClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>>
     }
 
     where<
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>
     >(cb: (cols: TableToColumnsMap<TablesToObject<TTables>>) => TCbResult):
-        ISelectQuery<TDbType, TTables, AccumulateParams<TParams, TCbResult>> {
-        return this as ISelectQuery<TDbType, TTables, AccumulateParams<TParams, TCbResult>>;
+        ISelectClause<TDbType, TTables, AccumulateParams<TParams, TCbResult>> {
+        return this as ISelectClause<TDbType, TTables, AccumulateParams<TParams, TCbResult>>;
     }
 
     exec(params?: QueryParamsToObject<TParams>): TResult extends undefined ? TablesToResultMap<TDbType, TTables> : ColumnsToResultMap<TDbType, TResult> {

@@ -9,10 +9,10 @@ import type ColumnComparisonOperation from "../comparison.js";
 import type ColumnLogicalOperation from "../logicalOperations.js";
 import type { TablesToObject, TableToColumnsMap, TableToObject } from "../_types/miscellaneous.js";
 import type { AccumulateParams, InferParamsFromOps } from "../_types/result.js";
-import { ISelectQuery } from "./ISelectQuery.js";
 import type QueryTable from "../queryTable.js";
+import type ISelectClause from "./ISelectClause.js";
 
-interface IJoinQuery<
+interface IJoinClause<
     TDbType extends DbType,
     TTables extends QueryTable<TDbType, any, any, any, any, any>[],
     TParams extends QueryParam<TDbType, string, TDbType extends PgDbType ? PgValueTypes : never>[] | undefined = undefined
@@ -35,11 +35,9 @@ interface IJoinQuery<
         table: TInnerJoinTable,
         cb: (cols: TableToColumnsMap<TablesToObject<[...TTables, TInnerJoinResult]>>) => TCbResult
     ):
-        IJoinQuery<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
-        ISelectQuery<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>>
+        IJoinClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
+        ISelectClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>>
 
 }
 
-export type {
-    IJoinQuery
-}
+export default IJoinClause;

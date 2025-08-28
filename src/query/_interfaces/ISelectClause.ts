@@ -1,13 +1,12 @@
 import { DbType, type PgDbType } from "../../db.js";
 import type { PgValueTypes } from "../../postgresql/dataTypes.js";
 import type { QueryParam } from "../queryColumn.js";
-import type { QueryTablesObjectType } from "../../table/types/utils.js";
 import type { TablesToObject, TableToColumnsMap } from "../_types/miscellaneous.js";
 import type { TResultShape } from "../_types/result.js";
 import { IExecuteableQuery } from "./IExecuteableQuery.js";
 import type QueryTable from "../queryTable.js";
 
-interface ISelectQuery<
+interface ISelectClause<
     TDbType extends DbType,
     TTables extends QueryTable<TDbType, any, any, any, any, any>[],
     TParams extends QueryParam<TDbType, string, TDbType extends PgDbType ? PgValueTypes : never>[] | undefined = undefined
@@ -24,6 +23,4 @@ interface ISelectQuery<
         cb?: TCb): IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined, TParams>
 }
 
-export type {
-    ISelectQuery
-}
+export default ISelectClause;
