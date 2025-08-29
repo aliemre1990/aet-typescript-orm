@@ -20,7 +20,7 @@ const res = customersTable
 
         return [cols.customers, cols.users.id, cols.shipments]
     })
-    .select(cols => ({ id: cols.customers.id, userId: cols.users.id}));
+    .select(cols => ({ id: cols.customers.id, userId: cols.users.id }));
 type tp = typeof res extends ISelectClause<any, any, any, infer grp> ? grp : never;
 type tp1 = tp[0];
 type tp2 = tp[1];
