@@ -1,0 +1,60 @@
+import type { DbType, PgDbType } from "../../db.js";
+import type { JsTypeToPgTypes, PgTypeToJsType } from "../../postgresql/dataTypes.js";
+import type Column from "../../table/column.js";
+import type { GetColumnTypeFromDbType } from "../_types/miscellaneous.js";
+import type { QueryParam } from "../queryColumn.js";
+import type QueryColumn from "../queryColumn.js";
+
+
+const aggregationOperations = {
+    // Basic aggregations
+    count: { name: 'COUNT' },
+    countDistinct: { name: 'COUNT_DISTINCT' },
+    sum: { name: 'SUM' },
+    avg: { name: 'AVG' },
+    min: { name: 'MIN' },
+    max: { name: 'MAX' },
+
+    // String aggregations
+    stringAgg: { name: 'STRING_AGG' },
+
+    // Array aggregations (PostgreSQL)
+    arrayAgg: { name: 'ARRAY_AGG' },
+
+    // JSON aggregations (PostgreSQL/MySQL)
+    jsonAgg: { name: 'JSON_AGG' },
+    jsonObjectAgg: { name: 'JSON_OBJECT_AGG' },
+
+    // Boolean aggregations
+    boolAnd: { name: 'BOOL_AND' },
+    boolOr: { name: 'BOOL_OR' },
+    every: { name: 'EVERY' }, // PostgreSQL alias for BOOL_AND
+
+    // Window function related (often used with aggregations)
+    first: { name: 'FIRST_VALUE' },
+    last: { name: 'LAST_VALUE' }
+} as const;
+
+type AggregationOperation = (typeof aggregationOperations)[keyof typeof aggregationOperations];
+
+class BasicColumnAggregationOperation<
+    TDbType extends DbType,
+    TQueryColumn extends QueryColumn<TDbType, any, any, any>,
+    TAppliedType extends any,
+    TResultType extends any
+> {
+    constructor(
+        public column: TQueryColumn,
+        public operation: AggregationOperation
+    ) { }
+}
+
+export default BasicColumnAggregationOperation;
+
+export {
+    aggregationOperations
+}
+
+export type {
+    AggregationOperation
+}

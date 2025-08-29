@@ -11,10 +11,10 @@ type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
 
 
 // More reliable version using conditional types
-type UnionToTupleOrdered<T> = UnionToIntersection<
+type UnionToTuple<T> = UnionToIntersection<
     T extends any ? (t: T) => T : never
 > extends (_: any) => infer W
-    ? [...UnionToTupleOrdered<Exclude<T, W>>, W]
+    ? [...UnionToTuple<Exclude<T, W>>, W]
     : [];
 
 type DeepPrettify<T> = T extends Function
@@ -33,7 +33,7 @@ type FlattenObject<T> = T extends object ?
 // type t1 = FlattenObject<{ a: { b: string, c: { d: string } } }>
 // type t = FlattenObject<{ a: { b: { c: { d: string, f: { g: string, h: string } } }, e: string } }>
 
-type SingleKeyObject<T> = UnionToTupleOrdered<keyof T>["length"] extends 1 ? T : never;
+type SingleKeyObject<T> = UnionToTuple<keyof T>["length"] extends 1 ? T : never;
 
 type SingleKeyObject2<T> = IsUnion<keyof T> extends true ? never : {} extends T ? never : T;
 
@@ -49,7 +49,7 @@ type IsUnion<T, U extends T = T> =
 type IsAny<T> = 0 extends 1 & T ? true : false;
 
 export type {
-    UnionToTupleOrdered,
+    UnionToTuple,
     DeepPrettify,
     UnionToIntersection,
     FlattenObject,

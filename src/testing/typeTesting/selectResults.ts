@@ -1,5 +1,5 @@
 import type { InferParamsFromOps } from "../../query/_types/result.js";
-import type ColumnComparisonOperation from "../../query/comparison.js";
+import type ColumnComparisonOperation from "../../query/comparisons/_comparisonOperations.js";
 import ColumnLogicalOperation, { and } from "../../query/logicalOperations.js";
 import { param } from "../../query/param.js";
 import QueryColumn from "../../query/queryColumn.js";

@@ -2,33 +2,34 @@ import { DbType, type PgDbType } from "../db.js";
 import type { PgValueTypes } from "../postgresql/dataTypes.js";
 import QueryColumn, { type QueryParam } from "./queryColumn.js";
 import type Table from "../table/table.js";
-import type { QueryTableSpecsType } from "../table/types/tableSpecs.js";
-import type { ColumnsObjectType, QueryColumnsObjectType, QueryTablesObjectType } from "../table/types/utils.js";
+import type { QueryColumnsObjectType } from "../table/types/utils.js";
 import type { JoinType } from "../types.js";
 import { isNullOrUndefined } from "../utility/guards.js";
-import type ColumnComparisonOperation from "./comparison.js";
+import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
 import { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
-import type { TablesToObject, TableToColumnsMap, TableToObject } from "./_types/miscellaneous.js";
-import type { AccumulateParams, ColumnsToResultMap, InferParamsFromOps, QueryParamsToObject, TablesToResultMap, TResultShape } from "./_types/result.js";
+import type { TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.js";
+import type { AccumulateParams, ColumnsToResultMap, GroupedColumnsToResultMap, InferParamsFromOps, QueryParamsToObject, TablesToGroupedResultMap, TablesToResultMap, TGroupedResultShape, TResultShape } from "./_types/result.js";
 import QueryTable from "./queryTable.js";
 import type Column from "../table/column.js";
 import type IJoinClause from "./_interfaces/IJoinClause.js";
 import type ISelectClause from "./_interfaces/ISelectClause.js";
 import type IWhereClause from "./_interfaces/IWhereClause.js";
+import type IGroupByClause from "./_interfaces/IGroupByClause.js";
+import type { TablesToColumnsMapFormatGroupedColumns } from "./_types/grouping.js";
 
 class QueryBuilder<
     TDbType extends DbType,
     TTables extends QueryTable<TDbType, any, any, any, any, any>[],
     TResult extends TResultShape<TDbType> | undefined = undefined,
     TParams extends QueryParam<TDbType, string, TDbType extends PgDbType ? PgValueTypes : never>[] | undefined = undefined,
-    TGroupColumns extends (QueryTable<TDbType, any, any, any, any, any> | QueryColumn<TDbType, any, any, any>)[] | undefined = undefined
-
+    TGroupedColumns extends ({ [key: string]: QueryColumn<TDbType, any, any, any> } | QueryColumn<TDbType, any, any, any>)[] | undefined = undefined,
 >
     implements
-    ISelectClause<TDbType, TTables, any>,
-    IJoinClause<TDbType, TTables, any>,
-    IWhereClause<TDbType, TTables, any> {
+    ISelectClause<TDbType, TTables, TParams, TGroupedColumns>,
+    IJoinClause<TDbType, TTables, TParams>,
+    IWhereClause<TDbType, TTables, TParams>,
+    IGroupByClause<TDbType, TTables, TParams> {
 
     colsSelection?: TResult;
 
@@ -41,17 +42,24 @@ class QueryBuilder<
     }
 
     select<TCb extends undefined>():
-        IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined, TParams>
-    select<
-        TCb extends ((cols: TableToColumnsMap<TablesToObject<TTables>>) => TResultShape<TDbType>)
+        IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>
+    select<TCb extends (
+        cols: TGroupedColumns extends undefined ?
+            TableToColumnsMap<TablesToObject<TTables>> :
+            TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>
+    ) => TGroupedColumns extends undefined ? TResultShape<TDbType> : TGroupedResultShape<TDbType>
     >(cb: TCb | undefined):
-        IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined, TParams>
+        IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>
     select<
-        TCb extends ((cols: TableToColumnsMap<TablesToObject<TTables>>) => TResultShape<TDbType>)
+        TCb extends (
+            cols: TGroupedColumns extends undefined ?
+                TableToColumnsMap<TablesToObject<TTables>> :
+                TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>
+        ) => TGroupedColumns extends undefined ? TResultShape<TDbType> : TGroupedResultShape<TDbType>
     >(
         cb?: TCb
-    ): IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined> {
-        return this as unknown as IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined, TParams>;
+    ): IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined, TParams, TGroupedColumns> {
+        return this as unknown as IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>;
     };
 
 
@@ -74,7 +82,8 @@ class QueryBuilder<
     ):
         IJoinClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
         ISelectClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
-        IWhereClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> {
+        IWhereClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
+        IGroupByClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> {
         let innerJoinTable: TInnerJoinResult;
         if ("table" in table) {
             innerJoinTable = table as TInnerJoinResult;
@@ -95,7 +104,8 @@ class QueryBuilder<
         return new QueryBuilder(newTables) as
             IJoinClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
             ISelectClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
-            IWhereClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>>
+            IWhereClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
+            IGroupByClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>>
     }
 
     where<
@@ -105,7 +115,23 @@ class QueryBuilder<
         return this as ISelectClause<TDbType, TTables, AccumulateParams<TParams, TCbResult>>;
     }
 
-    exec(params?: QueryParamsToObject<TParams>): TResult extends undefined ? TablesToResultMap<TDbType, TTables> : ColumnsToResultMap<TDbType, TResult> {
+    groupBy<const TCbResult extends ({ [key: string]: QueryColumn<TDbType, any, any, any> } | QueryColumn<TDbType, any, any, any>)[]
+    >(cb: (cols: TableToColumnsMap<TablesToObject<TTables>>) => TCbResult) {
+        return this as ISelectClause<TDbType, TTables, TParams, TCbResult>
+    }
+
+
+
+    exec(params?: QueryParamsToObject<TParams>):
+        TResult extends undefined ?
+        TGroupedColumns extends undefined ?
+        TablesToResultMap<TDbType, TTables> :
+        TablesToGroupedResultMap<TDbType, TTables, TGroupedColumns> :
+        TResult extends TResultShape<TDbType> ?
+        ColumnsToResultMap<TDbType, TResult> :
+        TResult extends TGroupedResultShape<TDbType> ?
+        GroupedColumnsToResultMap<TDbType, TResult> :
+        never {
         if (isNullOrUndefined(this?.colsSelection)) {
             return {} as any;
         }

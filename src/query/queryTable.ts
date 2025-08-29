@@ -9,7 +9,7 @@ import type ISelectClause from "./_interfaces/ISelectClause.js";
 import type IWhereClause from "./_interfaces/IWhereClause.js";
 import type { TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.js";
 import type { TResultShape } from "./_types/result.js";
-import type ColumnComparisonOperation from "./comparison.js";
+import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
 import { QueryBuilder } from "./queryBuilder.js";
 

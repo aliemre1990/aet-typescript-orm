@@ -3,17 +3,23 @@ import type { PgTypeToJsType } from "../../postgresql/dataTypes.js";
 import type QueryColumn from "../queryColumn.js";
 import type { ColumnType, QueryTablesObjectType, QueryTableSpecsType } from "../../table/types/utils.js";
 import type { IsPlural, ToSingular } from "../../utility/string.js";
-import type { DeepPrettify, FlattenObject, UnionToTupleOrdered } from "../../utility/common.js";
+import type { DeepPrettify, FlattenObject } from "../../utility/common.js";
 import type { QueryParam } from "../queryColumn.js";
-import type ColumnComparisonOperation from "../comparison.js";
+import type ColumnComparisonOperation from "../comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "../logicalOperations.js";
 import type QueryTable from "../queryTable.js";
+import type GroupedColumn from "../groupedColumn.js";
 
 type TResultShape<TDbType extends DbType> = {
     [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined> | TResultShape<TDbType>;
 };
 
+type TGroupedResultShape<TDbType extends DbType> = {
+    [key: string]: GroupedColumn<TDbType, QueryColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined>> | TGroupedResultShape<TDbType>;
+};
 
+
+//
 type TablesToResultMap<TDbType extends DbType, TTables extends QueryTable<TDbType, any, any, any, any, any>[]> =
     TTables extends undefined ? undefined :
     TTables["length"] extends 0 ? undefined :
@@ -45,10 +51,68 @@ type TablesToResultMap<TDbType extends DbType, TTables extends QueryTable<TDbTyp
             (T["asName"] extends undefined ? T["table"]["name"] : T["asName"]) & string}${Capitalize<T["columns"][C]["column"]["name"]>}`]: PgTypeToJsType<T["columns"][C]["column"]["type"]>
         }
     }>;
-//  [C in keyof T[keyof T]["columns"]as T[keyof T]["columns"][C] extends QueryColumn<TDbType, any, any, any> ? C : never]:
-//       PgTypeToJsType<T[keyof T]["columns"][C]["column"]["type"]>
 
+//    
+type TablesToGroupedResultMap<
+    TDbType extends DbType,
+    TTables extends QueryTable<TDbType, any, any, any, any, any>[],
+    TGroupedColumns extends ({ [key: string]: QueryColumn<TDbType, any, any, any> } | QueryColumn<TDbType, any, any, any>)[] | undefined
+> =
+    TTables extends undefined ? undefined :
+    TTables["length"] extends 0 ? undefined :
+    TTables["length"] extends 1 ?
+    FlattenObject<{
+        [
+        T in TTables[number]as
+        T extends QueryTable<TDbType, any, any, any, any, any> ?
+        T["asName"] extends undefined ? T["table"]["name"] : T["asName"] & string
+        : never
+        ]:
+        {
+            [C in keyof T["columns"]as T["columns"][C]["column"]["name"]]: PgTypeToJsType<T["columns"][C]["column"]["type"]>
+        }
+
+    }> :
+    FlattenObject<{
+        [
+        T in TTables[number]as
+        T extends QueryTable<TDbType, any, any, any, any, any> ?
+        T["asName"] extends undefined ? T["table"]["name"] : T["asName"] & string
+        : never
+        ]:
+        {
+            [
+            C in keyof T["columns"]as
+            `${IsPlural<(T["asName"] extends undefined ? T["table"]["name"] : T["asName"]) & string> extends true ?
+            ToSingular<(T["asName"] extends undefined ? T["table"]["name"] : T["asName"]) & string> :
+            (T["asName"] extends undefined ? T["table"]["name"] : T["asName"]) & string}${Capitalize<T["columns"][C]["column"]["name"]>}`]: PgTypeToJsType<T["columns"][C]["column"]["type"]>
+        }
+    }>;
+
+
+//
 type ColumnsToResultMap<TDbType extends DbType, T extends TResultShape<TDbType> | undefined> =
+    T extends undefined ? undefined :
+    DeepPrettify<{
+        [K in keyof T as T[K] extends QueryColumn<TDbType, any, any, any> ?
+        T[K]["asName"] extends undefined ? K : T[K]["asName"] & string : never]:
+        T[K] extends QueryColumn<TDbType, any, any, any> ? PgTypeToJsType<T[K]["column"]["type"]> : never
+    }
+        &
+    {
+        [K in keyof T as T[K] extends { [key: string]: QueryColumn<TDbType, any, infer TTableSpecs, any> } ?
+        TTableSpecs extends { asTableName: string } ? TTableSpecs["asTableName"] : K : never]:
+        T[K] extends { [key: string]: QueryColumn<TDbType, any, any, any> } ? ColumnsToResultMap<TDbType, T[K]> : never
+    }
+        &
+    {
+        [K in keyof T as T[K] extends TResultShape<TDbType> ? K : never]:
+        T[K] extends TResultShape<TDbType> ? ColumnsToResultMap<TDbType, T[K]> : never
+    }
+    >
+
+//
+type GroupedColumnsToResultMap<TDbType extends DbType, T extends TGroupedResultShape<TDbType> | undefined> =
     T extends undefined ? undefined :
     DeepPrettify<{
         [K in keyof T as T[K] extends QueryColumn<TDbType, any, any, any> ?
@@ -77,7 +141,7 @@ type QueryParamsToObject<T extends readonly QueryParam<any, any, any>[] | undefi
     } : undefined;
 
 
-
+//
 type InferParamsFromOps<T> =
     T extends ColumnComparisonOperation<any, any, infer TParams, any> ?
     TParams extends readonly QueryParam<any, any, any>[] ? TParams : [] :
@@ -97,6 +161,7 @@ type InferParamsFromOpsArray<T extends readonly any[]> =
     [];
 
 
+//
 type AccumulateParams<TParams extends QueryParam<any, any, any>[] | undefined, TCbResult extends ColumnComparisonOperation<any, any, any, any> | ColumnLogicalOperation<any, any>> =
     TParams extends undefined ?
     InferParamsFromOps<TCbResult>["length"] extends 0 ? undefined : InferParamsFromOps<TCbResult> :
@@ -109,5 +174,8 @@ export type {
     ColumnsToResultMap,
     QueryParamsToObject,
     InferParamsFromOps,
-    AccumulateParams
+    AccumulateParams,
+    TGroupedResultShape,
+    GroupedColumnsToResultMap,
+    TablesToGroupedResultMap
 }

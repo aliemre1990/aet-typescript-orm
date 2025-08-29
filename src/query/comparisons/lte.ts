@@ -3,7 +3,7 @@ import type { JsTypeToPgTypes, PgTypeToJsType } from "../../postgresql/dataTypes
 import type Column from "../../table/column.js";
 import type { ColumnType, QueryTableSpecsType } from "../../table/types/utils.js";
 import type { GetColumnTypeFromDbType } from "../_types/miscellaneous.js";
-import ColumnComparisonOperation, { comparisonOperations } from "../comparison.js";
+import ColumnComparisonOperation, { comparisonOperations } from "./_comparisonOperations.js";
 import { QueryParam, QueryParamMedian } from "../queryColumn.js";
 import QueryColumn from "../queryColumn.js";
 

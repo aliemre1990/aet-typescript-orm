@@ -1,5 +1,5 @@
 import type { DbType, PgDbType } from "../db.js";
-import type ColumnComparisonOperation from "./comparison.js";
+import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
 
 const logicalOperations = {
     and: { name: 'AND' },

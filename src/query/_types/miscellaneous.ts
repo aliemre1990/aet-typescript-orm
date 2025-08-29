@@ -2,7 +2,11 @@ import type { DbType, PgDbType } from "../../db.js";
 import type { PgTypeToJsType } from "../../postgresql/dataTypes.js";
 import type Column from "../../table/column.js";
 import type Table from "../../table/table.js";
+import type { TableSpecsType } from "../../table/types/tableSpecs.js";
 import type { ColumnsObjectType, QueryColumnsObjectType } from "../../table/types/utils.js";
+import type { UnionToTuple, } from "../../utility/common.js";
+import type GroupedColumn from "../groupedColumn.js";
+import type QueryColumn from "../queryColumn.js";
 import type QueryTable from "../queryTable.js";
 
 type TableToColumnsMap<T extends { [key: string]: QueryTable<DbType, ColumnsObjectType<DbType>, string, Table<DbType, ColumnsObjectType<DbType>, string>, QueryColumnsObjectType<DbType>, string | undefined> }, TIsComparableColumn extends boolean = false, TColumn = null> = {
@@ -27,6 +31,8 @@ type TablesToObject<TTables extends QueryTable<DbType, any, any, any, any, any>[
 
 type GetColumnTypeFromDbType<TDbType extends DbType, TColumn extends Column<TDbType, any, any, any>> =
     TDbType extends PgDbType ? PgTypeToJsType<TColumn["type"]> : never;
+
+
 
 export type {
     TableToColumnsMap,

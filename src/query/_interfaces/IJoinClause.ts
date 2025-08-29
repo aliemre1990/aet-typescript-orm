@@ -5,12 +5,13 @@ import type QueryColumn from "../queryColumn.js";
 import type Table from "../../table/table.js";
 import type { ColumnsObjectType, QueryTablesObjectType, QueryTableSpecsType } from "../../table/types/utils.js";
 import type { JoinType } from "../../types.js";
-import type ColumnComparisonOperation from "../comparison.js";
+import type ColumnComparisonOperation from "../comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "../logicalOperations.js";
 import type { TablesToObject, TableToColumnsMap, TableToObject } from "../_types/miscellaneous.js";
 import type { AccumulateParams, InferParamsFromOps } from "../_types/result.js";
 import type QueryTable from "../queryTable.js";
 import type ISelectClause from "./ISelectClause.js";
+import type IGroupByClause from "./IGroupByClause.js";
 
 interface IJoinClause<
     TDbType extends DbType,
@@ -36,7 +37,8 @@ interface IJoinClause<
         cb: (cols: TableToColumnsMap<TablesToObject<[...TTables, TInnerJoinResult]>>) => TCbResult
     ):
         IJoinClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
-        ISelectClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>>
+        ISelectClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
+        IGroupByClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>>
 
 }
 
