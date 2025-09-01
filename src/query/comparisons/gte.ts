@@ -65,14 +65,14 @@ function gte<
 
         return new ColumnComparisonOperation(
             this,
-            comparisonOperations.gte.name,
+            comparisonOperations.gte,
             [param]
         )
     }
 
     return new ColumnComparisonOperation(
         this,
-        comparisonOperations.gte.name,
+        comparisonOperations.gte,
         [value]
     );
 }

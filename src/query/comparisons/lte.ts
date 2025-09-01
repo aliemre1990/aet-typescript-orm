@@ -65,14 +65,14 @@ function lte<
 
         return new ColumnComparisonOperation(
             this,
-            comparisonOperations.lte.name,
+            comparisonOperations.lte,
             [param]
         )
     }
 
     return new ColumnComparisonOperation(
         this,
-        comparisonOperations.lte.name,
+        comparisonOperations.lte,
         [value]
     );
 }

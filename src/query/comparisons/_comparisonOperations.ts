@@ -23,7 +23,7 @@ const comparisonOperations = {
     notExists: { name: 'NOTEXISTS' }
 } as const;
 
-type ComparisonOperation = (typeof comparisonOperations)[keyof typeof comparisonOperations]["name"];
+type ComparisonOperation = (typeof comparisonOperations)[keyof typeof comparisonOperations];
 
 class ColumnComparisonOperation<
     TDbType extends DbType,

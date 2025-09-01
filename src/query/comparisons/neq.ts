@@ -65,14 +65,14 @@ function neq<
 
         return new ColumnComparisonOperation(
             this,
-            comparisonOperations.neq.name,
+            comparisonOperations.neq,
             [param]
         )
     }
 
     return new ColumnComparisonOperation(
         this,
-        comparisonOperations.neq.name,
+        comparisonOperations.neq,
         [value]
     );
 }

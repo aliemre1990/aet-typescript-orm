@@ -65,14 +65,14 @@ function eq<
 
         return new ColumnComparisonOperation(
             this,
-            comparisonOperations.eq.name,
+            comparisonOperations.eq,
             [param]
         )
     }
 
     return new ColumnComparisonOperation(
         this,
-        comparisonOperations.eq.name,
+        comparisonOperations.eq,
         [value]
     );
 }

@@ -65,14 +65,14 @@ function lt<
 
         return new ColumnComparisonOperation(
             this,
-            comparisonOperations.lt.name,
+            comparisonOperations.lt,
             [param]
         )
     }
 
     return new ColumnComparisonOperation(
         this,
-        comparisonOperations.lt.name,
+        comparisonOperations.lt,
         [value]
     );
 }

@@ -75,7 +75,7 @@ function sqlIn<
 
         return new ColumnComparisonOperation(
             this,
-            comparisonOperations.in.name,
+            comparisonOperations.in,
             [paramRes]
         )
     }
@@ -83,7 +83,7 @@ function sqlIn<
     return new ColumnComparisonOperation
         (
             this,
-            comparisonOperations.in.name,
+            comparisonOperations.in,
             [param, ...values]
         );
 }

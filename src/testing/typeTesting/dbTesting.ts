@@ -11,7 +11,7 @@ const client = new Client({
 await client.connect();
 
 
-// Returns two columns, second column name is sum.
+// Returns two columns, second column name is sum. the later sum overrides before.
 const res = await client.query("SELECT customer_id, sum(freight),sum(ship_via) FROM orders GROUP BY customer_id;");
 
 console.log(res);

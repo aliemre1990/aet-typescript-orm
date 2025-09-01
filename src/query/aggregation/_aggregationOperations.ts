@@ -39,7 +39,7 @@ type AggregationOperation = (typeof aggregationOperations)[keyof typeof aggregat
 
 class BasicColumnAggregationOperation<
     TDbType extends DbType,
-    TQueryColumn extends QueryColumn<TDbType, any, any, any>,
+    TQueryColumn extends QueryColumn<TDbType, any, any, any> | undefined,
     TAppliedType extends any,
     TResultType extends any
 > {
