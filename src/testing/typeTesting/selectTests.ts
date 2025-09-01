@@ -8,12 +8,38 @@ import type { TableSpecsType } from "../../table/types/tableSpecs.js";
 import { customersTable, ordersTable, shipmentsTable, usersTable } from "./_tables.js";
 import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
 
-const whereResult = customersTable.where((cols) => cols.customers.id.eq(1)).select().exec();
+/**
+ * 
+ */
+const SingleTableAutoSelectWhereWithParamQuery = customersTable
+    .where((cols) => cols.customers.id.eq(param("whereparam")))
+    .select()
+    .exec;
 
-const selectTable = customersTable.select().exec();
-const selectQTable = customersTable.as("cst").select().exec();
+type SingleTableAutoSelectWhereWithParamQueryResult = { id: number, name: string, createdBy: number };
+type SingleTableAutoSelectWhereWithParamQueryReturnType = ReturnType<typeof SingleTableAutoSelectWhereWithParamQuery>;
+type SingleTableAutoSelectWhereWithParamQueryTest = AssertTrue<AssertEqual<SingleTableAutoSelectWhereWithParamQueryResult, SingleTableAutoSelectWhereWithParamQueryReturnType>>
 
-const joinQTable = customersTable.as("cst").join("INNER", usersTable, (cols) => cols.users.id.eq(cols.cst.createdBy)).select().exec();
+/**
+ * 
+ */
+const SingleQueryTableAutoSelectQuery = customersTable.as("cst").select().exec;
+
+type SingleQueryTableAutoSelectQueryResult = { id: number, name: string, createdBy: number };
+type SingleQueryTableAutoSelectQueryReturnType = ReturnType<typeof SingleQueryTableAutoSelectQuery>
+type SingleQueryTableAutoSelectQueryTest = AssertTrue<AssertEqual<SingleQueryTableAutoSelectQueryResult, SingleQueryTableAutoSelectQueryReturnType>>
+
+/**
+ * 
+ */
+const QueryTableJoinQuery = customersTable.as("cst")
+    .join("INNER", usersTable, (cols) => cols.users.id.eq(cols.cst.createdBy))
+    .select()
+    .exec;
+
+type QueryTableJoinQueryResult = { userId: number, userUserName: string, cstId: number, cstName: string, cstCreatedBy: number };
+type QueryTableJoinQueryReturnType = ReturnType<typeof QueryTableJoinQuery>;
+type QueryTableJoinQueryTest = AssertTrue<AssertEqual<QueryTableJoinQueryResult, QueryTableJoinQueryReturnType>>
 
 /**
  * 

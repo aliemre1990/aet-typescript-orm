@@ -9,6 +9,7 @@ import type ColumnComparisonOperation from "../comparisons/_comparisonOperations
 import type ColumnLogicalOperation from "../logicalOperations.js";
 import type QueryTable from "../queryTable.js";
 import type GroupedColumn from "../groupedColumn.js";
+import type { IsGroupedColumnsContains, SpreadGroupedColumns } from "./grouping.js";
 
 type TResultShape<TDbType extends DbType> = {
     [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined> | TResultShape<TDbType>;
@@ -56,7 +57,7 @@ type TablesToResultMap<TDbType extends DbType, TTables extends QueryTable<TDbTyp
 type TablesToGroupedResultMap<
     TDbType extends DbType,
     TTables extends QueryTable<TDbType, any, any, any, any, any>[],
-    TGroupedColumns extends ({ [key: string]: QueryColumn<TDbType, any, any, any> } | QueryColumn<TDbType, any, any, any>)[] | undefined
+    TGroupedColumns extends ({ [key: string]: QueryColumn<any, any, any, any> } | QueryColumn<any, any, any, any>)[] | undefined
 > =
     TTables extends undefined ? undefined :
     TTables["length"] extends 0 ? undefined :
@@ -64,28 +65,36 @@ type TablesToGroupedResultMap<
     FlattenObject<{
         [
         T in TTables[number]as
-        T extends QueryTable<TDbType, any, any, any, any, any> ?
         T["asName"] extends undefined ? T["table"]["name"] : T["asName"] & string
-        : never
         ]:
         {
-            [C in keyof T["columns"]as T["columns"][C]["column"]["name"]]: PgTypeToJsType<T["columns"][C]["column"]["type"]>
+            [
+            C in keyof T["columns"]as
+            TGroupedColumns extends ({ [key: string]: QueryColumn<any, any, any, any> } | QueryColumn<any, any, any, any>)[] ?
+            IsGroupedColumnsContains<SpreadGroupedColumns<TGroupedColumns>, T["columns"][C]> extends true ?
+            T["columns"][C]["column"]["name"] :
+            never :
+            never
+            ]: PgTypeToJsType<T["columns"][C]["column"]["type"]>
         }
 
     }> :
     FlattenObject<{
         [
         T in TTables[number]as
-        T extends QueryTable<TDbType, any, any, any, any, any> ?
         T["asName"] extends undefined ? T["table"]["name"] : T["asName"] & string
-        : never
         ]:
         {
             [
             C in keyof T["columns"]as
+            TGroupedColumns extends ({ [key: string]: QueryColumn<any, any, any, any> } | QueryColumn<any, any, any, any>)[] ?
+            IsGroupedColumnsContains<SpreadGroupedColumns<TGroupedColumns>, T["columns"][C]> extends true ?
             `${IsPlural<(T["asName"] extends undefined ? T["table"]["name"] : T["asName"]) & string> extends true ?
             ToSingular<(T["asName"] extends undefined ? T["table"]["name"] : T["asName"]) & string> :
-            (T["asName"] extends undefined ? T["table"]["name"] : T["asName"]) & string}${Capitalize<T["columns"][C]["column"]["name"]>}`]: PgTypeToJsType<T["columns"][C]["column"]["type"]>
+            (T["asName"] extends undefined ? T["table"]["name"] : T["asName"]) & string}${Capitalize<T["columns"][C]["column"]["name"]>}`
+            : never
+            : never
+            ]: PgTypeToJsType<T["columns"][C]["column"]["type"]>
         }
     }>;
 
@@ -115,20 +124,21 @@ type ColumnsToResultMap<TDbType extends DbType, T extends TResultShape<TDbType> 
 type GroupedColumnsToResultMap<TDbType extends DbType, T extends TGroupedResultShape<TDbType> | undefined> =
     T extends undefined ? undefined :
     DeepPrettify<{
-        [K in keyof T as T[K] extends QueryColumn<TDbType, any, any, any> ?
-        T[K]["asName"] extends undefined ? K : T[K]["asName"] & string : never]:
-        T[K] extends QueryColumn<TDbType, any, any, any> ? PgTypeToJsType<T[K]["column"]["type"]> : never
+        [K in keyof T as T[K] extends GroupedColumn<TDbType, infer TQColumn> ?
+        TQColumn["asName"] extends undefined ? K : TQColumn["asName"] & string : never]:
+        T[K] extends GroupedColumn<TDbType, infer TQColumn> ? PgTypeToJsType<TQColumn["column"]["type"]> : never
     }
         &
     {
-        [K in keyof T as T[K] extends { [key: string]: QueryColumn<TDbType, any, infer TTableSpecs, any> } ?
-        TTableSpecs extends { asTableName: string } ? TTableSpecs["asTableName"] : K : never]:
-        T[K] extends { [key: string]: QueryColumn<TDbType, any, any, any> } ? ColumnsToResultMap<TDbType, T[K]> : never
+        [K in keyof T as T[K] extends { [key: string]: GroupedColumn<TDbType, infer TQColumn> } ?
+        TQColumn extends QueryColumn<TDbType, any, infer TTableSpecs, any> ?
+        TTableSpecs extends { asTableName: string } ? TTableSpecs["asTableName"] : K : never : never]:
+        T[K] extends { [key: string]: GroupedColumn<TDbType, any> } ? GroupedColumnsToResultMap<TDbType, T[K]> : never
     }
         &
     {
-        [K in keyof T as T[K] extends TResultShape<TDbType> ? K : never]:
-        T[K] extends TResultShape<TDbType> ? ColumnsToResultMap<TDbType, T[K]> : never
+        [K in keyof T as T[K] extends TGroupedResultShape<TDbType> ? K : never]:
+        T[K] extends TGroupedResultShape<TDbType> ? GroupedColumnsToResultMap<TDbType, T[K]> : never
     }
     >
 

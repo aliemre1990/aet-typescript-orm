@@ -4,10 +4,16 @@ import type QueryColumn from "../queryColumn.js";
 import type QueryTable from "../queryTable.js";
 
 //
-type SpreadGroupedColumns<TGroupedColumns extends readonly any[]> =
+type SpreadGroupedColumns<TGroupedColumns extends readonly ({ [key: string]: QueryColumn<any, any, any, any> } | QueryColumn<any, any, any, any>)[]> =
     TGroupedColumns extends readonly [infer First, ...infer Rest] ?
-    First extends QueryColumn<any, any, any, any> ? [First, ...SpreadGroupedColumns<Rest>] :
-    First extends { [key: string]: QueryColumn<any, any, any, any> } ? [...SpreadGroupedTable<First>, ...SpreadGroupedColumns<Rest>] :
+    First extends QueryColumn<any, any, any, any> ? 
+        Rest extends ({ [key: string]: QueryColumn<any, any, any, any> } | QueryColumn<any, any, any, any>)[]?
+            [First, ...SpreadGroupedColumns<Rest>] :
+            [First]:
+    First extends { [key: string]: QueryColumn<any, any, any, any> } ?
+        Rest extends ({ [key: string]: QueryColumn<any, any, any, any> } | QueryColumn<any, any, any, any>)[]?
+            [...SpreadGroupedTable<First>, ...SpreadGroupedColumns<Rest>] :
+            [...SpreadGroupedTable<First>]:
     [] : [];
 
 type SpreadGroupedTable<TGroupedTable extends { [key: string]: any }> =
@@ -58,5 +64,6 @@ type TablesToColumnsMapFormatGroupedColumns<
 
 export type {
     TablesToColumnsMapFormatGroupedColumns,
-    SpreadGroupedColumns
+    SpreadGroupedColumns,
+    IsGroupedColumnsContains
 }
