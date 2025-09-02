@@ -8,7 +8,7 @@ import { QueryParam } from "../queryColumn.js";
 import type ColumnComparisonOperation from "../comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "../logicalOperations.js";
 import type QueryTable from "../queryTable.js";
-import type GroupedColumn from "../groupedColumn.js";
+import type GroupedColumn from "../aggregation/_groupedColumn.js";
 import type { IsGroupedColumnsContains, SpreadGroupedColumns } from "./grouping.js";
 import type ColumnSQLFunction from "../functions/_functions.js";
 

@@ -1,5 +1,5 @@
 import type { UnionToTuple } from "../../utility/common.js";
-import type GroupedColumn from "../groupedColumn.js";
+import type GroupedColumn from "../aggregation/_groupedColumn.js";
 import type QueryColumn from "../queryColumn.js";
 import type QueryTable from "../queryTable.js";
 

@@ -5,7 +5,7 @@ import type Table from "../../table/table.js";
 import type { TableSpecsType } from "../../table/types/tableSpecs.js";
 import type { ColumnsObjectType, QueryColumnsObjectType } from "../../table/types/utils.js";
 import type { UnionToTuple, } from "../../utility/common.js";
-import type GroupedColumn from "../groupedColumn.js";
+import type GroupedColumn from "../aggregation/_groupedColumn.js";
 import type QueryColumn from "../queryColumn.js";
 import type QueryTable from "../queryTable.js";
 

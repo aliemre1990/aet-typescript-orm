@@ -13,7 +13,7 @@ interface IWhereClause<
     TTables extends QueryTable<TDbType, any, any, any, any, any>[],
     TParams extends QueryParam<TDbType, string, TDbType extends PgDbType ? PgValueTypes : never>[] | undefined = undefined
 > {
-    where<TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>
+    where<TCbResult extends ColumnComparisonOperation<TDbType, any, any, any, any> | ColumnLogicalOperation<TDbType, any>
     >(cb: (cols: TableToColumnsMap<TablesToObject<TTables>>) => TCbResult):
         ISelectClause<TDbType, TTables, AccumulateParams<TParams, TCbResult>>
 

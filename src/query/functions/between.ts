@@ -3,7 +3,7 @@ import type { JsTypeToPgTypes, PgTypeToJsType } from "../../postgresql/dataTypes
 import type Column from "../../table/column.js";
 import type { ColumnType, QueryTableSpecsType } from "../../table/types/utils.js";
 import type { GetColumnTypeFromDbType } from "../_types/miscellaneous.js";
-import ColumnComparisonOperation, { comparisonOperations } from "./_comparisonOperations.js";
+import ColumnComparisonOperation, { comparisonOperations } from "../comparisons/_comparisonOperations.js";
 import { QueryParam, QueryParamMedian } from "../queryColumn.js";
 import QueryColumn from "../queryColumn.js";
 
@@ -19,6 +19,7 @@ function between<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     undefined,
+    undefined,
     undefined
 >
 function between<
@@ -33,7 +34,8 @@ function between<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     undefined,
-    [TLAppliedQColumn, TRAppliedQColumn]
+    [TLAppliedQColumn, TRAppliedQColumn],
+    undefined
 >
 function between<
     TDbType extends DbType,
@@ -52,6 +54,7 @@ function between<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     [TLParam, TRParam],
+    undefined,
     undefined
 >
 
@@ -67,7 +70,8 @@ function between<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     undefined,
-    [TLAppliedQColumn]
+    [TLAppliedQColumn],
+    undefined
 >
 function between<
     TDbType extends DbType,
@@ -80,7 +84,8 @@ function between<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     undefined,
-    [TRAppliedQColumn]
+    [TRAppliedQColumn],
+    undefined
 >
 
 // Param and value
@@ -97,6 +102,7 @@ function between<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     [TLParam],
+    undefined,
     undefined
 >
 function between<
@@ -112,6 +118,7 @@ function between<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     [TRParam],
+    undefined,
     undefined
 >
 
@@ -130,7 +137,8 @@ function between<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     [TLParam],
-    [TRAppliedQColumn]
+    [TRAppliedQColumn],
+    undefined
 >
 function between<
     TDbType extends DbType,
@@ -146,7 +154,8 @@ function between<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     [TRParam],
-    [TLAppliedQColumn]
+    [TLAppliedQColumn],
+    undefined
 >
 //Implementation
 function between<
@@ -177,15 +186,15 @@ function between<
             const rParam = new QueryParam<TDbType, TRParamName extends string ? TRParamName : never, TValueType>(rightValue.name);
 
             return new ColumnComparisonOperation(
+                comparisonOperations.between,
                 this,
-                comparisonOperations.between.name,
                 [lParam, rParam]
             )
         }
 
         return new ColumnComparisonOperation(
+            comparisonOperations.between,
             this,
-            comparisonOperations.between.name,
             [lParam, rightValue]
         )
 
@@ -198,23 +207,23 @@ function between<
             const lParam = new QueryParam<TDbType, TLParamName extends string ? TLParamName : never, TValueType>(leftValue.name);
 
             return new ColumnComparisonOperation(
+                comparisonOperations.between,
                 this,
-                comparisonOperations.eq.name,
                 [lParam, rParam]
             );
         }
 
         return new ColumnComparisonOperation(
+            comparisonOperations.between,
             this,
-            comparisonOperations.eq.name,
             [leftValue, rParam]
         );
 
     }
 
     return new ColumnComparisonOperation(
+        comparisonOperations.between,
         this,
-        comparisonOperations.eq.name,
         [leftValue, rightValue]
     );
 }
