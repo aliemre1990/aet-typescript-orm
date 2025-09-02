@@ -19,8 +19,6 @@ function between<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     undefined,
-    undefined,
-    undefined,
     undefined
 >
 function between<
@@ -35,8 +33,7 @@ function between<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     undefined,
-    [TLAppliedQColumn, TRAppliedQColumn],
-    undefined
+    [TLAppliedQColumn, TRAppliedQColumn]
 >
 function between<
     TDbType extends DbType,
@@ -55,7 +52,6 @@ function between<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     [TLParam, TRParam],
-    undefined,
     undefined
 >
 
@@ -71,8 +67,7 @@ function between<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     undefined,
-    [TLAppliedQColumn],
-    undefined
+    [TLAppliedQColumn]
 >
 function between<
     TDbType extends DbType,
@@ -85,8 +80,7 @@ function between<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     undefined,
-    [TRAppliedQColumn],
-    undefined
+    [TRAppliedQColumn]
 >
 
 // Param and value
@@ -103,7 +97,6 @@ function between<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     [TLParam],
-    undefined,
     undefined
 >
 function between<
@@ -119,7 +112,6 @@ function between<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     [TRParam],
-    undefined,
     undefined
 >
 
@@ -138,8 +130,7 @@ function between<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     [TLParam],
-    [TRAppliedQColumn],
-    undefined
+    [TRAppliedQColumn]
 >
 function between<
     TDbType extends DbType,
@@ -155,8 +146,7 @@ function between<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     [TRParam],
-    [TLAppliedQColumn],
-    undefined
+    [TLAppliedQColumn]
 >
 //Implementation
 function between<
@@ -187,15 +177,15 @@ function between<
             const rParam = new QueryParam<TDbType, TRParamName extends string ? TRParamName : never, TValueType>(rightValue.name);
 
             return new ColumnComparisonOperation(
-                comparisonOperations.between,
                 this,
+                comparisonOperations.between.name,
                 [lParam, rParam]
             )
         }
 
         return new ColumnComparisonOperation(
-            comparisonOperations.between,
             this,
+            comparisonOperations.between.name,
             [lParam, rightValue]
         )
 
@@ -208,23 +198,23 @@ function between<
             const lParam = new QueryParam<TDbType, TLParamName extends string ? TLParamName : never, TValueType>(leftValue.name);
 
             return new ColumnComparisonOperation(
-                comparisonOperations.between,
                 this,
+                comparisonOperations.eq.name,
                 [lParam, rParam]
             );
         }
 
         return new ColumnComparisonOperation(
-            comparisonOperations.between,
             this,
+            comparisonOperations.eq.name,
             [leftValue, rParam]
         );
 
     }
 
     return new ColumnComparisonOperation(
-        comparisonOperations.between,
         this,
+        comparisonOperations.eq.name,
         [leftValue, rightValue]
     );
 }

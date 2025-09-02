@@ -4,12 +4,13 @@ import type QueryColumn from "../queryColumn.js";
 import type { ColumnType, QueryTablesObjectType, QueryTableSpecsType } from "../../table/types/utils.js";
 import type { IsPlural, ToSingular } from "../../utility/string.js";
 import type { DeepPrettify, FlattenObject } from "../../utility/common.js";
-import type { QueryParam } from "../queryColumn.js";
+import { QueryParam } from "../queryColumn.js";
 import type ColumnComparisonOperation from "../comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "../logicalOperations.js";
 import type QueryTable from "../queryTable.js";
 import type GroupedColumn from "../groupedColumn.js";
 import type { IsGroupedColumnsContains, SpreadGroupedColumns } from "./grouping.js";
+import type ColumnSQLFunction from "../functions/_functions.js";
 
 type TResultShape<TDbType extends DbType> = {
     [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined> | TResultShape<TDbType>;
@@ -153,15 +154,20 @@ type QueryParamsToObject<T extends readonly QueryParam<any, any, any>[] | undefi
 
 //
 type InferParamsFromOps<T> =
-    T extends ColumnComparisonOperation<any, any, infer TParams, any> ?
-    TParams extends readonly QueryParam<any, any, any>[] ? TParams : [] :
-    T extends ColumnLogicalOperation<any, infer TOps> ?
+    T extends ColumnComparisonOperation<any, infer TFn, infer TParams, any, any> ?
+    TParams extends readonly QueryParam<any, any, any>[] ? TFn extends ColumnSQLFunction<any, any, any> ?
+    [...InferParamsFromFns<[TFn]>]
+    : TParams :
+    TFn extends ColumnSQLFunction<any, any, any> ?
+    InferParamsFromFns<[TFn]> :
+    []
+    : T extends ColumnLogicalOperation<any, infer TOps> ?
     InferParamsFromOpsArray<TOps> :
     [];
 
 type InferParamsFromOpsArray<T extends readonly any[]> =
     T extends readonly [infer First, ...infer Rest] ?
-    First extends ColumnComparisonOperation<any, any, infer TParams, any> ?
+    First extends ColumnComparisonOperation<any, any, infer TParams, any, any> ?
     TParams extends readonly QueryParam<any, any, any>[] ?
     [...TParams, ...InferParamsFromOpsArray<Rest>] :
     InferParamsFromOpsArray<Rest> :
@@ -170,9 +176,21 @@ type InferParamsFromOpsArray<T extends readonly any[]> =
     InferParamsFromOpsArray<Rest> :
     [];
 
+type InferParamsFromFns<T> =
+    T extends readonly [infer First, ...infer Rest] ?
+    First extends ColumnSQLFunction<any, infer TArgs, any> ?
+    [...InferParamsFromFnArgs<TArgs>, ...InferParamsFromFns<Rest>] : [...InferParamsFromFns<Rest>] : [];
+
+type InferParamsFromFnArgs<T> =
+    T extends readonly [infer FirstArg, ...infer RestArgs] ?
+    FirstArg extends QueryParam<any, any, any> ? [FirstArg, ...InferParamsFromFnArgs<RestArgs>] :
+    FirstArg extends ColumnSQLFunction<any, any, any> ? [...InferParamsFromFns<[FirstArg]>, ...InferParamsFromFnArgs<RestArgs>] :
+    [...InferParamsFromFnArgs<RestArgs>] :
+    [];
+
 
 //
-type AccumulateParams<TParams extends QueryParam<any, any, any>[] | undefined, TCbResult extends ColumnComparisonOperation<any, any, any, any> | ColumnLogicalOperation<any, any>> =
+type AccumulateParams<TParams extends QueryParam<any, any, any>[] | undefined, TCbResult extends ColumnComparisonOperation<any, any, any, any, any> | ColumnLogicalOperation<any, any>> =
     TParams extends undefined ?
     InferParamsFromOps<TCbResult>["length"] extends 0 ? undefined : InferParamsFromOps<TCbResult> :
     TParams extends QueryParam<any, any, any>[] ? [...TParams, ...InferParamsFromOps<TCbResult>] :

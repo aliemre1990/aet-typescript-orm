@@ -7,7 +7,7 @@ import ColumnComparisonOperation, { comparisonOperations } from "./_comparisonOp
 import { QueryParam, QueryParamMedian } from "../queryColumn.js";
 import QueryColumn from "../queryColumn.js";
 
-function neq<
+function gt<
     TDbType extends DbType,
     TColumn extends ColumnType<TDbType>,
     TQTableSpecs extends QueryTableSpecsType,
@@ -19,7 +19,7 @@ function neq<
     undefined,
     undefined
 >
-function neq<
+function gt<
     TDbType extends DbType,
     TColumn extends ColumnType<TDbType>,
     TQTableSpecs extends QueryTableSpecsType,
@@ -32,7 +32,7 @@ function neq<
     undefined,
     [TAppliedQColumn]
 >
-function neq<
+function gt<
     TDbType extends DbType,
     TColumn extends ColumnType<TDbType>,
     TQTableSpecs extends QueryTableSpecsType,
@@ -48,7 +48,7 @@ function neq<
     [TParam],
     undefined
 >
-function neq<
+function gt<
     TDbType extends DbType,
     TColumn extends ColumnType<TDbType>,
     TQTableSpecs extends QueryTableSpecsType,
@@ -65,16 +65,16 @@ function neq<
 
         return new ColumnComparisonOperation(
             this,
-            comparisonOperations.neq,
+            comparisonOperations.gt,
             [param]
         )
     }
 
     return new ColumnComparisonOperation(
         this,
-        comparisonOperations.neq,
+        comparisonOperations.gt,
         [value]
     );
 }
 
-export default neq;
+export default gt;

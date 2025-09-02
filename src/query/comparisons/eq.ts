@@ -6,6 +6,7 @@ import type { GetColumnTypeFromDbType } from "../_types/miscellaneous.js";
 import ColumnComparisonOperation, { comparisonOperations } from "./_comparisonOperations.js";
 import { QueryParam, QueryParamMedian } from "../queryColumn.js";
 import QueryColumn from "../queryColumn.js";
+import type ColumnSQLFunction from "../functions/_functions.js";
 
 function eq<
     TDbType extends DbType,
@@ -16,6 +17,7 @@ function eq<
 >(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, value: TValueType): ColumnComparisonOperation<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
+    undefined,
     undefined,
     undefined
 >
@@ -30,7 +32,22 @@ function eq<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     undefined,
-    [TAppliedQColumn]
+    [TAppliedQColumn],
+    undefined
+>
+function eq<
+    TDbType extends DbType,
+    TColumn extends ColumnType<TDbType>,
+    TQTableSpecs extends QueryTableSpecsType,
+    TAsName extends string | undefined,
+    TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
+    TAppliedSQLFunction extends ColumnSQLFunction<TDbType, any, TValueType>,
+>(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, value: TAppliedSQLFunction): ColumnComparisonOperation<
+    TDbType,
+    QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
+    undefined,
+    undefined,
+    [TAppliedSQLFunction]
 >
 function eq<
     TDbType extends DbType,
@@ -46,6 +63,7 @@ function eq<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     [TParam],
+    undefined,
     undefined
 >
 function eq<
@@ -56,23 +74,24 @@ function eq<
     TParamMedian extends QueryParamMedian<any> | undefined,
     TParamName extends (TParamMedian extends QueryParamMedian<infer U> ? U : never) | undefined,
     TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
-    TAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any> | undefined
+    TAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any> | undefined,
+    TAppliedSQLFunction extends ColumnSQLFunction<TDbType, any, TValueType> | undefined
 >
-    (this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, value: TValueType | TParamMedian | TAppliedQColumn) {
+    (this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, value: TValueType | TParamMedian | TAppliedQColumn | TAppliedSQLFunction) {
 
     if (value instanceof QueryParamMedian) {
         const param = new QueryParam<TDbType, TParamName extends string ? TParamName : never, TValueType>(value.name);
 
         return new ColumnComparisonOperation(
-            this,
             comparisonOperations.eq,
+            this,
             [param]
         )
     }
 
     return new ColumnComparisonOperation(
-        this,
         comparisonOperations.eq,
+        this,
         [value]
     );
 }

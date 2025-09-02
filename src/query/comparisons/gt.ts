@@ -17,6 +17,7 @@ function gt<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     undefined,
+    undefined,
     undefined
 >
 function gt<
@@ -30,7 +31,8 @@ function gt<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     undefined,
-    [TAppliedQColumn]
+    [TAppliedQColumn],
+    undefined
 >
 function gt<
     TDbType extends DbType,
@@ -46,6 +48,7 @@ function gt<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     [TParam],
+    undefined,
     undefined
 >
 function gt<
@@ -64,15 +67,15 @@ function gt<
         const param = new QueryParam<TDbType, TParamName extends string ? TParamName : never, TValueType>(value.name);
 
         return new ColumnComparisonOperation(
-            this,
             comparisonOperations.gt,
+            this,
             [param]
         )
     }
 
     return new ColumnComparisonOperation(
-        this,
         comparisonOperations.gt,
+        this,
         [value]
     );
 }

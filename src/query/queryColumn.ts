@@ -2,14 +2,10 @@ import type { DbType } from "../db.js";
 import QueryParam from "./param.js";
 import { QueryParamMedian } from "./param.js";
 import type { ColumnType, QueryTableSpecsType } from "../table/types/utils.js";
-import gte from "./comparisons/gte.js";
 import gt from "./comparisons/gt.js";
-import neq from "./comparisons/neq.js";
 import eq from "./comparisons/eq.js";
 import between from "./comparisons/between.js";
 import sqlIn from "./comparisons/in.js";
-import lt from "./comparisons/lt.js";
-import lte from "./comparisons/lte.js";
 
 class QueryColumn<
     TDbType extends DbType,
@@ -20,11 +16,7 @@ class QueryColumn<
     qTableSpecs?: TQTableSpecs;
 
     eq: typeof eq = eq;
-    neq: typeof neq = neq;
     gt: typeof gt = gt;
-    gte: typeof gte = gte;
-    lt: typeof lt = lt;
-    lte: typeof lte = lte;
     sqlIn: typeof sqlIn = sqlIn;
 
     between: typeof between = between;

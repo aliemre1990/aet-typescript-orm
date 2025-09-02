@@ -184,7 +184,7 @@ type JsTypeToPgTypes<T> =
     'JSON' | 'JSONB' | 'DOMAIN' | 'ANY' | 'ANYARRAY' | 'ANYNONARRAY' | 'ANYENUM' | 'ANYRANGE' | 'ANYCOMPATIBLE' | 'ANYCOMPATIBLEARRAY' | 'ANYCOMPATIBLENONARRAY' | 'ANYCOMPATIBLERANGE' | 'ANYELEMENT' | 'LANGUAGE_HANDLER' | 'INTERNAL' | 'OPAQUE' | 'FDW_HANDLER' | 'INDEX_AM_HANDLER' | 'TSM_HANDLER' | 'TABLE_AM_HANDLER' :
     never;
 
-type PgValueTypes = string | string[] | number | number[] | bigint | bigint[] | boolean | boolean[] | Date | Date[] | Buffer | object;
+type PgValueTypes = string | string[] | number | number[] | bigint | bigint[] | boolean | boolean[] | Date | Date[] | Buffer | object | null;
 
 type GetArrayEquivalentPgValueType<T> =
     T extends string ? string[] :

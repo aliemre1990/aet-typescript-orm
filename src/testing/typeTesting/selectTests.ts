@@ -76,12 +76,12 @@ const AutoSelectMultiJoins = customersTable
 
         const res1 = and(
             cols.users.id.eq(param("userParam1")),
-            cols.users.id.neq(param("userParam2")),
+            cols.users.id.eq(param("userParam2")),
             cols.users.userName.gt(param("userParam3")),
             cols.users.id.between(param("userBetweenLeft"), param("userBetweenRight")),
             and(
                 cols.users.id.eq(cols.customers.createdBy),
-                cols.customers.name.gte(param("userGteParam4")),
+                cols.customers.name.eq(param("userGteParam4")),
                 and(cols.users.id.eq(param("userEqParam1"))),
                 cols.users.id.sqlIn(param("inParam"))
             )
@@ -104,7 +104,7 @@ const AutoSelectMultiJoins = customersTable
             cols.parentUsers.id.eq(param("parentUserEq1")),
             cols.parentUsers.id.between(param("parentUserBetLeft"), cols.customers.id),
             cols.parentUsers.id.gt(param("parentUserGt2")),
-            cols.parentUsers.userName.neq(param("parentUserNeq3")),
+            cols.parentUsers.userName.eq(param("parentUserNeq3")),
             cols.parentUsers.userName.between(cols.customers.name, cols.users.userName),
             and(cols.customers.createdBy.gt(235), cols.parentUsers.userName.gt(param("innerParentUserParam1")))
         );
@@ -119,11 +119,14 @@ const AutoSelectMultiJoins = customersTable
          * 
          */
         type op0 = ops[0];
-        type op1AppliedColumnType = op0 extends ColumnComparisonOperation<any, any, any, infer TAppliedCol, any> ? TAppliedCol : never;
-        type op1ColumnType = op1AppliedColumnType[0] extends QueryColumn<any, infer TCol, any, any> ? TCol : never;
+        type op0AppliedColumnType = op0 extends ColumnComparisonOperation<any, any, any, infer TAppliedCol, any, any> ? TAppliedCol : never;
+        type op0ColumnType = op0AppliedColumnType[0] extends QueryColumn<any, infer TCol, any, any> ? TCol : never;
 
-        type op1ColumnResult = Column<"postgresql", "SERIAL", "id", TableSpecsType<"customers">>;
-        type op1Test = AssertTrue<AssertEqual<op1ColumnResult, op1ColumnType>>
+        type op0ColumnResult = Column<"postgresql", "SERIAL", "id", TableSpecsType<"customers">>;
+        type op0Test = AssertTrue<AssertEqual<op0ColumnResult, op0ColumnType>>;
+
+        type op1 = ops[1];
+        type op1Params = op1 extends ColumnComparisonOperation<any, any, infer TParams, any, any> ? TParams : never;
 
 
     })

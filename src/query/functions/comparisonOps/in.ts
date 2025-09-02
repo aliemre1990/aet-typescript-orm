@@ -49,7 +49,6 @@ function sqlIn<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     [TParam],
-    undefined,
     undefined
 >
 function sqlIn<
@@ -75,16 +74,16 @@ function sqlIn<
         const paramRes = new QueryParam(param.name);
 
         return new ColumnComparisonOperation(
-            comparisonOperations.in,
             this,
+            comparisonOperations.in,
             [paramRes]
         )
     }
 
     return new ColumnComparisonOperation
         (
-            comparisonOperations.in,
             this,
+            comparisonOperations.in,
             [param, ...values]
         );
 }
