@@ -1,28 +1,27 @@
-import type { DbType } from "../../db.js";
+import type { DbType, PgDbType } from "../../db.js";
 import type { PgValueTypes } from "../../postgresql/dataTypes.js";
 import { QueryParamMedian } from "../param.js";
 import QueryParam from "../param.js";
 import type QueryColumn from "../queryColumn.js";
 import ColumnSQLFunction, { sqlFunctions } from "./_functions.js";
 
-type ConvertMedianToParam<T> =
+type ConvertMedianToParam<T, TDbType extends DbType, TValueType extends TDbType extends PgDbType ? PgValueTypes : never> =
     T extends QueryParamMedian<infer U>
-    ? QueryParam<any, U, any>
+    ? QueryParam<TDbType, U, TValueType>
     : T;
 
-type ConvertMediansInArray<T extends any[]> = {
-    [K in keyof T]: ConvertMedianToParam<T[K]>
+type ConvertMediansInArray<T extends any[], TDbType extends DbType, TValueType extends TDbType extends PgDbType ? PgValueTypes : never> = {
+    [K in keyof T]: ConvertMedianToParam<T[K], TDbType, TValueType>
 };
 
-function coalesce<
+function pgCoalesce<
     TArgs extends (
         PgValueTypes |
         null |
         QueryParamMedian<any> |
-        QueryColumn<any, any, any, any> |
-        ColumnSQLFunction<any, any, any>
+        QueryColumn<PgDbType, any, any, any> |
+        ColumnSQLFunction<PgDbType, any, any>
     )[],
-    TDbType extends DbType,
 >
     (...args: TArgs) {
 
@@ -36,7 +35,7 @@ function coalesce<
         }
     }
 
-    return new ColumnSQLFunction(args as ConvertMediansInArray<TArgs>, sqlFunctions.coalesce);
+    return new ColumnSQLFunction(args as ConvertMediansInArray<TArgs, PgDbType, any>, sqlFunctions.coalesce);
 }
 
-export default coalesce;
+export default pgCoalesce;

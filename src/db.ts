@@ -1,5 +1,6 @@
 type PgDbType = 'postgresql';
-type DbType = PgDbType;
+type MySQLDbType = 'mysql';
+type DbType = PgDbType | MySQLDbType;
 
 export type {
     PgDbType,

@@ -1,5 +1,6 @@
 import type { InferParamsFromOps } from "../../query/_types/result.js";
 import type ColumnComparisonOperation from "../../query/comparisons/_comparisonOperations.js";
+import pgCoalesce from "../../query/functions/coalesce.js";
 import ColumnLogicalOperation, { and } from "../../query/logicalOperations.js";
 import { param } from "../../query/param.js";
 import QueryColumn from "../../query/queryColumn.js";
@@ -77,7 +78,7 @@ const AutoSelectMultiJoins = customersTable
         const res1 = and(
             cols.users.id.eq(param("userParam1")),
             cols.users.id.eq(param("userParam2")),
-            cols.users.userName.gt(param("userParam3")),
+            cols.users.userName.eq(param("userParam3")),
             cols.users.id.between(param("userBetweenLeft"), param("userBetweenRight")),
             and(
                 cols.users.id.eq(cols.customers.createdBy),
@@ -103,10 +104,10 @@ const AutoSelectMultiJoins = customersTable
             cols.parentUsers.id.eq(cols.customers.id),
             cols.parentUsers.id.eq(param("parentUserEq1")),
             cols.parentUsers.id.between(param("parentUserBetLeft"), cols.customers.id),
-            cols.parentUsers.id.gt(param("parentUserGt2")),
+            cols.parentUsers.id.eq(pgCoalesce(param("parentUserGt2"), 1, 2, pgCoalesce(1, 2, param("innerCoalesce")))),
             cols.parentUsers.userName.eq(param("parentUserNeq3")),
             cols.parentUsers.userName.between(cols.customers.name, cols.users.userName),
-            and(cols.customers.createdBy.gt(235), cols.parentUsers.userName.gt(param("innerParentUserParam1")))
+            and(cols.customers.createdBy.eq(235), cols.parentUsers.userName.eq(param("innerParentUserParam1")))
         );
 
 
@@ -161,6 +162,7 @@ type AutoSelectMultiJoinsParamsResult = {
     parentUserEq1: number;
     parentUserBetLeft: number;
     parentUserGt2: number;
+    innerCoalesce: any;
     parentUserNeq3: string;
     innerParentUserParam1: string;
 } | undefined;

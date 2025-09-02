@@ -7,23 +7,6 @@ import QueryParam from "../../param.js";
 import type QueryColumn from "../../queryColumn.js";
 import type ColumnSQLFunction from "../_functions.js";
 
-
-function functionEq<
-    TDbType extends DbType,
-    TArgs extends (
-        PgValueTypes | null |
-        QueryParam<TDbType, any, any> |
-        QueryColumn<TDbType, any, any, any> |
-        ColumnSQLFunction<TDbType, any, TReturnType>
-    )[],
-    TReturnType extends TDbType extends PgDbType ? PgValueTypes : never
->(this: ColumnSQLFunction<TDbType, TArgs, TReturnType>, value: TReturnType): ColumnComparisonOperation<
-    TDbType,
-    ColumnSQLFunction<TDbType, TArgs, TReturnType>,
-    undefined,
-    undefined,
-    undefined
->
 function functionEq<
     TDbType extends DbType,
     TArgs extends (
@@ -75,6 +58,22 @@ function functionEq<
     TDbType,
     ColumnSQLFunction<TDbType, TArgs, TReturnType>,
     [TParam],
+    undefined,
+    undefined
+>
+function functionEq<
+    TDbType extends DbType,
+    TArgs extends (
+        PgValueTypes | null |
+        QueryParam<TDbType, any, any> |
+        QueryColumn<TDbType, any, any, any> |
+        ColumnSQLFunction<TDbType, any, TReturnType>
+    )[],
+    TReturnType extends TDbType extends PgDbType ? PgValueTypes : never
+>(this: ColumnSQLFunction<TDbType, TArgs, TReturnType>, value: TReturnType): ColumnComparisonOperation<
+    TDbType,
+    ColumnSQLFunction<TDbType, TArgs, TReturnType>,
+    undefined,
     undefined,
     undefined
 >

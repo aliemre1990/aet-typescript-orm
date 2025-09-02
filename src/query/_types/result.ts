@@ -154,10 +154,16 @@ type QueryParamsToObject<T extends readonly QueryParam<any, any, any>[] | undefi
 
 //
 type InferParamsFromOps<T> =
-    T extends ColumnComparisonOperation<any, infer TFn, infer TParams, any, any> ?
-    TParams extends readonly QueryParam<any, any, any>[] ? TFn extends ColumnSQLFunction<any, any, any> ?
-    [...InferParamsFromFns<[TFn]>]
-    : TParams :
+    T extends ColumnComparisonOperation<any, infer TFn, infer TParams, any, infer TAppliedFns> ?
+    TParams extends readonly QueryParam<any, any, any>[] ? TFn extends ColumnSQLFunction<any, any, any> ? TAppliedFns extends readonly ColumnSQLFunction<any, any, any>[] ?
+    [...InferParamsFromFns<TAppliedFns>, ...InferParamsFromFns<[TFn]>, ...TParams] :
+    [...TParams, ...InferParamsFromFns<[TFn]>] :
+    TParams :
+    TFn extends ColumnSQLFunction<any, any, any> ? TAppliedFns extends readonly ColumnSQLFunction<any, any, any>[] ?
+    [...InferParamsFromFns<TAppliedFns>, ...InferParamsFromFns<[TFn]>] :
+    [...InferParamsFromFns<[TFn]>] :
+    TAppliedFns extends readonly ColumnSQLFunction<any, any, any>[] ?
+    [...InferParamsFromFns<TAppliedFns>] :
     TFn extends ColumnSQLFunction<any, any, any> ?
     InferParamsFromFns<[TFn]> :
     []
@@ -167,9 +173,16 @@ type InferParamsFromOps<T> =
 
 type InferParamsFromOpsArray<T extends readonly any[]> =
     T extends readonly [infer First, ...infer Rest] ?
-    First extends ColumnComparisonOperation<any, any, infer TParams, any, any> ?
-    TParams extends readonly QueryParam<any, any, any>[] ?
+    First extends ColumnComparisonOperation<any, infer TFn, infer TParams, any, infer TAppliedFns> ?
+    TParams extends readonly QueryParam<any, any, any>[] ? TFn extends ColumnSQLFunction<any, any, any> ? TAppliedFns extends readonly ColumnSQLFunction<any, any, any>[] ?
+    [...InferParamsFromFns<TAppliedFns>, ...InferParamsFromFns<[TFn]>, ...TParams, ...InferParamsFromOpsArray<Rest>] :
+    [...TParams, ...InferParamsFromFns<[TFn]>, ...InferParamsFromOpsArray<Rest>] :
     [...TParams, ...InferParamsFromOpsArray<Rest>] :
+    TFn extends ColumnSQLFunction<any, any, any> ? TAppliedFns extends readonly ColumnSQLFunction<any, any, any>[] ?
+    [...InferParamsFromFns<TAppliedFns>, ...InferParamsFromFns<[TFn]>, ...InferParamsFromOpsArray<Rest>] :
+    [...InferParamsFromFns<[TFn]>, ...InferParamsFromOpsArray<Rest>] :
+    TAppliedFns extends readonly ColumnSQLFunction<any, any, any>[] ?
+    [...InferParamsFromFns<TAppliedFns>, ...InferParamsFromOpsArray<Rest>] :
     InferParamsFromOpsArray<Rest> :
     First extends ColumnLogicalOperation<any, infer TOps> ?
     [...InferParamsFromOpsArray<TOps>, ...InferParamsFromOpsArray<Rest>] :

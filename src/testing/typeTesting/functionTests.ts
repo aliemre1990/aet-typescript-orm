@@ -1,5 +1,6 @@
 import type ColumnComparisonOperation from "../../query/comparisons/_comparisonOperations.js";
-import coalesce from "../../query/functions/coalesce.js";
+import pgCoalesce from "../../query/functions/coalesce.js";
+import functionEq from "../../query/functions/comparisonOps/eq.js";
 import ColumnLogicalOperation, { and } from "../../query/logicalOperations.js";
 import { param } from "../../query/param.js";
 import type QueryColumn from "../../query/queryColumn.js";
@@ -11,7 +12,7 @@ import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
 const AutoSelectMultiJoins = customersTable
     .join('INNER', usersTable, (cols) => {
 
-        const res1 = coalesce(1, 2, param("param"), coalesce(1, 2, 3, param("param1"), coalesce(1, 2, 3, 4, param("asdf")))).eq(1);
+        const res1 = pgCoalesce(1, 2, param("param"), pgCoalesce(1, 2, 3, param("param1"), pgCoalesce(1, 2, 3, 4, param("asdf")))).eq(1);
 
         type T = typeof res1 extends ColumnComparisonOperation<any, infer TFns, infer TParams, any, any> ? TFns : never;
 
@@ -21,7 +22,19 @@ const AutoSelectMultiJoins = customersTable
         // type inrest = typeof inres extends ColumnComparisonOperation<any, any, any, infer TCols, any> ? TCols : never;
         // type prm = inrest[1];
     })
-    .join('INNER', usersTable.as('parentUsers'), (cols) => cols.users.id.eq(1))
+    .join('INNER', usersTable.as('parentUsers'), (cols) => {
+        const res = and(pgCoalesce(param("coalesceParam2")).eq(1), pgCoalesce(param("coalesceParam1")).eq(pgCoalesce(1, 2, param("rightParam"))));
+
+        type t = typeof res;
+        type tOps = t extends ColumnLogicalOperation<any, infer TOps> ? TOps : never;
+        type t1 = tOps[1];
+
+        const resOther = and(pgCoalesce(param("coalesceParam2")).eq(1), pgCoalesce(param("coalesceParam1")).eq(pgCoalesce(1, 2, param("rightParam"))));
+        // const bound = functionEq.bind(pgCoalesce(1, 2));
+        // bound(pgCoalesce(1, 2, param("rightParam")))
+
+        return res;
+    })
     .join('INNER', ordersTable, (cols) => cols.users.userName.eq(cols.customers.name))
     .select()
     .exec;

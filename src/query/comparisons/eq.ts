@@ -13,19 +13,6 @@ function eq<
     TColumn extends ColumnType<TDbType>,
     TQTableSpecs extends QueryTableSpecsType,
     TAsName extends string | undefined,
-    TValueType extends TDbType extends PgDbType ? PgTypeToJsType<TColumn["type"]> : never,
->(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, value: TValueType): ColumnComparisonOperation<
-    TDbType,
-    QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
-    undefined,
-    undefined,
-    undefined
->
-function eq<
-    TDbType extends DbType,
-    TColumn extends ColumnType<TDbType>,
-    TQTableSpecs extends QueryTableSpecsType,
-    TAsName extends string | undefined,
     TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
     TAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any>,
 >(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, value: TAppliedQColumn): ColumnComparisonOperation<
@@ -63,6 +50,19 @@ function eq<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     [TParam],
+    undefined,
+    undefined
+>
+function eq<
+    TDbType extends DbType,
+    TColumn extends ColumnType<TDbType>,
+    TQTableSpecs extends QueryTableSpecsType,
+    TAsName extends string | undefined,
+    TValueType extends TDbType extends PgDbType ? TColumn extends Column<PgDbType, any, any, any> ? PgTypeToJsType<TColumn["type"]> : never : never,
+>(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, value: TValueType): ColumnComparisonOperation<
+    TDbType,
+    QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
+    undefined,
     undefined,
     undefined
 >
