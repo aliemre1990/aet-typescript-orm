@@ -29,6 +29,8 @@ const AutoSelectMultiJoins = customersTable
         type tOps = t extends ColumnLogicalOperation<any, infer TOps> ? TOps : never;
         type t1 = tOps[1];
 
+        pgCoalesce(cols.customers.id, 1);
+
         const resOther = and(pgCoalesce(param("coalesceParam2")).eq(1), pgCoalesce(param("coalesceParam1")).eq(pgCoalesce(1, 2, param("rightParam"))));
         // const bound = functionEq.bind(pgCoalesce(1, 2));
         // bound(pgCoalesce(1, 2, param("rightParam")))

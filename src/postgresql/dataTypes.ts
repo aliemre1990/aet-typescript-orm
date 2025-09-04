@@ -1,3 +1,5 @@
+import type { DbType, DbValueTypes, PgDbType } from "../db.js";
+
 const pgColumnTypes = {
     // Numeric Types
     smallInt: 'SMALLINT',
@@ -157,7 +159,9 @@ type PgTypeToJsType<T extends PgColumnType> =
     T extends 'LANGUAGE_HANDLER' | 'INTERNAL' | 'OPAQUE' | 'FDW_HANDLER' | 'INDEX_AM_HANDLER' | 'TSM_HANDLER' | 'TABLE_AM_HANDLER' ? any :
     unknown;
 
-type JsTypeToPgTypes<T> =
+
+type JsTypeToPgTypes<TDbType extends DbType, T extends PgValueTypes> =
+    TDbType extends PgDbType ?
     T extends number ?
     'SMALLINT' | 'INTEGER' | 'SERIAL' | 'SMALLSERIAL' | 'DECIMAL' | 'NUMERIC' | 'REAL' | 'DOUBLE PRECISION' | 'MONEY' | 'OID' | 'REGPROC' | 'REGPROCEDURE' | 'REGOPER' | 'REGOPERATOR' | 'REGCLASS' | 'REGTYPE' | 'REGROLE' | 'REGNAMESPACE' | 'REGCONFIG' | 'REGDICTIONARY' :
     T extends bigint ?
@@ -182,9 +186,10 @@ type JsTypeToPgTypes<T> =
     PgColumnType : // null can be any type
     T extends any ?
     'JSON' | 'JSONB' | 'DOMAIN' | 'ANY' | 'ANYARRAY' | 'ANYNONARRAY' | 'ANYENUM' | 'ANYRANGE' | 'ANYCOMPATIBLE' | 'ANYCOMPATIBLEARRAY' | 'ANYCOMPATIBLENONARRAY' | 'ANYCOMPATIBLERANGE' | 'ANYELEMENT' | 'LANGUAGE_HANDLER' | 'INTERNAL' | 'OPAQUE' | 'FDW_HANDLER' | 'INDEX_AM_HANDLER' | 'TSM_HANDLER' | 'TABLE_AM_HANDLER' :
-    never;
+    never
+    : never;
 
-type PgValueTypes = string | string[] | number | number[] | bigint | bigint[] | boolean | boolean[] | Date | Date[] | Buffer | object;
+type PgValueTypes = DbValueTypes;
 
 type GetArrayEquivalentPgValueType<T> =
     T extends string ? string[] :

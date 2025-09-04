@@ -1,5 +1,5 @@
-import { DbType, PgDbType } from "../db.js";
-import type { PgValueTypes } from "../postgresql/dataTypes.js";
+import { DbType, dbTypes, PgDbType } from "../db.js";
+import type { PgColumnType, PgValueTypes } from "../postgresql/dataTypes.js";
 import type ColumnComparisonOperation from "../query/comparisons/_comparisonOperations.js";
 import type { IExecuteableQuery } from "../query/_interfaces/IExecuteableQuery.js";
 import type ColumnLogicalOperation from "../query/logicalOperations.js";
@@ -7,10 +7,10 @@ import { QueryBuilder } from "../query/queryBuilder.js";
 import type { TablesToObject, TableToColumnsMap, TableToObject } from "../query/_types/miscellaneous.js";
 import type { InferParamsFromOps, TResultShape } from "../query/_types/result.js";
 import type { JoinType } from "../types.js";
-import type Column from "./column.js";
+import Column from "./column.js";
 import QueryColumn, { type QueryParam } from "../query/queryColumn.js";
 import type { QueryTableSpecsType, TableSpecsType } from "./types/tableSpecs.js";
-import type { ColumnsObjectType, GetColumnType, QueryColumnsObjectType } from "./types/utils.js";
+import type { ColumnsObjectType, GetColumnTypes, QueryColumnsObjectType } from "./types/utils.js";
 import QueryTable from "../query/queryTable.js";
 import type IJoinClause from "../query/_interfaces/IJoinClause.js";
 import type ISelectClause from "../query/_interfaces/ISelectClause.js";
@@ -33,6 +33,7 @@ class Table<
     IGroupByClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>]> {
 
     constructor(
+        public DbType: TDbType,
         public name: TTableName,
         public columns: TColumns,
         public primaryKeys?: (string[])[],
@@ -149,7 +150,7 @@ class Table<
 
 function pgTable<
     TTableName extends string,
-    TColumns extends Record<string, Column<PgDbType, GetColumnType<PgDbType>, string, TableSpecsType<TTableName>>>
+    TColumns extends Record<string, Column<PgDbType, PgColumnType, string, TableSpecsType<string>, boolean>>,
 >(
     name: TTableName,
     columns: TColumns,
@@ -158,19 +159,34 @@ function pgTable<
     foreignKeys?: ForeignKey[]
 ) {
 
+    type TFinalColumns = { [K in keyof TColumns]: Column<PgDbType, TColumns[K]["type"], TColumns[K]["name"], TableSpecsType<TTableName>, TColumns[K]["isNullable"]> };
 
-    return new Table<PgDbType, TColumns, TTableName>(
+    return new Table<PgDbType, TFinalColumns, TTableName>(
+        dbTypes.postgresql,
         name,
-        columns,
+        columns as unknown as TFinalColumns,
         primaryKeys,
         uniqueKeys,
         foreignKeys
     );
 }
 
+function pgColumn<
+    TColumnName extends string,
+    TColumnType extends PgColumnType,
+    TIsNull extends boolean,
+>(
+    name: TColumnName,
+    type: TColumnType,
+    isNullable: TIsNull
+): Column<PgDbType, TColumnType, TColumnName, TableSpecsType, TIsNull> {
+    return new Column<PgDbType, TColumnType, TColumnName, TableSpecsType, TIsNull>(name, type, isNullable);
+}
+
 export default Table;
 
 export {
     ForeignKey,
-    pgTable
+    pgTable,
+    pgColumn
 }

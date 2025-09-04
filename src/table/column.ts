@@ -1,12 +1,15 @@
 import type { DbType } from "../db.js";
 import type { TableSpecsType } from "./types/tableSpecs.js";
-import type { GetColumnType } from "./types/utils.js";
+import type { GetColumnTypes, GetValueTypeFromColumnType, GetColumnValueTypes } from "./types/utils.js";
 
 class Column<
     TDbType extends DbType,
-    TColumnType extends GetColumnType<TDbType>,
+    TColumnType extends GetColumnTypes<TDbType>,
     TColumnName extends string,
-    TTableSpecs extends TableSpecsType
+    TTableSpecs extends TableSpecsType,
+    TIsNull extends boolean = false,
+    TValueType extends GetColumnValueTypes<TDbType> = GetValueTypeFromColumnType<TDbType, TColumnType>,
+    TFinalValueType extends GetColumnValueTypes<TDbType> | null = TIsNull extends true ? GetValueTypeFromColumnType<TDbType, TColumnType> | null : GetValueTypeFromColumnType<TDbType, TColumnType>
 > {
 
     tableSpecs?: TTableSpecs;
@@ -14,8 +17,8 @@ class Column<
     constructor(
         public name: TColumnName,
         public type: TColumnType,
-        public defaultValue?: string,
-        public isNullable: boolean = false
+        public isNullable: TIsNull,
+        public defaultValue?: string
     ) { }
 
     setTableSpecs(val: TTableSpecs) {

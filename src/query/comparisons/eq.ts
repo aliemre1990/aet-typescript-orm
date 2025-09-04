@@ -2,7 +2,7 @@ import type { DbType, PgDbType } from "../../db.js";
 import type { JsTypeToPgTypes, PgTypeToJsType } from "../../postgresql/dataTypes.js";
 import type Column from "../../table/column.js";
 import type { ColumnType, QueryTableSpecsType } from "../../table/types/utils.js";
-import type { GetColumnTypeFromDbType } from "../_types/miscellaneous.js";
+import type { GetColumnTypeFromDbType, GetColumnValueType } from "../_types/miscellaneous.js";
 import ColumnComparisonOperation, { comparisonOperations } from "./_comparisonOperations.js";
 import { QueryParam, QueryParamMedian } from "../queryColumn.js";
 import QueryColumn from "../queryColumn.js";
@@ -13,8 +13,8 @@ function eq<
     TColumn extends ColumnType<TDbType>,
     TQTableSpecs extends QueryTableSpecsType,
     TAsName extends string | undefined,
-    TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
-    TAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any>,
+    TValueType extends GetColumnValueType<TDbType, TColumn>,
+    TAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TDbType, TValueType>, any, any, any>, any, any>,
 >(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, value: TAppliedQColumn): ColumnComparisonOperation<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
@@ -27,8 +27,8 @@ function eq<
     TColumn extends ColumnType<TDbType>,
     TQTableSpecs extends QueryTableSpecsType,
     TAsName extends string | undefined,
-    TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
-    TAppliedSQLFunction extends ColumnSQLFunction<TDbType, any, TValueType>,
+    TValueType extends GetColumnValueType<TDbType, TColumn>,
+    TAppliedSQLFunction extends ColumnSQLFunction<TDbType, any, any, any>,
 >(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, value: TAppliedSQLFunction): ColumnComparisonOperation<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
@@ -44,7 +44,7 @@ function eq<
     TParamMedian extends QueryParamMedian<any>,
     TParamName extends TParamMedian extends QueryParamMedian<infer U> ? U : never,
     TParam extends QueryParam<TDbType, TParamName, TValueType>,
-    TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>
+    TValueType extends GetColumnValueType<TDbType, TColumn>,
 >(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, value: TParamMedian
 ): ColumnComparisonOperation<
     TDbType,
@@ -58,7 +58,7 @@ function eq<
     TColumn extends ColumnType<TDbType>,
     TQTableSpecs extends QueryTableSpecsType,
     TAsName extends string | undefined,
-    TValueType extends TDbType extends PgDbType ? TColumn extends Column<PgDbType, any, any, any> ? PgTypeToJsType<TColumn["type"]> : never : never,
+    TValueType extends GetColumnValueType<TDbType, TColumn>
 >(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, value: TValueType): ColumnComparisonOperation<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
@@ -73,9 +73,9 @@ function eq<
     TAsName extends string | undefined,
     TParamMedian extends QueryParamMedian<any> | undefined,
     TParamName extends (TParamMedian extends QueryParamMedian<infer U> ? U : never) | undefined,
-    TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
-    TAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any> | undefined,
-    TAppliedSQLFunction extends ColumnSQLFunction<TDbType, any, TValueType> | undefined
+    TValueType extends GetColumnValueType<TDbType, TColumn>,
+    TAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TDbType, TValueType>, any, any, any>, any, any> | undefined,
+    TAppliedSQLFunction extends ColumnSQLFunction<TDbType, any, any, TValueType> | undefined
 >
     (this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, value: TValueType | TParamMedian | TAppliedQColumn | TAppliedSQLFunction) {
 

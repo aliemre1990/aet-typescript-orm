@@ -7,7 +7,7 @@ import BasicColumnAggregationOperation, { aggregationOperations } from "./_aggre
 
 function sum<
     TDbType extends DbType,
-    TQueryColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<number>, any, any>, any, any>
+    TQueryColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TDbType, number>, any, any>, any, any>
 >(column: TQueryColumn) {
     const op = new BasicColumnAggregationOperation<TDbType, TQueryColumn, number, number>(column, aggregationOperations.sum);
     const aggregatedColumn = new AggregatedColumn<TDbType, TQueryColumn, typeof op>(column, op);

@@ -2,7 +2,7 @@ import type { DbType, PgDbType } from "../../db.js";
 import type { JsTypeToPgTypes, PgTypeToJsType } from "../../postgresql/dataTypes.js";
 import type Column from "../../table/column.js";
 import type { ColumnType, QueryTableSpecsType } from "../../table/types/utils.js";
-import type { GetColumnTypeFromDbType } from "../_types/miscellaneous.js";
+import type { GetColumnTypeFromDbType, GetColumnValueType } from "../_types/miscellaneous.js";
 import ColumnComparisonOperation, { comparisonOperations } from "./_comparisonOperations.js";
 import { QueryParam, QueryParamMedian } from "../queryColumn.js";
 import QueryColumn from "../queryColumn.js";
@@ -14,11 +14,10 @@ function between<
     TColumn extends ColumnType<TDbType>,
     TQTableSpecs extends QueryTableSpecsType,
     TAsName extends string | undefined,
-    TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>
+    TValueType extends GetColumnValueType<TDbType, TColumn>,
 >(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, leftValue: TValueType, rightValue: TValueType): ColumnComparisonOperation<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
-    undefined,
     undefined,
     undefined,
     undefined
@@ -28,9 +27,9 @@ function between<
     TColumn extends ColumnType<TDbType>,
     TQTableSpecs extends QueryTableSpecsType,
     TAsName extends string | undefined,
-    TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
-    TLAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any>,
-    TRAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any>,
+    TValueType extends GetColumnValueType<TDbType, TColumn>,
+    TLAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TDbType, TValueType>, any, any, any>, any, any>,
+    TRAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TDbType, TValueType>, any, any, any>, any, any>,
 >(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, leftValue: TLAppliedQColumn, rightValue: TRAppliedQColumn): ColumnComparisonOperation<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
@@ -49,7 +48,7 @@ function between<
     TRParamMedian extends QueryParamMedian<any>,
     TRParamName extends TRParamMedian extends QueryParamMedian<infer U> ? U : never,
     TRParam extends QueryParam<TDbType, TRParamName, TValueType>,
-    TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>
+    TValueType extends GetColumnValueType<TDbType, TColumn>
 >(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, leftValue: TLParamMedian, rightValue: TRParamMedian
 ): ColumnComparisonOperation<
     TDbType,
@@ -59,14 +58,39 @@ function between<
     undefined
 >
 
+function between<
+    TDbType extends DbType,
+    TColumn extends ColumnType<TDbType>,
+    TQTableSpecs extends QueryTableSpecsType,
+    TAsName extends string | undefined,
+    TLParamMedian extends QueryParamMedian<any>,
+    TLParamName extends TLParamMedian extends QueryParamMedian<infer U> ? U : never,
+    TLParam extends QueryParam<TDbType, TLParamName, TValueType>,
+    TRParamMedian extends QueryParamMedian<any>,
+    TRParamName extends TRParamMedian extends QueryParamMedian<infer U> ? U : never,
+    TRParam extends QueryParam<TDbType, TRParamName, TValueType>,
+    TValueType extends GetColumnValueType<TDbType, TColumn>
+>(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, leftValue: TLParamMedian, rightValue: TRParamMedian
+): ColumnComparisonOperation<
+    TDbType,
+    QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
+    [TLParam, TRParam],
+    undefined,
+    undefined
+>
+
+
+
+
+
 // Column and value
 function between<
     TDbType extends DbType,
     TColumn extends ColumnType<TDbType>,
     TQTableSpecs extends QueryTableSpecsType,
     TAsName extends string | undefined,
-    TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
-    TLAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any>,
+    TValueType extends GetColumnValueType<TDbType, TColumn>,
+    TLAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TDbType, TValueType>, any, any, any>, any, any>,
 >(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, leftValue: TLAppliedQColumn, rightValue: TValueType): ColumnComparisonOperation<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
@@ -79,8 +103,8 @@ function between<
     TColumn extends ColumnType<TDbType>,
     TQTableSpecs extends QueryTableSpecsType,
     TAsName extends string | undefined,
-    TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
-    TRAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any>,
+    TValueType extends GetColumnValueType<TDbType, TColumn>,
+    TRAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TDbType, TValueType>, any, any, any>, any, any>,
 >(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, leftValue: TValueType, rightValue: TRAppliedQColumn): ColumnComparisonOperation<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
@@ -98,7 +122,7 @@ function between<
     TLParamMedian extends QueryParamMedian<any>,
     TLParamName extends TLParamMedian extends QueryParamMedian<infer U> ? U : never,
     TLParam extends QueryParam<TDbType, TLParamName, TValueType>,
-    TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
+    TValueType extends GetColumnValueType<TDbType, TColumn>
 >(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, leftValue: TLParamMedian, rightValue: TValueType): ColumnComparisonOperation<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
@@ -114,7 +138,7 @@ function between<
     TRParamMedian extends QueryParamMedian<any>,
     TRParamName extends TRParamMedian extends QueryParamMedian<infer U> ? U : never,
     TRParam extends QueryParam<TDbType, TRParamName, TValueType>,
-    TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>
+    TValueType extends GetColumnValueType<TDbType, TColumn>
 >(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, leftValue: TValueType, rightValue: TRParamMedian): ColumnComparisonOperation<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
@@ -132,8 +156,8 @@ function between<
     TLParamMedian extends QueryParamMedian<any>,
     TLParamName extends TLParamMedian extends QueryParamMedian<infer U> ? U : never,
     TLParam extends QueryParam<TDbType, TLParamName, TValueType>,
-    TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
-    TRAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any>,
+    TValueType extends GetColumnValueType<TDbType, TColumn>,
+    TRAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TDbType, TValueType>, any, any, any>, any, any>
 >(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, leftValue: TLParamMedian, rightValue: TRAppliedQColumn): ColumnComparisonOperation<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
@@ -149,8 +173,8 @@ function between<
     TRParamMedian extends QueryParamMedian<any>,
     TRParamName extends TRParamMedian extends QueryParamMedian<infer U> ? U : never,
     TRParam extends QueryParam<TDbType, TRParamName, TValueType>,
-    TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
-    TLAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any>,
+    TValueType extends GetColumnValueType<TDbType, TColumn>,
+    TLAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TDbType, TValueType>, any, any, any>, any, any>,
 >(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, leftValue: TLAppliedQColumn, rightValue: TRParamMedian): ColumnComparisonOperation<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
@@ -170,9 +194,9 @@ function between<
     TRParamMedian extends QueryParamMedian<any> | undefined,
     TRParamName extends (TRParamMedian extends QueryParamMedian<infer U> ? U : never) | undefined,
     TRParam extends TRParamName extends string ? (QueryParam<TDbType, TRParamName, TValueType>) : undefined,
-    TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
-    TLAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any> | undefined,
-    TRAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any> | undefined
+    TValueType extends GetColumnValueType<TDbType, TColumn>,
+    TLAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TDbType, TValueType>, any, any, any>, any, any> | undefined,
+    TRAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TDbType, TValueType>, any, any, any>, any, any> | undefined
 >
     (
         this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,

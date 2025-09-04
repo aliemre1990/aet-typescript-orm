@@ -1,29 +1,29 @@
 import { pgColumnTypes } from "../../postgresql/dataTypes.js";
 import Column from "../../table/column.js";
-import { ForeignKey, pgTable } from "../../table/table.js";
+import { ForeignKey, pgColumn, pgTable } from "../../table/table.js";
 
 const usersTable = pgTable(
     'users',
     {
-        id: new Column('id', pgColumnTypes.serial),
-        userName: new Column('userName', pgColumnTypes.varchar)
+        id: pgColumn('id', pgColumnTypes.serial, false),
+        userName: pgColumn('userName', pgColumnTypes.varchar, false)
     }
 )
 
 const employeesTable = pgTable(
     'employees',
     {
-        id: new Column('id', pgColumnTypes.serial),
-        userName: new Column('name', pgColumnTypes.varchar)
+        id: pgColumn('id', pgColumnTypes.serial, false),
+        userName: pgColumn('name', pgColumnTypes.varchar, false)
     }
 )
 
 const customersTable = pgTable(
     'customers',
     {
-        customerId: new Column('id', pgColumnTypes.serial),
-        name: new Column('name', pgColumnTypes.varchar),
-        createdBy: new Column('createdBy', pgColumnTypes.int)
+        customerId: pgColumn('id', pgColumnTypes.serial, false),
+        name: pgColumn('name', pgColumnTypes.varchar, false),
+        createdBy: pgColumn('createdBy', pgColumnTypes.int, false)
     },
     undefined,
     undefined,
@@ -36,9 +36,9 @@ const customersTable = pgTable(
 const ordersTable = pgTable(
     'orders',
     {
-        orderId: new Column('id', pgColumnTypes.serial),
-        customerId: new Column('customerId', pgColumnTypes.int),
-        createdBy: new Column('createdBy', pgColumnTypes.int)
+        orderId: pgColumn('id', pgColumnTypes.serial, false),
+        customerId: pgColumn('customerId', pgColumnTypes.int, false),
+        createdBy: pgColumn('createdBy', pgColumnTypes.int, false)
     },
     undefined,
     undefined,
@@ -51,9 +51,9 @@ const ordersTable = pgTable(
 const shipmentsTable = pgTable(
     'shipments',
     {
-        id: new Column('id', pgColumnTypes.serial),
-        orderId: new Column('orderId', pgColumnTypes.serial),
-        createdBy: new Column('createdBy', pgColumnTypes.int)
+        id: pgColumn('id', pgColumnTypes.serial, false),
+        orderId: pgColumn('orderId', pgColumnTypes.serial, false),
+        createdBy: pgColumn('createdBy', pgColumnTypes.int, false)
     },
     undefined,
     undefined,

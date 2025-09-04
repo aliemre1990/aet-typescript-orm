@@ -29,14 +29,16 @@ type TablesToObject<TTables extends QueryTable<DbType, any, any, any, any, any>[
     ]: T
 }
 
-type GetColumnTypeFromDbType<TDbType extends DbType, TColumn extends Column<TDbType, any, any, any>> =
+type GetColumnTypeFromDbType<TDbType extends DbType, TColumn extends Column<TDbType, any, any, any, any, any>> =
     TDbType extends PgDbType ? PgTypeToJsType<TColumn["type"]> : never;
 
+type GetColumnValueType<TDbType extends DbType, TColumn> = TColumn extends Column<TDbType, any, any, any, any, infer TValType, any> ? TValType : never;
 
 
 export type {
     TableToColumnsMap,
     TableToObject,
     GetColumnTypeFromDbType,
-    TablesToObject
+    TablesToObject,
+    GetColumnValueType
 }

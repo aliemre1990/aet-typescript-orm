@@ -1,4 +1,4 @@
-import type { DbType } from "../../db.js";
+import type { DbType, DbValueTypes, PgDbType } from "../../db.js";
 import type { PgValueTypes } from "../../postgresql/dataTypes.js";
 import type Column from "../../table/column.js";
 import type QueryParam from "../param.js";
@@ -16,20 +16,21 @@ type SQLFunction = (typeof sqlFunctions)[keyof typeof sqlFunctions];
 
 class ColumnSQLFunction<
     TDbType extends DbType,
+    TSQLFunction extends SQLFunction,
     TArgs extends (
-        PgValueTypes | null |
+        PgValueTypes |
         QueryParam<TDbType, any, any> |
-        QueryColumn<TDbType, Column<TDbType, any, any, any>, any, any> |
-        ColumnSQLFunction<TDbType, any, TReturnType>
+        QueryColumn<TDbType, Column<TDbType, any, any, any, any>, any, any> |
+        ColumnSQLFunction<TDbType, any, any, TReturnType>
     )[],
-    TReturnType extends PgValueTypes | null
+    TReturnType extends (TDbType extends PgDbType ? PgValueTypes : never) | null
 > {
 
     eq: typeof functionEq = functionEq;
 
     constructor(
         public args: TArgs,
-        public sqlFunction: SQLFunction,
+        public sqlFunction: TSQLFunction,
 
     ) { }
 }

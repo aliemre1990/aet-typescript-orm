@@ -8,7 +8,7 @@ class QueryParamMedian<TName extends string> {
 class QueryParam<
     TDbType extends DbType,
     TName extends string,
-    TValue extends TDbType extends PgDbType ? PgValueTypes : never
+    TValue extends (TDbType extends PgDbType ? PgValueTypes : never) | null
 > {
     constructor(public name: TName) { }
 }

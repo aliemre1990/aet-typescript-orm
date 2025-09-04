@@ -3,7 +3,7 @@ import type { GetArrayEquivalentPgValueType, JsTypeToPgTypes } from "../../postg
 import type Column from "../../table/column.js";
 import type { ColumnType, QueryTableSpecsType } from "../../table/types/utils.js";
 import { isNullOrUndefined } from "../../utility/guards.js";
-import type { GetColumnTypeFromDbType } from "../_types/miscellaneous.js";
+import type { GetColumnTypeFromDbType, GetColumnValueType } from "../_types/miscellaneous.js";
 import ColumnComparisonOperation, { comparisonOperations } from "./_comparisonOperations.js";
 import { QueryParam, QueryParamMedian } from "../queryColumn.js";
 import QueryColumn from "../queryColumn.js";
@@ -21,8 +21,8 @@ function sqlIn<
     TColumn extends ColumnType<TDbType>,
     TQTableSpecs extends QueryTableSpecsType,
     TAsName extends string | undefined,
-    TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
-    TValues extends readonly (TValueType | QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any>)[]
+    TValueType extends GetColumnValueType<TDbType, TColumn>,
+    TValues extends readonly (TValueType | QueryColumn<TDbType, Column<TDbType, any, any, any, any, TValueType>, any, any>)[]
 >(
     this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
     ...values: TValues
@@ -58,8 +58,8 @@ function sqlIn<
     TQTableSpecs extends QueryTableSpecsType,
     TAsName extends string | undefined,
     TParamMedian extends QueryParamMedian<any> | undefined,
-    TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>,
-    TValues extends readonly (TValueType | QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TValueType>, any, any>, any, any>)[]
+    TValueType extends GetColumnValueType<TDbType, TColumn>,
+    TValues extends readonly (TValueType | QueryColumn<TDbType, Column<TDbType, any, any, any, any, TValueType>, any, any>)[]
 >
     (
         this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,

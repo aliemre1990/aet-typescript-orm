@@ -110,7 +110,6 @@ const AutoSelectMultiJoins = customersTable
             and(cols.customers.createdBy.eq(235), cols.parentUsers.userName.eq(param("innerParentUserParam1")))
         );
 
-
         return comp;
 
         type inferComparison = typeof comp;
