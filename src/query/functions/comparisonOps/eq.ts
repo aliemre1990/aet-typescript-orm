@@ -12,7 +12,7 @@ function functionEq<
     TDbType extends DbType,
     TSQLFunction extends SQLFunction,
     TArgs extends (
-        PgValueTypes |
+        PgValueTypes | null |
         QueryParam<TDbType, any, any> |
         QueryColumn<TDbType, any, any, any> |
         ColumnSQLFunction<TDbType, any, any, TReturnType>
@@ -30,7 +30,7 @@ function functionEq<
     TDbType extends DbType,
     TSQLFunction extends SQLFunction,
     TArgs extends (
-        PgValueTypes |
+        PgValueTypes | null |
         QueryParam<TDbType, any, any> |
         QueryColumn<TDbType, any, any, any> |
         ColumnSQLFunction<TDbType, any, any, TReturnType>
@@ -48,7 +48,7 @@ function functionEq<
     TDbType extends DbType,
     TSQLFunction extends SQLFunction,
     TArgs extends (
-        PgValueTypes |
+        PgValueTypes | null |
         QueryParam<TDbType, any, any> |
         QueryColumn<TDbType, any, any, any> |
         ColumnSQLFunction<TDbType, any, any, TReturnType>
@@ -69,7 +69,7 @@ function functionEq<
     TDbType extends DbType,
     TSQLFunction extends SQLFunction,
     TArgs extends (
-        PgValueTypes |
+        PgValueTypes | null |
         QueryParam<TDbType, any, any> |
         QueryColumn<TDbType, any, any, any> |
         ColumnSQLFunction<TDbType, any, any, TReturnType>
@@ -86,7 +86,7 @@ function functionEq<
     TDbType extends DbType,
     TSQLFunction extends SQLFunction,
     TArgs extends (
-        PgValueTypes |
+        PgValueTypes | null |
         QueryParam<TDbType, any, any> |
         QueryColumn<TDbType, any, any, any> |
         ColumnSQLFunction<TDbType, any, any, TReturnType>
@@ -110,6 +110,8 @@ function functionEq<
         )
     }
 
+
+    // todo: check here later
     if (value === undefined) {
         throw Error('Value cannot be undefined');
     }

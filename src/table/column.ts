@@ -9,7 +9,7 @@ class Column<
     TTableSpecs extends TableSpecsType,
     TIsNull extends boolean = false,
     TValueType extends GetColumnValueTypes<TDbType> = GetValueTypeFromColumnType<TDbType, TColumnType>,
-    TFinalValueType extends GetColumnValueTypes<TDbType> | null = TIsNull extends true ? GetValueTypeFromColumnType<TDbType, TColumnType> | null : GetValueTypeFromColumnType<TDbType, TColumnType>
+    TFinalValueType extends GetColumnValueTypes<TDbType> | null = TIsNull extends true ? TValueType | null : TValueType
 > {
 
     tableSpecs?: TTableSpecs;

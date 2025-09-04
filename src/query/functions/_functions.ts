@@ -18,7 +18,7 @@ class ColumnSQLFunction<
     TDbType extends DbType,
     TSQLFunction extends SQLFunction,
     TArgs extends (
-        PgValueTypes |
+        PgValueTypes | null |
         QueryParam<TDbType, any, any> |
         QueryColumn<TDbType, Column<TDbType, any, any, any, any>, any, any> |
         ColumnSQLFunction<TDbType, any, any, TReturnType>
