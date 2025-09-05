@@ -31,7 +31,7 @@ class ColumnComparisonOperation<
     TDbType extends DbType,
     TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
     TParams extends QueryParam<TDbType, any, any>[] | undefined,
-    TAppliedQColumns extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TDbType, TValueType>, any, any>, any, any>[] | undefined,
+    TAppliedQColumns extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TDbType, TValueType>, any, any, any>, any, any>[] | undefined,
     TAppliedQSQLFunctions extends ColumnSQLFunction<TDbType, any, any, any>[] | undefined,
     TValueType extends GetColumnValueTypes<TDbType> = GetColumnTypeFromDbType<TDbType, TComparing extends QueryColumn<TDbType, infer TCol, any, any> ? TCol : never>
 > {
