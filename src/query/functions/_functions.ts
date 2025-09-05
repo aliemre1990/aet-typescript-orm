@@ -1,9 +1,9 @@
 import type { DbType, DbValueTypes, PgDbType } from "../../db.js";
 import type { PgValueTypes } from "../../postgresql/dataTypes.js";
 import type Column from "../../table/column.js";
+import eq from "../comparisons/eq.js";
 import type QueryParam from "../param.js";
 import type QueryColumn from "../queryColumn.js";
-import functionEq from "./comparisonOps/eq.js";
 
 const sqlFunctions = {
     coalesce: { name: 'COALESCE' },
@@ -28,7 +28,7 @@ class ColumnSQLFunction<
 
     dummyProp?: TReturnType;
 
-    eq: typeof functionEq = functionEq;
+    eq: typeof eq = eq;
 
     constructor(
         public args: TArgs,

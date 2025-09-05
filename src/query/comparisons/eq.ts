@@ -1,83 +1,71 @@
-import type { DbType, PgDbType } from "../../db.js";
-import type { JsTypeToPgTypes, PgTypeToJsType } from "../../postgresql/dataTypes.js";
+import type { DbType } from "../../db.js";
 import type Column from "../../table/column.js";
-import type { ColumnType, QueryTableSpecsType } from "../../table/types/utils.js";
-import type { GetColumnTypeFromDbType, GetColumnValueType } from "../_types/miscellaneous.js";
 import ColumnComparisonOperation, { comparisonOperations } from "./_comparisonOperations.js";
 import { QueryParam, QueryParamMedian } from "../queryColumn.js";
 import QueryColumn from "../queryColumn.js";
 import type ColumnSQLFunction from "../functions/_functions.js";
+import type { InferValueTypeFromThisType } from "./_types/inferValueTypeFromThisType.js";
 
 function eq<
     TDbType extends DbType,
-    TColumn extends ColumnType<TDbType>,
-    TQTableSpecs extends QueryTableSpecsType,
-    TAsName extends string | undefined,
-    TValueType extends GetColumnValueType<TDbType, TColumn>,
+    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
     TAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, any, any, any, any, TValueType>, any, any>,
->(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, value: TAppliedQColumn): ColumnComparisonOperation<
+>(this: TComparing, value: TAppliedQColumn): ColumnComparisonOperation<
     TDbType,
-    QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
+    TComparing,
     undefined,
     [TAppliedQColumn],
     undefined
 >
 function eq<
     TDbType extends DbType,
-    TColumn extends ColumnType<TDbType>,
-    TQTableSpecs extends QueryTableSpecsType,
-    TAsName extends string | undefined,
-    TValueType extends GetColumnValueType<TDbType, TColumn>,
+    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
     TAppliedSQLFunction extends ColumnSQLFunction<TDbType, any, any, TValueType | null>,
->(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, value: TAppliedSQLFunction): ColumnComparisonOperation<
+>(this: TComparing, value: TAppliedSQLFunction): ColumnComparisonOperation<
     TDbType,
-    QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
+    TComparing,
     undefined,
     undefined,
     [TAppliedSQLFunction]
 >
 function eq<
     TDbType extends DbType,
-    TColumn extends ColumnType<TDbType>,
-    TQTableSpecs extends QueryTableSpecsType,
-    TAsName extends string | undefined,
+    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
     TParamMedian extends QueryParamMedian<any>,
     TParamName extends TParamMedian extends QueryParamMedian<infer U> ? U : never,
-    TParam extends QueryParam<TDbType, TParamName, TValueType>,
-    TValueType extends GetColumnValueType<TDbType, TColumn>,
->(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, value: TParamMedian
+    TParam extends QueryParam<TDbType, TParamName, TValueType | null>,
+>(this: TComparing, value: TParamMedian
 ): ColumnComparisonOperation<
     TDbType,
-    QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
+    TComparing,
     [TParam],
     undefined,
     undefined
 >
 function eq<
     TDbType extends DbType,
-    TColumn extends ColumnType<TDbType>,
-    TQTableSpecs extends QueryTableSpecsType,
-    TAsName extends string | undefined,
-    TValueType extends GetColumnValueType<TDbType, TColumn>
->(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, value: TValueType): ColumnComparisonOperation<
+    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
+>(this: TComparing, value: TValueType | null): ColumnComparisonOperation<
     TDbType,
-    QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
+    TComparing,
     undefined,
     undefined,
     undefined
 >
 function eq<
     TDbType extends DbType,
-    TColumn extends ColumnType<TDbType>,
-    TQTableSpecs extends QueryTableSpecsType,
-    TAsName extends string | undefined,
+    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
     TParamMedian extends QueryParamMedian<any> | undefined,
     TParamName extends (TParamMedian extends QueryParamMedian<infer U> ? U : never) | undefined,
-    TValueType extends GetColumnValueType<TDbType, TColumn>,
     TAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, any, any, any, any, TValueType>, any, any> | undefined,
     TAppliedSQLFunction extends ColumnSQLFunction<TDbType, any, any, TValueType | null> | undefined
 >
-    (this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, value: TValueType | TParamMedian | TAppliedQColumn | TAppliedSQLFunction) {
+    (this: TComparing, value: TValueType | TParamMedian | TAppliedQColumn | TAppliedSQLFunction | null) {
 
     if (value instanceof QueryParamMedian) {
         const param = new QueryParam<TDbType, TParamName extends string ? TParamName : never, TValueType>(value.name);

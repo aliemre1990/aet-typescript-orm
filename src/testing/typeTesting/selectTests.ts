@@ -153,20 +153,20 @@ type AutoSelectMultiJoinsReturnType = ReturnType<typeof AutoSelectMultiJoins>
 type AutoSelectMultiJoinsTest = AssertTrue<AssertEqual<AutoSelectMultiJoinsResult, AutoSelectMultiJoinsReturnType>>;
 
 type AutoSelectMultiJoinsParamsResult = {
-    userParam1: number;
-    userParam2: number;
-    userParam3: string;
+    userParam1: number | null;
+    userParam2: number | null;
+    userParam3: string | null;
     userBetweenLeft: number;
     userBetweenRight: number;
-    userGteParam4: string;
-    userEqParam1: number;
+    userGteParam4: string | null;
+    userEqParam1: number | null;
     inParam: number[];
-    parentUserEq1: number;
+    parentUserEq1: number | null;
     parentUserBetLeft: number;
     parentUserGt2: number | null;
     innerCoalesce: number | null;
-    parentUserNeq3: string;
-    innerParentUserParam1: string;
+    parentUserNeq3: string | null;
+    innerParentUserParam1: string | null;
 } | undefined;
 type AutoSelectMultiJoinsParamsType = typeof AutoSelectMultiJoins extends (param: infer TParams) => any ? TParams : never;
 type AutoSelectMultiJoinsParamsText = AssertTrue<AssertEqual<AutoSelectMultiJoinsParamsResult, AutoSelectMultiJoinsParamsType>>

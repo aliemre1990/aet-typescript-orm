@@ -1,6 +1,7 @@
 import type { DbType, PgDbType } from "../../db.js";
 import type { JsTypeToPgTypes, PgValueTypes } from "../../postgresql/dataTypes.js";
 import type Column from "../../table/column.js";
+import type { ClearNull } from "../../utility/common.js";
 import { QueryParamMedian } from "../param.js";
 import QueryParam from "../param.js";
 import type QueryColumn from "../queryColumn.js";
@@ -16,17 +17,17 @@ type ConvertMediansInArray<T extends any[], TDbType extends DbType, TValueType e
     [K in keyof T]: ConvertMedianToParam<T[K], TDbType, TValueType>
 };
 
-type CoalesceArg<TDbType extends DbType, TValueType extends ((TDbType extends PgDbType ? PgValueTypes : never) | null)> =
+type CoalesceArg<TDbType extends DbType, TValueType extends ((TDbType extends PgDbType ? PgValueTypes : never))> =
     | TValueType
     | QueryParamMedian<any>
-    | QueryColumn<TDbType, any, any, any>
-    | ColumnSQLFunction<TDbType, any, any, TValueType>;
+    | QueryColumn<TDbType, Column<TDbType, any, any, any, any, TValueType>, any, any>
+    | ColumnSQLFunction<TDbType, any, any, TValueType | null>;
 
 function pgCoalesce<
     TArgs extends any[],
     TValueType extends PgValueTypes | null = InferFirstTypeFromArgs<PgDbType, TArgs> | null
 >
-    (...args: TArgs & (TArgs extends CoalesceArg<PgDbType, TValueType>[] ? TArgs : never)) {
+    (...args: TArgs & (TArgs extends CoalesceArg<PgDbType, ClearNull<TValueType>>[] ? TArgs : never)) {
 
     for (let i = 0; i < args.length; i++) {
         const arg = args[i];

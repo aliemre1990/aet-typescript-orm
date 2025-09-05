@@ -6,6 +6,7 @@ import type { GetColumnTypeFromDbType } from "../_types/miscellaneous.js";
 import type ColumnSQLFunction from "../functions/_functions.js";
 import type { QueryParam } from "../queryColumn.js";
 import type QueryColumn from "../queryColumn.js";
+import type { InferValueTypeFromThisType } from "./_types/inferValueTypeFromThisType.js";
 
 const comparisonOperations = {
     eq: { name: 'EQ' },
@@ -33,7 +34,7 @@ class ColumnComparisonOperation<
     TParams extends QueryParam<TDbType, any, any>[] | undefined,
     TAppliedQColumns extends QueryColumn<TDbType, Column<TDbType, any, any, any, any>, any, any>[] | undefined,
     TAppliedQSQLFunctions extends ColumnSQLFunction<TDbType, any, any, any>[] | undefined,
-    TValueType extends GetColumnValueTypes<TDbType> = GetColumnTypeFromDbType<TDbType, TComparing extends QueryColumn<TDbType, infer TCol, any, any> ? TCol : never>
+    TValueType extends GetColumnValueTypes<TDbType> | null = InferValueTypeFromThisType<TDbType, TComparing> | null
 > {
     constructor(
         public operation: ComparisonOperation,
