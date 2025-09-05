@@ -19,14 +19,15 @@ type UnionToTuple<T> = UnionToIntersection<
 
 type DeepPrettify<T> = T extends Function
     ? T
+    : T extends Date ? T
     : T extends object
     ? { [K in keyof T]: DeepPrettify<T[K]> }
     : T;
 
 
-type FlattenObject<T> = T extends object ?
+type FlattenObject<T> = T extends Date ? T : T extends object ?
     DeepPrettify<UnionToIntersection<{
-        [K in keyof T]: T[K] extends object ? FlattenObject<T[K]> : { [P in K]: T[K] }
+        [K in keyof T]: T[K] extends Date ? { [P in K]: T[K] } : T[K] extends object ? FlattenObject<T[K]> : { [P in K]: T[K] }
     }[keyof T]>> : never
     ;
 

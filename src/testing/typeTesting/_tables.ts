@@ -6,7 +6,8 @@ const usersTable = pgTable(
     'users',
     {
         id: pgColumn('id', pgColumnTypes.serial, false),
-        userName: pgColumn('userName', pgColumnTypes.varchar, false)
+        userName: pgColumn('userName', pgColumnTypes.varchar, false),
+        createdAt: pgColumn('createdAt', pgColumnTypes.date, false),
     }
 )
 

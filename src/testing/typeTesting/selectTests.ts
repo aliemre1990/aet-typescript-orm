@@ -38,7 +38,7 @@ const QueryTableJoinQuery = customersTable.as("cst")
     .select()
     .exec;
 
-type QueryTableJoinQueryResult = { userId: number, userUserName: string, cstId: number, cstName: string, cstCreatedBy: number };
+type QueryTableJoinQueryResult = { userId: number, userUserName: string, userCreatedAt: Date, cstId: number, cstName: string, cstCreatedBy: number };
 type QueryTableJoinQueryReturnType = ReturnType<typeof QueryTableJoinQuery>;
 type QueryTableJoinQueryTest = AssertTrue<AssertEqual<QueryTableJoinQueryResult, QueryTableJoinQueryReturnType>>
 
@@ -65,6 +65,7 @@ type SingleTableJoinWithAutoSelectQueryResult = {
     customerCreatedBy: number;
     userId: number;
     userUserName: string;
+    userCreatedAt: Date;
 };
 type SingleTableJoinWithAutoSelectQueryReturnType = ReturnType<typeof SingleTableJoinWithAutoSelectQuery>;
 type SingleTableJoinWithAutoSelectQueryTest = AssertTrue<AssertEqual<SingleTableJoinWithAutoSelectQueryResult, SingleTableJoinWithAutoSelectQueryReturnType>>
@@ -140,8 +141,10 @@ type AutoSelectMultiJoinsResult = {
     customerCreatedBy: number;
     userId: number;
     userUserName: string;
+    userCreatedAt: Date;
     parentUserId: number;
     parentUserUserName: string;
+    parentUserCreatedAt: Date;
     orderId: number;
     orderCustomerId: number;
     orderCreatedBy: number;

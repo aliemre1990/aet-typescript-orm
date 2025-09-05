@@ -50,7 +50,8 @@ type TablesToResultMap<TDbType extends DbType, TTables extends QueryTable<TDbTyp
             C in keyof T["columns"]as
             `${IsPlural<(T["asName"] extends undefined ? T["table"]["name"] : T["asName"]) & string> extends true ?
             ToSingular<(T["asName"] extends undefined ? T["table"]["name"] : T["asName"]) & string> :
-            (T["asName"] extends undefined ? T["table"]["name"] : T["asName"]) & string}${Capitalize<T["columns"][C]["column"]["name"]>}`]: PgTypeToJsType<T["columns"][C]["column"]["type"]>
+            (T["asName"] extends undefined ? T["table"]["name"] : T["asName"]) & string}${Capitalize<T["columns"][C]["column"]["name"]>}`]:
+            PgTypeToJsType<T["columns"][C]["column"]["type"]>
         }
     }>;
 
