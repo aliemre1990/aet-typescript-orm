@@ -163,8 +163,8 @@ type AutoSelectMultiJoinsParamsResult = {
     inParam: number[];
     parentUserEq1: number;
     parentUserBetLeft: number;
-    parentUserGt2: number;
-    innerCoalesce: any;
+    parentUserGt2: number | null;
+    innerCoalesce: number | null;
     parentUserNeq3: string;
     innerParentUserParam1: string;
 } | undefined;

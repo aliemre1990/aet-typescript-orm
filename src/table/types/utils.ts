@@ -11,7 +11,7 @@ type GetColumnValueTypes<TDbType extends DbType> = TDbType extends PgDbType ? Pg
 type GetValueTypeFromColumnType<TDbType extends DbType, TColType extends TDbType extends PgDbType ? PgColumnType : never> =
     TDbType extends PgDbType ? PgTypeToJsType<TColType> : never;
 
-type ColumnType<TDbType extends DbType> = Column<TDbType, GetColumnTypes<TDbType>, string, TableSpecsType, boolean>;
+type ColumnType<TDbType extends DbType> = Column<TDbType, GetColumnTypes<TDbType>, string, TableSpecsType, boolean, any, any>;
 type ColumnsObjectType<TDbType extends DbType> = { [key: string]: ColumnType<TDbType> };
 type TableType<TDbType extends DbType, TColumns extends ColumnsObjectType<TDbType>, TTableName extends string = string> = Table<TDbType, TColumns, TTableName>;
 type TablesObjectType<TDbType extends DbType> = { [key: string]: TableType<TDbType, ColumnsObjectType<TDbType>> };

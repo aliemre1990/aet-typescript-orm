@@ -7,12 +7,12 @@ import type QueryColumn from "../queryColumn.js";
 import ColumnSQLFunction, { sqlFunctions } from "./_functions.js";
 import type { InferFirstTypeFromArgs } from "./_types/args.js";
 
-type ConvertMedianToParam<T, TDbType extends DbType, TValueType extends TDbType extends PgDbType ? PgValueTypes : never> =
+type ConvertMedianToParam<T, TDbType extends DbType, TValueType extends (TDbType extends PgDbType ? PgValueTypes : never) | null> =
     T extends QueryParamMedian<infer U>
     ? QueryParam<TDbType, U, TValueType>
     : T;
 
-type ConvertMediansInArray<T extends any[], TDbType extends DbType, TValueType extends TDbType extends PgDbType ? PgValueTypes : never> = {
+type ConvertMediansInArray<T extends any[], TDbType extends DbType, TValueType extends (TDbType extends PgDbType ? PgValueTypes : never) | null> = {
     [K in keyof T]: ConvertMedianToParam<T[K], TDbType, TValueType>
 };
 
@@ -38,7 +38,7 @@ function pgCoalesce<
         }
     }
 
-    return new ColumnSQLFunction(args as ConvertMediansInArray<TArgs, PgDbType, any>, sqlFunctions.coalesce);
+    return new ColumnSQLFunction<PgDbType, typeof sqlFunctions.coalesce, ConvertMediansInArray<TArgs, PgDbType, TValueType>, TValueType>(args as ConvertMediansInArray<TArgs, PgDbType, TValueType>, sqlFunctions.coalesce);
 }
 
 export default pgCoalesce;

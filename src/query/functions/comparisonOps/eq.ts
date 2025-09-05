@@ -35,7 +35,7 @@ function functionEq<
         QueryColumn<TDbType, any, any, any> |
         ColumnSQLFunction<TDbType, any, any, TReturnType>
     )[],
-    TReturnType extends TDbType extends PgDbType ? PgValueTypes : never,
+    TReturnType extends (TDbType extends PgDbType ? PgValueTypes : never) | null,
     TAppliedSQLFunction extends ColumnSQLFunction<TDbType, any, any, TReturnType>,
 >(this: ColumnSQLFunction<TDbType, TSQLFunction, TArgs, TReturnType>, value: TAppliedSQLFunction): ColumnComparisonOperation<
     TDbType,
@@ -53,7 +53,7 @@ function functionEq<
         QueryColumn<TDbType, any, any, any> |
         ColumnSQLFunction<TDbType, any, any, TReturnType>
     )[],
-    TReturnType extends TDbType extends PgDbType ? PgValueTypes : never,
+    TReturnType extends (TDbType extends PgDbType ? PgValueTypes : never) | null,
     TParamMedian extends QueryParamMedian<any>,
     TParamName extends TParamMedian extends QueryParamMedian<infer U> ? U : never,
     TParam extends QueryParam<TDbType, TParamName, TReturnType>
@@ -74,7 +74,7 @@ function functionEq<
         QueryColumn<TDbType, any, any, any> |
         ColumnSQLFunction<TDbType, any, any, TReturnType>
     )[],
-    TReturnType extends TDbType extends PgDbType ? PgValueTypes : never
+    TReturnType extends (TDbType extends PgDbType ? PgValueTypes : never) | null,
 >(this: ColumnSQLFunction<TDbType, TSQLFunction, TArgs, TReturnType>, value: TReturnType): ColumnComparisonOperation<
     TDbType,
     ColumnSQLFunction<TDbType, TSQLFunction, TArgs, TReturnType>,

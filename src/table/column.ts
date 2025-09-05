@@ -14,6 +14,9 @@ class Column<
 
     tableSpecs?: TTableSpecs;
 
+    value?: TValueType;
+    finalValue?: TFinalValueType;
+
     constructor(
         public name: TColumnName,
         public type: TColumnType,

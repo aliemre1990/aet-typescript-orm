@@ -26,6 +26,8 @@ class ColumnSQLFunction<
     TReturnType extends (TDbType extends PgDbType ? PgValueTypes : never) | null
 > {
 
+    dummyProp?: TReturnType;
+
     eq: typeof functionEq = functionEq;
 
     constructor(
