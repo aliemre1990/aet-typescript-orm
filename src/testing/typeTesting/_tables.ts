@@ -15,7 +15,8 @@ const employeesTable = pgTable(
     'employees',
     {
         id: pgColumn('id', pgColumnTypes.serial, false),
-        userName: pgColumn('name', pgColumnTypes.varchar, false)
+        userName: pgColumn('name', pgColumnTypes.varchar, false),
+        salary: pgColumn('salary', pgColumnTypes.decimal, true)
     }
 )
 
