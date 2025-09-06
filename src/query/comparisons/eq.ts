@@ -22,7 +22,7 @@ function eq<
     TDbType extends DbType,
     TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
     TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
-    TAppliedSQLFunction extends ColumnSQLFunction<TDbType, any, any, TValueType | null>,
+    TAppliedSQLFunction extends ColumnSQLFunction<TDbType, any, any, TValueType | null>
 >(this: TComparing, value: TAppliedSQLFunction): ColumnComparisonOperation<
     TDbType,
     TComparing,

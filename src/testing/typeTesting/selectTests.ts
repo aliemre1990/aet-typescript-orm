@@ -156,8 +156,8 @@ type AutoSelectMultiJoinsParamsResult = {
     userParam1: number | null;
     userParam2: number | null;
     userParam3: string | null;
-    userBetweenLeft: number;
-    userBetweenRight: number;
+    userBetweenLeft: number | null;
+    userBetweenRight: number | null;
     userGteParam4: string | null;
     userEqParam1: number | null;
     inParam: number[];
@@ -170,7 +170,6 @@ type AutoSelectMultiJoinsParamsResult = {
 } | undefined;
 type AutoSelectMultiJoinsParamsType = typeof AutoSelectMultiJoins extends (param: infer TParams) => any ? TParams : never;
 type AutoSelectMultiJoinsParamsText = AssertTrue<AssertEqual<AutoSelectMultiJoinsParamsResult, AutoSelectMultiJoinsParamsType>>
-
 
 
 /**

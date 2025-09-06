@@ -1,12 +1,12 @@
-import type { DbValueTypes, PgDbType } from "../../db.js";
-import type ColumnComparisonOperation from "../../query/comparisons/_comparisonOperations.js";
-import type ColumnSQLFunction from "../../query/functions/_functions.js";
-import pgCoalesce from "../../query/functions/coalesce.js";
-import ColumnLogicalOperation, { and } from "../../query/logicalOperations.js";
-import QueryParam, { param } from "../../query/param.js";
-import QueryColumn from "../../query/queryColumn.js";
-import { customersTable, employeesTable, ordersTable, usersTable } from "./_tables.js";
-import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
+import type { DbValueTypes, PgDbType } from "../../../db.js";
+import type ColumnComparisonOperation from "../../../query/comparisons/_comparisonOperations.js";
+import type ColumnSQLFunction from "../../../query/functions/_functions.js";
+import pgCoalesce from "../../../query/functions/coalesce.js";
+import ColumnLogicalOperation, { and } from "../../../query/logicalOperations.js";
+import QueryParam, { param } from "../../../query/param.js";
+import QueryColumn from "../../../query/queryColumn.js";
+import { customersTable, employeesTable, ordersTable, usersTable } from "../_tables.js";
+import type { AssertEqual, AssertTrue } from "../_typeTestingUtilities.js";
 
 /**
  * 
