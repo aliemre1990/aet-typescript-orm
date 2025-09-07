@@ -1,7 +1,6 @@
 import type { DbType, PgDbType } from "../../db.js";
 import type { JsTypeToPgTypes, PgValueTypes } from "../../postgresql/dataTypes.js";
 import type Column from "../../table/column.js";
-import type { ClearNull } from "../../utility/common.js";
 import { QueryParamMedian } from "../param.js";
 import QueryParam from "../param.js";
 import type QueryColumn from "../queryColumn.js";
@@ -27,7 +26,7 @@ function pgCoalesce<
     TArgs extends any[],
     TValueType extends PgValueTypes | null = InferFirstTypeFromArgs<PgDbType, TArgs> | null
 >
-    (...args: TArgs & (TArgs extends CoalesceArg<PgDbType, ClearNull<TValueType>>[] ? TArgs : never)) {
+    (...args: TArgs & (TArgs extends CoalesceArg<PgDbType, NonNullable<TValueType>>[] ? TArgs : never)) {
 
     for (let i = 0; i < args.length; i++) {
         const arg = args[i];
@@ -43,7 +42,7 @@ function pgCoalesce<
         PgDbType,
         typeof sqlFunctions.coalesce,
         ConvertMediansInArray<TArgs, PgDbType, TValueType>,
-        IsContainsNonNull<PgDbType, TArgs> extends true ? ClearNull<TValueType> : TValueType
+        IsContainsNonNull<PgDbType, TArgs> extends true ? NonNullable<TValueType> : TValueType
     >(args as ConvertMediansInArray<TArgs, PgDbType, TValueType>, sqlFunctions.coalesce);
 }
 

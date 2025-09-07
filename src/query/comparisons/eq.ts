@@ -11,7 +11,7 @@ function eq<
     TDbType extends DbType,
     TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
     TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
-    TApplied extends IComparable<TDbType, any, TValueType>,
+    TApplied extends IComparable<TDbType, any, TValueType, any>,
 >(this: TComparing, value: TApplied): ColumnComparisonOperation<
     TDbType,
     TComparing,
@@ -48,7 +48,7 @@ function eq<
     TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
     TParamMedian extends QueryParamMedian<any> | undefined,
     TParamName extends (TParamMedian extends QueryParamMedian<infer U> ? U : never) | undefined,
-    TApplied extends IComparable<TDbType, any, TValueType>,
+    TApplied extends IComparable<TDbType, any, TValueType, any>,
 >
     (this: TComparing, value: TValueType | TParamMedian | TApplied | null) {
 

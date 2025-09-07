@@ -49,8 +49,6 @@ type IsUnion<T, U extends T = T> =
 
 type IsAny<T> = 0 extends 1 & T ? true : false;
 
-type ClearNull<T> = T extends null ? never : T;
-
 export type {
     UnionToTuple,
     DeepPrettify,
@@ -58,6 +56,5 @@ export type {
     FlattenObject,
     SingleKeyObject,
     IsUnion,
-    IsAny,
-    ClearNull
+    IsAny
 }

@@ -26,8 +26,8 @@ function between<
     TDbType extends DbType,
     TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
     TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
-    TLApplied extends IComparable<TDbType, any, TValueType>,
-    TRApplied extends IComparable<TDbType, any, TValueType>
+    TLApplied extends IComparable<TDbType, any, TValueType, any>,
+    TRApplied extends IComparable<TDbType, any, TValueType, any>
 >(this: TComparing, leftValue: TLApplied, rightValue: TRApplied): ColumnComparisonOperation<
     TDbType,
     TComparing,
@@ -59,7 +59,7 @@ function between<
     TDbType extends DbType,
     TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
     TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
-    TLApplied extends IComparable<TDbType, any, TValueType>
+    TLApplied extends IComparable<TDbType, any, TValueType, any>
 >(this: TComparing, leftValue: TLApplied, rightValue: TValueType | null): ColumnComparisonOperation<
     TDbType,
     TComparing,
@@ -71,7 +71,7 @@ function between<
     TDbType extends DbType,
     TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
     TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
-    TRApplied extends IComparable<TDbType, any, TValueType>
+    TRApplied extends IComparable<TDbType, any, TValueType, any>
 >(this: TComparing, leftValue: TValueType | null, rightValue: TRApplied): ColumnComparisonOperation<
     TDbType,
     TComparing,
@@ -97,16 +97,14 @@ function between<
 >
 function between<
     TDbType extends DbType,
-    TColumn extends ColumnType<TDbType>,
-    TQTableSpecs extends QueryTableSpecsType,
-    TAsName extends string | undefined,
+    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
     TRParamMedian extends QueryParamMedian<any>,
     TRParamName extends TRParamMedian extends QueryParamMedian<infer U> ? U : never,
-    TRParam extends QueryParam<TDbType, TRParamName, TValueType>,
-    TValueType extends GetColumnValueType<TDbType, TColumn>
->(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, leftValue: TValueType, rightValue: TRParamMedian): ColumnComparisonOperation<
+    TRParam extends QueryParam<TDbType, TRParamName, TValueType>
+>(this: TComparing, leftValue: TValueType, rightValue: TRParamMedian): ColumnComparisonOperation<
     TDbType,
-    QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
+    TComparing,
     undefined,
     [TRParam]
 >
@@ -114,54 +112,48 @@ function between<
 // Param and column
 function between<
     TDbType extends DbType,
-    TColumn extends ColumnType<TDbType>,
-    TQTableSpecs extends QueryTableSpecsType,
-    TAsName extends string | undefined,
+    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
     TLParamMedian extends QueryParamMedian<any>,
     TLParamName extends TLParamMedian extends QueryParamMedian<infer U> ? U : never,
     TLParam extends QueryParam<TDbType, TLParamName, TValueType>,
-    TValueType extends GetColumnValueType<TDbType, TColumn>,
-    TRApplied extends IComparable<TDbType, any, TValueType>
->(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, leftValue: TLParamMedian, rightValue: TRApplied): ColumnComparisonOperation<
+    TRApplied extends IComparable<TDbType, any, TValueType, any>
+>(this: TComparing, leftValue: TLParamMedian, rightValue: TRApplied): ColumnComparisonOperation<
     TDbType,
-    QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
+    TComparing,
     [TRApplied],
     [TLParam]
 >
 function between<
     TDbType extends DbType,
-    TColumn extends ColumnType<TDbType>,
-    TQTableSpecs extends QueryTableSpecsType,
-    TAsName extends string | undefined,
+    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
     TRParamMedian extends QueryParamMedian<any>,
     TRParamName extends TRParamMedian extends QueryParamMedian<infer U> ? U : never,
     TRParam extends QueryParam<TDbType, TRParamName, TValueType>,
-    TValueType extends GetColumnValueType<TDbType, TColumn>,
-    TLApplied extends IComparable<TDbType, any, TValueType>
->(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, leftValue: TLApplied, rightValue: TRParamMedian): ColumnComparisonOperation<
+    TLApplied extends IComparable<TDbType, any, TValueType, any>
+>(this: TComparing, leftValue: TLApplied, rightValue: TRParamMedian): ColumnComparisonOperation<
     TDbType,
-    QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
+    TComparing,
     [TLApplied],
     [TRParam]
 >
 //Implementation
 function between<
     TDbType extends DbType,
-    TColumn extends ColumnType<TDbType>,
-    TQTableSpecs extends QueryTableSpecsType,
-    TAsName extends string | undefined,
+    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
     TLParamMedian extends QueryParamMedian<any> | undefined,
     TLParamName extends (TLParamMedian extends QueryParamMedian<infer U> ? U : never) | undefined,
     TLParam extends TLParamName extends string ? (QueryParam<TDbType, TLParamName, TValueType>) : undefined,
     TRParamMedian extends QueryParamMedian<any> | undefined,
     TRParamName extends (TRParamMedian extends QueryParamMedian<infer U> ? U : never) | undefined,
     TRParam extends TRParamName extends string ? (QueryParam<TDbType, TRParamName, TValueType>) : undefined,
-    TValueType extends GetColumnValueType<TDbType, TColumn>,
     TLAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TDbType, TValueType>, any, any, any>, any, any> | undefined,
     TRAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TDbType, TValueType>, any, any, any>, any, any> | undefined
 >
     (
-        this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
+        this: TComparing,
         leftValue: TValueType | TLParamMedian | TLAppliedQColumn,
         rightValue: TValueType | TRParamMedian | TRAppliedQColumn
     ) {

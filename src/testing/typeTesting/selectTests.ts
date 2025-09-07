@@ -113,7 +113,7 @@ const AutoSelectMultiJoins = customersTable
 
         type tp = typeof res;
         type tp1 = tp extends ColumnComparisonOperation<any, any, infer TApplied, any> ? TApplied : never;
-        type tp2 = tp1[0] extends IComparable<any, infer tparams, any> ? tparams : never;
+        type tp2 = tp1[0] extends IComparable<any, infer tparams, any, any> ? tparams : never;
 
         return comp;
     })

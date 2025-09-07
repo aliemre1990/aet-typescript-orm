@@ -13,12 +13,14 @@ class QueryColumn<
     TColumn extends ColumnType<TDbType>,
     TQTableSpecs extends QueryTableSpecsType,
     TAsName extends string | undefined = undefined,
-    TValueType extends GetColumnValueTypes<TDbType> = TColumn extends Column<TDbType, any, any, any, any, infer TValType> ? TValType : never
-> implements IComparable<TDbType, undefined, TValueType> {
+    TValueType extends GetColumnValueTypes<TDbType> = TColumn extends Column<TDbType, any, any, any, any, infer TValType> ? TValType : never,
+    TFinalValueType extends TValueType | null = TColumn extends Column<TDbType, any, any, any, any, any, infer TFinalValType> ? TFinalValType : never
+> implements IComparable<TDbType, undefined, TValueType, TFinalValueType> {
     qTableSpecs?: TQTableSpecs;
 
     params: undefined;
     icomparableValueDummy?: TValueType;
+    icomparableFinalValueDummy?: TFinalValueType;
 
     eq: typeof eq = eq;
     sqlIn: typeof sqlIn = sqlIn;

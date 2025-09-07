@@ -14,7 +14,7 @@ import type { IComparable } from "./_interfaces/IComparable.js";
 // Helper type to extract only QueryColumns from the mixed tuple
 type ExtractComparables<T extends readonly unknown[]> =
     T extends readonly [infer First, ...infer Rest] ?
-    First extends IComparable<any, any, any> ?
+    First extends IComparable<any, any, any, any> ?
     [First, ...ExtractComparables<Rest>] :
     ExtractComparables<Rest> :
     [];
@@ -23,7 +23,7 @@ function sqlIn<
     TDbType extends DbType,
     TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
     TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
-    TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType>)[]
+    TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any>)[]
 >(
     this: TComparing,
     ...values: TValues
@@ -54,7 +54,7 @@ function sqlIn<
     TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
     TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
     TParamMedian extends QueryParamMedian<any> | undefined,
-    TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType>)[]
+    TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any>)[]
 >
     (
         this: TComparing,
