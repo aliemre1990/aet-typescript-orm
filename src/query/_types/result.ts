@@ -1,7 +1,6 @@
 import type { DbType } from "../../db.js";
-import type { PgTypeToJsType } from "../../postgresql/dataTypes.js";
 import type QueryColumn from "../queryColumn.js";
-import type { ColumnType, QueryTablesObjectType, QueryTableSpecsType } from "../../table/types/utils.js";
+import type { ColumnType, QueryTableSpecsType } from "../../table/types/utils.js";
 import type { IsPlural, ToSingular } from "../../utility/string.js";
 import type { DeepPrettify, FlattenObject } from "../../utility/common.js";
 import { QueryParam } from "../queryColumn.js";
@@ -12,6 +11,7 @@ import type GroupedColumn from "../aggregation/_groupedColumn.js";
 import type { IsGroupedColumnsContains, SpreadGroupedColumns } from "./grouping.js";
 import type ColumnSQLFunction from "../functions/_functions.js";
 import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
+import type Column from "../../table/column.js";
 
 type TResultShape<TDbType extends DbType> = {
     [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined> | TResultShape<TDbType>;
@@ -35,7 +35,8 @@ type TablesToResultMap<TDbType extends DbType, TTables extends QueryTable<TDbTyp
         : never
         ]:
         {
-            [C in keyof T["columns"]as T["columns"][C]["column"]["name"]]: PgTypeToJsType<T["columns"][C]["column"]["type"]>
+            [C in keyof T["columns"]as T["columns"][C]["column"]["name"]]:
+            T["columns"][C]["column"] extends Column<TDbType, any, any, any, any, any, infer TFinalValueType> ? TFinalValueType : never;
         }
 
     }> :
@@ -52,7 +53,7 @@ type TablesToResultMap<TDbType extends DbType, TTables extends QueryTable<TDbTyp
             `${IsPlural<(T["asName"] extends undefined ? T["table"]["name"] : T["asName"]) & string> extends true ?
             ToSingular<(T["asName"] extends undefined ? T["table"]["name"] : T["asName"]) & string> :
             (T["asName"] extends undefined ? T["table"]["name"] : T["asName"]) & string}${Capitalize<T["columns"][C]["column"]["name"]>}`]:
-            PgTypeToJsType<T["columns"][C]["column"]["type"]>
+            T["columns"][C]["column"] extends Column<TDbType, any, any, any, any, any, infer TFinalValueType> ? TFinalValueType : never;
         }
     }>;
 
@@ -78,7 +79,8 @@ type TablesToGroupedResultMap<
             T["columns"][C]["column"]["name"] :
             never :
             never
-            ]: PgTypeToJsType<T["columns"][C]["column"]["type"]>
+            ]:
+            T["columns"][C]["column"] extends Column<TDbType, any, any, any, any, any, infer TFinalValueType> ? TFinalValueType : never;
         }
 
     }> :
@@ -97,7 +99,8 @@ type TablesToGroupedResultMap<
             (T["asName"] extends undefined ? T["table"]["name"] : T["asName"]) & string}${Capitalize<T["columns"][C]["column"]["name"]>}`
             : never
             : never
-            ]: PgTypeToJsType<T["columns"][C]["column"]["type"]>
+            ]:
+            T["columns"][C]["column"] extends Column<TDbType, any, any, any, any, any, infer TFinalValueType> ? TFinalValueType : never;
         }
     }>;
 
@@ -108,7 +111,10 @@ type ColumnsToResultMap<TDbType extends DbType, T extends TResultShape<TDbType> 
     DeepPrettify<{
         [K in keyof T as T[K] extends QueryColumn<TDbType, any, any, any> ?
         T[K]["asName"] extends undefined ? K : T[K]["asName"] & string : never]:
-        T[K] extends QueryColumn<TDbType, any, any, any> ? PgTypeToJsType<T[K]["column"]["type"]> : never
+        T[K] extends QueryColumn<TDbType, any, any, any> ?
+        T[K]["column"] extends Column<TDbType, any, any, any, any, any, infer TFinalType> ? TFinalType :
+        never :
+        never
     }
         &
     {
@@ -129,7 +135,10 @@ type GroupedColumnsToResultMap<TDbType extends DbType, T extends TGroupedResultS
     DeepPrettify<{
         [K in keyof T as T[K] extends GroupedColumn<TDbType, infer TQColumn> ?
         TQColumn["asName"] extends undefined ? K : TQColumn["asName"] & string : never]:
-        T[K] extends GroupedColumn<TDbType, infer TQColumn> ? PgTypeToJsType<TQColumn["column"]["type"]> : never
+        T[K] extends GroupedColumn<TDbType, infer TQColumn> ?
+        TQColumn["column"] extends Column<TDbType, any, any, any, any, infer TFinalType> ? TFinalType :
+        never :
+        never
     }
         &
     {

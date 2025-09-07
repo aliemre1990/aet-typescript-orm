@@ -1,8 +1,5 @@
-import type { DbType, PgDbType } from "../../db.js";
-import type { JsTypeToPgTypes, PgTypeToJsType } from "../../postgresql/dataTypes.js";
-import type Column from "../../table/column.js";
+import type { DbType } from "../../db.js";
 import type { GetColumnValueTypes } from "../../table/types/utils.js";
-import type { GetColumnTypeFromDbType } from "../_types/miscellaneous.js";
 import type ColumnSQLFunction from "../functions/_functions.js";
 import type { QueryParam } from "../queryColumn.js";
 import type QueryColumn from "../queryColumn.js";

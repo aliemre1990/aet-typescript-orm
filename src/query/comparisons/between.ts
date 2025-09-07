@@ -1,8 +1,6 @@
-import type { DbType, PgDbType } from "../../db.js";
-import type { JsTypeToPgTypes, PgTypeToJsType } from "../../postgresql/dataTypes.js";
+import type { DbType } from "../../db.js";
+import type { JsTypeToPgTypes } from "../../postgresql/dataTypes.js";
 import type Column from "../../table/column.js";
-import type { ColumnType, QueryTableSpecsType } from "../../table/types/utils.js";
-import type { GetColumnTypeFromDbType, GetColumnValueType } from "../_types/miscellaneous.js";
 import ColumnComparisonOperation, { comparisonOperations } from "./_comparisonOperations.js";
 import { QueryParam, QueryParamMedian } from "../queryColumn.js";
 import QueryColumn from "../queryColumn.js";
@@ -82,16 +80,14 @@ function between<
 // Param and value
 function between<
     TDbType extends DbType,
-    TColumn extends ColumnType<TDbType>,
-    TQTableSpecs extends QueryTableSpecsType,
-    TAsName extends string | undefined,
+    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
     TLParamMedian extends QueryParamMedian<any>,
     TLParamName extends TLParamMedian extends QueryParamMedian<infer U> ? U : never,
     TLParam extends QueryParam<TDbType, TLParamName, TValueType>,
-    TValueType extends GetColumnValueType<TDbType, TColumn>
->(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, leftValue: TLParamMedian, rightValue: TValueType): ColumnComparisonOperation<
+>(this: TComparing, leftValue: TLParamMedian, rightValue: TValueType): ColumnComparisonOperation<
     TDbType,
-    QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
+    TComparing,
     undefined,
     [TLParam]
 >

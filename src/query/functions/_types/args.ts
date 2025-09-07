@@ -1,7 +1,5 @@
 import type { DbType, DbValueTypes, PgDbType } from "../../../db.js";
 import type { PgValueTypes } from "../../../postgresql/dataTypes.js";
-import type Column from "../../../table/column.js";
-import type { GetColumnTypeFromDbType } from "../../_types/miscellaneous.js";
 import type { IComparable } from "../../comparisons/_interfaces/IComparable.js";
 import type { QueryParamMedian } from "../../queryColumn.js";
 import type QueryColumn from "../../queryColumn.js";

@@ -1,9 +1,6 @@
 import type { DbType, PgDbType } from "../../db.js";
-import type { GetArrayEquivalentPgValueType, JsTypeToPgTypes } from "../../postgresql/dataTypes.js";
-import type Column from "../../table/column.js";
-import type { ColumnType, QueryTableSpecsType } from "../../table/types/utils.js";
+import type { GetArrayEquivalentPgValueType } from "../../postgresql/dataTypes.js";
 import { isNullOrUndefined } from "../../utility/guards.js";
-import type { GetColumnTypeFromDbType, GetColumnValueType } from "../_types/miscellaneous.js";
 import ColumnComparisonOperation, { comparisonOperations } from "./_comparisonOperations.js";
 import { QueryParam, QueryParamMedian } from "../queryColumn.js";
 import QueryColumn from "../queryColumn.js";
