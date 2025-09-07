@@ -4,13 +4,13 @@ import ColumnComparisonOperation, { comparisonOperations } from "./_comparisonOp
 import { QueryParam, QueryParamMedian } from "../queryColumn.js";
 import QueryColumn from "../queryColumn.js";
 import type ColumnSQLFunction from "../functions/_functions.js";
-import type { InferValueTypeFromThisType } from "./_types/inferValueTypeFromThisType.js";
+import type { InferValueTypeFromComparable, InferValueTypeFromThisType } from "./_types/inferValue.js";
 import type { IComparable } from "./_interfaces/IComparable.js";
 
 function eq<
     TDbType extends DbType,
-    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
-    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
+    TComparing extends IComparable<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TApplied extends IComparable<TDbType, any, TValueType, any>,
 >(this: TComparing, value: TApplied): ColumnComparisonOperation<
     TDbType,
@@ -20,8 +20,8 @@ function eq<
 >
 function eq<
     TDbType extends DbType,
-    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
-    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
+    TComparing extends IComparable<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TParamMedian extends QueryParamMedian<any>,
     TParamName extends TParamMedian extends QueryParamMedian<infer U> ? U : never,
     TParam extends QueryParam<TDbType, TParamName, TValueType | null>,
@@ -34,8 +34,8 @@ function eq<
 >
 function eq<
     TDbType extends DbType,
-    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
-    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
+    TComparing extends IComparable<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromComparable<TDbType, TComparing>
 >(this: TComparing, value: TValueType | null): ColumnComparisonOperation<
     TDbType,
     TComparing,
@@ -44,8 +44,8 @@ function eq<
 >
 function eq<
     TDbType extends DbType,
-    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
-    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
+    TComparing extends IComparable<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TParamMedian extends QueryParamMedian<any> | undefined,
     TParamName extends (TParamMedian extends QueryParamMedian<infer U> ? U : never) | undefined,
     TApplied extends IComparable<TDbType, any, TValueType, any>,

@@ -164,14 +164,14 @@ type QueryParamsToObject<T extends readonly QueryParam<any, any, any>[] | undefi
 
 //
 type InferParamsFromOps<T> =
-    T extends ColumnComparisonOperation<any, infer TFn, infer TApplied, infer TParams> ?
-    TParams extends readonly QueryParam<any, any, any>[] ? TFn extends ColumnSQLFunction<any, any, any, any> ? TApplied extends IComparable<any, any, any, any>[] ?
-    [...InferParamsFromComparables<TApplied>, ...InferParamsFromFn<TFn>, ...TParams] :
-    [...InferParamsFromFn<TFn>, ...TParams] :
+    T extends ColumnComparisonOperation<any, infer TComparing, infer TApplied, infer TParams> ?
+    TParams extends readonly QueryParam<any, any, any>[] ? TComparing extends IComparable<any, any, any, any> ? TApplied extends IComparable<any, any, any, any>[] ?
+    [...InferParamsFromComparables<[TComparing]>, ...TParams, ...InferParamsFromComparables<TApplied>,] :
+    [...InferParamsFromComparables<[TComparing]>, ...TParams] :
     TParams :
-    TFn extends ColumnSQLFunction<any, any, any, any> ? TApplied extends IComparable<any, any, any, any>[] ?
-    [...InferParamsFromComparables<TApplied>, ...InferParamsFromFn<TFn>] :
-    [...InferParamsFromFn<TFn>] :
+    TComparing extends IComparable<any, any, any, any> ? TApplied extends IComparable<any, any, any, any>[] ?
+    [...InferParamsFromComparables<[TComparing]>, ...InferParamsFromComparables<TApplied>] :
+    [...InferParamsFromComparables<[TComparing]>] :
     TApplied extends readonly IComparable<any, any, any, any>[] ?
     [...InferParamsFromComparables<TApplied>] :
     [] :
@@ -181,15 +181,15 @@ type InferParamsFromOps<T> =
 
 type InferParamsFromOpsArray<T extends readonly any[]> =
     T extends readonly [infer First, ...infer Rest] ?
-    First extends ColumnComparisonOperation<any, infer TFn, infer TApplied, infer TParams> ?
-    TParams extends readonly QueryParam<any, any, any>[] ? TFn extends ColumnSQLFunction<any, any, any, any> ? TApplied extends IComparable<any, any, any, any>[] ?
-    [...TParams, ...InferParamsFromComparables<TApplied>, ...InferParamsFromFn<TFn>, ...InferParamsFromOpsArray<Rest>] :
-    [...TParams, ...InferParamsFromFn<TFn>, ...InferParamsFromOpsArray<Rest>] :
+    First extends ColumnComparisonOperation<any, infer TComparing, infer TApplied, infer TParams> ?
+    TParams extends readonly QueryParam<any, any, any>[] ? TComparing extends IComparable<any, any, any, any> ? TApplied extends IComparable<any, any, any, any>[] ?
+    [...InferParamsFromComparables<[TComparing]>, ...TParams, ...InferParamsFromComparables<TApplied>, ...InferParamsFromOpsArray<Rest>] :
+    [...InferParamsFromComparables<[TComparing]>, ...TParams, ...InferParamsFromOpsArray<Rest>] :
     [...TParams, ...InferParamsFromOpsArray<Rest>] :
 
-    TFn extends ColumnSQLFunction<any, any, any, any> ? TApplied extends IComparable<any, any, any, any>[] ?
-    [...InferParamsFromComparables<TApplied>, ...InferParamsFromFn<TFn>, ...InferParamsFromOpsArray<Rest>] :
-    [...InferParamsFromFn<TFn>, ...InferParamsFromOpsArray<Rest>] :
+    TComparing extends IComparable<any, any, any, any> ? TApplied extends IComparable<any, any, any, any>[] ?
+    [...InferParamsFromComparables<[TComparing]>, ...InferParamsFromComparables<TApplied>, ...InferParamsFromOpsArray<Rest>] :
+    [...InferParamsFromComparables<[TComparing]>, ...InferParamsFromOpsArray<Rest>] :
 
     TApplied extends IComparable<any, any, any, any>[] ?
     [...InferParamsFromComparables<TApplied>, ...InferParamsFromOpsArray<Rest>] :

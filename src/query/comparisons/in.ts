@@ -5,7 +5,7 @@ import ColumnComparisonOperation, { comparisonOperations } from "./_comparisonOp
 import { QueryParam, QueryParamMedian } from "../queryColumn.js";
 import QueryColumn from "../queryColumn.js";
 import type ColumnSQLFunction from "../functions/_functions.js";
-import type { InferValueTypeFromThisType } from "./_types/inferValueTypeFromThisType.js";
+import type { InferValueTypeFromComparable, InferValueTypeFromThisType } from "./_types/inferValue.js";
 import type { IComparable } from "./_interfaces/IComparable.js";
 
 // Helper type to extract only QueryColumns from the mixed tuple
@@ -18,8 +18,8 @@ type ExtractComparables<T extends readonly unknown[]> =
 
 function sqlIn<
     TDbType extends DbType,
-    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
-    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
+    TComparing extends IComparable<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any>)[]
 >(
     this: TComparing,
@@ -34,8 +34,8 @@ function sqlIn<
 
 function sqlIn<
     TDbType extends DbType,
-    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
-    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
+    TComparing extends IComparable<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TParamMedian extends QueryParamMedian<any>,
     TParamName extends TParamMedian extends QueryParamMedian<infer U> ? U : never,
     TParam extends QueryParam<TDbType, TParamName, TDbType extends PgDbType ? GetArrayEquivalentPgValueType<TValueType> : never>,
@@ -48,8 +48,8 @@ function sqlIn<
 >
 function sqlIn<
     TDbType extends DbType,
-    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
-    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
+    TComparing extends IComparable<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TParamMedian extends QueryParamMedian<any> | undefined,
     TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any>)[]
 >

@@ -4,7 +4,7 @@ import type ColumnSQLFunction from "../functions/_functions.js";
 import type { QueryParam } from "../queryColumn.js";
 import type QueryColumn from "../queryColumn.js";
 import type { IComparable } from "./_interfaces/IComparable.js";
-import type { InferValueTypeFromThisType } from "./_types/inferValueTypeFromThisType.js";
+import type { InferValueTypeFromComparable, InferValueTypeFromThisType } from "./_types/inferValue.js";
 
 const comparisonOperations = {
     eq: { name: 'EQ' },
@@ -28,10 +28,10 @@ type ComparisonOperation = (typeof comparisonOperations)[keyof typeof comparison
 
 class ColumnComparisonOperation<
     TDbType extends DbType,
-    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
+    TComparing extends IComparable<TDbType, any, any, any>,
     TApplied extends IComparable<TDbType, any, TValueType, any>[] | undefined,
     TParams extends QueryParam<TDbType, any, any>[] | undefined,
-    TValueType extends GetColumnValueTypes<TDbType> = InferValueTypeFromThisType<TDbType, TComparing>
+    TValueType extends GetColumnValueTypes<TDbType> = InferValueTypeFromComparable<TDbType, TComparing>
 > {
     constructor(
         public operation: ComparisonOperation,

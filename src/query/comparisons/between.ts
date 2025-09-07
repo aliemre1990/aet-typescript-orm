@@ -5,15 +5,15 @@ import ColumnComparisonOperation, { comparisonOperations } from "./_comparisonOp
 import { QueryParam, QueryParamMedian } from "../queryColumn.js";
 import QueryColumn from "../queryColumn.js";
 import type ColumnSQLFunction from "../functions/_functions.js";
-import type { InferValueTypeFromThisType } from "./_types/inferValueTypeFromThisType.js";
+import type { InferValueTypeFromComparable, InferValueTypeFromThisType } from "./_types/inferValue.js";
 import type { IComparable } from "./_interfaces/IComparable.js";
 
 
 // All same
 function between<
     TDbType extends DbType,
-    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
-    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
+    TComparing extends IComparable<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromComparable<TDbType, TComparing>
 >(this: TComparing, leftValue: TValueType | null, rightValue: TValueType | null): ColumnComparisonOperation<
     TDbType,
     TComparing,
@@ -22,8 +22,8 @@ function between<
 >
 function between<
     TDbType extends DbType,
-    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
-    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
+    TComparing extends IComparable<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TLApplied extends IComparable<TDbType, any, TValueType, any>,
     TRApplied extends IComparable<TDbType, any, TValueType, any>
 >(this: TComparing, leftValue: TLApplied, rightValue: TRApplied): ColumnComparisonOperation<
@@ -34,8 +34,8 @@ function between<
 >
 function between<
     TDbType extends DbType,
-    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
-    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
+    TComparing extends IComparable<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TLParamMedian extends QueryParamMedian<any>,
     TLParamName extends TLParamMedian extends QueryParamMedian<infer U> ? U : never,
     TLParam extends QueryParam<TDbType, TLParamName, TValueType | null>,
@@ -55,8 +55,8 @@ function between<
 // Column and value
 function between<
     TDbType extends DbType,
-    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
-    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
+    TComparing extends IComparable<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TLApplied extends IComparable<TDbType, any, TValueType, any>
 >(this: TComparing, leftValue: TLApplied, rightValue: TValueType | null): ColumnComparisonOperation<
     TDbType,
@@ -67,8 +67,8 @@ function between<
 
 function between<
     TDbType extends DbType,
-    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
-    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
+    TComparing extends IComparable<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TRApplied extends IComparable<TDbType, any, TValueType, any>
 >(this: TComparing, leftValue: TValueType | null, rightValue: TRApplied): ColumnComparisonOperation<
     TDbType,
@@ -80,11 +80,11 @@ function between<
 // Param and value
 function between<
     TDbType extends DbType,
-    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
-    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
+    TComparing extends IComparable<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TLParamMedian extends QueryParamMedian<any>,
     TLParamName extends TLParamMedian extends QueryParamMedian<infer U> ? U : never,
-    TLParam extends QueryParam<TDbType, TLParamName, TValueType| null>,
+    TLParam extends QueryParam<TDbType, TLParamName, TValueType | null>,
 >(this: TComparing, leftValue: TLParamMedian, rightValue: TValueType | null): ColumnComparisonOperation<
     TDbType,
     TComparing,
@@ -93,8 +93,8 @@ function between<
 >
 function between<
     TDbType extends DbType,
-    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
-    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
+    TComparing extends IComparable<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TRParamMedian extends QueryParamMedian<any>,
     TRParamName extends TRParamMedian extends QueryParamMedian<infer U> ? U : never,
     TRParam extends QueryParam<TDbType, TRParamName, TValueType | null>
@@ -108,8 +108,8 @@ function between<
 // Param and column
 function between<
     TDbType extends DbType,
-    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
-    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
+    TComparing extends IComparable<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TLParamMedian extends QueryParamMedian<any>,
     TLParamName extends TLParamMedian extends QueryParamMedian<infer U> ? U : never,
     TLParam extends QueryParam<TDbType, TLParamName, TValueType | null>,
@@ -122,11 +122,11 @@ function between<
 >
 function between<
     TDbType extends DbType,
-    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
-    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
+    TComparing extends IComparable<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TRParamMedian extends QueryParamMedian<any>,
     TRParamName extends TRParamMedian extends QueryParamMedian<infer U> ? U : never,
-    TRParam extends QueryParam<TDbType, TRParamName, TValueType| null>,
+    TRParam extends QueryParam<TDbType, TRParamName, TValueType | null>,
     TLApplied extends IComparable<TDbType, any, TValueType, any>
 >(this: TComparing, leftValue: TLApplied, rightValue: TRParamMedian): ColumnComparisonOperation<
     TDbType,
@@ -137,8 +137,8 @@ function between<
 //Implementation
 function between<
     TDbType extends DbType,
-    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
-    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
+    TComparing extends IComparable<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TLParamMedian extends QueryParamMedian<any> | undefined,
     TLParamName extends (TLParamMedian extends QueryParamMedian<infer U> ? U : never) | undefined,
     TRParamMedian extends QueryParamMedian<any> | undefined,

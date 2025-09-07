@@ -114,9 +114,9 @@ type betweenCoalesceParamedParams = InferParamsFromOps<typeofBetweenCoalescePara
 
 type betweenCoalesceParamedParamLengthTest = AssertTrue<AssertEqual<2, betweenCoalesceParamedParams["length"]>>;
 
-type betweenCoalesceParamedFirstParamRes = QueryParam<PgDbType, "betRight", string | null>;
+type betweenCoalesceParamedFirstParamRes = QueryParam<PgDbType, "betLeft", string | null>;
 type betweenCoalesceParamedFirstParamTest = AssertTrue<AssertEqual<betweenCoalesceParamedFirstParamRes, betweenCoalesceParamedParams[0]>>;
 
-type betweenCoalesceParamedSecondParamRes = QueryParam<PgDbType, "betLeft", string | null>;
+type betweenCoalesceParamedSecondParamRes = QueryParam<PgDbType, "betRight", string | null>;
 type betweenCoalesceParamedSecondParamTest = AssertTrue<AssertEqual<betweenCoalesceParamedSecondParamRes, betweenCoalesceParamedParams[1]>>;
 
