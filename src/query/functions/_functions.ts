@@ -23,8 +23,7 @@ class ColumnSQLFunction<
     TArgs extends (
         PgValueTypes | null |
         QueryParam<TDbType, any, any> |
-        QueryColumn<TDbType, Column<TDbType, any, any, any, any>, any, any> |
-        ColumnSQLFunction<TDbType, any, any, TReturnType>
+        IComparable<TDbType, any, NonNullable<TReturnType>, any>
     )[],
     TReturnType extends GetColumnValueTypes<TDbType> | null
 > implements IComparable<TDbType, InferParamsFromFnArgs<TArgs>, NonNullable<TReturnType>, TReturnType> {

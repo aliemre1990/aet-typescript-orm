@@ -1,6 +1,7 @@
 import type { DbType, PgDbType } from "../../db.js";
 import type { JsTypeToPgTypes, PgValueTypes } from "../../postgresql/dataTypes.js";
 import type Column from "../../table/column.js";
+import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
 import { QueryParamMedian } from "../param.js";
 import QueryParam from "../param.js";
 import type QueryColumn from "../queryColumn.js";
@@ -19,8 +20,7 @@ type ConvertMediansInArray<T extends any[], TDbType extends DbType, TValueType e
 type CoalesceArg<TDbType extends DbType, TValueType extends ((TDbType extends PgDbType ? PgValueTypes : never))> =
     | TValueType
     | QueryParamMedian<any>
-    | QueryColumn<TDbType, Column<TDbType, any, any, any, any, TValueType>, any, any>
-    | ColumnSQLFunction<TDbType, any, any, TValueType | null>;
+    | IComparable<TDbType, any, TValueType, any>;
 
 function pgCoalesce<
     TArgs extends any[],

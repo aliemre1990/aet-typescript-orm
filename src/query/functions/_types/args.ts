@@ -2,6 +2,7 @@ import type { DbType, DbValueTypes, PgDbType } from "../../../db.js";
 import type { PgValueTypes } from "../../../postgresql/dataTypes.js";
 import type Column from "../../../table/column.js";
 import type { GetColumnTypeFromDbType } from "../../_types/miscellaneous.js";
+import type { IComparable } from "../../comparisons/_interfaces/IComparable.js";
 import type { QueryParamMedian } from "../../queryColumn.js";
 import type QueryColumn from "../../queryColumn.js";
 import type ColumnSQLFunction from "../_functions.js";
@@ -17,7 +18,7 @@ type InferFirstTypeFromArgs<TDbType extends DbType, TArgs extends
     TArgs extends readonly [infer First, ...infer Rest] ?
     First extends QueryParamMedian<any> ?
 
-    Rest extends (QueryParamMedian<any> | DbValueTypes | QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>)[] ?
+    Rest extends (QueryParamMedian<any> | DbValueTypes | IComparable<TDbType, any, any, any>)[] ?
     InferFirstTypeFromArgs<TDbType, Rest> :
     TDbType extends PgDbType ? PgValueTypes : never :
 
@@ -34,25 +35,10 @@ type InferFirstTypeFromArgs<TDbType extends DbType, TArgs extends
     First extends Buffer ? Buffer :
     First extends object[] ? object[] :
 
-    First extends QueryColumn<TDbType, infer TCol, any, any> ? GetColumnTypeFromDbType<TDbType, TCol> :
+    First extends IComparable<TDbType, any, infer TValType, any> ? TValType :
 
-    First extends ColumnSQLFunction<TDbType, any, any, infer TReturnType> ?
-    TReturnType extends string ? string :
-    TReturnType extends string[] ? string[] :
-    TReturnType extends number ? number :
-    TReturnType extends number[] ? number[] :
-    TReturnType extends bigint ? bigint :
-    TReturnType extends bigint[] ? bigint[] :
-    TReturnType extends boolean ? boolean :
-    TReturnType extends boolean[] ? boolean[] :
-    TReturnType extends Date ? Date :
-    TReturnType extends Date[] ? Date[] :
-    TReturnType extends Buffer ? Buffer :
-    TReturnType extends object[] ? object[] :
-    TReturnType extends object ? object :
-    never :
     First extends object ? object :
-    Rest extends (QueryParamMedian<any> | DbValueTypes | QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>)[] ?
+    Rest extends (QueryParamMedian<any> | DbValueTypes | IComparable<TDbType, any, any, any>)[] ?
     InferFirstTypeFromArgs<TDbType, Rest> :
     TDbType extends PgDbType ? PgValueTypes : never :
     TDbType extends PgDbType ? PgValueTypes : never
@@ -62,33 +48,27 @@ type IsContainsNonNull<TDbType extends DbType, TArgs extends
     (
         QueryParamMedian<any> |
         DbValueTypes |
-        QueryColumn<TDbType, any, any, any> |
-        ColumnSQLFunction<TDbType, any, any, any>
+        IComparable<TDbType, any, any, any>
     )[]
 > = TArgs extends readonly [infer First, ...infer Rest] ?
 
     First extends QueryParamMedian<any> ?
-    Rest extends (QueryParamMedian<any> | DbValueTypes | QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>)[] ?
+    Rest extends (QueryParamMedian<any> | DbValueTypes | IComparable<TDbType, any, any, any>)[] ?
     IsContainsNonNull<TDbType, Rest> :
     false :
 
-    First extends QueryColumn<TDbType, infer TCol, any, any> ?
-    TCol extends Column<TDbType, any, any, any, any, any, infer TFinalType> ?
+    First extends IComparable<TDbType, any, any, infer TFinalType> ?
     null extends TFinalType ?
-    Rest extends (QueryParamMedian<any> | DbValueTypes | QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>)[] ?
+    Rest extends (QueryParamMedian<any> | DbValueTypes | IComparable<TDbType, any, any, any>)[] ?
     IsContainsNonNull<TDbType, Rest> :
     false :
     true :
 
-    Rest extends (QueryParamMedian<any> | DbValueTypes | QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>)[] ?
-    IsContainsNonNull<TDbType, Rest> :
-    false :
-
     null extends First ?
-    Rest extends (QueryParamMedian<any> | DbValueTypes | QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>)[] ?
+    Rest extends (QueryParamMedian<any> | DbValueTypes | IComparable<TDbType, any, any, any>)[] ?
     IsContainsNonNull<TDbType, Rest> :
     false :
-    true:  
+    true :
 
     false
     ;
