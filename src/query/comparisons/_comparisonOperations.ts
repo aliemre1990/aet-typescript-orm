@@ -6,6 +6,7 @@ import type { GetColumnTypeFromDbType } from "../_types/miscellaneous.js";
 import type ColumnSQLFunction from "../functions/_functions.js";
 import type { QueryParam } from "../queryColumn.js";
 import type QueryColumn from "../queryColumn.js";
+import type { IComparable } from "./_interfaces/IComparable.js";
 import type { InferValueTypeFromThisType } from "./_types/inferValueTypeFromThisType.js";
 
 const comparisonOperations = {
@@ -31,9 +32,8 @@ type ComparisonOperation = (typeof comparisonOperations)[keyof typeof comparison
 class ColumnComparisonOperation<
     TDbType extends DbType,
     TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
+    TApplied extends IComparable<TDbType, any, TValueType>[] | undefined,
     TParams extends QueryParam<TDbType, any, any>[] | undefined,
-    TAppliedQColumns extends QueryColumn<TDbType, Column<TDbType, any, any, any, any>, any, any>[] | undefined,
-    TAppliedQSQLFunctions extends ColumnSQLFunction<TDbType, any, any, any>[] | undefined,
     TValueType extends GetColumnValueTypes<TDbType> | null = InferValueTypeFromThisType<TDbType, TComparing> | null
 > {
     constructor(
@@ -42,9 +42,8 @@ class ColumnComparisonOperation<
         public value?:
             (
                 TValueType |
-                (TAppliedQColumns extends QueryColumn<TDbType, any, any, any>[] ? TAppliedQColumns[number] : never) |
-                (TAppliedQSQLFunctions extends ColumnSQLFunction<TDbType, any, any, any>[] ? TAppliedQSQLFunctions[number] : never) |
-                (TParams extends QueryParam<TDbType, any, any>[] ? TParams[number] : never)
+                (TParams extends QueryParam<TDbType, any, any>[] ? TParams[number] : never) |
+                TApplied
             )[]
     ) { }
 }

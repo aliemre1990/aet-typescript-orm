@@ -64,6 +64,8 @@ const InferParamsFromCoalesce = customersTable
             1, 2, param("param1"), pgCoalesce(1, 2, 3, param("param2"), pgCoalesce(1, 2, 3, 4, param("param3")))
         ).eq(param("param4"));
 
+        type tp = typeof res1;
+        type tp1 = tp extends ColumnComparisonOperation<any, any, any, infer TP> ? TP : never;
 
         return res1;
     })

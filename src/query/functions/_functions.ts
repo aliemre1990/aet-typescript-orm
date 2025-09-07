@@ -1,6 +1,8 @@
 import type { DbType, DbValueTypes, PgDbType } from "../../db.js";
 import type { PgValueTypes } from "../../postgresql/dataTypes.js";
 import type Column from "../../table/column.js";
+import type { InferParamsFromFn, InferParamsFromFnArgs } from "../_types/result.js";
+import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
 import eq from "../comparisons/eq.js";
 import type QueryParam from "../param.js";
 import type QueryColumn from "../queryColumn.js";
@@ -24,9 +26,10 @@ class ColumnSQLFunction<
         ColumnSQLFunction<TDbType, any, any, TReturnType>
     )[],
     TReturnType extends (TDbType extends PgDbType ? PgValueTypes : never) | null
-> {
+> implements IComparable<TDbType, InferParamsFromFnArgs<TArgs>, TReturnType> {
 
-    dummyProp?: TReturnType;
+    icomparableValueDummy?: TReturnType;
+    params?: InferParamsFromFnArgs<TArgs>;
 
     eq: typeof eq = eq;
 

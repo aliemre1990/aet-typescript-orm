@@ -7,62 +7,57 @@ import type { GetColumnTypeFromDbType, GetColumnValueType } from "../_types/misc
 import ColumnComparisonOperation, { comparisonOperations } from "./_comparisonOperations.js";
 import { QueryParam, QueryParamMedian } from "../queryColumn.js";
 import QueryColumn from "../queryColumn.js";
+import type ColumnSQLFunction from "../functions/_functions.js";
+import type { InferValueTypeFromThisType } from "./_types/inferValueTypeFromThisType.js";
+import type { IComparable } from "./_interfaces/IComparable.js";
 
 // Helper type to extract only QueryColumns from the mixed tuple
-type ExtractColumnsFromMix<T extends readonly unknown[]> =
+type ExtractComparables<T extends readonly unknown[]> =
     T extends readonly [infer First, ...infer Rest] ?
-    First extends QueryColumn<any, any, any, any> ?
-    [First, ...ExtractColumnsFromMix<Rest>] :
-    ExtractColumnsFromMix<Rest> :
+    First extends IComparable<any, any, any> ?
+    [First, ...ExtractComparables<Rest>] :
+    ExtractComparables<Rest> :
     [];
 
 function sqlIn<
     TDbType extends DbType,
-    TColumn extends ColumnType<TDbType>,
-    TQTableSpecs extends QueryTableSpecsType,
-    TAsName extends string | undefined,
-    TValueType extends GetColumnValueType<TDbType, TColumn>,
-    TValues extends readonly (TValueType | QueryColumn<TDbType, Column<TDbType, any, any, any, any, TValueType>, any, any>)[]
+    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
+    TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType>)[]
 >(
-    this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
+    this: TComparing,
     ...values: TValues
 ): ColumnComparisonOperation<
     TDbType,
-    QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
-    undefined,
-    ExtractColumnsFromMix<TValues>["length"] extends 0 ? undefined : ExtractColumnsFromMix<TValues>, // Helper type to extract only the columns as tuple
-    TValueType
+    TComparing,
+    ExtractComparables<TValues>["length"] extends 0 ? undefined : ExtractComparables<TValues>, // Helper type to extract only the columns as tuple
+    undefined
 >
 
 
 function sqlIn<
     TDbType extends DbType,
-    TColumn extends ColumnType<TDbType>,
-    TQTableSpecs extends QueryTableSpecsType,
-    TAsName extends string | undefined,
+    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
     TParamMedian extends QueryParamMedian<any>,
     TParamName extends TParamMedian extends QueryParamMedian<infer U> ? U : never,
     TParam extends QueryParam<TDbType, TParamName, TDbType extends PgDbType ? GetArrayEquivalentPgValueType<TValueType> : never>,
-    TValueType extends GetColumnTypeFromDbType<TDbType, TColumn>
->(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, param: TParamMedian
+>(this: TComparing, param: TParamMedian
 ): ColumnComparisonOperation<
     TDbType,
-    QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
-    [TParam],
+    TComparing,
     undefined,
-    undefined
+    [TParam]
 >
 function sqlIn<
     TDbType extends DbType,
-    TColumn extends ColumnType<TDbType>,
-    TQTableSpecs extends QueryTableSpecsType,
-    TAsName extends string | undefined,
+    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
+    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
     TParamMedian extends QueryParamMedian<any> | undefined,
-    TValueType extends GetColumnValueType<TDbType, TColumn>,
-    TValues extends readonly (TValueType | QueryColumn<TDbType, Column<TDbType, any, any, any, any, TValueType>, any, any>)[]
+    TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType>)[]
 >
     (
-        this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
+        this: TComparing,
         param: TParamMedian | TValues[number],
         ...values: TValues
     ) {

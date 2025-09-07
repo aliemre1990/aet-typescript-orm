@@ -8,6 +8,7 @@ import { QueryParam, QueryParamMedian } from "../queryColumn.js";
 import QueryColumn from "../queryColumn.js";
 import type ColumnSQLFunction from "../functions/_functions.js";
 import type { InferValueTypeFromThisType } from "./_types/inferValueTypeFromThisType.js";
+import type { IComparable } from "./_interfaces/IComparable.js";
 
 
 // All same
@@ -19,20 +20,18 @@ function between<
     TDbType,
     TComparing,
     undefined,
-    undefined,
     undefined
 >
 function between<
     TDbType extends DbType,
     TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
     TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
-    TLAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, any, any, any, any, TValueType>, any, any>,
-    TRAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, any, any, any, any, TValueType>, any, any>,
->(this: TComparing, leftValue: TLAppliedQColumn, rightValue: TRAppliedQColumn): ColumnComparisonOperation<
+    TLApplied extends IComparable<TDbType, any, TValueType>,
+    TRApplied extends IComparable<TDbType, any, TValueType>
+>(this: TComparing, leftValue: TLApplied, rightValue: TRApplied): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    undefined,
-    [TLAppliedQColumn, TRAppliedQColumn],
+    [TLApplied, TRApplied],
     undefined
 >
 function between<
@@ -49,27 +48,9 @@ function between<
 ): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    [TLParam, TRParam],
     undefined,
-    undefined
+    [TLParam, TRParam]
 >
-
-function between<
-    TDbType extends DbType,
-    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
-    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
-    TLAppliedSQLFunction extends ColumnSQLFunction<TDbType, any, any, TValueType | null>,
-    TRAppliedSQLFunction extends ColumnSQLFunction<TDbType, any, any, TValueType | null>
->(this: TComparing, leftValue: TLAppliedSQLFunction, rightValue: TRAppliedSQLFunction
-): ColumnComparisonOperation<
-    TDbType,
-    TComparing,
-    undefined,
-    undefined,
-    [TLAppliedSQLFunction, TRAppliedSQLFunction]
->
-
-
 
 
 
@@ -78,24 +59,23 @@ function between<
     TDbType extends DbType,
     TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
     TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
-    TLAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, any, any, any, any, TValueType>, any, any>,
->(this: TComparing, leftValue: TLAppliedQColumn, rightValue: TValueType | null): ColumnComparisonOperation<
+    TLApplied extends IComparable<TDbType, any, TValueType>
+>(this: TComparing, leftValue: TLApplied, rightValue: TValueType | null): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    undefined,
-    [TLAppliedQColumn],
+    [TLApplied],
     undefined
 >
+
 function between<
     TDbType extends DbType,
     TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
     TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
-    TRAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, any, any, any, any, TValueType>, any, any>,
->(this: TComparing, leftValue: TValueType | null, rightValue: TRAppliedQColumn): ColumnComparisonOperation<
+    TRApplied extends IComparable<TDbType, any, TValueType>
+>(this: TComparing, leftValue: TValueType | null, rightValue: TRApplied): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    undefined,
-    [TRAppliedQColumn],
+    [TRApplied],
     undefined
 >
 
@@ -112,9 +92,8 @@ function between<
 >(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, leftValue: TLParamMedian, rightValue: TValueType): ColumnComparisonOperation<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
-    [TLParam],
     undefined,
-    undefined
+    [TLParam]
 >
 function between<
     TDbType extends DbType,
@@ -128,9 +107,8 @@ function between<
 >(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, leftValue: TValueType, rightValue: TRParamMedian): ColumnComparisonOperation<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
-    [TRParam],
     undefined,
-    undefined
+    [TRParam]
 >
 
 // Param and column
@@ -143,13 +121,12 @@ function between<
     TLParamName extends TLParamMedian extends QueryParamMedian<infer U> ? U : never,
     TLParam extends QueryParam<TDbType, TLParamName, TValueType>,
     TValueType extends GetColumnValueType<TDbType, TColumn>,
-    TRAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TDbType, TValueType>, any, any, any>, any, any>
->(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, leftValue: TLParamMedian, rightValue: TRAppliedQColumn): ColumnComparisonOperation<
+    TRApplied extends IComparable<TDbType, any, TValueType>
+>(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, leftValue: TLParamMedian, rightValue: TRApplied): ColumnComparisonOperation<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
-    [TLParam],
-    [TRAppliedQColumn],
-    undefined
+    [TRApplied],
+    [TLParam]
 >
 function between<
     TDbType extends DbType,
@@ -160,13 +137,12 @@ function between<
     TRParamName extends TRParamMedian extends QueryParamMedian<infer U> ? U : never,
     TRParam extends QueryParam<TDbType, TRParamName, TValueType>,
     TValueType extends GetColumnValueType<TDbType, TColumn>,
-    TLAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TDbType, TValueType>, any, any, any>, any, any>,
->(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, leftValue: TLAppliedQColumn, rightValue: TRParamMedian): ColumnComparisonOperation<
+    TLApplied extends IComparable<TDbType, any, TValueType>
+>(this: QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>, leftValue: TLApplied, rightValue: TRParamMedian): ColumnComparisonOperation<
     TDbType,
     QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>,
-    [TRParam],
-    [TLAppliedQColumn],
-    undefined
+    [TLApplied],
+    [TRParam]
 >
 //Implementation
 function between<

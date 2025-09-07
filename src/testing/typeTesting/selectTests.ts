@@ -1,5 +1,6 @@
 import type { InferParamsFromOps } from "../../query/_types/result.js";
 import type ColumnComparisonOperation from "../../query/comparisons/_comparisonOperations.js";
+import type { IComparable } from "../../query/comparisons/_interfaces/IComparable.js";
 import pgCoalesce from "../../query/functions/coalesce.js";
 import ColumnLogicalOperation, { and } from "../../query/logicalOperations.js";
 import { param } from "../../query/param.js";
@@ -89,10 +90,6 @@ const AutoSelectMultiJoins = customersTable
             )
         );
 
-        const inres = cols.users.id.sqlIn(...[cols.customers.id, cols.users.id]);
-        type inrest = typeof inres extends ColumnComparisonOperation<any, any, any, infer TCols, any> ? TCols : never;
-        type prm = inrest[1];
-
         return res1;
 
         // const inres = cols.users.id.sqlIn(1, cols.customers.id, 2, cols.users.id, cols.customers.id);
@@ -111,25 +108,14 @@ const AutoSelectMultiJoins = customersTable
             and(cols.customers.createdBy.eq(235), cols.parentUsers.userName.eq(param("innerParentUserParam1")))
         );
 
+
+        const res = cols.parentUsers.id.eq(pgCoalesce(param("parentUserGt2"), 1, 2, pgCoalesce(1, 2, param("innerCoalesce"))));
+
+        type tp = typeof res;
+        type tp1 = tp extends ColumnComparisonOperation<any, any, infer TApplied, any> ? TApplied : never;
+        type tp2 = tp1[0] extends IComparable<any, infer tparams, any> ? tparams : never;
+
         return comp;
-
-        type inferComparison = typeof comp;
-        type ops = inferComparison extends ColumnLogicalOperation<any, infer ops> ? ops : never;
-
-        /**
-         * 
-         */
-        type op0 = ops[0];
-        type op0AppliedColumnType = op0 extends ColumnComparisonOperation<any, any, any, infer TAppliedCol, any, any> ? TAppliedCol : never;
-        type op0ColumnType = op0AppliedColumnType[0] extends QueryColumn<any, infer TCol, any, any> ? TCol : never;
-
-        type op0ColumnResult = Column<"postgresql", "SERIAL", "id", TableSpecsType<"customers">>;
-        type op0Test = AssertTrue<AssertEqual<op0ColumnResult, op0ColumnType>>;
-
-        type op1 = ops[1];
-        type op1Params = op1 extends ColumnComparisonOperation<any, any, infer TParams, any, any> ? TParams : never;
-
-
     })
     .join('INNER', ordersTable, (cols) => cols.users.userName.eq(cols.customers.name))
     .select()
@@ -163,14 +149,13 @@ type AutoSelectMultiJoinsParamsResult = {
     inParam: number[];
     parentUserEq1: number | null;
     parentUserBetLeft: number;
-    parentUserGt2: number | null;
-    innerCoalesce: number | null;
+    parentUserGt2: number | null; //
+    innerCoalesce: number | null; //
     parentUserNeq3: string | null;
     innerParentUserParam1: string | null;
 } | undefined;
 type AutoSelectMultiJoinsParamsType = typeof AutoSelectMultiJoins extends (param: infer TParams) => any ? TParams : never;
 type AutoSelectMultiJoinsParamsText = AssertTrue<AssertEqual<AutoSelectMultiJoinsParamsResult, AutoSelectMultiJoinsParamsType>>
-
 
 /**
  * 

@@ -5,30 +5,18 @@ import { QueryParam, QueryParamMedian } from "../queryColumn.js";
 import QueryColumn from "../queryColumn.js";
 import type ColumnSQLFunction from "../functions/_functions.js";
 import type { InferValueTypeFromThisType } from "./_types/inferValueTypeFromThisType.js";
+import type { IComparable } from "./_interfaces/IComparable.js";
 
 function eq<
     TDbType extends DbType,
     TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
     TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
-    TAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, any, any, any, any, TValueType>, any, any>,
->(this: TComparing, value: TAppliedQColumn): ColumnComparisonOperation<
+    TApplied extends IComparable<TDbType, any, TValueType>,
+>(this: TComparing, value: TApplied): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    undefined,
-    [TAppliedQColumn],
+    [TApplied],
     undefined
->
-function eq<
-    TDbType extends DbType,
-    TComparing extends QueryColumn<TDbType, any, any, any> | ColumnSQLFunction<TDbType, any, any, any>,
-    TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
-    TAppliedSQLFunction extends ColumnSQLFunction<TDbType, any, any, TValueType | null>
->(this: TComparing, value: TAppliedSQLFunction): ColumnComparisonOperation<
-    TDbType,
-    TComparing,
-    undefined,
-    undefined,
-    [TAppliedSQLFunction]
 >
 function eq<
     TDbType extends DbType,
@@ -41,9 +29,8 @@ function eq<
 ): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    [TParam],
     undefined,
-    undefined
+    [TParam]
 >
 function eq<
     TDbType extends DbType,
@@ -53,7 +40,6 @@ function eq<
     TDbType,
     TComparing,
     undefined,
-    undefined,
     undefined
 >
 function eq<
@@ -62,10 +48,9 @@ function eq<
     TValueType extends InferValueTypeFromThisType<TDbType, TComparing>,
     TParamMedian extends QueryParamMedian<any> | undefined,
     TParamName extends (TParamMedian extends QueryParamMedian<infer U> ? U : never) | undefined,
-    TAppliedQColumn extends QueryColumn<TDbType, Column<TDbType, any, any, any, any, TValueType>, any, any> | undefined,
-    TAppliedSQLFunction extends ColumnSQLFunction<TDbType, any, any, TValueType | null> | undefined
+    TApplied extends IComparable<TDbType, any, TValueType>,
 >
-    (this: TComparing, value: TValueType | TParamMedian | TAppliedQColumn | TAppliedSQLFunction | null) {
+    (this: TComparing, value: TValueType | TParamMedian | TApplied | null) {
 
     if (value instanceof QueryParamMedian) {
         const param = new QueryParam<TDbType, TParamName extends string ? TParamName : never, TValueType>(value.name);

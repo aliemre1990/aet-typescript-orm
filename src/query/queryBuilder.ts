@@ -65,7 +65,7 @@ class QueryBuilder<
 
     join<
         TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any>,
-        TCbResult extends ColumnComparisonOperation<TDbType, any, any, any, any> | ColumnLogicalOperation<TDbType, any>,
+        TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>,
         TInnerJoinResult extends QueryTable<TDbType, any, any, any, any, any> = TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
         QueryTable<
             TDbType,
@@ -109,7 +109,7 @@ class QueryBuilder<
     }
 
     where<
-        TCbResult extends ColumnComparisonOperation<TDbType, any, any, any, any> | ColumnLogicalOperation<TDbType, any>
+        TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>
     >(cb: (cols: TableToColumnsMap<TablesToObject<TTables>>) => TCbResult):
         ISelectClause<TDbType, TTables, AccumulateParams<TParams, TCbResult>> {
         return this as ISelectClause<TDbType, TTables, AccumulateParams<TParams, TCbResult>>;
