@@ -6,14 +6,14 @@ import type QueryTable from "../queryTable.js";
 //
 type SpreadGroupedColumns<TGroupedColumns extends readonly ({ [key: string]: QueryColumn<any, any, any, any> } | QueryColumn<any, any, any, any>)[]> =
     TGroupedColumns extends readonly [infer First, ...infer Rest] ?
-    First extends QueryColumn<any, any, any, any> ? 
-        Rest extends ({ [key: string]: QueryColumn<any, any, any, any> } | QueryColumn<any, any, any, any>)[]?
-            [First, ...SpreadGroupedColumns<Rest>] :
-            [First]:
+    First extends QueryColumn<any, any, any, any> ?
+    Rest extends ({ [key: string]: QueryColumn<any, any, any, any> } | QueryColumn<any, any, any, any>)[] ?
+    [First, ...SpreadGroupedColumns<Rest>] :
+    [First] :
     First extends { [key: string]: QueryColumn<any, any, any, any> } ?
-        Rest extends ({ [key: string]: QueryColumn<any, any, any, any> } | QueryColumn<any, any, any, any>)[]?
-            [...SpreadGroupedTable<First>, ...SpreadGroupedColumns<Rest>] :
-            [...SpreadGroupedTable<First>]:
+    Rest extends ({ [key: string]: QueryColumn<any, any, any, any> } | QueryColumn<any, any, any, any>)[] ?
+    [...SpreadGroupedTable<First>, ...SpreadGroupedColumns<Rest>] :
+    [...SpreadGroupedTable<First>] :
     [] : [];
 
 type SpreadGroupedTable<TGroupedTable extends { [key: string]: any }> =
@@ -56,7 +56,7 @@ type TablesToColumnsMapFormatGroupedColumns<
             TGroupedColumns extends ({ [key: string]: QueryColumn<any, any, any, any> } | QueryColumn<any, any, any, any>)[] ?
             IsGroupedColumnsContains<SpreadGroupedColumns<TGroupedColumns>, T["columns"][Kc]> extends true ?
             T["columns"][Kc] extends QueryColumn<infer TDbType, infer TColumn, infer TQTableSpecs, infer TAsName> ?
-            GroupedColumn<TDbType, QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>> : never : T["columns"][Kc]
+            GroupedColumn<TDbType, TColumn, TQTableSpecs, TAsName> : never : T["columns"][Kc]
             : T["columns"][Kc]
 
         }

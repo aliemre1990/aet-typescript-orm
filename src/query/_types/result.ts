@@ -18,7 +18,7 @@ type TResultShape<TDbType extends DbType> = {
 };
 
 type TGroupedResultShape<TDbType extends DbType> = {
-    [key: string]: GroupedColumn<TDbType, QueryColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined>> | TGroupedResultShape<TDbType>;
+    [key: string]: GroupedColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined> | TGroupedResultShape<TDbType>;
 };
 
 
@@ -133,19 +133,18 @@ type ColumnsToResultMap<TDbType extends DbType, T extends TResultShape<TDbType> 
 type GroupedColumnsToResultMap<TDbType extends DbType, T extends TGroupedResultShape<TDbType> | undefined> =
     T extends undefined ? undefined :
     DeepPrettify<{
-        [K in keyof T as T[K] extends GroupedColumn<TDbType, infer TQColumn> ?
-        TQColumn["asName"] extends undefined ? K : TQColumn["asName"] & string : never]:
-        T[K] extends GroupedColumn<TDbType, infer TQColumn> ?
-        TQColumn["column"] extends Column<TDbType, any, any, any, any, infer TFinalType> ? TFinalType :
+        [K in keyof T as T[K] extends GroupedColumn<TDbType, any, any, infer TAsName> ?
+        TAsName extends undefined ? K : TAsName & string : never]:
+        T[K] extends GroupedColumn<TDbType, infer TColumn, any, any> ?
+        TColumn extends Column<TDbType, any, any, any, any, infer TFinalType> ? TFinalType :
         never :
         never
     }
         &
     {
-        [K in keyof T as T[K] extends { [key: string]: GroupedColumn<TDbType, infer TQColumn> } ?
-        TQColumn extends QueryColumn<TDbType, any, infer TTableSpecs, any> ?
-        TTableSpecs extends { asTableName: string } ? TTableSpecs["asTableName"] : K : never : never]:
-        T[K] extends { [key: string]: GroupedColumn<TDbType, any> } ? GroupedColumnsToResultMap<TDbType, T[K]> : never
+        [K in keyof T as T[K] extends { [key: string]: GroupedColumn<TDbType, any, infer TTableSpecs, any> } ?
+        TTableSpecs extends { asTableName: string } ? TTableSpecs["asTableName"] : K : never]:
+        T[K] extends { [key: string]: GroupedColumn<TDbType, any, any, any> } ? GroupedColumnsToResultMap<TDbType, T[K]> : never
     }
         &
     {
