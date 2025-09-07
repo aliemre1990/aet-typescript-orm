@@ -4,10 +4,9 @@ import type BasicColumnAggregationOperation from "./_aggregationOperations.js";
 
 class AggregatedColumn<
     TDbType extends DbType,
-    TQueryColumn extends QueryColumn<TDbType, any, any, any>,
-    TAggOp extends BasicColumnAggregationOperation<TDbType, TQueryColumn, any, any>
+    TQueryColumn extends QueryColumn<TDbType, any, any, any>
 > {
-    constructor(public queryColumn: TQueryColumn, public op: TAggOp) {
+    constructor(public queryColumn: TQueryColumn) {
 
     }
 }

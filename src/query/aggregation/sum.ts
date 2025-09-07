@@ -7,12 +7,10 @@ import BasicColumnAggregationOperation, { aggregationOperations } from "./_aggre
 
 function sum<
     TDbType extends DbType,
-    TQueryColumn extends QueryColumn<TDbType, Column<TDbType, JsTypeToPgTypes<TDbType, number>, any, any>, any, any>
->(column: TQueryColumn) {
-    const op = new BasicColumnAggregationOperation<TDbType, TQueryColumn, number, number>(column, aggregationOperations.sum);
-    const aggregatedColumn = new AggregatedColumn<TDbType, TQueryColumn, typeof op>(column, op);
+    TAggColumn extends AggregatedColumn<TDbType, any>
+>(column: TAggColumn) {
+    const op = new BasicColumnAggregationOperation<TDbType, TAggColumn, number, number>(column, aggregationOperations.sum);
 
-    return aggregatedColumn;
 }
 
 export default sum;

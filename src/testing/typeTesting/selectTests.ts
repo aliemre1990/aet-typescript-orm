@@ -104,13 +104,6 @@ const AutoSelectMultiJoins = customersTable
             and(cols.customers.createdBy.eq(235), cols.parentUsers.userName.eq(param("innerParentUserParam1")))
         );
 
-
-        const res = cols.parentUsers.id.eq(pgCoalesce(param("parentUserGt2"), 1, 2, pgCoalesce(1, 2, param("innerCoalesce"))));
-
-        type tp = typeof res;
-        type tp1 = tp extends ColumnComparisonOperation<any, any, infer TApplied, any> ? TApplied : never;
-        type tp2 = tp1[0] extends IComparable<any, infer tparams, any, any> ? tparams : never;
-
         return comp;
     })
     .join('INNER', ordersTable, (cols) => cols.users.userName.eq(cols.customers.name))
@@ -144,7 +137,7 @@ type AutoSelectMultiJoinsParamsResult = {
     userEqParam1: number | null;
     inParam: number[];
     parentUserEq1: number | null;
-    parentUserBetLeft: number;
+    parentUserBetLeft: number | null;
     parentUserGt2: number | null; //
     innerCoalesce: number | null; //
     parentUserNeq3: string | null;

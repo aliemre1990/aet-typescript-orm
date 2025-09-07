@@ -18,7 +18,7 @@ type ConvertMediansInArray<T extends any[], TDbType extends DbType, TValueType e
 };
 
 type CoalesceArg<TDbType extends DbType, TValueType extends ((TDbType extends PgDbType ? PgValueTypes : never))> =
-    | TValueType
+    | TValueType | null
     | QueryParamMedian<any>
     | IComparable<TDbType, any, TValueType, any>;
 

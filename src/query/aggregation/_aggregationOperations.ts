@@ -1,5 +1,6 @@
 import type { DbType } from "../../db.js";
 import type QueryColumn from "../queryColumn.js";
+import type AggregatedColumn from "./_aggregatedColumn.js";
 
 
 const aggregationOperations = {
@@ -35,12 +36,12 @@ type AggregationOperation = (typeof aggregationOperations)[keyof typeof aggregat
 
 class BasicColumnAggregationOperation<
     TDbType extends DbType,
-    TQueryColumn extends QueryColumn<TDbType, any, any, any> | undefined,
+    TAggColumn extends AggregatedColumn<TDbType, any>,
     TAppliedType extends any,
     TResultType extends any
 > {
     constructor(
-        public column: TQueryColumn,
+        public column: TAggColumn,
         public operation: AggregationOperation
     ) { }
 }

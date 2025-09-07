@@ -1,4 +1,5 @@
 import type { DbValueTypes, PgDbType } from "../../../db.js";
+import type { InferParamsFromOps } from "../../../query/_types/result.js";
 import type ColumnComparisonOperation from "../../../query/comparisons/_comparisonOperations.js";
 import type ColumnSQLFunction from "../../../query/functions/_functions.js";
 import pgCoalesce from "../../../query/functions/coalesce.js";
@@ -91,5 +92,31 @@ type InferParamsFromCoalesceParamsResult = {
     coalesceAnd1: string | null;
     coalesceAnd2: Date | null;
 } | undefined;
+type InferParamsFromCoalesceTest = AssertTrue<AssertEqual<InferParamsFromCoalesceParamsResult, InferParamsFromCoalesceParams>>;
 
-type InferParamsFromCoalesceTest = AssertTrue<AssertEqual<InferParamsFromCoalesceParamsResult, InferParamsFromCoalesceParams>>
+/**
+ * 
+ */
+pgCoalesce(empSalaryQC, 100).between(100, 200);
+pgCoalesce(empSalaryQC, 100).between(100, null);
+pgCoalesce(empSalaryQC, null).between(500, null);
+// @ts-expect-error
+pgCoalesce(customerNameQC, "ali").between(100, 500);
+pgCoalesce(customerNameQC, "ali").between(pgCoalesce("adsf"), pgCoalesce("asdfxcv", null));
+
+/**
+ * 
+ */
+const betweenCoalesceParamed = pgCoalesce(customerNameQC, "ali").between(param("betLeft"), pgCoalesce("asdf", param("betRight")));
+
+type typeofBetweenCoalesceParamed = typeof betweenCoalesceParamed;
+type betweenCoalesceParamedParams = InferParamsFromOps<typeofBetweenCoalesceParamed>;
+
+type betweenCoalesceParamedParamLengthTest = AssertTrue<AssertEqual<2, betweenCoalesceParamedParams["length"]>>;
+
+type betweenCoalesceParamedFirstParamRes = QueryParam<PgDbType, "betRight", string | null>;
+type betweenCoalesceParamedFirstParamTest = AssertTrue<AssertEqual<betweenCoalesceParamedFirstParamRes, betweenCoalesceParamedParams[0]>>;
+
+type betweenCoalesceParamedSecondParamRes = QueryParam<PgDbType, "betLeft", string | null>;
+type betweenCoalesceParamedSecondParamTest = AssertTrue<AssertEqual<betweenCoalesceParamedSecondParamRes, betweenCoalesceParamedParams[1]>>;
+

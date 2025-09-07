@@ -4,6 +4,7 @@ import type Column from "../../table/column.js";
 import type { GetColumnValueTypes } from "../../table/types/utils.js";
 import type { InferParamsFromFn, InferParamsFromFnArgs } from "../_types/result.js";
 import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
+import between from "../comparisons/between.js";
 import eq from "../comparisons/eq.js";
 import type QueryParam from "../param.js";
 import type QueryColumn from "../queryColumn.js";
@@ -33,6 +34,7 @@ class ColumnSQLFunction<
     params?: InferParamsFromFnArgs<TArgs>;
 
     eq: typeof eq = eq;
+    between: typeof between = between;
 
     constructor(
         public args: TArgs,
