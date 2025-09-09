@@ -15,19 +15,24 @@ class QueryColumn<
     TAsName extends string | undefined = undefined,
     TValueType extends GetColumnValueTypes<TDbType> = TColumn extends Column<TDbType, any, any, any, any, infer TValType> ? TValType : never,
     TFinalValueType extends TValueType | null = TColumn extends Column<TDbType, any, any, any, any, any, infer TFinalValType> ? TFinalValType : never
-> implements IComparable<TDbType, undefined, TValueType, TFinalValueType> {
+> implements IComparable<TDbType, undefined, TValueType, TFinalValueType, TAsName, false> {
     qTableSpecs?: TQTableSpecs;
 
-    params: undefined;
+    asName?: TAsName;
+    params?: undefined;
+    dbType?: TDbType;
     icomparableValueDummy?: TValueType;
     icomparableFinalValueDummy?: TFinalValueType;
+    isAgg?: false;
 
     eq: typeof eq = eq;
     sqlIn: typeof sqlIn = sqlIn;
 
     between: typeof between = between;
 
-    constructor(public column: TColumn, public asName?: TAsName) { }
+    constructor(public column: TColumn, asName?: TAsName) {
+        this.asName = asName;
+    }
 
     as<TAsName extends string>(val: TAsName) {
         return new QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>(this.column, val);

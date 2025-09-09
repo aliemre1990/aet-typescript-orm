@@ -1,4 +1,5 @@
 import type { UnionToTuple } from "../../utility/common.js";
+import type AggregatedColumn from "../aggregation/_aggregatedColumn.js";
 import type GroupedColumn from "../aggregation/_groupedColumn.js";
 import type QueryColumn from "../queryColumn.js";
 import type QueryTable from "../queryTable.js";
@@ -56,8 +57,10 @@ type TablesToColumnsMapFormatGroupedColumns<
             TGroupedColumns extends ({ [key: string]: QueryColumn<any, any, any, any> } | QueryColumn<any, any, any, any>)[] ?
             IsGroupedColumnsContains<SpreadGroupedColumns<TGroupedColumns>, T["columns"][Kc]> extends true ?
             T["columns"][Kc] extends QueryColumn<infer TDbType, infer TColumn, infer TQTableSpecs, infer TAsName> ?
-            GroupedColumn<TDbType, TColumn, TQTableSpecs, TAsName> : never : T["columns"][Kc]
-            : T["columns"][Kc]
+            GroupedColumn<TDbType, TColumn, TQTableSpecs, TAsName> :
+            never :
+            AggregatedColumn<T["columns"][Kc] extends QueryColumn<infer TDbType, any, any, any> ? TDbType : never, T["columns"][Kc]> :
+            never
 
         }
     }

@@ -1,10 +1,8 @@
 import type { DbType, PgDbType } from "../../db.js";
-import type { JsTypeToPgTypes, PgValueTypes } from "../../postgresql/dataTypes.js";
-import type Column from "../../table/column.js";
+import type { PgValueTypes } from "../../postgresql/dataTypes.js";
 import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
 import { QueryParamMedian } from "../param.js";
 import QueryParam from "../param.js";
-import type QueryColumn from "../queryColumn.js";
 import ColumnSQLFunction, { sqlFunctions } from "./_functions.js";
 import type { InferFirstTypeFromArgs, IsContainsNonNull } from "./_types/args.js";
 
@@ -20,7 +18,7 @@ type ConvertMediansInArray<T extends any[], TDbType extends DbType, TValueType e
 type CoalesceArg<TDbType extends DbType, TValueType extends ((TDbType extends PgDbType ? PgValueTypes : never))> =
     | TValueType | null
     | QueryParamMedian<any>
-    | IComparable<TDbType, any, TValueType, any>;
+    | IComparable<TDbType, any, TValueType, any, any, any>;
 
 function pgCoalesce<
     TArgs extends any[],
@@ -42,7 +40,8 @@ function pgCoalesce<
         PgDbType,
         typeof sqlFunctions.coalesce,
         ConvertMediansInArray<TArgs, PgDbType, TValueType>,
-        IsContainsNonNull<PgDbType, TArgs> extends true ? NonNullable<TValueType> : TValueType
+        IsContainsNonNull<PgDbType, TArgs> extends true ? NonNullable<TValueType> : TValueType,
+        undefined
     >(args as ConvertMediansInArray<TArgs, PgDbType, TValueType>, sqlFunctions.coalesce);
 }
 

@@ -11,6 +11,7 @@ import type QueryColumn from "../queryColumn.js";
 
 const sqlFunctions = {
     coalesce: { name: 'COALESCE' },
+    jsonBuildObject: { name: 'JSON_BUILD_OBJECT' }
 
 } as const;
 
@@ -24,14 +25,20 @@ class ColumnSQLFunction<
     TArgs extends (
         PgValueTypes | null |
         QueryParam<TDbType, any, any> |
-        IComparable<TDbType, any, NonNullable<TReturnType>, any>
+        IComparable<TDbType, any, NonNullable<TReturnType>, any, any, any>
     )[],
-    TReturnType extends GetColumnValueTypes<TDbType> | null
-> implements IComparable<TDbType, InferParamsFromFnArgs<TArgs>, NonNullable<TReturnType>, TReturnType> {
+    TReturnType extends GetColumnValueTypes<TDbType> | null,
+    TAsName extends string | undefined,
+    TIsAgg extends boolean = false
+> implements IComparable<TDbType, InferParamsFromFnArgs<TArgs>, NonNullable<TReturnType>, TReturnType, TAsName, TIsAgg> {
 
     icomparableValueDummy?: NonNullable<TReturnType>;
     icomparableFinalValueDummy?: TReturnType;
     params?: InferParamsFromFnArgs<TArgs>;
+    asName?: TAsName;
+    isAgg?: TIsAgg;
+    dbType?: TDbType;
+
 
     eq: typeof eq = eq;
     between: typeof between = between;
@@ -39,8 +46,14 @@ class ColumnSQLFunction<
     constructor(
         public args: TArgs,
         public sqlFunction: TSQLFunction,
+        asName?: TAsName
+    ) {
+        this.asName = asName;
+    }
 
-    ) { }
+    as<TAsName extends string>(asName: TAsName) {
+        return new ColumnSQLFunction<TDbType, TSQLFunction, TArgs, TReturnType, TAsName, TIsAgg>(this.args, this.sqlFunction, asName);
+    }
 }
 
 export default ColumnSQLFunction;
