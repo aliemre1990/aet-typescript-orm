@@ -2,7 +2,7 @@ import { DbType, type PgDbType } from "../../db.js";
 import type { PgValueTypes } from "../../postgresql/dataTypes.js";
 import type { QueryParam } from "../queryColumn.js";
 import type { TablesToObject, TableToColumnsMap } from "../_types/miscellaneous.js";
-import type { TGroupedResultShape, TResultShape } from "../_types/result.js";
+import type {  TResultShape } from "../_types/result.js";
 import { IExecuteableQuery } from "./IExecuteableQuery.js";
 import type QueryTable from "../queryTable.js";
 import type QueryColumn from "../queryColumn.js";
@@ -20,7 +20,7 @@ interface ISelectClause<
         cols: TGroupedColumns extends undefined ?
             TableToColumnsMap<TablesToObject<TTables>> :
             TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>
-    ) => TGroupedColumns extends undefined ? TResultShape<TDbType> : TGroupedResultShape<TDbType>
+    ) =>  TResultShape<TDbType>
     >(cb: TCb | undefined):
         IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>
     select<
@@ -28,7 +28,7 @@ interface ISelectClause<
             cols: TGroupedColumns extends undefined ?
                 TableToColumnsMap<TablesToObject<TTables>> :
                 TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>
-        ) => TGroupedColumns extends undefined ? TResultShape<TDbType> : TGroupedResultShape<TDbType>
+        ) =>  TResultShape<TDbType>
     >(
         cb?: TCb
     ): IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>

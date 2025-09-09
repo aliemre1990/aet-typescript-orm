@@ -14,12 +14,9 @@ import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
 import type Column from "../../table/column.js";
 
 type TResultShape<TDbType extends DbType> = {
-    [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined> | TResultShape<TDbType>;
+    [key: string]: IComparable<TDbType, any, any, any, any, any> | TResultShape<TDbType>;
 };
 
-type TGroupedResultShape<TDbType extends DbType> = {
-    [key: string]: GroupedColumn<TDbType, ColumnType<TDbType>, QueryTableSpecsType, string | undefined> | TGroupedResultShape<TDbType>;
-};
 
 
 //
@@ -109,47 +106,15 @@ type TablesToGroupedResultMap<
 type ColumnsToResultMap<TDbType extends DbType, T extends TResultShape<TDbType> | undefined> =
     T extends undefined ? undefined :
     DeepPrettify<{
-        [K in keyof T as T[K] extends QueryColumn<TDbType, any, any, any> ?
-        T[K]["asName"] extends undefined ? K : T[K]["asName"] & string : never]:
-        T[K] extends QueryColumn<TDbType, any, any, any> ?
-        T[K]["column"] extends Column<TDbType, any, any, any, any, any, infer TFinalType> ? TFinalType :
-        never :
+        [K in keyof T as T[K] extends IComparable<TDbType, any, any, any, infer TAsName, any> ?
+        TAsName extends undefined ? K : TAsName & string : never]:
+        T[K] extends IComparable<TDbType, any, any, infer TFinalType, any, any> ? TFinalType :
         never
-    }
-        &
-    {
-        [K in keyof T as T[K] extends { [key: string]: QueryColumn<TDbType, any, infer TTableSpecs, any> } ?
-        TTableSpecs extends { asTableName: string } ? TTableSpecs["asTableName"] : K : never]:
-        T[K] extends { [key: string]: QueryColumn<TDbType, any, any, any> } ? ColumnsToResultMap<TDbType, T[K]> : never
     }
         &
     {
         [K in keyof T as T[K] extends TResultShape<TDbType> ? K : never]:
         T[K] extends TResultShape<TDbType> ? ColumnsToResultMap<TDbType, T[K]> : never
-    }
-    >
-
-//
-type GroupedColumnsToResultMap<TDbType extends DbType, T extends TGroupedResultShape<TDbType> | undefined> =
-    T extends undefined ? undefined :
-    DeepPrettify<{
-        [K in keyof T as T[K] extends GroupedColumn<TDbType, any, any, infer TAsName> ?
-        TAsName extends undefined ? K : TAsName & string : never]:
-        T[K] extends GroupedColumn<TDbType, infer TColumn, any, any> ?
-        TColumn extends Column<TDbType, any, any, any, any, infer TFinalType> ? TFinalType :
-        never :
-        never
-    }
-        &
-    {
-        [K in keyof T as T[K] extends { [key: string]: GroupedColumn<TDbType, any, infer TTableSpecs, any> } ?
-        TTableSpecs extends { asTableName: string } ? TTableSpecs["asTableName"] : K : never]:
-        T[K] extends { [key: string]: GroupedColumn<TDbType, any, any, any> } ? GroupedColumnsToResultMap<TDbType, T[K]> : never
-    }
-        &
-    {
-        [K in keyof T as T[K] extends TGroupedResultShape<TDbType> ? K : never]:
-        T[K] extends TGroupedResultShape<TDbType> ? GroupedColumnsToResultMap<TDbType, T[K]> : never
     }
     >
 
@@ -231,8 +196,6 @@ export type {
     QueryParamsToObject,
     InferParamsFromOps,
     AccumulateParams,
-    TGroupedResultShape,
-    GroupedColumnsToResultMap,
     TablesToGroupedResultMap,
     InferParamsFromFn,
     InferParamsFromFnArgs

@@ -9,7 +9,7 @@ import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.
 import { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
 import type { TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.js";
-import type { AccumulateParams, ColumnsToResultMap, GroupedColumnsToResultMap, InferParamsFromOps, QueryParamsToObject, TablesToGroupedResultMap, TablesToResultMap, TGroupedResultShape, TResultShape } from "./_types/result.js";
+import type { AccumulateParams, ColumnsToResultMap,   QueryParamsToObject, TablesToGroupedResultMap, TablesToResultMap,  TResultShape } from "./_types/result.js";
 import QueryTable from "./queryTable.js";
 import type Column from "../table/column.js";
 import type IJoinClause from "./_interfaces/IJoinClause.js";
@@ -47,7 +47,7 @@ class QueryBuilder<
         cols: TGroupedColumns extends undefined ?
             TableToColumnsMap<TablesToObject<TTables>> :
             TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>
-    ) => TGroupedColumns extends undefined ? TResultShape<TDbType> : TGroupedResultShape<TDbType>
+    ) =>  TResultShape<TDbType> 
     >(cb: TCb | undefined):
         IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>
     select<
@@ -55,7 +55,7 @@ class QueryBuilder<
             cols: TGroupedColumns extends undefined ?
                 TableToColumnsMap<TablesToObject<TTables>> :
                 TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>
-        ) => TGroupedColumns extends undefined ? TResultShape<TDbType> : TGroupedResultShape<TDbType>
+        ) => TResultShape<TDbType>
     >(
         cb?: TCb
     ): IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined, TParams, TGroupedColumns> {
@@ -129,8 +129,6 @@ class QueryBuilder<
         TablesToGroupedResultMap<TDbType, TTables, TGroupedColumns> :
         TResult extends TResultShape<TDbType> ?
         ColumnsToResultMap<TDbType, TResult> :
-        TResult extends TGroupedResultShape<TDbType> ?
-        GroupedColumnsToResultMap<TDbType, TResult> :
         never {
         if (isNullOrUndefined(this?.colsSelection)) {
             return {} as any;
