@@ -15,11 +15,11 @@ import type { AssertEqual, AssertTrue } from "../_typeTestingUtilities.js";
 const pgCoalescePlainWithParam = pgCoalesce(1, 2, param("param"));
 
 type pgCoalescePlainWithParamType = typeof pgCoalescePlainWithParam;
-type pgCoalescePlainWithParamArgs = pgCoalescePlainWithParamType extends ColumnSQLFunction<any, any, infer TArgs, any, any, any> ? TArgs : never;
+type pgCoalescePlainWithParamArgs = pgCoalescePlainWithParamType extends ColumnSQLFunction<any, any, infer TArgs, any, any> ? TArgs : never;
 type pgCoalescePlainWithParamArg0 = pgCoalescePlainWithParamArgs[0];
 type pgCoalescePlainWithParamArg1 = pgCoalescePlainWithParamArgs[1];
 type pgCoalescePlainWithParamArg2 = pgCoalescePlainWithParamArgs[2];
-type pgCoalescePlainWithParamReturnType = pgCoalescePlainWithParamType extends ColumnSQLFunction<any, any, any, infer TRet, any, any> ? TRet : never;
+type pgCoalescePlainWithParamReturnType = pgCoalescePlainWithParamType extends ColumnSQLFunction<any, any, any, infer TRet, any> ? TRet : never;
 
 type pgCoalescePlainWithParamLengthTest = AssertTrue<AssertEqual<3, pgCoalescePlainWithParamArgs["length"]>>;
 type pgCoalescePlainWithParamReturnTypeTest = AssertTrue<AssertEqual<number, pgCoalescePlainWithParamReturnType>>
@@ -45,7 +45,7 @@ const nonNullCoalesce = pgCoalesce(customerIdQC, 2);
 
 const nullCoalesce = pgCoalesce(empSalaryQC);
 type NullCoalesce = typeof nullCoalesce;
-type NullCoalesceRetType = NullCoalesce extends ColumnSQLFunction<any, any, any, infer TRet, any, any> ? TRet : never;
+type NullCoalesceRetType = NullCoalesce extends ColumnSQLFunction<any, any, any, infer TRet, any> ? TRet : never;
 type NullCoalesceTest = AssertTrue<AssertEqual<number | null, NullCoalesceRetType>>
 
 // @ts-expect-error

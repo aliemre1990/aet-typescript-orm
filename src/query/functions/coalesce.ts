@@ -18,7 +18,7 @@ type ConvertMediansInArray<T extends any[], TDbType extends DbType, TValueType e
 type CoalesceArg<TDbType extends DbType, TValueType extends ((TDbType extends PgDbType ? PgValueTypes : never))> =
     | TValueType | null
     | QueryParamMedian<any>
-    | IComparable<TDbType, any, TValueType, any, any, any>;
+    | IComparable<TDbType, any, TValueType, any, any>;
 
 function pgCoalesce<
     TArgs extends any[],
@@ -40,8 +40,7 @@ function pgCoalesce<
         PgDbType,
         typeof sqlFunctions.coalesce,
         ConvertMediansInArray<TArgs, PgDbType, TValueType>,
-        IsContainsNonNull<PgDbType, TArgs> extends true ? NonNullable<TValueType> : TValueType,
-        undefined
+        IsContainsNonNull<PgDbType, TArgs> extends true ? NonNullable<TValueType> : TValueType
     >(args as ConvertMediansInArray<TArgs, PgDbType, TValueType>, sqlFunctions.coalesce);
 }
 

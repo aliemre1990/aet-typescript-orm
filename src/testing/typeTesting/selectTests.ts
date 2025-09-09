@@ -181,7 +181,7 @@ const MultiLevelSelectWithJoins = customersTable
     .join('INNER', usersTable.as("parentUsers"), (cols) => cols.parentUsers.id.eq(1))
     .select(cols => ({
         customerId: cols.customers.id,
-        userName: cols.users.userName.as("username1"),
+        userName: cols.users.userName,
         subProp: {
             parentUserId: cols.parentUsers.id,
             customers: cols.customers
@@ -190,7 +190,7 @@ const MultiLevelSelectWithJoins = customersTable
     .exec;
 type multiLevelSelectWithJoinsExpectedResult = {
     customerId: number,
-    username1: string,
+    userName: string,
     subProp: {
         parentUserId: number,
         customers: {

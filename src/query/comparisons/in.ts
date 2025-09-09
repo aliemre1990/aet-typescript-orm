@@ -11,16 +11,16 @@ import type { IComparable } from "./_interfaces/IComparable.js";
 // Helper type to extract only QueryColumns from the mixed tuple
 type ExtractComparables<T extends readonly unknown[]> =
     T extends readonly [infer First, ...infer Rest] ?
-    First extends IComparable<any, any, any, any, any, any> ?
+    First extends IComparable<any, any, any, any, any> ?
     [First, ...ExtractComparables<Rest>] :
     ExtractComparables<Rest> :
     [];
 
 function sqlIn<
     TDbType extends DbType,
-    TComparing extends IComparable<TDbType, any, any, any, any, any>,
+    TComparing extends IComparable<TDbType, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
-    TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any, any, any>)[]
+    TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any, any>)[]
 >(
     this: TComparing,
     ...values: TValues
@@ -34,7 +34,7 @@ function sqlIn<
 
 function sqlIn<
     TDbType extends DbType,
-    TComparing extends IComparable<TDbType, any, any, any, any, any>,
+    TComparing extends IComparable<TDbType, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TParamMedian extends QueryParamMedian<any>,
     TParamName extends TParamMedian extends QueryParamMedian<infer U> ? U : never,
@@ -48,10 +48,10 @@ function sqlIn<
 >
 function sqlIn<
     TDbType extends DbType,
-    TComparing extends IComparable<TDbType, any, any, any, any, any>,
+    TComparing extends IComparable<TDbType, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TParamMedian extends QueryParamMedian<any> | undefined,
-    TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any, any, any>)[]
+    TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any, any>)[]
 >
     (
         this: TComparing,

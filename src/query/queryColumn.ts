@@ -15,7 +15,7 @@ class QueryColumn<
     TAsName extends string | undefined = undefined,
     TValueType extends GetColumnValueTypes<TDbType> = TColumn extends Column<TDbType, any, any, any, any, infer TValType> ? TValType : never,
     TFinalValueType extends TValueType | null = TColumn extends Column<TDbType, any, any, any, any, any, infer TFinalValType> ? TFinalValType : never
-> implements IComparable<TDbType, undefined, TValueType, TFinalValueType, TAsName, false> {
+> implements IComparable<TDbType, undefined, TValueType, TFinalValueType, false> {
     qTableSpecs?: TQTableSpecs;
 
     asName?: TAsName;

@@ -25,17 +25,15 @@ class ColumnSQLFunction<
     TArgs extends (
         PgValueTypes | null |
         QueryParam<TDbType, any, any> |
-        IComparable<TDbType, any, NonNullable<TReturnType>, any, any, any>
+        IComparable<TDbType, any, NonNullable<TReturnType>, any, any>
     )[],
     TReturnType extends GetColumnValueTypes<TDbType> | null,
-    TAsName extends string | undefined,
     TIsAgg extends boolean = false
-> implements IComparable<TDbType, InferParamsFromFnArgs<TArgs>, NonNullable<TReturnType>, TReturnType, TAsName, TIsAgg> {
+> implements IComparable<TDbType, InferParamsFromFnArgs<TArgs>, NonNullable<TReturnType>, TReturnType,  TIsAgg> {
 
     icomparableValueDummy?: NonNullable<TReturnType>;
     icomparableFinalValueDummy?: TReturnType;
     params?: InferParamsFromFnArgs<TArgs>;
-    asName?: TAsName;
     isAgg?: TIsAgg;
     dbType?: TDbType;
 
@@ -46,13 +44,7 @@ class ColumnSQLFunction<
     constructor(
         public args: TArgs,
         public sqlFunction: TSQLFunction,
-        asName?: TAsName
     ) {
-        this.asName = asName;
-    }
-
-    as<TAsName extends string>(asName: TAsName) {
-        return new ColumnSQLFunction<TDbType, TSQLFunction, TArgs, TReturnType, TAsName, TIsAgg>(this.args, this.sqlFunction, asName);
     }
 }
 

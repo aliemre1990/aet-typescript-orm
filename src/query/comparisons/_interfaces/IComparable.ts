@@ -7,14 +7,12 @@ interface IComparable<
     TParams extends QueryParam<TDbType, string, any>[] | undefined,
     TValueType extends GetColumnValueTypes<TDbType>,
     TFinalValueType extends TValueType | null,
-    TAsName extends string | undefined,
     TIsAgg extends boolean
 > {
     dbType?: TDbType;
     icomparableValueDummy?: TValueType;
     icomparableFinalValueDummy?: TFinalValueType;
     params?: TParams;
-    asName?: TAsName;
     isAgg?: TIsAgg;
 }
 

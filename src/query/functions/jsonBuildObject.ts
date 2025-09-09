@@ -6,7 +6,7 @@ import type { InferIsAggFromJSONFn, InferReturnTypeFromJSONBuildObjectParam } fr
 
 type JSONBuildObjectParam<TDbType extends DbType> = {
     [key: string]:
-    IComparable<TDbType, any, any, any, any, any> |
+    IComparable<TDbType, any, any, any, any> |
     AggregatedColumn<TDbType, any> |
     JSONBuildObjectParam<TDbType>
 }

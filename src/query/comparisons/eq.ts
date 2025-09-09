@@ -9,9 +9,9 @@ import type { IComparable } from "./_interfaces/IComparable.js";
 
 function eq<
     TDbType extends DbType,
-    TComparing extends IComparable<TDbType, any, any, any, any, any>,
+    TComparing extends IComparable<TDbType, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
-    TApplied extends IComparable<TDbType, any, TValueType, any, any, any>,
+    TApplied extends IComparable<TDbType, any, TValueType, any, any>,
 >(this: TComparing, value: TApplied): ColumnComparisonOperation<
     TDbType,
     TComparing,
@@ -20,7 +20,7 @@ function eq<
 >
 function eq<
     TDbType extends DbType,
-    TComparing extends IComparable<TDbType, any, any, any, any, any>,
+    TComparing extends IComparable<TDbType, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TParamMedian extends QueryParamMedian<any>,
     TParamName extends TParamMedian extends QueryParamMedian<infer U> ? U : never,
@@ -34,7 +34,7 @@ function eq<
 >
 function eq<
     TDbType extends DbType,
-    TComparing extends IComparable<TDbType, any, any, any, any, any>,
+    TComparing extends IComparable<TDbType, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>
 >(this: TComparing, value: TValueType | null): ColumnComparisonOperation<
     TDbType,
@@ -44,11 +44,11 @@ function eq<
 >
 function eq<
     TDbType extends DbType,
-    TComparing extends IComparable<TDbType, any, any, any, any, any>,
+    TComparing extends IComparable<TDbType, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TParamMedian extends QueryParamMedian<any> | undefined,
     TParamName extends (TParamMedian extends QueryParamMedian<infer U> ? U : never) | undefined,
-    TApplied extends IComparable<TDbType, any, TValueType, any, any, any>,
+    TApplied extends IComparable<TDbType, any, TValueType, any, any>,
 >
     (this: TComparing, value: TValueType | TParamMedian | TApplied | null) {
 

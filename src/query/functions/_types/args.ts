@@ -12,13 +12,13 @@ type InferFirstTypeFromArgs<TDbType extends DbType, TArgs extends
     (
         QueryParamMedian<any> |
         DbValueTypes |
-        IComparable<TDbType, any, any, any, any, any>
+        IComparable<TDbType, any, any, any, any>
     )[]
 > =
     TArgs extends readonly [infer First, ...infer Rest] ?
     First extends QueryParamMedian<any> ?
 
-    Rest extends (QueryParamMedian<any> | DbValueTypes | IComparable<TDbType, any, any, any, any, any>)[] ?
+    Rest extends (QueryParamMedian<any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
     InferFirstTypeFromArgs<TDbType, Rest> :
     TDbType extends PgDbType ? PgValueTypes : never :
 
@@ -35,10 +35,10 @@ type InferFirstTypeFromArgs<TDbType extends DbType, TArgs extends
     First extends Buffer ? Buffer :
     First extends object[] ? object[] :
 
-    First extends IComparable<TDbType, any, infer TValType, any, any, any> ? TValType :
+    First extends IComparable<TDbType, any, infer TValType, any, any> ? TValType :
 
     First extends object ? object :
-    Rest extends (QueryParamMedian<any> | DbValueTypes | IComparable<TDbType, any, any, any, any, any>)[] ?
+    Rest extends (QueryParamMedian<any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
     InferFirstTypeFromArgs<TDbType, Rest> :
     TDbType extends PgDbType ? PgValueTypes : never :
     TDbType extends PgDbType ? PgValueTypes : never
@@ -48,24 +48,24 @@ type IsContainsNonNull<TDbType extends DbType, TArgs extends
     (
         QueryParamMedian<any> |
         DbValueTypes |
-        IComparable<TDbType, any, any, any, any, any>
+        IComparable<TDbType, any, any, any, any>
     )[]
 > = TArgs extends readonly [infer First, ...infer Rest] ?
 
     First extends QueryParamMedian<any> ?
-    Rest extends (QueryParamMedian<any> | DbValueTypes | IComparable<TDbType, any, any, any, any, any>)[] ?
+    Rest extends (QueryParamMedian<any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
     IsContainsNonNull<TDbType, Rest> :
     false :
 
-    First extends IComparable<TDbType, any, any, infer TFinalType, any, any> ?
+    First extends IComparable<TDbType, any, any, infer TFinalType, any> ?
     null extends TFinalType ?
-    Rest extends (QueryParamMedian<any> | DbValueTypes | IComparable<TDbType, any, any, any, any, any>)[] ?
+    Rest extends (QueryParamMedian<any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
     IsContainsNonNull<TDbType, Rest> :
     false :
     true :
 
     null extends First ?
-    Rest extends (QueryParamMedian<any> | DbValueTypes | IComparable<TDbType, any, any, any, any, any>)[] ?
+    Rest extends (QueryParamMedian<any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
     IsContainsNonNull<TDbType, Rest> :
     false :
     true :
@@ -79,8 +79,8 @@ type IsContainsNonNull<TDbType extends DbType, TArgs extends
 type InferReturnTypeFromJSONBuildObjectParam<TDbType extends DbType, TObj extends JSONBuildObjectParam<TDbType>> =
     DeepPrettify<{
         [K in keyof TObj]:
-        TObj[K] extends IComparable<TDbType, any, any, infer TFinalType, any, any> ? TFinalType :
-        TObj[K] extends AggregatedColumn<TDbType, infer TQC> ? TQC extends IComparable<TDbType, any, any, infer TFinalType, any, any> ? TFinalType : never :
+        TObj[K] extends IComparable<TDbType, any, any, infer TFinalType, any> ? TFinalType :
+        TObj[K] extends AggregatedColumn<TDbType, infer TQC> ? TQC extends IComparable<TDbType, any, any, infer TFinalType, any> ? TFinalType : never :
         TObj[K] extends JSONBuildObjectParam<TDbType> ? InferReturnTypeFromJSONBuildObjectParam<TDbType, TObj[K]> :
         never
     }>
