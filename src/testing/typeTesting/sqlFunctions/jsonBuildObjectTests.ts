@@ -1,6 +1,7 @@
 import type { PgDbType } from "../../../db.js";
 import AggregatedColumn from "../../../query/aggregation/_aggregatedColumn.js";
 import type { InferIsAggFromJSONFn, InferReturnTypeFromJSONBuildObjectParam } from "../../../query/functions/_types/args.js";
+import jsonBuildObject from "../../../query/functions/jsonBuildObject.js";
 import QueryColumn from "../../../query/queryColumn.js";
 import { customersTable } from "../_tables.js";
 
@@ -11,3 +12,7 @@ const jsonObj = { ali: customerIdQC, veli: { ali: customerIdQC, asd: { bv: custo
 type tp = InferIsAggFromJSONFn<PgDbType, typeof jsonObj>
 
 type tpx = InferReturnTypeFromJSONBuildObjectParam<PgDbType, typeof jsonObj>;
+
+
+
+const simpleJsonBuildObj = customersTable.select(cols => ({ obj: jsonBuildObject({ id: cols.customers.id }) })).exec();

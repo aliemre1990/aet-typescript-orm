@@ -1,5 +1,3 @@
-import type ISelectClause from "../../query/_interfaces/ISelectClause.js";
-import type { SpreadGroupedColumns } from "../../query/_types/grouping.js";
 import { customersTable, shipmentsTable, usersTable } from "./_tables.js";
 import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
 

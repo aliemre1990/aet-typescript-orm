@@ -1,13 +1,10 @@
-import type { DbType, DbValueTypes, PgDbType } from "../../db.js";
-import type { PgValueTypes } from "../../postgresql/dataTypes.js";
-import type Column from "../../table/column.js";
+import type { DbType, DbValueTypes } from "../../db.js";
 import type { GetColumnValueTypes } from "../../table/types/utils.js";
-import type { InferParamsFromFn, InferParamsFromFnArgs } from "../_types/result.js";
+import type { InferParamsFromFnArgs } from "../_types/result.js";
 import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
 import between from "../comparisons/between.js";
 import eq from "../comparisons/eq.js";
 import type QueryParam from "../param.js";
-import type QueryColumn from "../queryColumn.js";
 
 const sqlFunctions = {
     coalesce: { name: 'COALESCE' },
@@ -23,13 +20,13 @@ class ColumnSQLFunction<
     TDbType extends DbType,
     TSQLFunction extends SQLFunction,
     TArgs extends (
-        PgValueTypes | null |
+        GetColumnValueTypes<TDbType> | null |
         QueryParam<TDbType, any, any> |
         IComparable<TDbType, any, NonNullable<TReturnType>, any, any>
     )[],
     TReturnType extends GetColumnValueTypes<TDbType> | null,
     TIsAgg extends boolean = false
-> implements IComparable<TDbType, InferParamsFromFnArgs<TArgs>, NonNullable<TReturnType>, TReturnType,  TIsAgg> {
+> implements IComparable<TDbType, InferParamsFromFnArgs<TArgs>, NonNullable<TReturnType>, TReturnType, TIsAgg> {
 
     icomparableValueDummy?: NonNullable<TReturnType>;
     icomparableFinalValueDummy?: TReturnType;
