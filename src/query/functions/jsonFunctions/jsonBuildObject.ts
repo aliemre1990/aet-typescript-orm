@@ -1,0 +1,95 @@
+import type { DbType, PgDbType } from "../../../db.js";
+import type { GetColumnValueTypes } from "../../../table/types/utils.js";
+import type { UnionToTuple } from "../../../utility/common.js";
+import type AggregatedColumn from "../../aggregation/_aggregatedColumn.js";
+import type { IComparable } from "../../comparisons/_interfaces/IComparable.js";
+import type { InferIsAggFromJSONFn, InferReturnTypeFromJSONBuildObjectParam } from "../_types/args.js";
+
+class JSONBuildObjectFunction<
+    TDbType extends PgDbType,
+    TObj extends JSONBuildObjectParam<TDbType>,
+    TReturnType extends GetColumnValueTypes<TDbType> | null = TDbType extends PgDbType ? InferReturnTypeFromJSONBuildObjectParam<TDbType, TObj> : never,
+    TIsAgg extends boolean = InferIsAggFromJSONFn<TDbType, TObj>
+> implements IComparable<TDbType, InferParamsFromJsonBuildObjectArg<TDbType, TObj>, NonNullable<TReturnType>, TReturnType, TIsAgg> {
+
+    icomparableValueDummy?: NonNullable<TReturnType>;
+    icomparableFinalValueDummy?: TReturnType;
+    params?: InferParamsFromJsonBuildObjectArg<TDbType, TObj>;
+    isAgg?: TIsAgg;
+    dbType?: TDbType;
+
+    constructor(
+        public obj: TObj,
+        public isJsonB: boolean,
+    ) {
+    }
+}
+
+type InferParamsFromJsonBuildObjectArg<TDbType extends DbType, TObj extends JSONBuildObjectParam<TDbType>> =
+    InferParamsFromObj<TDbType, TObj>["length"] extends 0 ? undefined :
+    InferParamsFromObj<TDbType, TObj>;
+
+type InferParamsFromObj<TDbType extends DbType, TObj extends JSONBuildObjectParam<TDbType>> =
+    UnionToTuple<TObj[keyof TObj]> extends readonly [infer FirstKey, ...infer RestKeys] ?
+    RestKeys extends readonly any[] ?
+    FirstKey extends IComparable<TDbType, infer TParams, any, any, any> ? [...(TParams extends undefined ? [] : TParams), ...InferParamsFromObjArr<TDbType, RestKeys>] :
+    FirstKey extends JSONBuildObjectParam<TDbType> ? [...InferParamsFromObj<TDbType, FirstKey>, ...InferParamsFromObjArr<TDbType, RestKeys>] :
+    [...InferParamsFromObjArr<TDbType, RestKeys>] :
+    FirstKey extends IComparable<TDbType, infer TParams, any, any, any> ? [...(TParams extends undefined ? [] : TParams)] :
+    FirstKey extends JSONBuildObjectParam<TDbType> ? [...InferParamsFromObj<TDbType, FirstKey>] :
+    [] :
+    [];
+
+type InferParamsFromObjArr<TDbType extends DbType, TRest extends readonly any[]> =
+    TRest extends readonly [infer FirstKey, ...infer RestKeys] ?
+    RestKeys extends readonly any[] ?
+    FirstKey extends IComparable<TDbType, infer TParams, any, any, any> ? [...(TParams extends undefined ? [] : TParams), ...InferParamsFromObjArr<TDbType, RestKeys>] :
+    FirstKey extends JSONBuildObjectParam<TDbType> ? [...InferParamsFromObj<TDbType, FirstKey>, ...InferParamsFromObjArr<TDbType, RestKeys>] :
+    [...InferParamsFromObjArr<TDbType, RestKeys>] :
+    FirstKey extends IComparable<TDbType, infer TParams, any, any, any> ? [...(TParams extends undefined ? [] : TParams)] :
+    FirstKey extends JSONBuildObjectParam<TDbType> ? [...InferParamsFromObj<TDbType, FirstKey>] :
+    [] :
+    [];
+
+type JSONBuildObjectParam<TDbType extends DbType> = {
+    [key: string]:
+    IComparable<TDbType, any, any, any, any> |
+    AggregatedColumn<TDbType, any> |
+    JSONBuildObjectParam<TDbType>
+}
+
+function jsonBuildObject<
+    TDbType extends PgDbType,
+    TObj extends JSONBuildObjectParam<TDbType>,
+>
+    (obj: TObj) {
+
+    return new JSONBuildObjectFunction<
+        TDbType,
+        TObj
+    >(
+        obj, false
+    )
+}
+
+function jsonbBuildObject<
+    TDbType extends PgDbType,
+    TObj extends JSONBuildObjectParam<TDbType>,
+>
+    (obj: TObj) {
+
+    return new JSONBuildObjectFunction<
+        TDbType,
+        TObj
+    >(
+        obj, true
+    )
+}
+
+export default JSONBuildObjectFunction;
+
+export { jsonBuildObject, jsonbBuildObject };
+
+export type {
+    JSONBuildObjectParam
+}

@@ -14,7 +14,7 @@ import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
 import type Column from "../../table/column.js";
 
 type TResultShape<TDbType extends DbType> = {
-    [key: string]: IComparable<TDbType, any, any, any, any> | TResultShape<TDbType>;
+    [key: string]: IComparable<TDbType, any, any, any, false> | TResultShape<TDbType>;
 };
 
 
@@ -170,17 +170,11 @@ type InferParamsFromComparables<T> =
     [...InferParamsFromComparables<Rest>] :
     [];
 
-type InferParamsFromFn<T> = T extends ColumnSQLFunction<any, any, infer TArgs, any, any> ? InferParamsFromFnArgs<TArgs> : never;
-
-type InferParamsFromFnArgs<T> =
-    T extends readonly [infer FirstArg, ...infer RestArgs] ?
-    FirstArg extends QueryParam<any, any, any> ? [FirstArg, ...InferParamsFromFnArgs<RestArgs>] :
-    FirstArg extends ColumnSQLFunction<any, any, any, any, any> ? [...InferParamsFromFn<FirstArg>, ...InferParamsFromFnArgs<RestArgs>] :
-    [...InferParamsFromFnArgs<RestArgs>] :
-    [];
 
 
-//
+/**
+ * 
+ */
 type AccumulateParams<TParams extends QueryParam<any, any, any>[] | undefined, TCbResult extends ColumnComparisonOperation<any, any, any, any, any> | ColumnLogicalOperation<any, any>> =
     TParams extends undefined ?
     InferParamsFromOps<TCbResult>["length"] extends 0 ? undefined : InferParamsFromOps<TCbResult> :
@@ -194,7 +188,5 @@ export type {
     QueryParamsToObject,
     InferParamsFromOps,
     AccumulateParams,
-    TablesToGroupedResultMap,
-    InferParamsFromFn,
-    InferParamsFromFnArgs
+    TablesToGroupedResultMap
 }

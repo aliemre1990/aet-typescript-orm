@@ -1,18 +1,15 @@
-import type { PgDbType } from "../../../db.js";
-import AggregatedColumn from "../../../query/aggregation/_aggregatedColumn.js";
-import type { InferIsAggFromJSONFn, InferReturnTypeFromJSONBuildObjectParam } from "../../../query/functions/_types/args.js";
-import jsonBuildObject from "../../../query/functions/jsonBuildObject.js";
-import QueryColumn from "../../../query/queryColumn.js";
+import { jsonBuildObject } from "../../../query/functions/jsonFunctions/jsonBuildObject.js";
 import { customersTable } from "../_tables.js";
 
-const customerIdQC = new QueryColumn<PgDbType, typeof customersTable.columns.customerId, NonNullable<typeof customersTable.columns.customerId.tableSpecs>>(customersTable.columns.customerId);
-const customerIdAggC = new AggregatedColumn<PgDbType, typeof customerIdQC>(customerIdQC)
-
-const jsonObj = { ali: customerIdQC, veli: { ali: customerIdQC, asd: { bv: customerIdAggC } } };
-type tp = InferIsAggFromJSONFn<PgDbType, typeof jsonObj>
-
-type tpx = InferReturnTypeFromJSONBuildObjectParam<PgDbType, typeof jsonObj>;
+const simpleJsonBuildObj = customersTable.select(cols => ({ id: cols.customers.id, obj: jsonBuildObject({ id: cols.customers.id, bd: jsonBuildObject({ sd: cols.customers.name }) }) })).exec();
 
 
+const groupedJsonBuildObj = customersTable
+    .groupBy(cols => [cols.customers.id])
+    .select(cols => ({ id: jsonBuildObject({ id: cols.customers.id }) }));
 
-const simpleJsonBuildObj = customersTable.select(cols => ({ obj: jsonBuildObject({ id: cols.customers.id }) })).exec();
+
+const aggregatedJsonBuildObj = customersTable
+    .groupBy(cols => [cols.customers.id])
+    // @ts-expect-error
+    .select(cols => ({ id: jsonBuildObject({ id: cols.customers.name }) }))

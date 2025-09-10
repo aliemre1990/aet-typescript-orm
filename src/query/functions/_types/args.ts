@@ -6,7 +6,7 @@ import type { IComparable } from "../../comparisons/_interfaces/IComparable.js";
 import type { QueryParamMedian } from "../../queryColumn.js";
 import type QueryColumn from "../../queryColumn.js";
 import type ColumnSQLFunction from "../_functions.js";
-import type { JSONBuildObjectParam } from "../jsonBuildObject.js";
+import type { JSONBuildObjectParam } from "../jsonFunctions/jsonBuildObject.js";
 
 type InferFirstTypeFromArgs<TDbType extends DbType, TArgs extends
     (
@@ -33,11 +33,11 @@ type InferFirstTypeFromArgs<TDbType extends DbType, TArgs extends
     First extends Date ? Date :
     First extends Date[] ? Date[] :
     First extends Buffer ? Buffer :
-    First extends object[] ? object[] :
-
+    
     First extends IComparable<TDbType, any, infer TValType, any, any> ? TValType :
-
-    First extends object ? object :
+    
+    First extends object ? First :
+    First extends object[] ? First[] :
     Rest extends (QueryParamMedian<any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
     InferFirstTypeFromArgs<TDbType, Rest> :
     TDbType extends PgDbType ? PgValueTypes : never :
