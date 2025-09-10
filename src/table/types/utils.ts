@@ -7,7 +7,6 @@ import type { QueryTableSpecsType, TableSpecsType } from "./tableSpecs.js";
 import type QueryTable from "../../query/queryTable.js";
 
 type GetColumnTypes<TDbType extends DbType> = TDbType extends PgDbType ? PgColumnType : never;
-type GetColumnValueTypes<TDbType extends DbType> = TDbType extends PgDbType ? PgValueTypes : never;
 type GetValueTypeFromColumnType<TDbType extends DbType, TColType extends TDbType extends PgDbType ? PgColumnType : never> =
     TDbType extends PgDbType ? PgTypeToJsType<TColType> : never;
 
@@ -27,6 +26,5 @@ export type {
     QueryTablesObjectType,
     QueryColumnsObjectType,
     QueryTableSpecsType,
-    GetColumnValueTypes,
     GetValueTypeFromColumnType
 }

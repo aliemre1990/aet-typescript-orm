@@ -1,4 +1,4 @@
-import type { DbType, PgDbType } from "../../db.js";
+import type { DbType, DbValueTypes, PgDbType } from "../../db.js";
 import type { PgValueTypes } from "../../postgresql/dataTypes.js";
 import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
 import { QueryParamMedian } from "../param.js";
@@ -6,25 +6,26 @@ import QueryParam from "../param.js";
 import ColumnSQLFunction, { sqlFunctions } from "./_functions.js";
 import type { InferFirstTypeFromArgs, IsContainsNonNull } from "./_types/args.js";
 
-type ConvertMedianToParam<T, TDbType extends DbType, TValueType extends (TDbType extends PgDbType ? PgValueTypes : never) | null> =
+type ConvertMedianToParam<T, TDbType extends DbType, TValueType extends DbValueTypes | null> =
     T extends QueryParamMedian<infer U>
     ? QueryParam<TDbType, U, TValueType>
     : T;
 
-type ConvertMediansInArray<T extends any[], TDbType extends DbType, TValueType extends (TDbType extends PgDbType ? PgValueTypes : never) | null> = {
+type ConvertMediansInArray<T extends any[], TDbType extends DbType, TValueType extends DbValueTypes | null> = {
     [K in keyof T]: ConvertMedianToParam<T[K], TDbType, TValueType>
 };
 
-type CoalesceArg<TDbType extends DbType, TValueType extends ((TDbType extends PgDbType ? PgValueTypes : never))> =
+type CoalesceArg<TDbType extends DbType, TValueType extends DbValueTypes> =
     | TValueType | null
     | QueryParamMedian<any>
     | IComparable<TDbType, any, TValueType, any, any>;
 
-function pgCoalesce<
+function coalesce<
+    TDbType extends DbType,
     TArgs extends any[],
-    TValueType extends PgValueTypes | null = InferFirstTypeFromArgs<PgDbType, TArgs> | null
+    TValueType extends DbValueTypes | null = InferFirstTypeFromArgs<TDbType, TArgs> | null
 >
-    (...args: TArgs & (TArgs extends CoalesceArg<PgDbType, NonNullable<TValueType>>[] ? TArgs : never)) {
+    (...args: TArgs & (TArgs extends CoalesceArg<TDbType, NonNullable<TValueType>>[] ? TArgs : never)) {
 
     for (let i = 0; i < args.length; i++) {
         const arg = args[i];
@@ -44,4 +45,4 @@ function pgCoalesce<
     >(args as ConvertMediansInArray<TArgs, PgDbType, TValueType>, sqlFunctions.coalesce);
 }
 
-export default pgCoalesce;
+export default coalesce;

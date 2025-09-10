@@ -11,6 +11,7 @@ type DbValueTypes = string | string[] | number | number[] | bigint | bigint[] | 
 
 export type {
     PgDbType,
+    MySQLDbType,
     DbType,
     DbValueTypes
 }

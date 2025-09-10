@@ -1,5 +1,4 @@
 import type { DbType, DbValueTypes } from "../../db.js";
-import type { GetColumnValueTypes } from "../../table/types/utils.js";
 import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
 import between from "../comparisons/between.js";
 import eq from "../comparisons/eq.js";
@@ -8,6 +7,7 @@ import type { InferParamsFromFnArgs } from "./_types/inferParamsFromArgs.js";
 
 const sqlFunctions = {
     coalesce: { name: 'COALESCE' },
+    round: { name: 'ROUND' },
     jsonBuildObject: { name: 'JSON_BUILD_OBJECT' }
 
 } as const;
@@ -20,11 +20,11 @@ class ColumnSQLFunction<
     TDbType extends DbType,
     TSQLFunction extends SQLFunction,
     TArgs extends (
-        GetColumnValueTypes<TDbType> | null |
+        DbValueTypes | null |
         QueryParam<TDbType, any, any> |
         IComparable<TDbType, any, NonNullable<TReturnType>, any, any>
     )[],
-    TReturnType extends GetColumnValueTypes<TDbType> | null,
+    TReturnType extends DbValueTypes | null,
     TIsAgg extends boolean = false
 > implements IComparable<TDbType, InferParamsFromFnArgs<TArgs>, NonNullable<TReturnType>, TReturnType, TIsAgg> {
 

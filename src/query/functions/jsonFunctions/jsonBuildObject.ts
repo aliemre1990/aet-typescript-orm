@@ -1,5 +1,4 @@
-import type { DbType, PgDbType } from "../../../db.js";
-import type { GetColumnValueTypes } from "../../../table/types/utils.js";
+import type { DbType, DbValueTypes, PgDbType } from "../../../db.js";
 import type { UnionToTuple } from "../../../utility/common.js";
 import type AggregatedColumn from "../../aggregation/_aggregatedColumn.js";
 import type { IComparable } from "../../comparisons/_interfaces/IComparable.js";
@@ -8,7 +7,7 @@ import type { InferIsAggFromJSONFn, InferReturnTypeFromJSONBuildObjectParam } fr
 class JSONBuildObjectFunction<
     TDbType extends PgDbType,
     TObj extends JSONBuildObjectParam<TDbType>,
-    TReturnType extends GetColumnValueTypes<TDbType> | null = TDbType extends PgDbType ? InferReturnTypeFromJSONBuildObjectParam<TDbType, TObj> : never,
+    TReturnType extends DbValueTypes | null = TDbType extends PgDbType ? InferReturnTypeFromJSONBuildObjectParam<TDbType, TObj> : never,
     TIsAgg extends boolean = InferIsAggFromJSONFn<TDbType, TObj>
 > implements IComparable<TDbType, InferParamsFromJsonBuildObjectArg<TDbType, TObj>, NonNullable<TReturnType>, TReturnType, TIsAgg> {
 

@@ -1,5 +1,4 @@
-import type { DbType } from "../../db.js";
-import type { GetColumnValueTypes } from "../../table/types/utils.js";
+import type { DbType, DbValueTypes } from "../../db.js";
 import type ColumnSQLFunction from "../functions/_functions.js";
 import type { QueryParam } from "../queryColumn.js";
 import type QueryColumn from "../queryColumn.js";
@@ -31,7 +30,7 @@ class ColumnComparisonOperation<
     TComparing extends IComparable<TDbType, any, any, any, any>,
     TApplied extends IComparable<TDbType, any, TValueType, any, any>[] | undefined,
     TParams extends QueryParam<TDbType, any, any>[] | undefined,
-    TValueType extends GetColumnValueTypes<TDbType> = InferValueTypeFromComparable<TDbType, TComparing>
+    TValueType extends DbValueTypes = InferValueTypeFromComparable<TDbType, TComparing>
 > {
     constructor(
         public operation: ComparisonOperation,

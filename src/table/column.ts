@@ -1,6 +1,6 @@
-import type { DbType } from "../db.js";
+import type { DbType, DbValueTypes } from "../db.js";
 import type { TableSpecsType } from "./types/tableSpecs.js";
-import type { GetColumnTypes, GetValueTypeFromColumnType, GetColumnValueTypes } from "./types/utils.js";
+import type { GetColumnTypes, GetValueTypeFromColumnType } from "./types/utils.js";
 
 class Column<
     TDbType extends DbType,
@@ -8,8 +8,8 @@ class Column<
     TColumnName extends string,
     TTableSpecs extends TableSpecsType,
     TIsNull extends boolean = false,
-    TValueType extends GetColumnValueTypes<TDbType> = GetValueTypeFromColumnType<TDbType, TColumnType>,
-    TFinalValueType extends GetColumnValueTypes<TDbType> | null = TIsNull extends true ? TValueType | null : TValueType
+    TValueType extends DbValueTypes = GetValueTypeFromColumnType<TDbType, TColumnType>,
+    TFinalValueType extends DbValueTypes | null = TIsNull extends true ? TValueType | null : TValueType
 > {
 
     tableSpecs?: TTableSpecs;

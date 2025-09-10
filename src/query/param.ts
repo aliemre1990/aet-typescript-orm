@@ -1,4 +1,4 @@
-import type { DbType, PgDbType } from "../db.js";
+import type { DbType, DbValueTypes, PgDbType } from "../db.js";
 import type { PgValueTypes } from "../postgresql/dataTypes.js";
 
 class QueryParamMedian<TName extends string> {
@@ -8,7 +8,7 @@ class QueryParamMedian<TName extends string> {
 class QueryParam<
     TDbType extends DbType,
     TName extends string,
-    TValue extends (TDbType extends PgDbType ? PgValueTypes : never) | null
+    TValue extends DbValueTypes | null
 > {
     constructor(public name: TName) { }
 }
