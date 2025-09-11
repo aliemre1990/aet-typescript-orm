@@ -12,6 +12,7 @@ import type { AccumulateParams, InferParamsFromOps } from "../_types/result.js";
 import type QueryTable from "../queryTable.js";
 import type ISelectClause from "./ISelectClause.js";
 import type IGroupByClause from "./IGroupByClause.js";
+import type { DbOperators } from "../_types/ops.js";
 
 interface IJoinClause<
     TDbType extends DbType,
@@ -34,7 +35,7 @@ interface IJoinClause<
     >(
         type: JoinType,
         table: TInnerJoinTable,
-        cb: (cols: TableToColumnsMap<TablesToObject<[...TTables, TInnerJoinResult]>>) => TCbResult
+        cb: (cols: TableToColumnsMap<TablesToObject<[...TTables, TInnerJoinResult]>>, ops: DbOperators<TDbType>) => TCbResult
     ):
         IJoinClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
         ISelectClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &

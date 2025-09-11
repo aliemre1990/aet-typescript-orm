@@ -3,7 +3,6 @@ import type { InferParamsFromOps } from "../../../query/_types/result.js";
 import type ColumnComparisonOperation from "../../../query/comparisons/_comparisonOperations.js";
 import type ColumnSQLFunction from "../../../query/functions/_functions.js";
 import coalesce from "../../../query/functions/coalesce.js";
-import { and } from "../../../query/logicalOperations.js";
 import QueryParam, { param } from "../../../query/param.js";
 import QueryColumn from "../../../query/queryColumn.js";
 import { customersTable, employeesTable, ordersTable, usersTable } from "../_tables.js";
@@ -70,7 +69,7 @@ const InferParamsFromCoalesce = customersTable
 
         return res1;
     })
-    .join('INNER', usersTable.as('parentUsers'), (cols) => {
+    .join('INNER', usersTable.as('parentUsers'), (cols, { and }) => {
         const res = and(
             coalesce("asdf", param("coalesceAnd1")).eq("sadf"),
             coalesce(new Date(), param("coalesceAnd2")).eq(new Date())

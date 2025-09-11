@@ -17,10 +17,10 @@ type ExtractComparables<T extends readonly unknown[]> =
     [];
 
 function sqlIn<
-    TDbType extends DbType,
     TComparing extends IComparable<TDbType, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
-    TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any, any>)[]
+    TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any, any>)[],
+    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any> ? DbType : never
 >(
     this: TComparing,
     ...values: TValues
@@ -33,12 +33,12 @@ function sqlIn<
 
 
 function sqlIn<
-    TDbType extends DbType,
     TComparing extends IComparable<TDbType, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TParamMedian extends QueryParamMedian<any>,
     TParamName extends TParamMedian extends QueryParamMedian<infer U> ? U : never,
     TParam extends QueryParam<TDbType, TParamName, TDbType extends PgDbType ? GetArrayEquivalentPgValueType<TValueType> : never>,
+    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any> ? DbType : never
 >(this: TComparing, param: TParamMedian
 ): ColumnComparisonOperation<
     TDbType,
@@ -47,11 +47,11 @@ function sqlIn<
     [TParam]
 >
 function sqlIn<
-    TDbType extends DbType,
     TComparing extends IComparable<TDbType, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TParamMedian extends QueryParamMedian<any> | undefined,
-    TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any, any>)[]
+    TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any, any>)[],
+    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any> ? DbType : never
 >
     (
         this: TComparing,

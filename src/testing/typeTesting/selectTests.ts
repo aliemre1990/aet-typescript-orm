@@ -1,7 +1,6 @@
 import type ColumnComparisonOperation from "../../query/comparisons/_comparisonOperations.js";
 import type { IComparable } from "../../query/comparisons/_interfaces/IComparable.js";
 import pgCoalesce from "../../query/functions/coalesce.js";
-import { and } from "../../query/logicalOperations.js";
 import { param } from "../../query/param.js";
 import { customersTable, ordersTable, shipmentsTable, usersTable } from "./_tables.js";
 import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
@@ -71,7 +70,7 @@ type SingleTableJoinWithAutoSelectQueryTest = AssertTrue<AssertEqual<SingleTable
  * 
  */
 const AutoSelectMultiJoins = customersTable
-    .join('INNER', usersTable, (cols) => {
+    .join('INNER', usersTable, (cols, { and }) => {
 
         const res1 = and(
             cols.users.id.eq(param("userParam1")),
@@ -92,7 +91,7 @@ const AutoSelectMultiJoins = customersTable
         // type inrest = typeof inres extends ColumnComparisonOperation<any, any, any, infer TCols, any> ? TCols : never;
         // type prm = inrest[1];
     })
-    .join('INNER', usersTable.as('parentUsers'), (cols) => {
+    .join('INNER', usersTable.as('parentUsers'), (cols, { and }) => {
 
         const comp = and(
             cols.parentUsers.id.eq(cols.customers.id),

@@ -9,7 +9,7 @@ import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.
 import { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
 import type { TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.js";
-import type { AccumulateParams, ColumnsToResultMap,   QueryParamsToObject, TablesToGroupedResultMap, TablesToResultMap,  TResultShape } from "./_types/result.js";
+import type { AccumulateParams, ColumnsToResultMap, QueryParamsToObject, TablesToGroupedResultMap, TablesToResultMap, TResultShape } from "./_types/result.js";
 import QueryTable from "./queryTable.js";
 import type Column from "../table/column.js";
 import type IJoinClause from "./_interfaces/IJoinClause.js";
@@ -17,6 +17,7 @@ import type ISelectClause from "./_interfaces/ISelectClause.js";
 import type IWhereClause from "./_interfaces/IWhereClause.js";
 import type IGroupByClause from "./_interfaces/IGroupByClause.js";
 import type { TablesToColumnsMapFormatGroupedColumns } from "./_types/grouping.js";
+import type { DbOperators } from "./_types/ops.js";
 
 class QueryBuilder<
     TDbType extends DbType,
@@ -47,7 +48,7 @@ class QueryBuilder<
         cols: TGroupedColumns extends undefined ?
             TableToColumnsMap<TablesToObject<TTables>> :
             TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>
-    ) =>  TResultShape<TDbType> 
+    ) => TResultShape<TDbType>
     >(cb: TCb | undefined):
         IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>
     select<
@@ -78,7 +79,7 @@ class QueryBuilder<
     >(
         type: JoinType,
         table: TInnerJoinTable,
-        cb: (cols: TableToColumnsMap<TablesToObject<[...TTables, TInnerJoinResult]>>) => TCbResult
+        cb: (cols: TableToColumnsMap<TablesToObject<[...TTables, TInnerJoinResult]>>, ops: DbOperators<TDbType>) => TCbResult
     ):
         IJoinClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
         ISelectClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &

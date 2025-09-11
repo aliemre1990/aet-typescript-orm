@@ -10,34 +10,34 @@ const logicalOperations = {
 type LogicalOperation = (typeof logicalOperations[keyof typeof logicalOperations]);
 
 
+
 class ColumnLogicalOperation<
     TDbType extends DbType,
     TComparisons extends (ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>)[],
+
+
 > {
-    constructor(public operator: LogicalOperation, public comparisons: TComparisons) { }
+    // Used conditional type to prevent inifinite recursive
+    // dbType?: TDbType extends PgDbType ? PgDbType : never;
+
+    constructor(public operator: LogicalOperation, public comparisons: TComparisons, public dbType: any) { }
+
 }
 
-
-function and<
-    TComparisons extends (ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>)[],
-    TDbType extends DbType = TComparisons extends (ColumnComparisonOperation<infer TDbType1 extends DbType, any, any, any> | ColumnLogicalOperation<infer TDbType2, any>)[] ? TDbType1 & TDbType2 : never
->(...ops: TComparisons) {
-    return new ColumnLogicalOperation<TDbType, TComparisons>(logicalOperations.and, ops);
+function generateAnd<TDbType extends DbType>(dbType: TDbType) {
+    return function <
+        TComparisons extends (ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>)[]
+    >(...ops: TComparisons) {
+        return new ColumnLogicalOperation<TDbType, TComparisons>(logicalOperations.and, ops, dbType);
+    }
 }
 
-function or<
-    TComparisons extends (ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>)[],
-    TDbType extends DbType = TComparisons extends (ColumnComparisonOperation<infer TDbType1 extends DbType, any, any, any> | ColumnLogicalOperation<infer TDbType2, any>)[] ? TDbType1 & TDbType2 : never
->(...ops: TComparisons) {
-    return new ColumnLogicalOperation<TDbType, TComparisons>(logicalOperations.or, ops);
-}
 
 export default ColumnLogicalOperation;
 
 export {
     logicalOperations,
-    and,
-    or
+    generateAnd
 }
 
 export type {

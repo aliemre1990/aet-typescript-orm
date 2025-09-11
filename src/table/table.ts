@@ -16,6 +16,7 @@ import type IJoinClause from "../query/_interfaces/IJoinClause.js";
 import type ISelectClause from "../query/_interfaces/ISelectClause.js";
 import type IWhereClause from "../query/_interfaces/IWhereClause.js";
 import type IGroupByClause from "../query/_interfaces/IGroupByClause.js";
+import type { DbOperators } from "../query/_types/ops.js";
 
 class ForeignKey {
     constructor(public column: string, public references: { table: string; column: string | 'self-parent' | 'self-child' }) { }
@@ -93,22 +94,10 @@ class Table<
     >(
         type: JoinType,
         table: TInnerJoinTable,
-        cb: (cols:
-            TableToColumnsMap<
-                TablesToObject<
-                    [
-                        QueryTable<
-                            TDbType,
-                            TColumns,
-                            TTableName,
-                            Table<TDbType, TColumns, TTableName>,
-                            TQueryColumns
-                        >
-                        ,
-                        TInnerJoinResult
-                    ]
-                >
-            >) => TCbResult
+        cb: (
+            cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>, TInnerJoinResult]>>,
+            ops: DbOperators<TDbType>
+        ) => TCbResult
     ) {
         const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
             prev[curr[0]] = new QueryColumn(curr[1]);

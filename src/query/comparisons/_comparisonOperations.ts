@@ -32,12 +32,15 @@ class ColumnComparisonOperation<
     TParams extends QueryParam<TDbType, any, any>[] | undefined,
     TValueType extends DbValueTypes = InferValueTypeFromComparable<TDbType, TComparing>
 > {
+
+    dbType?: TDbType;
+
     constructor(
         public operation: ComparisonOperation,
         public comparing: TComparing,
         public value?:
             (
-                TValueType |
+                TValueType | null |
                 (TParams extends QueryParam<TDbType, any, any>[] ? TParams[number] : never) |
                 TApplied
             )[]
