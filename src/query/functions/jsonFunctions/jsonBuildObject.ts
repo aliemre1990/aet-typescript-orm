@@ -57,9 +57,9 @@ type JSONBuildObjectParam<TDbType extends DbType> = {
     JSONBuildObjectParam<TDbType>
 }
 
-function jsonBuildObject<
-    TDbType extends PgDbType,
+function jsonBuildObjectFn<
     TObj extends JSONBuildObjectParam<TDbType>,
+    TDbType extends PgDbType = PgDbType
 >
     (obj: TObj) {
 
@@ -71,9 +71,9 @@ function jsonBuildObject<
     )
 }
 
-function jsonbBuildObject<
-    TDbType extends PgDbType,
+function jsonbBuildObjectFn<
     TObj extends JSONBuildObjectParam<TDbType>,
+    TDbType extends PgDbType = PgDbType
 >
     (obj: TObj) {
 
@@ -87,7 +87,7 @@ function jsonbBuildObject<
 
 export default JSONBuildObjectFunction;
 
-export { jsonBuildObject, jsonbBuildObject };
+export { jsonBuildObjectFn, jsonbBuildObjectFn };
 
 export type {
     JSONBuildObjectParam

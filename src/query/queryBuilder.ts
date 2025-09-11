@@ -17,7 +17,7 @@ import type ISelectClause from "./_interfaces/ISelectClause.js";
 import type IWhereClause from "./_interfaces/IWhereClause.js";
 import type IGroupByClause from "./_interfaces/IGroupByClause.js";
 import type { TablesToColumnsMapFormatGroupedColumns } from "./_types/grouping.js";
-import type { DbOperators } from "./_types/ops.js";
+import type { DbFunctions, DbOperators } from "./_types/ops.js";
 
 class QueryBuilder<
     TDbType extends DbType,
@@ -45,17 +45,15 @@ class QueryBuilder<
     select<TCb extends undefined>():
         IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>
     select<TCb extends (
-        cols: TGroupedColumns extends undefined ?
-            TableToColumnsMap<TablesToObject<TTables>> :
-            TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>
+        cols: TGroupedColumns extends undefined ? TableToColumnsMap<TablesToObject<TTables>> : TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>,
+        ops: DbFunctions<TDbType>
     ) => TResultShape<TDbType>
     >(cb: TCb | undefined):
         IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>
     select<
         TCb extends (
-            cols: TGroupedColumns extends undefined ?
-                TableToColumnsMap<TablesToObject<TTables>> :
-                TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>
+            cols: TGroupedColumns extends undefined ? TableToColumnsMap<TablesToObject<TTables>> : TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>,
+            ops: DbFunctions<TDbType>
         ) => TResultShape<TDbType>
     >(
         cb?: TCb
@@ -111,7 +109,10 @@ class QueryBuilder<
 
     where<
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>
-    >(cb: (cols: TableToColumnsMap<TablesToObject<TTables>>) => TCbResult):
+    >(cb: (
+        cols: TableToColumnsMap<TablesToObject<TTables>>,
+        ops: DbOperators<TDbType>
+    ) => TCbResult):
         ISelectClause<TDbType, TTables, AccumulateParams<TParams, TCbResult>> {
         return this as ISelectClause<TDbType, TTables, AccumulateParams<TParams, TCbResult>>;
     }

@@ -2,7 +2,7 @@ import type { DbType, PgDbType } from "../../db.js";
 import type { GetArrayEquivalentPgValueType } from "../../postgresql/dataTypes.js";
 import { isNullOrUndefined } from "../../utility/guards.js";
 import ColumnComparisonOperation, { comparisonOperations } from "./_comparisonOperations.js";
-import { QueryParam, QueryParamMedian } from "../queryColumn.js";
+import { QueryParam } from "../queryColumn.js";
 import QueryColumn from "../queryColumn.js";
 import type ColumnSQLFunction from "../functions/_functions.js";
 import type { InferValueTypeFromComparable, InferValueTypeFromThisType } from "./_types/inferValue.js";
@@ -16,6 +16,21 @@ type ExtractComparables<T extends readonly unknown[]> =
     ExtractComparables<Rest> :
     [];
 
+
+function sqlIn<
+    TComparing extends IComparable<TDbType, any, any, any, any>,
+    TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
+    TParamMedian extends QueryParam<TDbType, string, any>,
+    TParamName extends TParamMedian extends QueryParam<any, infer U, any> ? U : never,
+    TParam extends QueryParam<TDbType, TParamName, TDbType extends PgDbType ? GetArrayEquivalentPgValueType<TValueType> : never>,
+    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any> ? DbType : never
+>(this: TComparing, param: TParamMedian
+): ColumnComparisonOperation<
+    TDbType,
+    TComparing,
+    undefined,
+    [TParam]
+>
 function sqlIn<
     TComparing extends IComparable<TDbType, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
@@ -35,21 +50,7 @@ function sqlIn<
 function sqlIn<
     TComparing extends IComparable<TDbType, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
-    TParamMedian extends QueryParamMedian<any>,
-    TParamName extends TParamMedian extends QueryParamMedian<infer U> ? U : never,
-    TParam extends QueryParam<TDbType, TParamName, TDbType extends PgDbType ? GetArrayEquivalentPgValueType<TValueType> : never>,
-    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any> ? DbType : never
->(this: TComparing, param: TParamMedian
-): ColumnComparisonOperation<
-    TDbType,
-    TComparing,
-    undefined,
-    [TParam]
->
-function sqlIn<
-    TComparing extends IComparable<TDbType, any, any, any, any>,
-    TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
-    TParamMedian extends QueryParamMedian<any> | undefined,
+    TParamMedian extends QueryParam<TDbType, string, any> | undefined,
     TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any, any>)[],
     TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any> ? DbType : never
 >
@@ -63,7 +64,7 @@ function sqlIn<
         throw Error('In operation requires at least one value.');
     }
 
-    if (param instanceof QueryParamMedian) {
+    if (param instanceof QueryParam) {
         const paramRes = new QueryParam(param.name);
 
         return new ColumnComparisonOperation(

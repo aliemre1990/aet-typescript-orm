@@ -16,7 +16,7 @@ import type IJoinClause from "../query/_interfaces/IJoinClause.js";
 import type ISelectClause from "../query/_interfaces/ISelectClause.js";
 import type IWhereClause from "../query/_interfaces/IWhereClause.js";
 import type IGroupByClause from "../query/_interfaces/IGroupByClause.js";
-import type { DbOperators } from "../query/_types/ops.js";
+import type { DbFunctions, DbOperators } from "../query/_types/ops.js";
 
 class ForeignKey {
     constructor(public column: string, public references: { table: string; column: string | 'self-parent' | 'self-child' }) { }
@@ -25,8 +25,8 @@ class ForeignKey {
 class Table<
     TDbType extends DbType,
     TColumns extends ColumnsObjectType<TDbType>,
-    TTableName extends string = string,
-    TQueryColumns extends QueryColumnsObjectType<TDbType, QueryTableSpecsType> = { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], { tableName: TTableName }, undefined> }
+    TTableName extends string,
+    TQueryColumns extends QueryColumnsObjectType<TDbType, QueryTableSpecsType> = { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], QueryTableSpecsType<TTableName>, undefined> }
 > implements
     ISelectClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>]>,
     IJoinClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>]>,
@@ -57,11 +57,19 @@ class Table<
     select<TCb extends undefined>():
         IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>], TCb extends (cols: any) => infer TR ? TR : undefined>
     select<
-        TCb extends ((cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>) => TResultShape<TDbType>)
+        TCb extends (
+            (
+                cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>,
+                ops: DbFunctions<TDbType>
+            ) => TResultShape<TDbType>)
     >(cb: TCb):
         IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>], TCb extends (cols: any) => infer TR ? TR : undefined>
     select<
-        TCb extends ((cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>) => TResultShape<TDbType>)
+        TCb extends (
+            (
+                cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>,
+                ops: DbFunctions<TDbType>
+            ) => TResultShape<TDbType>)
     >(
         cb?: TCb
     ) {
@@ -113,13 +121,16 @@ class Table<
 
     where<
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any, any> | ColumnLogicalOperation<TDbType, any>
-    >(cb: (cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>) => TCbResult) {
+    >(cb: (
+        cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>,
+        ops: DbOperators<TDbType>
+    ) => TCbResult) {
         const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
             prev[curr[0]] = new QueryColumn(curr[1]);
             return prev;
         }, {} as QueryColumnsObjectType<TDbType, QueryTableSpecsType>) as TQueryColumns
 
-        const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>(this, queryColumns);
+        const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName, any>, TQueryColumns, undefined>(this, queryColumns);
 
         return new QueryBuilder<TDbType, [typeof queryTable]>([queryTable]).where(cb);
     }
@@ -131,7 +142,7 @@ class Table<
             return prev;
         }, {} as QueryColumnsObjectType<TDbType, QueryTableSpecsType>) as TQueryColumns
 
-        const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>(this, queryColumns);
+        const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName, any>, TQueryColumns, undefined>(this, queryColumns);
 
         return new QueryBuilder<TDbType, [typeof queryTable]>([queryTable]).groupBy(cb);
     }

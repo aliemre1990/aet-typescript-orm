@@ -8,7 +8,7 @@ import type IJoinClause from "./_interfaces/IJoinClause.js";
 import type ISelectClause from "./_interfaces/ISelectClause.js";
 import type IWhereClause from "./_interfaces/IWhereClause.js";
 import type { TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.js";
-import type { DbOperators } from "./_types/ops.js";
+import type { DbFunctions, DbOperators } from "./_types/ops.js";
 import type { TResultShape } from "./_types/result.js";
 import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
@@ -41,11 +41,19 @@ class QueryTable<
     select<TCb extends undefined>():
         IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], TCb extends (cols: any) => infer TR ? TR : undefined>
     select<
-        TCb extends ((cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>) => TResultShape<TDbType>)
+        TCb extends (
+            (
+                cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
+                ops: DbFunctions<TDbType>
+            ) => TResultShape<TDbType>)
     >(cb: TCb):
         IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], TCb extends (cols: any) => infer TR ? TR : undefined>
     select<
-        TCb extends ((cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>) => TResultShape<TDbType>)
+        TCb extends (
+            (
+                cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
+                ops: DbFunctions<TDbType>
+            ) => TResultShape<TDbType>)
     >(
         cb?: TCb
     ) {
@@ -81,7 +89,10 @@ class QueryTable<
 
     where<
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any, any> | ColumnLogicalOperation<TDbType, any>
-    >(cb: (cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>) => TCbResult) {
+    >(cb: (
+        cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
+        ops: DbOperators<TDbType>
+    ) => TCbResult) {
 
 
         return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>([this]).where(cb);

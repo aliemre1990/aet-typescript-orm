@@ -2,11 +2,14 @@ import type { DbValueTypes, PgDbType } from "../../../db.js";
 import type { InferParamsFromOps } from "../../../query/_types/result.js";
 import type ColumnComparisonOperation from "../../../query/comparisons/_comparisonOperations.js";
 import type ColumnSQLFunction from "../../../query/functions/_functions.js";
-import coalesce from "../../../query/functions/coalesce.js";
-import QueryParam, { param } from "../../../query/param.js";
+import { generateCoalesceFn } from "../../../query/functions/coalesce.js";
+import QueryParam, { generateParamFn } from "../../../query/param.js";
 import QueryColumn from "../../../query/queryColumn.js";
 import { customersTable, employeesTable, ordersTable, usersTable } from "../_tables.js";
 import type { AssertEqual, AssertTrue } from "../_typeTestingUtilities.js";
+
+const coalesce = generateCoalesceFn("postgresql");
+const param = generateParamFn("postgresql");
 
 /**
  * 
@@ -58,9 +61,9 @@ coalesce(customerIdQC).eq(createdByQC);
  * 
  */
 const InferParamsFromCoalesce = customersTable
-    .join('INNER', usersTable, (cols, ops) => {
+    .join('INNER', usersTable, (cols, { coalesce }) => {
 
-        const res1 = ops.coalesce(
+        const res1 = coalesce(
             1, 2, param("param1"), coalesce(1, 2, 3, param("param2"), coalesce(1, 2, 3, 4, param("param3")))
         ).eq(param("param4"));
 
@@ -69,7 +72,7 @@ const InferParamsFromCoalesce = customersTable
 
         return res1;
     })
-    .join('INNER', usersTable.as('parentUsers'), (cols, { and }) => {
+    .join('INNER', usersTable.as('parentUsers'), (cols, { and, coalesce }) => {
         const res = and(
             coalesce("asdf", param("coalesceAnd1")).eq("sadf"),
             coalesce(new Date(), param("coalesceAnd2")).eq(new Date())

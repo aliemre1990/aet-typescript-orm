@@ -7,6 +7,7 @@ import type { TablesToObject, TableToColumnsMap } from "../_types/miscellaneous.
 import type { AccumulateParams } from "../_types/result.js";
 import type QueryTable from "../queryTable.js";
 import type ISelectClause from "./ISelectClause.js";
+import type { DbOperators } from "../_types/ops.js";
 
 interface IWhereClause<
     TDbType extends DbType,
@@ -14,7 +15,10 @@ interface IWhereClause<
     TParams extends QueryParam<TDbType, string, TDbType extends PgDbType ? PgValueTypes : never>[] | undefined = undefined
 > {
     where<TCbResult extends ColumnComparisonOperation<TDbType, any, any, any, any> | ColumnLogicalOperation<TDbType, any>
-    >(cb: (cols: TableToColumnsMap<TablesToObject<TTables>>) => TCbResult):
+    >(cb: (
+        cols: TableToColumnsMap<TablesToObject<TTables>>,
+        ops: DbOperators<TDbType>
+    ) => TCbResult):
         ISelectClause<TDbType, TTables, AccumulateParams<TParams, TCbResult>>
 
 }

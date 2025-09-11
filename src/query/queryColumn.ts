@@ -1,6 +1,5 @@
 import type { DbType, DbValueTypes } from "../db.js";
 import QueryParam from "./param.js";
-import { QueryParamMedian } from "./param.js";
 import type { ColumnType, QueryTableSpecsType } from "../table/types/utils.js";
 import eq from "./comparisons/eq.js";
 import between from "./comparisons/between.js";
@@ -47,6 +46,5 @@ class QueryColumn<
 export default QueryColumn;
 
 export {
-    QueryParam,
-    QueryParamMedian
+    QueryParam
 }

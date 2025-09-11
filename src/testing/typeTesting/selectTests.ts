@@ -1,7 +1,3 @@
-import type ColumnComparisonOperation from "../../query/comparisons/_comparisonOperations.js";
-import type { IComparable } from "../../query/comparisons/_interfaces/IComparable.js";
-import pgCoalesce from "../../query/functions/coalesce.js";
-import { param } from "../../query/param.js";
 import { customersTable, ordersTable, shipmentsTable, usersTable } from "./_tables.js";
 import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
 
@@ -9,7 +5,7 @@ import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
  * 
  */
 const SingleTableAutoSelectWhereWithParamQuery = customersTable
-    .where((cols) => cols.customers.id.eq(param("whereparam")))
+    .where((cols, { param }) => cols.customers.id.eq(param("whereparam")))
     .select()
     .exec;
 
@@ -51,7 +47,7 @@ type SingleTableAutoSelectQueryTest = AssertTrue<AssertEqual<SingleTableAutoSele
  * 
  */
 const SingleTableJoinWithAutoSelectQuery = customersTable
-    .join('INNER', usersTable, (cols) => cols.users.id.eq(param("param1")))
+    .join('INNER', usersTable, (cols, { param }) => cols.users.id.eq(param("param1")))
     .select()
     .exec;
 
@@ -70,7 +66,7 @@ type SingleTableJoinWithAutoSelectQueryTest = AssertTrue<AssertEqual<SingleTable
  * 
  */
 const AutoSelectMultiJoins = customersTable
-    .join('INNER', usersTable, (cols, { and }) => {
+    .join('INNER', usersTable, (cols, { and, param }) => {
 
         const res1 = and(
             cols.users.id.eq(param("userParam1")),
@@ -91,13 +87,13 @@ const AutoSelectMultiJoins = customersTable
         // type inrest = typeof inres extends ColumnComparisonOperation<any, any, any, infer TCols, any> ? TCols : never;
         // type prm = inrest[1];
     })
-    .join('INNER', usersTable.as('parentUsers'), (cols, { and }) => {
+    .join('INNER', usersTable.as('parentUsers'), (cols, { and, coalesce, param }) => {
 
         const comp = and(
             cols.parentUsers.id.eq(cols.customers.id),
             cols.parentUsers.id.eq(param("parentUserEq1")),
             cols.parentUsers.id.between(param("parentUserBetLeft"), cols.customers.id),
-            cols.parentUsers.id.eq(pgCoalesce(param("parentUserGt2"), 1, 2, pgCoalesce(1, 2, param("innerCoalesce")))),
+            cols.parentUsers.id.eq(coalesce(param("parentUserGt2"), 1, 2, coalesce(1, 2, param("innerCoalesce")))),
             cols.parentUsers.userName.eq(param("parentUserNeq3")),
             cols.parentUsers.userName.between(cols.customers.name, cols.users.userName),
             and(cols.customers.createdBy.eq(235), cols.parentUsers.userName.eq(param("innerParentUserParam1")))

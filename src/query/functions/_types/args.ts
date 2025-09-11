@@ -3,22 +3,22 @@ import type { PgValueTypes } from "../../../postgresql/dataTypes.js";
 import type { DeepPrettify, UnionToTuple } from "../../../utility/common.js";
 import type AggregatedColumn from "../../aggregation/_aggregatedColumn.js";
 import type { IComparable } from "../../comparisons/_interfaces/IComparable.js";
-import type { QueryParamMedian } from "../../queryColumn.js";
+import type { QueryParam } from "../../queryColumn.js";
 import type QueryColumn from "../../queryColumn.js";
 import type ColumnSQLFunction from "../_functions.js";
 import type { JSONBuildObjectParam } from "../jsonFunctions/jsonBuildObject.js";
 
 type InferFirstTypeFromArgs<TDbType extends DbType, TArgs extends
     (
-        QueryParamMedian<any> |
+        QueryParam<TDbType, string, any> |
         DbValueTypes |
         IComparable<TDbType, any, any, any, any>
     )[]
 > =
     TArgs extends readonly [infer First, ...infer Rest] ?
-    First extends QueryParamMedian<any> ?
+    First extends QueryParam<TDbType, string, any> ?
 
-    Rest extends (QueryParamMedian<any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
+    Rest extends (QueryParam<TDbType, string, any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
     InferFirstTypeFromArgs<TDbType, Rest> :
     TDbType extends PgDbType ? PgValueTypes : never :
 
@@ -33,12 +33,12 @@ type InferFirstTypeFromArgs<TDbType extends DbType, TArgs extends
     First extends Date ? Date :
     First extends Date[] ? Date[] :
     First extends Buffer ? Buffer :
-    
+
     First extends IComparable<TDbType, any, infer TValType, any, any> ? TValType :
-    
+
     First extends object ? First :
     First extends object[] ? First[] :
-    Rest extends (QueryParamMedian<any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
+    Rest extends (QueryParam<TDbType, string, any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
     InferFirstTypeFromArgs<TDbType, Rest> :
     TDbType extends PgDbType ? PgValueTypes : never :
     TDbType extends PgDbType ? PgValueTypes : never
@@ -46,26 +46,26 @@ type InferFirstTypeFromArgs<TDbType extends DbType, TArgs extends
 
 type IsContainsNonNull<TDbType extends DbType, TArgs extends
     (
-        QueryParamMedian<any> |
+        QueryParam<TDbType, string, any> |
         DbValueTypes |
         IComparable<TDbType, any, any, any, any>
     )[]
 > = TArgs extends readonly [infer First, ...infer Rest] ?
 
-    First extends QueryParamMedian<any> ?
-    Rest extends (QueryParamMedian<any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
+    First extends QueryParam<TDbType, string, any> ?
+    Rest extends (QueryParam<TDbType, string, any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
     IsContainsNonNull<TDbType, Rest> :
     false :
 
     First extends IComparable<TDbType, any, any, infer TFinalType, any> ?
     null extends TFinalType ?
-    Rest extends (QueryParamMedian<any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
+    Rest extends (QueryParam<TDbType, string, any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
     IsContainsNonNull<TDbType, Rest> :
     false :
     true :
 
     null extends First ?
-    Rest extends (QueryParamMedian<any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
+    Rest extends (QueryParam<TDbType, string, any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
     IsContainsNonNull<TDbType, Rest> :
     false :
     true :
