@@ -20,6 +20,34 @@ type CoalesceArg<TDbType extends DbType, TValueType extends DbValueTypes> =
     | QueryParamMedian<any>
     | IComparable<TDbType, any, TValueType, any, any>;
 
+
+function generateCoalesceFn<
+    TDbType extends DbType
+>() {
+    return <TArgs extends any[],
+        TValueType extends DbValueTypes | null = InferFirstTypeFromArgs<TDbType, TArgs> | null
+    >
+        (...args: TArgs & (TArgs extends CoalesceArg<TDbType, NonNullable<TValueType>>[] ? TArgs : never)) => {
+
+        for (let i = 0; i < args.length; i++) {
+            const arg = args[i];
+
+            if (arg instanceof QueryParamMedian) {
+                let tmpArg = new QueryParam(arg.name);
+
+                args[i] = tmpArg;
+            }
+        }
+
+        return new ColumnSQLFunction<
+            PgDbType,
+            typeof sqlFunctions.coalesce,
+            ConvertMediansInArray<TArgs, PgDbType, TValueType>,
+            IsContainsNonNull<PgDbType, TArgs> extends true ? NonNullable<TValueType> : TValueType
+        >(args as ConvertMediansInArray<TArgs, PgDbType, TValueType>, sqlFunctions.coalesce);
+    }
+}
+
 function coalesce<
     TDbType extends DbType,
     TArgs extends any[],
@@ -46,3 +74,7 @@ function coalesce<
 }
 
 export default coalesce;
+
+export {
+    generateCoalesceFn
+}

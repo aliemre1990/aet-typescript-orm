@@ -58,9 +58,9 @@ coalesce(customerIdQC).eq(createdByQC);
  * 
  */
 const InferParamsFromCoalesce = customersTable
-    .join('INNER', usersTable, (cols) => {
+    .join('INNER', usersTable, (cols, ops) => {
 
-        const res1 = coalesce(
+        const res1 = ops.coalesce(
             1, 2, param("param1"), coalesce(1, 2, 3, param("param2"), coalesce(1, 2, 3, 4, param("param3")))
         ).eq(param("param4"));
 
