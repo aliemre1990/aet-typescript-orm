@@ -32,13 +32,13 @@ class ColumnSQLFunction<
     icomparableFinalValueDummy?: TReturnType;
     params?: InferParamsFromFnArgs<TArgs>;
     isAgg?: TIsAgg;
-    dbType?: TDbType;
 
 
     eq: typeof eq = eq;
     between: typeof between = between;
 
     constructor(
+        public dbType: TDbType,
         public args: TArgs,
         public sqlFunction: TSQLFunction,
     ) {

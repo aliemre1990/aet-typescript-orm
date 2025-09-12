@@ -1,5 +1,4 @@
-import type { DbType, DbValueTypes, PgDbType } from "../../db.js";
-import type { PgValueTypes } from "../../postgresql/dataTypes.js";
+import type { DbType, DbValueTypes } from "../../db.js";
 import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
 import QueryParam from "../param.js";
 import ColumnSQLFunction, { sqlFunctions } from "./_functions.js";
@@ -33,18 +32,18 @@ function generateCoalesceFn<
             const arg = args[i];
 
             if (arg instanceof QueryParam) {
-                let tmpArg = new QueryParam(arg.name);
+                let tmpArg = new QueryParam(arg.name, arg.dbType);
 
                 args[i] = tmpArg;
             }
         }
 
         return new ColumnSQLFunction<
-            PgDbType,
+            TDbType,
             typeof sqlFunctions.coalesce,
-            ConvertMediansInArray<TArgs, PgDbType, TValueType>,
-            IsContainsNonNull<PgDbType, TArgs> extends true ? NonNullable<TValueType> : TValueType
-        >(args as ConvertMediansInArray<TArgs, PgDbType, TValueType>, sqlFunctions.coalesce);
+            ConvertMediansInArray<TArgs, TDbType, TValueType>,
+            IsContainsNonNull<TDbType, TArgs> extends true ? NonNullable<TValueType> : TValueType
+        >(dbType, args as ConvertMediansInArray<TArgs, TDbType, TValueType>, sqlFunctions.coalesce);
     }
 }
 

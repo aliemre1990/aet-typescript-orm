@@ -53,7 +53,7 @@ function eq<
     (this: TComparing, value: TValueType | TParamMedian | TApplied | null) {
 
     if (value instanceof QueryParam) {
-        const param = new QueryParam<TDbType, TParamName extends string ? TParamName : never, TValueType | null>(value.name);
+        const param = new QueryParam<TDbType, TParamName extends string ? TParamName : never, TValueType | null>(value.name, value.dbType);
 
         return new ColumnComparisonOperation(
             comparisonOperations.eq,

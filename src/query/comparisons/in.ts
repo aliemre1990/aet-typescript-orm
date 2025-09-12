@@ -65,7 +65,7 @@ function sqlIn<
     }
 
     if (param instanceof QueryParam) {
-        const paramRes = new QueryParam(param.name);
+        const paramRes = new QueryParam(param.name, param.dbType);
 
         return new ColumnComparisonOperation(
             comparisonOperations.in,

@@ -1,4 +1,4 @@
-import type { DbType, DbValueTypes } from "../db.js";
+import { dbTypes, type DbType, type DbValueTypes, type PgDbType } from "../db.js";
 import type { IComparable } from "./comparisons/_interfaces/IComparable.js";
 
 class QueryParam<
@@ -10,15 +10,19 @@ class QueryParam<
 
 {
 
-    // dbType?: TDbType;
     // params?: [QueryParam<TDbType, TName, TValue>];
     // icomparableValueDummy?: NonNullable<TValue>;
     // icomparableFinalValueDummy?: TValue;
     // isAgg?: false;
 
-    constructor(public name: TName) { }
+    constructor(public dbType: TDbType, public name: TName) { }
 }
 
+
+
+/**
+ * This causes infinite loop
+ */
 function generateParamFn<
     TDbType extends DbType
 >(dbType: TDbType) {
@@ -28,7 +32,7 @@ function generateParamFn<
     >(
         name: TName
     ) => {
-        return new QueryParam<TDbType, TName, TValueType>(name);
+        return new QueryParam<TDbType, TName, TValueType>(dbType, name);
     }
 }
 

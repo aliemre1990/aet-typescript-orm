@@ -1,4 +1,4 @@
-import type { DbType, PgDbType } from "../db.js";
+import { dbTypes, type DbType, type MySQLDbType, type PgDbType } from "../db.js";
 import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
 import type ColumnSQLFunction from "./functions/_functions.js";
 
@@ -20,11 +20,13 @@ class ColumnLogicalOperation<
     // Used conditional type to prevent inifinite recursive
     // dbType?: TDbType extends PgDbType ? PgDbType : never;
 
-    constructor(public operator: LogicalOperation, public comparisons: TComparisons, public dbType: any) { }
+    constructor(public operator: LogicalOperation, public comparisons: TComparisons, public dbType: TDbType) { }
 
 }
 
-function generateAnd<TDbType extends DbType>(dbType: TDbType) {
+function generateAndFn<TDbType extends DbType>(
+    dbType: TDbType
+) {
     return function <
         TComparisons extends (ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>)[]
     >(...ops: TComparisons) {
@@ -37,7 +39,7 @@ export default ColumnLogicalOperation;
 
 export {
     logicalOperations,
-    generateAnd
+    generateAndFn
 }
 
 export type {

@@ -150,10 +150,10 @@ function between<
     ) {
 
     if (leftValue instanceof QueryParam) {
-        const lParam = new QueryParam<TDbType, TLParamName extends string ? TLParamName : never, TValueType | null>(leftValue.name);
+        const lParam = new QueryParam<TDbType, TLParamName extends string ? TLParamName : never, TValueType | null>(leftValue.name, leftValue.dbType);
 
         if (rightValue instanceof QueryParam) {
-            const rParam = new QueryParam<TDbType, TRParamName extends string ? TRParamName : never, TValueType | null>(rightValue.name);
+            const rParam = new QueryParam<TDbType, TRParamName extends string ? TRParamName : never, TValueType | null>(rightValue.name, leftValue.dbType);
 
             return new ColumnComparisonOperation(
                 comparisonOperations.between,
@@ -171,10 +171,10 @@ function between<
     }
 
     if (rightValue instanceof QueryParam) {
-        const rParam = new QueryParam<TDbType, TRParamName extends string ? TRParamName : never, TValueType | null>(rightValue.name);
+        const rParam = new QueryParam<TDbType, TRParamName extends string ? TRParamName : never, TValueType | null>(rightValue.name, leftValue.dbType);
 
         if (leftValue instanceof QueryParam) {
-            const lParam = new QueryParam<TDbType, TLParamName extends string ? TLParamName : never, TValueType | null>(leftValue.name);
+            const lParam = new QueryParam<TDbType, TLParamName extends string ? TLParamName : never, TValueType | null>(leftValue.name, leftValue.dbType);
 
             return new ColumnComparisonOperation(
                 comparisonOperations.between,
