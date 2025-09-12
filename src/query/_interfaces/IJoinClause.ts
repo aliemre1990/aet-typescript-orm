@@ -1,23 +1,22 @@
-import { DbType, PgDbType, type DbValueTypes } from "../../db.js";
-import { PgColumnType, type PgValueTypes } from "../../postgresql/dataTypes.js";
+import { DbType, type DbValueTypes } from "../../db.js";
 import type { QueryParam } from "../queryColumn.js";
 import type QueryColumn from "../queryColumn.js";
 import type Table from "../../table/table.js";
-import type { ColumnsObjectType, QueryTablesObjectType, QueryTableSpecsType } from "../../table/types/utils.js";
 import type { JoinType } from "../../types.js";
 import type ColumnComparisonOperation from "../comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "../logicalOperations.js";
-import type { TablesToObject, TableToColumnsMap, TableToObject } from "../_types/miscellaneous.js";
-import type { AccumulateParams, InferParamsFromOps } from "../_types/result.js";
+import type { TablesToObject, TableToColumnsMap } from "../_types/miscellaneous.js";
+import type { AccumulateParams } from "../_types/result.js";
 import type QueryTable from "../queryTable.js";
 import type ISelectClause from "./ISelectClause.js";
 import type IGroupByClause from "./IGroupByClause.js";
 import type { DbOperators } from "../_types/ops.js";
+import type IWhereClause from "./IWhereClause.js";
 
 interface IJoinClause<
     TDbType extends DbType,
-    TTables extends QueryTable<TDbType, any, any, any, any, any>[],
-    TParams extends QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined
+    TTables extends readonly QueryTable<TDbType, any, any, any, any, any>[],
+    TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined
 > {
 
     join<
@@ -39,6 +38,7 @@ interface IJoinClause<
     ):
         IJoinClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
         ISelectClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
+        IWhereClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
         IGroupByClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>>
 
 }

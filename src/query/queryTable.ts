@@ -39,7 +39,7 @@ class QueryTable<
     }
 
     select<TCb extends undefined>():
-        IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], TCb extends (cols: any) => infer TR ? TR : undefined>
+        IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], TCb extends (cols: any, ops: any) => infer TR ? TR : undefined>
     select<
         TCb extends (
             (
@@ -47,7 +47,7 @@ class QueryTable<
                 ops: DbFunctions<TDbType>
             ) => TResultShape<TDbType>)
     >(cb: TCb):
-        IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], TCb extends (cols: any) => infer TR ? TR : undefined>
+        IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], TCb extends (cols: any, ops: any) => infer TR ? TR : undefined>
     select<
         TCb extends (
             (

@@ -14,12 +14,12 @@ import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
 import type Column from "../../table/column.js";
 
 type TResultShape<TDbType extends DbType> = {
-    [key: string]: IComparable<TDbType, any, any, any, false> | TResultShape<TDbType>;
+    [key: string]: IComparable<TDbType, any, any, any, false>;
 };
 
 
 //
-type TablesToResultMap<TDbType extends DbType, TTables extends QueryTable<TDbType, any, any, any, any, any>[]> =
+type TablesToResultMap<TDbType extends DbType, TTables extends readonly QueryTable<TDbType, any, any, any, any, any>[]> =
     TTables extends undefined ? undefined :
     TTables["length"] extends 0 ? undefined :
     TTables["length"] extends 1 ?
@@ -56,7 +56,7 @@ type TablesToResultMap<TDbType extends DbType, TTables extends QueryTable<TDbTyp
 //    
 type TablesToGroupedResultMap<
     TDbType extends DbType,
-    TTables extends QueryTable<TDbType, any, any, any, any, any>[],
+    TTables extends readonly QueryTable<TDbType, any, any, any, any, any>[],
     TGroupedColumns extends ({ [key: string]: QueryColumn<any, any, any, any> } | QueryColumn<any, any, any, any>)[] | undefined
 > =
     TTables extends undefined ? undefined :
@@ -108,11 +108,6 @@ type ColumnsToResultMap<TDbType extends DbType, T extends TResultShape<TDbType> 
         [K in keyof T as T[K] extends IComparable<TDbType, any, any, any, any> ? K : never]:
         T[K] extends IComparable<TDbType, any, any, infer TFinalType, any> ? TFinalType :
         never
-    }
-        &
-    {
-        [K in keyof T as T[K] extends TResultShape<TDbType> ? K : never]:
-        T[K] extends TResultShape<TDbType> ? ColumnsToResultMap<TDbType, T[K]> : never
     }
     >
 
@@ -175,11 +170,16 @@ type InferParamsFromComparables<T> =
 /**
  * 
  */
-type AccumulateParams<TParams extends QueryParam<any, any, any>[] | undefined, TCbResult extends ColumnComparisonOperation<any, any, any, any, any> | ColumnLogicalOperation<any, any>> =
+type AccumulateParams<TParams extends readonly QueryParam<any, any, any>[] | undefined, TCbResult extends ColumnComparisonOperation<any, any, any, any, any> | ColumnLogicalOperation<any, any>> =
     TParams extends undefined ?
     InferParamsFromOps<TCbResult>["length"] extends 0 ? undefined : InferParamsFromOps<TCbResult> :
     TParams extends QueryParam<any, any, any>[] ? [...TParams, ...InferParamsFromOps<TCbResult>] :
     never;
+
+/**
+ * 
+ */
+// type AccumulateColumnParams<TDbType extends DbType,TParams extends QueryParam<any,any,any>[]|undefined,TResult extends TResultShape<TDbType> >= {}
 
 export type {
     TResultShape,

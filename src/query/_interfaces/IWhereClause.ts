@@ -11,8 +11,8 @@ import type { DbOperators } from "../_types/ops.js";
 
 interface IWhereClause<
     TDbType extends DbType,
-    TTables extends QueryTable<TDbType, any, any, any, any, any>[],
-    TParams extends QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined
+    TTables extends readonly QueryTable<TDbType, any, any, any, any, any>[],
+    TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined
 > {
     where<TCbResult extends ColumnComparisonOperation<TDbType, any, any, any, any> | ColumnLogicalOperation<TDbType, any>
     >(cb: (

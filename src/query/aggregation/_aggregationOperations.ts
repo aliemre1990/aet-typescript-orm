@@ -41,6 +41,7 @@ class BasicColumnAggregationOperation<
     TResultType extends any
 > {
     constructor(
+        public dbType: TDbType,
         public column: TAggColumn,
         public operation: AggregationOperation
     ) { }

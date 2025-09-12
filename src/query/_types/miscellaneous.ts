@@ -13,7 +13,7 @@ type TableToObject<TTable extends QueryTable<DbType, ColumnsObjectType<DbType>, 
     [K in TTable["asName"] extends undefined ? TTable["table"]["name"] : TTable["asName"] & string]: TTable
 }
 
-type TablesToObject<TTables extends QueryTable<DbType, any, any, any, any, any>[]> = {
+type TablesToObject<TTables extends readonly QueryTable<DbType, any, any, any, any, any>[]> = {
     [
     T in TTables[number]as
     T extends QueryTable<DbType, any, any, any, any, any> ?

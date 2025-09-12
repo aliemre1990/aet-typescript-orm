@@ -33,17 +33,14 @@ type MultiTableGroupByWithAutoSelectQueryTest = AssertTrue<AssertEqual<MultiTabl
 const GroupByWithMultilevelSelectQuery = customersTable
     .join('INNER', usersTable, cols => cols.users.id.eq(cols.customers.createdBy))
     .join('INNER', shipmentsTable, cols => cols.shipments.id.eq(1))
-    .groupBy(cols => {
+    .groupBy((cols) => {
         return [cols.customers, cols.users.id, cols.shipments]
     })
-    .select(cols => ({
+    .select((cols, { jsonBuildObject }) => ({
         id: cols.customers.id,
         customerName: cols.customers.name,
-        customer: cols.customers,
-        example: {
-            id: cols.shipments.id,
-            shipment: cols.shipments
-        }
+        customer: jsonBuildObject({ id: cols.customers.id, name: cols.customers.name, createdBy: cols.customers.createdBy }),
+        example: jsonBuildObject({ id: cols.shipments.id, shipment: jsonBuildObject({ id: cols.shipments.id, orderId: cols.shipments.orderId, createdBy: cols.shipments.createdBy }) })
     }))
     .exec;
 

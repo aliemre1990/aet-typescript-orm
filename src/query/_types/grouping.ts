@@ -42,7 +42,7 @@ type IsGroupedColumnsContains<TGroupedColumns extends QueryColumn<any, any, any,
 
 //
 type TablesToColumnsMapFormatGroupedColumns<
-    TTables extends QueryTable<any, any, any, any, any, any>[],
+    TTables extends readonly QueryTable<any, any, any, any, any, any>[],
     TGroupedColumns extends ({ [key: string]: QueryColumn<any, any, any, any> } | QueryColumn<any, any, any, any>)[] | undefined
 > =
     TGroupedColumns extends undefined ?

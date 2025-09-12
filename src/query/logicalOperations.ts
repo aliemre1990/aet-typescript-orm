@@ -1,6 +1,5 @@
-import { dbTypes, type DbType, type MySQLDbType, type PgDbType } from "../db.js";
+import { type DbType } from "../db.js";
 import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
-import type ColumnSQLFunction from "./functions/_functions.js";
 
 const logicalOperations = {
     and: { name: 'AND' },
@@ -17,9 +16,6 @@ class ColumnLogicalOperation<
 
 
 > {
-    // Used conditional type to prevent inifinite recursive
-    // dbType?: TDbType extends PgDbType ? PgDbType : never;
-
     constructor(public operator: LogicalOperation, public comparisons: TComparisons, public dbType: TDbType) { }
 
 }

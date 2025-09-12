@@ -21,9 +21,9 @@ import type { DbFunctions, DbOperators } from "./_types/ops.js";
 
 class QueryBuilder<
     TDbType extends DbType,
-    TTables extends QueryTable<TDbType, any, any, any, any, any>[],
+    TTables extends readonly QueryTable<TDbType, any, any, any, any, any>[],
     TResult extends TResultShape<TDbType> | undefined = undefined,
-    TParams extends QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined,
+    TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined,
     TGroupedColumns extends ({ [key: string]: QueryColumn<TDbType, any, any, any> } | QueryColumn<TDbType, any, any, any>)[] | undefined = undefined,
 >
     implements
@@ -43,13 +43,13 @@ class QueryBuilder<
     }
 
     select<TCb extends undefined>():
-        IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>
+        IExecuteableQuery<TDbType, TTables, TCb extends (cols: any, ops: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>
     select<TCb extends (
         cols: TGroupedColumns extends undefined ? TableToColumnsMap<TablesToObject<TTables>> : TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>,
         ops: DbFunctions<TDbType>
     ) => TResultShape<TDbType>
     >(cb: TCb | undefined):
-        IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>
+        IExecuteableQuery<TDbType, TTables, TCb extends (cols: any, ops: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>
     select<
         TCb extends (
             cols: TGroupedColumns extends undefined ? TableToColumnsMap<TablesToObject<TTables>> : TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>,
@@ -57,8 +57,8 @@ class QueryBuilder<
         ) => TResultShape<TDbType>
     >(
         cb?: TCb
-    ): IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined, TParams, TGroupedColumns> {
-        return this as unknown as IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>;
+    ): IExecuteableQuery<TDbType, TTables, TCb extends (cols: any, ops: any) => infer TR ? TR : undefined, TParams, TGroupedColumns> {
+        return this as IExecuteableQuery<TDbType, TTables, TCb extends (cols: any, ops: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>;
     };
 
 

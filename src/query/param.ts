@@ -1,4 +1,4 @@
-import { dbTypes, type DbType, type DbValueTypes, type PgDbType } from "../db.js";
+import { dbTypes, type DbType, type DbValueTypes } from "../db.js";
 import type { IComparable } from "./comparisons/_interfaces/IComparable.js";
 
 class QueryParam<

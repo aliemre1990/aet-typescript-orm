@@ -174,13 +174,10 @@ type SingleLevelSelectWithJoinsParamsTest = AssertTrue<AssertEqual<undefined, Si
 const MultiLevelSelectWithJoins = customersTable
     .join('INNER', usersTable, (cols) => cols.users.id.eq(1))
     .join('INNER', usersTable.as("parentUsers"), (cols) => cols.parentUsers.id.eq(1))
-    .select(cols => ({
+    .select((cols, { jsonBuildObject }) => ({
         customerId: cols.customers.id,
         userName: cols.users.userName,
-        subProp: {
-            parentUserId: cols.parentUsers.id,
-            customers: cols.customers
-        }
+        subProp: jsonBuildObject({ parentUserId: cols.parentUsers.id, customers: jsonBuildObject({ id: cols.customers.id, name: cols.customers.name, createdBy: cols.customers.createdBy }) })
     }))
     .exec;
 type multiLevelSelectWithJoinsExpectedResult = {

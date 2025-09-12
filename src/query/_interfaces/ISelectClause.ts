@@ -11,18 +11,18 @@ import type { DbFunctions } from "../_types/ops.js";
 
 interface ISelectClause<
     TDbType extends DbType,
-    TTables extends QueryTable<TDbType, any, any, any, any, any>[],
-    TParams extends QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined,
+    TTables extends readonly QueryTable<TDbType, any, any, any, any, any>[],
+    TParams  extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined,
     TGroupedColumns extends ({ [key: string]: QueryColumn<TDbType, any, any, any> } | QueryColumn<TDbType, any, any, any>)[] | undefined = undefined
 > {
     select<TCb extends undefined>():
-        IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>
+        IExecuteableQuery<TDbType, TTables, TCb extends (cols: any, ops: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>
     select<TCb extends (
         cols: TGroupedColumns extends undefined ? TableToColumnsMap<TablesToObject<TTables>> : TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>,
         ops: DbFunctions<TDbType>
     ) => TResultShape<TDbType>
     >(cb: TCb | undefined):
-        IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>
+        IExecuteableQuery<TDbType, TTables, TCb extends (cols: any, ops: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>
     select<
         TCb extends (
             cols: TGroupedColumns extends undefined ? TableToColumnsMap<TablesToObject<TTables>> : TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>,
@@ -30,7 +30,7 @@ interface ISelectClause<
         ) => TResultShape<TDbType>
     >(
         cb?: TCb
-    ): IExecuteableQuery<TDbType, TTables, TCb extends (cols: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>
+    ): IExecuteableQuery<TDbType, TTables, TCb extends (cols: any, ops: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>
 
 }
 

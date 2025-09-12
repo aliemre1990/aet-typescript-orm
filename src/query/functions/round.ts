@@ -1,4 +1,4 @@
-import type { DbType, PgDbType } from "../../db.js";
+import type { DbType } from "../../db.js";
 import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
 import ColumnSQLFunction, { sqlFunctions } from "./_functions.js";
 
