@@ -1,11 +1,21 @@
-import type { DbType, DbValueTypes, PgDbType } from "../db.js";
-import type { PgValueTypes } from "../postgresql/dataTypes.js";
+import type { DbType, DbValueTypes } from "../db.js";
+import type { IComparable } from "./comparisons/_interfaces/IComparable.js";
 
 class QueryParam<
     TDbType extends DbType,
     TName extends string,
     TValue extends DbValueTypes | null
-> {
+>
+// implements IComparable<TDbType, [QueryParam<TDbType, TName, TValue>], NonNullable<TValue>, TValue, false> 
+
+{
+
+    // dbType?: TDbType;
+    // params?: [QueryParam<TDbType, TName, TValue>];
+    // icomparableValueDummy?: NonNullable<TValue>;
+    // icomparableFinalValueDummy?: TValue;
+    // isAgg?: false;
+
     constructor(public name: TName) { }
 }
 

@@ -1,4 +1,4 @@
-import { DbType, PgDbType } from "../../db.js";
+import { DbType, PgDbType, type DbValueTypes } from "../../db.js";
 import { type PgValueTypes } from "../../postgresql/dataTypes.js";
 import type { QueryParam } from "../queryColumn.js";
 import type ColumnComparisonOperation from "../comparisons/_comparisonOperations.js";
@@ -12,7 +12,7 @@ import type { DbOperators } from "../_types/ops.js";
 interface IWhereClause<
     TDbType extends DbType,
     TTables extends QueryTable<TDbType, any, any, any, any, any>[],
-    TParams extends QueryParam<TDbType, string, TDbType extends PgDbType ? PgValueTypes : never>[] | undefined = undefined
+    TParams extends QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined
 > {
     where<TCbResult extends ColumnComparisonOperation<TDbType, any, any, any, any> | ColumnLogicalOperation<TDbType, any>
     >(cb: (
