@@ -2,7 +2,7 @@ import type { DbType } from "../../db.js";
 import type QueryColumn from "../queryColumn.js";
 import type { ColumnType, QueryTableSpecsType } from "../../table/types/utils.js";
 import type { IsPlural, ToSingular } from "../../utility/string.js";
-import type { DeepPrettify, FlattenObject } from "../../utility/common.js";
+import type { DeepPrettify, FlattenObject, UnionToTuple } from "../../utility/common.js";
 import { QueryParam } from "../queryColumn.js";
 import type ColumnComparisonOperation from "../comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "../logicalOperations.js";
@@ -170,7 +170,26 @@ type AccumulateComparisonParams<TParams extends readonly QueryParam<any, any, an
 /**
  * 
  */
-type AccumulateColumnParams<TDbType extends DbType, TParams extends QueryParam<any, any, any>[] | undefined, TResult extends TResultShape<TDbType>> = {}
+type AccumulateColumnParams<TParams extends readonly QueryParam<any, any, any>[] | undefined, TResult extends TResultShape<DbType>> =
+    TParams extends undefined ?
+    InferParamsFromColumns<TResult>["length"] extends 0 ? undefined : InferParamsFromColumns<TResult> :
+    TParams extends QueryParam<any, any, any>[] ? [...TParams, ...InferParamsFromColumns<TResult>] :
+    never;
+
+
+type InferParamsFromColumns<TResult extends TResultShape<DbType>> =
+    UnionToTuple<TResult[keyof TResult]> extends readonly [infer First, ...infer Rest] ?
+    First extends IComparable<any, infer TParams, any, any, any> ? [...(TParams extends undefined ? [] : TParams), ...InferParamsFromColumnsArr<Rest>] :
+    Rest extends readonly any[] ? InferParamsFromColumnsArr<Rest> :
+    [] :
+    [];
+
+type InferParamsFromColumnsArr<TCols> =
+    TCols extends readonly [infer First, ...infer Rest] ?
+    First extends IComparable<any, infer TParams, any, any, any> ? [...(TParams extends undefined ? [] : TParams), ...InferParamsFromColumnsArr<Rest>] :
+    Rest extends readonly any[] ? InferParamsFromColumnsArr<Rest> :
+    [] :
+    [];
 
 export type {
     TResultShape,
@@ -179,5 +198,6 @@ export type {
     QueryParamsToObject,
     InferParamsFromOps,
     AccumulateComparisonParams,
-    TablesToGroupedResultMap
+    TablesToGroupedResultMap,
+    AccumulateColumnParams
 }

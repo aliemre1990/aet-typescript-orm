@@ -3,7 +3,7 @@ import type Table from "../../table/table.js";
 import type { ColumnsObjectType, QueryColumnsObjectType } from "../../table/types/utils.js";
 import type QueryTable from "../queryTable.js";
 
-type TableToColumnsMap<T extends { [key: string]: QueryTable<DbType, ColumnsObjectType<DbType>, string, Table<DbType, ColumnsObjectType<DbType>, string>, QueryColumnsObjectType<DbType>, string | undefined> }, TIsComparableColumn extends boolean = false, TColumn = null> = {
+type TableToColumnsMap<T extends { [key: string]: QueryTable<any, ColumnsObjectType<DbType>, string, Table<DbType, ColumnsObjectType<DbType>, string>, QueryColumnsObjectType<DbType>, string | undefined> }> = {
     [K in keyof T]: {
         [C in keyof T[K]["columns"]as T[K]["columns"][C]["column"]["name"]]: T[K]["columns"][C];
     }

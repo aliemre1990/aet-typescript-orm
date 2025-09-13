@@ -9,7 +9,7 @@ import type ISelectClause from "./_interfaces/ISelectClause.js";
 import type IWhereClause from "./_interfaces/IWhereClause.js";
 import type { TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.js";
 import type { DbFunctions, DbOperators } from "./_types/ops.js";
-import type { TResultShape } from "./_types/result.js";
+import type { AccumulateColumnParams, TResultShape } from "./_types/result.js";
 import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
 import { QueryBuilder } from "./queryBuilder.js";
@@ -47,7 +47,7 @@ class QueryTable<
         TCbResult extends TResultShape<TDbType> = TCb extends (cols: any, ops: any) => infer TR ? TR : never
     >(
         cb: TCb
-    ) {
+    ): IExecuteableQuery<TDbType, TCbResult, AccumulateColumnParams<undefined, TCbResult>> {
 
         return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>([this]).select<TCb, TCbResult>(cb);
     }

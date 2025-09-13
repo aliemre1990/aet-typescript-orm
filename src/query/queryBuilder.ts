@@ -9,7 +9,7 @@ import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.
 import { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
 import type { TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.js";
-import type { AccumulateComparisonParams, ColumnsToResultMap, QueryParamsToObject, TablesToGroupedResultMap, TablesToResultMap, TResultShape } from "./_types/result.js";
+import type { AccumulateColumnParams, AccumulateComparisonParams, ColumnsToResultMap, QueryParamsToObject, TablesToGroupedResultMap, TablesToResultMap, TResultShape } from "./_types/result.js";
 import QueryTable from "./queryTable.js";
 import type Column from "../table/column.js";
 import type IJoinClause from "./_interfaces/IJoinClause.js";
@@ -50,8 +50,8 @@ class QueryBuilder<
         TCbResult extends TResultShape<TDbType> = TCb extends (cols: any, ops: any) => infer TR ? TR : never
     >(
         cb: TCb
-    ): IExecuteableQuery<TDbType, TCbResult, TParams> {
-        return new QueryBuilder(this.tables) as IExecuteableQuery<TDbType, TCbResult, TParams>;
+    ): IExecuteableQuery<TDbType, TCbResult, AccumulateColumnParams<TParams, TCbResult>> {
+        return new QueryBuilder(this.tables) as IExecuteableQuery<TDbType, TCbResult, AccumulateColumnParams<TParams, TCbResult>>;
     };
 
 

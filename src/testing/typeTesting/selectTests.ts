@@ -174,7 +174,7 @@ const SingleLevelSelectWithJoins = customersTable
 
         return cols.shipments.orderId.eq(1);
     })
-    .select(cols => ({ id: cols.customers.id, orderCustomerId: cols.orders.customerId, customerName: cols.customers.name }))
+    .select((cols, { round, param }) => ({ id: cols.customers.id, orderCustomerId: cols.orders.customerId, customerName: cols.customers.name }))
     .exec;
 type SingleLevelSelectWithJoinsResult = { id: number, orderCustomerId: number, customerName: string }
 type SingleLevelSelectWithJoinsTest = AssertTrue<AssertEqual<SingleLevelSelectWithJoinsResult, ReturnType<typeof SingleLevelSelectWithJoins>>>;

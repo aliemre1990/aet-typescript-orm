@@ -5,7 +5,7 @@ import type { IExecuteableQuery } from "../query/_interfaces/IExecuteableQuery.j
 import type ColumnLogicalOperation from "../query/logicalOperations.js";
 import { QueryBuilder } from "../query/queryBuilder.js";
 import type { TablesToObject, TableToColumnsMap, TableToObject } from "../query/_types/miscellaneous.js";
-import type { InferParamsFromOps, TResultShape } from "../query/_types/result.js";
+import type { AccumulateColumnParams, InferParamsFromOps, TResultShape } from "../query/_types/result.js";
 import type { JoinType } from "../types.js";
 import Column from "./column.js";
 import QueryColumn, { type QueryParam } from "../query/queryColumn.js";
@@ -63,7 +63,7 @@ class Table<
         TCbResult extends TResultShape<TDbType> = TCb extends (cols: any, ops: any) => infer TR ? TR : never
     >(
         cb: TCb
-    ) {
+    ): IExecuteableQuery<TDbType, TCbResult, AccumulateColumnParams<undefined, TCbResult>> {
 
         const queryColumns = Object.entries(this.columns)
             .reduce((prev, ent) => {

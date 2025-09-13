@@ -2,7 +2,7 @@ import { DbType, type DbValueTypes, type PgDbType } from "../../db.js";
 import type { PgValueTypes } from "../../postgresql/dataTypes.js";
 import type { QueryParam } from "../queryColumn.js";
 import type { TablesToObject, TableToColumnsMap } from "../_types/miscellaneous.js";
-import type { TResultShape } from "../_types/result.js";
+import type { AccumulateColumnParams, TResultShape } from "../_types/result.js";
 import { IExecuteableQuery } from "./IExecuteableQuery.js";
 import type QueryTable from "../queryTable.js";
 import type QueryColumn from "../queryColumn.js";
@@ -23,7 +23,7 @@ interface ISelectClause<
         TCbResult extends TResultShape<TDbType> = TCb extends (cols: any, ops: any) => infer TR ? TR : never
     >(
         cb: TCb
-    ): IExecuteableQuery<TDbType, TCbResult, TParams>
+    ): IExecuteableQuery<TDbType, TCbResult, AccumulateColumnParams<TParams, TCbResult>>
 
 }
 
