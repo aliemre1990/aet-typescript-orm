@@ -47,7 +47,7 @@ class QueryBuilder<
             cols: TGroupedColumns extends undefined ? TableToColumnsMap<TablesToObject<TTables>> : TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>,
             ops: DbFunctions<TDbType>
         ) => TResultShape<TDbType>,
-        TCbResult extends TResultShape<TDbType> | undefined = TCb extends (cols: any, ops: any) => infer TR ? TR : undefined
+        TCbResult extends TResultShape<TDbType> = TCb extends (cols: any, ops: any) => infer TR ? TR : never
     >(
         cb: TCb
     ): IExecuteableQuery<TDbType, TCbResult, TParams> {

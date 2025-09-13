@@ -170,7 +170,7 @@ type AccumulateComparisonParams<TParams extends readonly QueryParam<any, any, an
 /**
  * 
  */
-// type AccumulateColumnParams<TDbType extends DbType,TParams extends QueryParam<any,any,any>[]|undefined,TResult extends TResultShape<TDbType> >= {}
+type AccumulateColumnParams<TDbType extends DbType, TParams extends QueryParam<any, any, any>[] | undefined, TResult extends TResultShape<TDbType>> = {}
 
 export type {
     TResultShape,

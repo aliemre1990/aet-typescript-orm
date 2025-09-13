@@ -12,17 +12,18 @@ import type { DbFunctions } from "../_types/ops.js";
 interface ISelectClause<
     TDbType extends DbType,
     TTables extends readonly QueryTable<TDbType, any, any, any, any, any>[],
-    TParams  extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined,
+    TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined,
     TGroupedColumns extends ({ [key: string]: QueryColumn<TDbType, any, any, any> } | QueryColumn<TDbType, any, any, any>)[] | undefined = undefined
 > {
-      select<
+    select<
         TCb extends (
             cols: TGroupedColumns extends undefined ? TableToColumnsMap<TablesToObject<TTables>> : TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>,
             ops: DbFunctions<TDbType>
-        ) => TResultShape<TDbType>
+        ) => TResultShape<TDbType>,
+        TCbResult extends TResultShape<TDbType> = TCb extends (cols: any, ops: any) => infer TR ? TR : never
     >(
         cb: TCb
-    ): IExecuteableQuery<TDbType,  TCb extends (cols: any, ops: any) => infer TR ? TR : undefined, TParams>
+    ): IExecuteableQuery<TDbType, TCbResult, TParams>
 
 }
 

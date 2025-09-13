@@ -55,11 +55,12 @@ class Table<
     }
 
     select<
-        TCb extends (
-            (
-                cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>,
-                ops: DbFunctions<TDbType>
-            ) => TResultShape<TDbType>)
+        TCb extends
+        (
+            cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>,
+            ops: DbFunctions<TDbType>
+        ) => TResultShape<TDbType>,
+        TCbResult extends TResultShape<TDbType> = TCb extends (cols: any, ops: any) => infer TR ? TR : never
     >(
         cb: TCb
     ) {
@@ -73,7 +74,7 @@ class Table<
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>(this as any, queryColumns);
 
 
-        return new QueryBuilder<TDbType, [typeof queryTable]>([queryTable]).select(cb);
+        return new QueryBuilder<TDbType, [typeof queryTable]>([queryTable]).select<TCb, TCbResult>(cb);
     }
 
     join<
