@@ -21,8 +21,7 @@ class ColumnSQLFunction<
     TSQLFunction extends SQLFunction,
     TArgs extends (
         DbValueTypes | null |
-        QueryParam<TDbType, any, any> |
-        IComparable<TDbType, any, NonNullable<TReturnType>, any, any>
+        IComparable<TDbType, any, any, any, any>
     )[],
     TReturnType extends DbValueTypes | null,
     TIsAgg extends boolean = false

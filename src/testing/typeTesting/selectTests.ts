@@ -177,7 +177,7 @@ const MultiLevelSelectWithJoins = customersTable
     .select((cols, { jsonBuildObject }) => ({
         customerId: cols.customers.id,
         userName: cols.users.userName,
-        subProp: jsonBuildObject({ parentUserId: cols.parentUsers.id, customers: jsonBuildObject({ id: cols.customers.id, name: cols.customers.name, createdBy: cols.customers.createdBy }) })
+        subProp: jsonBuildObject({ parentUserId: cols.parentUsers.id, customers: jsonBuildObject(cols.customers) })
     }))
     .exec;
 type multiLevelSelectWithJoinsExpectedResult = {
