@@ -103,12 +103,12 @@ type TablesToGroupedResultMap<
 
 //
 type ColumnsToResultMap<TDbType extends DbType, T extends TResultShape<TDbType> | undefined> =
-    T extends undefined ? undefined :
-    DeepPrettify<{
-        [K in keyof T as T[K] extends IComparable<TDbType, any, any, any, any> ? K : never]:
-        T[K] extends IComparable<TDbType, any, any, infer TFinalType, any> ? TFinalType :
-        never
-    }
+    DeepPrettify<T extends undefined ? undefined :
+        {
+            [K in keyof T as T[K] extends IComparable<TDbType, any, any, any, any> ? K : never]:
+            T[K] extends IComparable<TDbType, any, any, infer TFinalType, any> ? TFinalType :
+            never
+        }
     >
 
 // Convert array of QueryParam to object type
@@ -136,9 +136,9 @@ type InferParamsFromOps<T> =
 type InferParamsFromOpsArray<T extends readonly any[]> =
     T extends readonly [infer First, ...infer Rest] ?
     First extends ColumnComparisonOperation<any, infer TComparing, infer TApplied, any> ?
-     TComparing extends IComparable<any, any, any, any, any> ? TApplied extends IComparable<any, any, any, any, any>[] ?
-    [...InferParamsFromComparables<[TComparing]>,  ...InferParamsFromComparables<TApplied>, ...InferParamsFromOpsArray<Rest>] :
-    [...InferParamsFromComparables<[TComparing]>,  ...InferParamsFromOpsArray<Rest>] :
+    TComparing extends IComparable<any, any, any, any, any> ? TApplied extends IComparable<any, any, any, any, any>[] ?
+    [...InferParamsFromComparables<[TComparing]>, ...InferParamsFromComparables<TApplied>, ...InferParamsFromOpsArray<Rest>] :
+    [...InferParamsFromComparables<[TComparing]>, ...InferParamsFromOpsArray<Rest>] :
 
     TApplied extends IComparable<any, any, any, any, any>[] ?
     [...InferParamsFromComparables<TApplied>, ...InferParamsFromOpsArray<Rest>] :
@@ -161,7 +161,7 @@ type InferParamsFromComparables<T> =
 /**
  * 
  */
-type AccumulateParams<TParams extends readonly QueryParam<any, any, any>[] | undefined, TCbResult extends ColumnComparisonOperation<any, any, any, any> | ColumnLogicalOperation<any, any>> =
+type AccumulateComparisonParams<TParams extends readonly QueryParam<any, any, any>[] | undefined, TCbResult extends ColumnComparisonOperation<any, any, any, any> | ColumnLogicalOperation<any, any>> =
     TParams extends undefined ?
     InferParamsFromOps<TCbResult>["length"] extends 0 ? undefined : InferParamsFromOps<TCbResult> :
     TParams extends QueryParam<any, any, any>[] ? [...TParams, ...InferParamsFromOps<TCbResult>] :
@@ -178,6 +178,6 @@ export type {
     ColumnsToResultMap,
     QueryParamsToObject,
     InferParamsFromOps,
-    AccumulateParams,
+    AccumulateComparisonParams,
     TablesToGroupedResultMap
 }

@@ -6,7 +6,7 @@ import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
  */
 const SingleTableAutoSelectWhereWithParamQuery = customersTable
     .where((cols, { param }) => cols.customers.id.eq(param("whereparam")))
-    .select()
+    .select(cols => cols.customers)
     .exec;
 
 type SingleTableAutoSelectWhereWithParamQueryResult = { id: number, name: string, createdBy: number };
@@ -16,7 +16,7 @@ type SingleTableAutoSelectWhereWithParamQueryTest = AssertTrue<AssertEqual<Singl
 /**
  * 
  */
-const SingleQueryTableAutoSelectQuery = customersTable.as("cst").select().exec;
+const SingleQueryTableAutoSelectQuery = customersTable.as("cst").select(cols => cols.cst).exec;
 
 type SingleQueryTableAutoSelectQueryResult = { id: number, name: string, createdBy: number };
 type SingleQueryTableAutoSelectQueryReturnType = ReturnType<typeof SingleQueryTableAutoSelectQuery>
@@ -27,17 +27,17 @@ type SingleQueryTableAutoSelectQueryTest = AssertTrue<AssertEqual<SingleQueryTab
  */
 const QueryTableJoinQuery = customersTable.as("cst")
     .join("INNER", usersTable, (cols) => cols.users.id.eq(cols.cst.createdBy))
-    .select()
+    .select(cols => ({ userId: cols.users.id, userName: cols.users.userName, userCreatedAt: cols.users.createdAt, cstId: cols.cst.id, cstName: cols.cst.name, cstCreatedBy: cols.cst.createdBy }))
     .exec;
 
-type QueryTableJoinQueryResult = { userId: number, userUserName: string, userCreatedAt: Date, cstId: number, cstName: string, cstCreatedBy: number };
+type QueryTableJoinQueryResult = { userId: number, userName: string, userCreatedAt: Date, cstId: number, cstName: string, cstCreatedBy: number };
 type QueryTableJoinQueryReturnType = ReturnType<typeof QueryTableJoinQuery>;
 type QueryTableJoinQueryTest = AssertTrue<AssertEqual<QueryTableJoinQueryResult, QueryTableJoinQueryReturnType>>
 
 /**
  * 
  */
-const SingleTableAutoSelectQuery = customersTable.select().exec;
+const SingleTableAutoSelectQuery = customersTable.select(cols => cols.customers).exec;
 
 type SingleTableAutoSelectQueryResult = { id: number; name: string; createdBy: number; };
 type SingleTableAutoSelectQueryReturnType = ReturnType<typeof SingleTableAutoSelectQuery>
@@ -48,7 +48,7 @@ type SingleTableAutoSelectQueryTest = AssertTrue<AssertEqual<SingleTableAutoSele
  */
 const SingleTableJoinWithAutoSelectQuery = customersTable
     .join('INNER', usersTable, (cols, { param }) => cols.users.id.eq(param("param1")))
-    .select()
+    .select(cols => ({ customerId: cols.customers.id, customerName: cols.customers.name, customerCreatedBy: cols.customers.createdBy, userId: cols.users.id, userName: cols.users.userName, userCreatedAt: cols.users.createdAt }))
     .exec;
 
 type SingleTableJoinWithAutoSelectQueryResult = {
@@ -56,7 +56,7 @@ type SingleTableJoinWithAutoSelectQueryResult = {
     customerName: string;
     customerCreatedBy: number;
     userId: number;
-    userUserName: string;
+    userName: string;
     userCreatedAt: Date;
 };
 type SingleTableJoinWithAutoSelectQueryReturnType = ReturnType<typeof SingleTableJoinWithAutoSelectQuery>;
@@ -102,7 +102,20 @@ const AutoSelectMultiJoins = customersTable
         return comp;
     })
     .join('INNER', ordersTable, (cols) => cols.users.userName.eq(cols.customers.name))
-    .select()
+    .select(cols => ({
+        customerId: cols.customers.id,
+        customerName: cols.customers.name,
+        customerCreatedBy: cols.customers.createdBy,
+        userId: cols.users.id,
+        userUserName: cols.users.userName,
+        userCreatedAt: cols.users.createdAt,
+        parentUserId: cols.parentUsers.id,
+        parentUserUserName: cols.parentUsers.userName,
+        parentUserCreatedAt: cols.parentUsers.createdAt,
+        orderId: cols.orders.id,
+        orderCustomerId: cols.orders.customerId,
+        orderCreatedBy: cols.orders.createdBy
+    }))
     .exec;
 
 type AutoSelectMultiJoinsResult = {

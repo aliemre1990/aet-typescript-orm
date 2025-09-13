@@ -7,16 +7,10 @@ import type QueryColumn from "../queryColumn.js";
 
 interface IExecuteableQuery<
     TDbType extends DbType,
-    TTables extends readonly QueryTable<TDbType, any, any, any, any, any>[],
     TResult extends TResultShape<TDbType> | undefined = undefined,
     TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined,
-    TGroupedColumns extends ({ [key: string]: QueryColumn<TDbType, any, any, any> } | QueryColumn<TDbType, any, any, any>)[] | undefined = undefined,
 > {
     exec: (params?: QueryParamsToObject<TParams>) =>
-        TResult extends undefined ?
-        TGroupedColumns extends undefined ?
-        TablesToResultMap<TDbType, TTables> :
-        TablesToGroupedResultMap<TDbType, TTables, TGroupedColumns> :
         TResult extends TResultShape<TDbType> ?
         ColumnsToResultMap<TDbType, TResult> :
         never

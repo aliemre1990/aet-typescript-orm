@@ -54,16 +54,6 @@ class Table<
         return new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, typeof queryColumns, TAsName>(this, queryColumns, val);
     }
 
-    select<TCb extends undefined>():
-        IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>], TCb extends (cols: any, ops: any) => infer TR ? TR : undefined>
-    select<
-        TCb extends (
-            (
-                cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>,
-                ops: DbFunctions<TDbType>
-            ) => TResultShape<TDbType>)
-    >(cb: TCb):
-        IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>], TCb extends (cols: any, ops: any) => infer TR ? TR : undefined>
     select<
         TCb extends (
             (
@@ -71,7 +61,7 @@ class Table<
                 ops: DbFunctions<TDbType>
             ) => TResultShape<TDbType>)
     >(
-        cb?: TCb
+        cb: TCb
     ) {
 
         const queryColumns = Object.entries(this.columns)

@@ -38,24 +38,14 @@ class QueryTable<
         return new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, typeof queryColumns, TAsName>(this.table, queryColumns, val);
     }
 
-    select<TCb extends undefined>():
-        IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], TCb extends (cols: any, ops: any) => infer TR ? TR : undefined>
     select<
-        TCb extends (
-            (
-                cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
-                ops: DbFunctions<TDbType>
-            ) => TResultShape<TDbType>)
-    >(cb: TCb):
-        IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], TCb extends (cols: any, ops: any) => infer TR ? TR : undefined>
-    select<
-        TCb extends (
-            (
-                cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
-                ops: DbFunctions<TDbType>
-            ) => TResultShape<TDbType>)
+        TCb extends
+        (
+            cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
+            ops: DbFunctions<TDbType>
+        ) => TResultShape<TDbType>
     >(
-        cb?: TCb
+        cb: TCb
     ) {
 
         return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>([this]).select(cb);

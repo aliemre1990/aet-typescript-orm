@@ -1,10 +1,9 @@
-import { DbType, PgDbType, type DbValueTypes } from "../../db.js";
-import { type PgValueTypes } from "../../postgresql/dataTypes.js";
+import { DbType, type DbValueTypes } from "../../db.js";
 import type { QueryParam } from "../queryColumn.js";
 import type ColumnComparisonOperation from "../comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "../logicalOperations.js";
 import type { TablesToObject, TableToColumnsMap } from "../_types/miscellaneous.js";
-import type { AccumulateParams } from "../_types/result.js";
+import type { AccumulateComparisonParams } from "../_types/result.js";
 import type QueryTable from "../queryTable.js";
 import type ISelectClause from "./ISelectClause.js";
 import type { DbOperators } from "../_types/ops.js";
@@ -19,7 +18,7 @@ interface IWhereClause<
         cols: TableToColumnsMap<TablesToObject<TTables>>,
         ops: DbOperators<TDbType>
     ) => TCbResult):
-        ISelectClause<TDbType, TTables, AccumulateParams<TParams, TCbResult>>
+        ISelectClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>>
 
 }
 

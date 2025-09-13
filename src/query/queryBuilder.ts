@@ -9,7 +9,7 @@ import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.
 import { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
 import type { TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.js";
-import type { AccumulateParams, ColumnsToResultMap, QueryParamsToObject, TablesToGroupedResultMap, TablesToResultMap, TResultShape } from "./_types/result.js";
+import type { AccumulateComparisonParams, ColumnsToResultMap, QueryParamsToObject, TablesToGroupedResultMap, TablesToResultMap, TResultShape } from "./_types/result.js";
 import QueryTable from "./queryTable.js";
 import type Column from "../table/column.js";
 import type IJoinClause from "./_interfaces/IJoinClause.js";
@@ -42,23 +42,16 @@ class QueryBuilder<
         this.colsSelection = colsSelection;
     }
 
-    select<TCb extends undefined>():
-        IExecuteableQuery<TDbType, TTables, TCb extends (cols: any, ops: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>
-    select<TCb extends (
-        cols: TGroupedColumns extends undefined ? TableToColumnsMap<TablesToObject<TTables>> : TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>,
-        ops: DbFunctions<TDbType>
-    ) => TResultShape<TDbType>
-    >(cb: TCb | undefined):
-        IExecuteableQuery<TDbType, TTables, TCb extends (cols: any, ops: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>
     select<
         TCb extends (
             cols: TGroupedColumns extends undefined ? TableToColumnsMap<TablesToObject<TTables>> : TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>,
             ops: DbFunctions<TDbType>
-        ) => TResultShape<TDbType>
+        ) => TResultShape<TDbType>,
+        TCbResult extends TResultShape<TDbType> | undefined = TCb extends (cols: any, ops: any) => infer TR ? TR : undefined
     >(
-        cb?: TCb
-    ): IExecuteableQuery<TDbType, TTables, TCb extends (cols: any, ops: any) => infer TR ? TR : undefined, TParams, TGroupedColumns> {
-        return this as IExecuteableQuery<TDbType, TTables, TCb extends (cols: any, ops: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>;
+        cb: TCb
+    ): IExecuteableQuery<TDbType, TCbResult, TParams> {
+        return new QueryBuilder(this.tables) as IExecuteableQuery<TDbType, TCbResult, TParams>;
     };
 
 
@@ -79,10 +72,10 @@ class QueryBuilder<
         table: TInnerJoinTable,
         cb: (cols: TableToColumnsMap<TablesToObject<[...TTables, TInnerJoinResult]>>, ops: DbOperators<TDbType>) => TCbResult
     ):
-        IJoinClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
-        ISelectClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
-        IWhereClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
-        IGroupByClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> {
+        IJoinClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
+        ISelectClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
+        IWhereClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
+        IGroupByClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> {
         let innerJoinTable: TInnerJoinResult;
         if ("table" in table) {
             innerJoinTable = table as TInnerJoinResult;
@@ -101,10 +94,10 @@ class QueryBuilder<
         const newTables = [...this.tables, innerJoinTable];
 
         return new QueryBuilder(newTables) as
-            IJoinClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
-            ISelectClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
-            IWhereClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>> &
-            IGroupByClause<TDbType, [...TTables, TInnerJoinResult], AccumulateParams<TParams, TCbResult>>
+            IJoinClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
+            ISelectClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
+            IWhereClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
+            IGroupByClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>
     }
 
     where<
@@ -113,8 +106,8 @@ class QueryBuilder<
         cols: TableToColumnsMap<TablesToObject<TTables>>,
         ops: DbOperators<TDbType>
     ) => TCbResult):
-        ISelectClause<TDbType, TTables, AccumulateParams<TParams, TCbResult>> {
-        return this as ISelectClause<TDbType, TTables, AccumulateParams<TParams, TCbResult>>;
+        ISelectClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>> {
+        return new QueryBuilder(this.tables) as ISelectClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>>;
     }
 
     groupBy<const TCbResult extends ({ [key: string]: QueryColumn<TDbType, any, any, any> } | QueryColumn<TDbType, any, any, any>)[]
@@ -122,13 +115,7 @@ class QueryBuilder<
         return this as ISelectClause<TDbType, TTables, TParams, TCbResult>
     }
 
-
-
     exec(params?: QueryParamsToObject<TParams>):
-        TResult extends undefined ?
-        TGroupedColumns extends undefined ?
-        TablesToResultMap<TDbType, TTables> :
-        TablesToGroupedResultMap<TDbType, TTables, TGroupedColumns> :
         TResult extends TResultShape<TDbType> ?
         ColumnsToResultMap<TDbType, TResult> :
         never {

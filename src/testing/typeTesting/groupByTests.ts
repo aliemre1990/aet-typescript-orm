@@ -6,7 +6,7 @@ import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
  */
 const SingleTableGroupAutoSelectQuery = customersTable
     .groupBy(cols => [cols.customers.id, cols.customers.name])
-    .select()
+    .select(cols => ({ id: cols.customers.id, name: cols.customers.name }))
     .exec;
 
 type SingleTableGroupAutoSelectQueryResult = { id: number, name: string };
@@ -20,7 +20,16 @@ const MultiTableGroupByWithAutoSelectQuery = customersTable
     .join('INNER', usersTable, cols => cols.users.id.eq(cols.customers.createdBy))
     .join('INNER', shipmentsTable, cols => cols.shipments.id.eq(1))
     .groupBy(cols => [cols.customers, cols.users.id, cols.shipments])
-    .select()
+    .select(cols => ({
+        customerId: cols.customers.id,
+        customerName: cols.customers.name,
+        customerCreatedBy: cols.customers.createdBy,
+        userId: cols.users.id,
+        shipmentId: cols.shipments.id,
+        shipmentOrderId: cols.shipments.orderId,
+        shipmentCreatedBy: cols.shipments.createdBy
+    })
+    )
     .exec;
 
 type MultiTableGroupByWithAutoSelectQueryResult = { customerId: number, customerName: string, customerCreatedBy: number, userId: number, shipmentId: number, shipmentOrderId: number, shipmentCreatedBy: number }

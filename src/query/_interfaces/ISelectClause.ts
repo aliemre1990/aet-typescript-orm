@@ -15,22 +15,14 @@ interface ISelectClause<
     TParams  extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined,
     TGroupedColumns extends ({ [key: string]: QueryColumn<TDbType, any, any, any> } | QueryColumn<TDbType, any, any, any>)[] | undefined = undefined
 > {
-    select<TCb extends undefined>():
-        IExecuteableQuery<TDbType, TTables, TCb extends (cols: any, ops: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>
-    select<TCb extends (
-        cols: TGroupedColumns extends undefined ? TableToColumnsMap<TablesToObject<TTables>> : TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>,
-        ops: DbFunctions<TDbType>
-    ) => TResultShape<TDbType>
-    >(cb: TCb | undefined):
-        IExecuteableQuery<TDbType, TTables, TCb extends (cols: any, ops: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>
-    select<
+      select<
         TCb extends (
             cols: TGroupedColumns extends undefined ? TableToColumnsMap<TablesToObject<TTables>> : TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>,
             ops: DbFunctions<TDbType>
         ) => TResultShape<TDbType>
     >(
-        cb?: TCb
-    ): IExecuteableQuery<TDbType, TTables, TCb extends (cols: any, ops: any) => infer TR ? TR : undefined, TParams, TGroupedColumns>
+        cb: TCb
+    ): IExecuteableQuery<TDbType,  TCb extends (cols: any, ops: any) => infer TR ? TR : undefined, TParams>
 
 }
 
