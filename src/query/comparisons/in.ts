@@ -24,7 +24,8 @@ function sqlIn<
     TParamMedian extends QueryParam<TDbType, string, any>,
     TParamName extends TParamMedian extends QueryParam<any, infer U, any> ? U : never,
     TParamValue extends TParamMedian extends QueryParam<any, any, infer TVal> ? TVal : never,
-    TParam extends QueryParam<TDbType, TParamName, IsAny<TParamValue> extends true ? GetArrayEquivalentPgValueType<TValueType> : TParamValue>,
+    // Find a way to make array nullable
+    TParam extends QueryParam<TDbType, TParamName, (IsAny<TParamValue> extends true ? NullableArray<GetArrayEquivalentPgValueType<TValueType>> | null : TParamValue)>,
     TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any> ? DbType : never
 >(this: TComparing, param: TParamMedian
 ): ColumnComparisonOperation<

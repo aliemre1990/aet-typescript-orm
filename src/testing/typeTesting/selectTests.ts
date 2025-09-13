@@ -77,7 +77,7 @@ const AutoSelectMultiJoins = customersTable
                 cols.users.id.eq(cols.customers.createdBy),
                 cols.customers.name.eq(param("userGteParam4")),
                 and(cols.users.id.eq(param("userEqParam1"))),
-                cols.users.id.sqlIn(param("inParam"))
+                cols.users.id.sqlIn(param("inParam").type<number[]>())
             )
         );
 
@@ -130,7 +130,7 @@ type AutoSelectMultiJoinsParamsResult = {
     userBetweenRight: number | null;
     userGteParam4: string | null;
     userEqParam1: number | null;
-    inParam: (number)[];
+    inParam: number[];
     parentUserEq1: number | null;
     parentUserBetLeft: number | null;
     parentUserGt2: number | null; //

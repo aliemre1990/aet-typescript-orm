@@ -28,7 +28,7 @@ type ComparisonOperation = (typeof comparisonOperations)[keyof typeof comparison
 class ColumnComparisonOperation<
     TDbType extends DbType,
     TComparing extends IComparable<TDbType, any, any, any, any>,
-    TApplied extends IComparable<TDbType, any, TValueType, any, any>[] | undefined,
+    TApplied extends IComparable<TDbType, any, any, any, any>[] | undefined,
     TValueType extends DbValueTypes = InferValueTypeFromComparable<TDbType, TComparing>
 > {
 
