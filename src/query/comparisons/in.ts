@@ -7,6 +7,7 @@ import QueryColumn from "../queryColumn.js";
 import type ColumnSQLFunction from "../functions/_functions.js";
 import type { InferValueTypeFromComparable, InferValueTypeFromThisType } from "./_types/inferValue.js";
 import type { IComparable } from "./_interfaces/IComparable.js";
+import type { IsAny, NullableArray } from "../../utility/common.js";
 
 // Helper type to extract only QueryColumns from the mixed tuple
 type ExtractComparables<T extends readonly unknown[]> =
@@ -22,7 +23,8 @@ function sqlIn<
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TParamMedian extends QueryParam<TDbType, string, any>,
     TParamName extends TParamMedian extends QueryParam<any, infer U, any> ? U : never,
-    TParam extends QueryParam<TDbType, TParamName, TDbType extends PgDbType ? GetArrayEquivalentPgValueType<TValueType> : never>,
+    TParamValue extends TParamMedian extends QueryParam<any, any, infer TVal> ? TVal : never,
+    TParam extends QueryParam<TDbType, TParamName, IsAny<TParamValue> extends true ? NullableArray<GetArrayEquivalentPgValueType<TValueType>> : TParamValue>,
     TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any> ? DbType : never
 >(this: TComparing, param: TParamMedian
 ): ColumnComparisonOperation<
@@ -51,6 +53,8 @@ function sqlIn<
     TComparing extends IComparable<TDbType, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TParamMedian extends QueryParam<TDbType, string, any> | undefined,
+    TParamName extends TParamMedian extends QueryParam<any, infer U, any> ? U : never,
+    TParamValue extends TParamMedian extends QueryParam<any, any, infer TVal> ? TVal : never,
     TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any, any>)[],
     TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any> ? DbType : never
 >
@@ -65,7 +69,11 @@ function sqlIn<
     }
 
     if (param instanceof QueryParam) {
-        const paramRes = new QueryParam(param.name, param.dbType);
+        const paramRes = new QueryParam<
+            TDbType,
+            TParamName,
+            IsAny<TParamValue> extends true ? NullableArray<GetArrayEquivalentPgValueType<TValueType>> : TParamValue
+        >(param.name, param.dbType);
 
         return new ColumnComparisonOperation(
             comparisonOperations.in,

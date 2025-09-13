@@ -69,7 +69,7 @@ const AutoSelectMultiJoins = customersTable
     .join('INNER', usersTable, (cols, { and, param }) => {
 
         const res1 = and(
-            cols.users.id.eq(param("userParam1")),
+            cols.users.id.eq(param("userParam1").type<number>()),
             cols.users.id.eq(param("userParam2")),
             cols.users.userName.eq(param("userParam3")),
             cols.users.id.between(param("userBetweenLeft"), param("userBetweenRight")),
@@ -123,14 +123,14 @@ type AutoSelectMultiJoinsReturnType = ReturnType<typeof AutoSelectMultiJoins>
 type AutoSelectMultiJoinsTest = AssertTrue<AssertEqual<AutoSelectMultiJoinsResult, AutoSelectMultiJoinsReturnType>>;
 
 type AutoSelectMultiJoinsParamsResult = {
-    userParam1: number | null;
+    userParam1: number;
     userParam2: number | null;
     userParam3: string | null;
     userBetweenLeft: number | null;
     userBetweenRight: number | null;
     userGteParam4: string | null;
     userEqParam1: number | null;
-    inParam: number[];
+    inParam: (number | null)[];
     parentUserEq1: number | null;
     parentUserBetLeft: number | null;
     parentUserGt2: number | null; //
