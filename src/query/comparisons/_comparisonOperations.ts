@@ -29,7 +29,6 @@ class ColumnComparisonOperation<
     TDbType extends DbType,
     TComparing extends IComparable<TDbType, any, any, any, any>,
     TApplied extends IComparable<TDbType, any, TValueType, any, any>[] | undefined,
-    TParams extends QueryParam<TDbType, any, any>[] | undefined,
     TValueType extends DbValueTypes = InferValueTypeFromComparable<TDbType, TComparing>
 > {
 
@@ -41,7 +40,6 @@ class ColumnComparisonOperation<
         public value?:
             (
                 TValueType | null |
-                (TParams extends QueryParam<TDbType, any, any>[] ? TParams[number] : never) |
                 TApplied
             )[]
     ) { }

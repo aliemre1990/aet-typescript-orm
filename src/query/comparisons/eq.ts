@@ -19,9 +19,9 @@ function eq<
 >(this: TComparing, value: TParamMedian
 ): ColumnComparisonOperation<
     TDbType,
-    TComparing,
-    undefined,
+    TComparing,  
     [TParam]
+  
 >
 function eq<
     TComparing extends IComparable<TDbType, any, any, any, any>,
@@ -31,8 +31,7 @@ function eq<
 >(this: TComparing, value: TApplied): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    [TApplied],
-    undefined
+    [TApplied]
 >
 function eq<
     TComparing extends IComparable<TDbType, any, any, any, any>,
@@ -41,7 +40,6 @@ function eq<
 >(this: TComparing, value: TValueType | null): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    undefined,
     undefined
 >
 function eq<

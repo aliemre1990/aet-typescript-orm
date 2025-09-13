@@ -51,6 +51,8 @@ type IsAny<T> = 0 extends 1 & T ? true : false;
 
 type NullableArray<T> = T extends Array<infer TItem> ? (TItem | null)[] : never;
 
+type NonNullableArray<T> = T extends Array<infer TItem> ? null extends TItem ? NonNullable<TItem>[] : TItem[] : T;
+
 export type {
     UnionToTuple,
     DeepPrettify,
@@ -59,5 +61,6 @@ export type {
     SingleKeyObject,
     IsUnion,
     IsAny,
-    NullableArray
+    NullableArray,
+    NonNullableArray
 }

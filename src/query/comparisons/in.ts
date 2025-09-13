@@ -24,13 +24,12 @@ function sqlIn<
     TParamMedian extends QueryParam<TDbType, string, any>,
     TParamName extends TParamMedian extends QueryParam<any, infer U, any> ? U : never,
     TParamValue extends TParamMedian extends QueryParam<any, any, infer TVal> ? TVal : never,
-    TParam extends QueryParam<TDbType, TParamName, IsAny<TParamValue> extends true ? NullableArray<GetArrayEquivalentPgValueType<TValueType>> : TParamValue>,
+    TParam extends QueryParam<TDbType, TParamName, IsAny<TParamValue> extends true ? GetArrayEquivalentPgValueType<TValueType> : TParamValue>,
     TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any> ? DbType : never
 >(this: TComparing, param: TParamMedian
 ): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    undefined,
     [TParam]
 >
 function sqlIn<
@@ -44,8 +43,7 @@ function sqlIn<
 ): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    ExtractComparables<TValues>["length"] extends 0 ? undefined : ExtractComparables<TValues>, // Helper type to extract only the columns as tuple
-    undefined
+    ExtractComparables<TValues>["length"] extends 0 ? undefined : ExtractComparables<TValues> // Helper type to extract only the columns as tuple
 >
 
 

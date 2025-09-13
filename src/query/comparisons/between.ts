@@ -24,7 +24,6 @@ function between<
 ): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    undefined,
     [TLParam, TRParam]
 >
 function between<
@@ -38,7 +37,6 @@ function between<
 >(this: TComparing, leftValue: TLParamMedian, rightValue: TValueType | null): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    undefined,
     [TLParam]
 >
 function between<
@@ -52,7 +50,6 @@ function between<
 >(this: TComparing, leftValue: TValueType | null, rightValue: TRParamMedian): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    undefined,
     [TRParam]
 >
 function between<
@@ -67,8 +64,7 @@ function between<
 >(this: TComparing, leftValue: TLParamMedian, rightValue: TRApplied): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    [TRApplied],
-    [TLParam]
+    [TLParam,TRApplied]
 >
 function between<
     TComparing extends IComparable<TDbType, any, any, any, any>,
@@ -82,8 +78,7 @@ function between<
 >(this: TComparing, leftValue: TLApplied, rightValue: TRParamMedian): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    [TLApplied],
-    [TRParam]
+    [TLApplied,TRParam]
 >
 
 
@@ -95,7 +90,6 @@ function between<
 >(this: TComparing, leftValue: TValueType | null, rightValue: TValueType | null): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    undefined,
     undefined
 >
 function between<
@@ -107,8 +101,7 @@ function between<
 >(this: TComparing, leftValue: TLApplied, rightValue: TRApplied): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    [TLApplied, TRApplied],
-    undefined
+    [TLApplied, TRApplied]
 >
 
 
@@ -122,8 +115,7 @@ function between<
 >(this: TComparing, leftValue: TLApplied, rightValue: TValueType | null): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    [TLApplied],
-    undefined
+    [TLApplied]
 >
 function between<
     TComparing extends IComparable<TDbType, any, any, any, any>,
@@ -133,8 +125,7 @@ function between<
 >(this: TComparing, leftValue: TValueType | null, rightValue: TRApplied): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    [TRApplied],
-    undefined
+    [TRApplied]
 >
 
 

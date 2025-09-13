@@ -130,7 +130,7 @@ type AutoSelectMultiJoinsParamsResult = {
     userBetweenRight: number | null;
     userGteParam4: string | null;
     userEqParam1: number | null;
-    inParam: (number | null)[];
+    inParam: (number)[];
     parentUserEq1: number | null;
     parentUserBetLeft: number | null;
     parentUserGt2: number | null; //

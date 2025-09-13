@@ -6,7 +6,7 @@ class QueryParam<
     TName extends string,
     TValueType extends DbValueTypes | null
 >
-    implements IComparable<TDbType, [QueryParam<TDbType, TName, TValueType>], NonNullable<TValueType>, TValueType, false> {
+    implements IComparable<TDbType, [QueryParam<TDbType, TName, TValueType>],  NonNullable<TValueType>, TValueType, false> {
 
     params?: [QueryParam<TDbType, TName, TValueType>];
     icomparableValueDummy?: NonNullable<TValueType>;

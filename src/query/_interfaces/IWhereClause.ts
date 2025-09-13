@@ -14,7 +14,7 @@ interface IWhereClause<
     TTables extends readonly QueryTable<TDbType, any, any, any, any, any>[],
     TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined
 > {
-    where<TCbResult extends ColumnComparisonOperation<TDbType, any, any, any, any> | ColumnLogicalOperation<TDbType, any>
+    where<TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>
     >(cb: (
         cols: TableToColumnsMap<TablesToObject<TTables>>,
         ops: DbOperators<TDbType>
