@@ -28,16 +28,6 @@ function generateCoalesceFn<
     >
         (...args: TArgs & (TArgs extends CoalesceArg<TDbType, NonNullable<TValueType>>[] ? TArgs : never)) => {
 
-        for (let i = 0; i < args.length; i++) {
-            const arg = args[i];
-
-            if (arg instanceof QueryParam) {
-                let tmpArg = new QueryParam(arg.name, arg.dbType);
-
-                args[i] = tmpArg;
-            }
-        }
-
         return new ColumnSQLFunction<
             TDbType,
             typeof sqlFunctions.coalesce,

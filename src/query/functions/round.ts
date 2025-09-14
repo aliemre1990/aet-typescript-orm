@@ -1,24 +1,44 @@
 import type { DbType } from "../../db.js";
+import type { IsAny } from "../../utility/common.js";
 import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
+import type QueryParam from "../param.js";
 import ColumnSQLFunction, { sqlFunctions } from "./_functions.js";
+
+type IsExplicitTypeNumber<TDbType extends DbType, TFirstArg extends QueryParam<TDbType, string, any> | IComparable<TDbType, any, number, any, any> | number | null> =
+    TFirstArg extends QueryParam<TDbType, string, infer TValueType> ? IsAny<TValueType> extends true ? TFirstArg :
+    number extends TValueType ? TFirstArg : never :
+    TFirstArg
+    ;
+
 
 function generateRoundFn<TDbType extends DbType>(dbType: TDbType) {
     return <
-        TFirstArg extends IComparable<TDbType, any, number, any, any> | number | null,
-        TSecondArg extends IComparable<TDbType, any, number, any, any> | number | null,
-    >(firstArg: TFirstArg, secondArg: TSecondArg) => {
+        TFirstArg extends QueryParam<TDbType, string, any> | IComparable<TDbType, any, number, any, any> | number | null,
+        TSecondArg extends QueryParam<TDbType, string, any> | IComparable<TDbType, any, number, any, any> | number | null,
+    >(firstArg: TFirstArg & (IsExplicitTypeNumber<TDbType, TFirstArg>), secondArg: TSecondArg & (IsExplicitTypeNumber<TDbType, TSecondArg>)) => {
+
+        type TFirstArgFormatted = TFirstArg extends QueryParam<TDbType, infer TParamName, infer TValueType> ?
+            IsAny<TValueType> extends true ? QueryParam<TDbType, TParamName, number | null> : QueryParam<TDbType, TParamName, TValueType> :
+            TFirstArg;
+
+        type TSecondArgFormatted = TSecondArg extends QueryParam<TDbType, infer TParamName, infer TValueType> ?
+            IsAny<TValueType> extends true ? QueryParam<TDbType, TParamName, number | null> : QueryParam<TDbType, TParamName, TValueType> :
+            TSecondArg;
+
+        let firstArgValue: TFirstArg = firstArg;
+        let secondArgValue: TSecondArg = secondArg;
 
         return new ColumnSQLFunction<
             TDbType,
             typeof sqlFunctions.round,
-            [TFirstArg, TSecondArg],
-            [TFirstArg, TSecondArg] extends [null, any] | [any, null] | [null, null] ? number | null :
-            TFirstArg extends IComparable<TDbType, any, any, infer TFinalType, any> ? number | null extends TFinalType ? number | null :
+            [TFirstArgFormatted, TSecondArgFormatted],
+            [TFirstArgFormatted, TSecondArgFormatted] extends [null, any] | [any, null] | [null, null] ? number | null :
+            TFirstArgFormatted extends IComparable<TDbType, any, any, infer TFinalType, any> ? number | null extends TFinalType ? number | null :
+            TSecondArgFormatted extends IComparable<TDbType, any, any, infer TFinalType, any> ? number | null extends TFinalType ? number | null :
             number :
-            TSecondArg extends IComparable<TDbType, any, any, infer TFinalType, any> ? number | null extends TFinalType ? number | null :
             number :
             number
-        >(dbType, [firstArg, secondArg], sqlFunctions.round);
+        >(dbType, [firstArgValue as TFirstArgFormatted, secondArgValue as TSecondArgFormatted], sqlFunctions.round);
 
     }
 }
