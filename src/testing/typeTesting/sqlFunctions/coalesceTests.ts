@@ -11,6 +11,12 @@ import type { AssertEqual, AssertTrue } from "../_typeTestingUtilities.js";
 const coalesce = generateCoalesceFn("postgresql");
 const param = generateParamFn("postgresql");
 
+const res = customersTable
+    .select((cols, { coalesce, param }) => ({
+        coalesceResult: coalesce(param("param1").type<number>(), param("param3"))
+    }))
+    .exec;
+
 /**
  * 
  */

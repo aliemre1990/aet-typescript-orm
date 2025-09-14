@@ -1,12 +1,13 @@
 import type { DbType, DbValueTypes } from "../../db.js";
+import type { IsAny } from "../../utility/common.js";
 import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
 import QueryParam from "../param.js";
 import ColumnSQLFunction, { sqlFunctions } from "./_functions.js";
 import type { InferFirstTypeFromArgs, IsContainsNonNull } from "./_types/args.js";
 
-type ConvertMedianToParam<T, TDbType extends DbType, TValueType extends DbValueTypes | null> =
-    T extends QueryParam<any, infer U, any>
-    ? QueryParam<TDbType, U, TValueType>
+type ConvertMedianToParam<T, TDbType extends DbType, TConvert extends DbValueTypes | null> =
+    T extends QueryParam<any, infer U, infer TValueType>
+    ? QueryParam<TDbType, U, IsAny<TValueType> extends true ? TConvert : TValueType>
     : T;
 
 type ConvertMediansInArray<T extends any[], TDbType extends DbType, TValueType extends DbValueTypes | null> = {
@@ -15,7 +16,7 @@ type ConvertMediansInArray<T extends any[], TDbType extends DbType, TValueType e
 
 type CoalesceArg<TDbType extends DbType, TValueType extends DbValueTypes> =
     | TValueType | null
-    | QueryParam<TDbType, string, any>
+    | QueryParam<TDbType, string, TValueType | null>
     | IComparable<TDbType, any, TValueType, any, any>;
 
 
@@ -23,17 +24,18 @@ function generateCoalesceFn<
     TDbType extends DbType
 >(dbType: TDbType) {
     return <
-        TArgs extends any[],
-        TValueType extends DbValueTypes | null = InferFirstTypeFromArgs<TDbType, TArgs> | null
+        TArgs extends any[]
     >
-        (...args: TArgs & (TArgs extends CoalesceArg<TDbType, NonNullable<TValueType>>[] ? TArgs : never)) => {
+        (...args: TArgs & (TArgs extends CoalesceArg<TDbType, NonNullable<InferFirstTypeFromArgs<TDbType, TArgs>>>[] ? TArgs : never)) => {
+
+        type FirstType = InferFirstTypeFromArgs<TDbType, TArgs>;
 
         return new ColumnSQLFunction<
             TDbType,
             typeof sqlFunctions.coalesce,
-            ConvertMediansInArray<TArgs, TDbType, TValueType>,
-            IsContainsNonNull<TDbType, TArgs> extends true ? NonNullable<TValueType> : TValueType
-        >(dbType, args as ConvertMediansInArray<TArgs, TDbType, TValueType>, sqlFunctions.coalesce);
+            ConvertMediansInArray<TArgs, TDbType, FirstType | null>,
+            IsContainsNonNull<TDbType, TArgs> extends true ? NonNullable<FirstType> : FirstType | null
+        >(dbType, args as ConvertMediansInArray<TArgs, TDbType, FirstType | null>, sqlFunctions.coalesce);
     }
 }
 

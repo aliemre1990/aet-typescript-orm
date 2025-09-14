@@ -1,6 +1,6 @@
 import type { DbType, DbValueTypes, PgDbType } from "../../../db.js";
 import type { PgValueTypes } from "../../../postgresql/dataTypes.js";
-import type { DeepPrettify, UnionToTuple } from "../../../utility/common.js";
+import type { DeepPrettify, IsAny, UnionToTuple } from "../../../utility/common.js";
 import type AggregatedColumn from "../../aggregation/_aggregatedColumn.js";
 import type { IComparable } from "../../comparisons/_interfaces/IComparable.js";
 import type { QueryParam } from "../../queryColumn.js";
@@ -16,11 +16,15 @@ type InferFirstTypeFromArgs<TDbType extends DbType, TArgs extends
     )[]
 > =
     TArgs extends readonly [infer First, ...infer Rest] ?
-    First extends QueryParam<TDbType, string, any> ?
+    First extends QueryParam<TDbType, string, infer TValueType> ?
+
+    IsAny<TValueType> extends true ?
 
     Rest extends (QueryParam<TDbType, string, any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
     InferFirstTypeFromArgs<TDbType, Rest> :
     TDbType extends PgDbType ? PgValueTypes : never :
+
+    TValueType :
 
     First extends string ? string :
     First extends string[] ? string[] :
@@ -36,8 +40,8 @@ type InferFirstTypeFromArgs<TDbType extends DbType, TArgs extends
 
     First extends IComparable<TDbType, any, infer TValType, any, any> ? TValType :
 
+    First extends object[] ? First :
     First extends object ? First :
-    First extends object[] ? First[] :
     Rest extends (QueryParam<TDbType, string, any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
     InferFirstTypeFromArgs<TDbType, Rest> :
     TDbType extends PgDbType ? PgValueTypes : never :
@@ -52,10 +56,18 @@ type IsContainsNonNull<TDbType extends DbType, TArgs extends
     )[]
 > = TArgs extends readonly [infer First, ...infer Rest] ?
 
-    First extends QueryParam<TDbType, string, any> ?
+    First extends QueryParam<TDbType, string, infer TValueType> ?
+
+    IsAny<TValueType> extends true ?
     Rest extends (QueryParam<TDbType, string, any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
     IsContainsNonNull<TDbType, Rest> :
     false :
+
+    null extends TValueType ?
+    Rest extends (QueryParam<TDbType, string, any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
+    IsContainsNonNull<TDbType, Rest> :
+    false :
+    true :
 
     First extends IComparable<TDbType, any, any, infer TFinalType, any> ?
     null extends TFinalType ?
