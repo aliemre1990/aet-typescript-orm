@@ -1,5 +1,4 @@
 import { DbType, type DbValueTypes } from "../../db.js";
-import type { QueryParam } from "../queryColumn.js";
 import type QueryColumn from "../queryColumn.js";
 import type Table from "../../table/table.js";
 import type { JoinType } from "../../types.js";
@@ -12,6 +11,7 @@ import type ISelectClause from "./ISelectClause.js";
 import type IGroupByClause from "./IGroupByClause.js";
 import type { DbOperators } from "../_types/ops.js";
 import type IWhereClause from "./IWhereClause.js";
+import type QueryParam from "../param.js";
 
 interface IJoinClause<
     TDbType extends DbType,

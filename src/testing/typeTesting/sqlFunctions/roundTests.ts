@@ -1,8 +1,5 @@
-import { PgDbType } from "../../../db.js";
 import type { IComparable } from "../../../query/comparisons/_interfaces/IComparable.js";
 import type ColumnSQLFunction from "../../../query/functions/_functions.js";
-import round from "../../../query/functions/round.js";
-import QueryColumn from "../../../query/queryColumn.js";
 import { employeesTable } from "../_tables.js";
 
 const res = employeesTable.select((cols, { round }) => ({ calculatedColumn: round(cols.employees.salary, 2) })).exec;

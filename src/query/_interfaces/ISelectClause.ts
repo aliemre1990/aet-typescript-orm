@@ -1,6 +1,4 @@
-import { DbType, type DbValueTypes, type PgDbType } from "../../db.js";
-import type { PgValueTypes } from "../../postgresql/dataTypes.js";
-import type { QueryParam } from "../queryColumn.js";
+import { DbType, type DbValueTypes } from "../../db.js";
 import type { TablesToObject, TableToColumnsMap } from "../_types/miscellaneous.js";
 import type { AccumulateColumnParams, TResultShape } from "../_types/result.js";
 import { IExecuteableQuery } from "./IExecuteableQuery.js";
@@ -8,6 +6,7 @@ import type QueryTable from "../queryTable.js";
 import type QueryColumn from "../queryColumn.js";
 import type { TablesToColumnsMapFormatGroupedColumns } from "../_types/grouping.js";
 import type { DbFunctions } from "../_types/ops.js";
+import type QueryParam from "../param.js";
 
 interface ISelectClause<
     TDbType extends DbType,

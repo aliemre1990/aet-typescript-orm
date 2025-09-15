@@ -1,6 +1,6 @@
 import { DbType, type DbValueTypes, type PgDbType } from "../db.js";
 import type { PgValueTypes } from "../postgresql/dataTypes.js";
-import QueryColumn, { type QueryParam } from "./queryColumn.js";
+import QueryColumn from "./queryColumn.js";
 import type Table from "../table/table.js";
 import type { QueryColumnsObjectType } from "../table/types/utils.js";
 import type { JoinType } from "../types.js";
@@ -9,7 +9,7 @@ import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.
 import { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
 import type { TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.js";
-import type { AccumulateColumnParams, AccumulateComparisonParams, ColumnsToResultMap, QueryParamsToObject, TablesToGroupedResultMap, TablesToResultMap, TResultShape } from "./_types/result.js";
+import type { AccumulateColumnParams, AccumulateComparisonParams, ColumnsToResultMap, QueryParamsToObject, TResultShape } from "./_types/result.js";
 import QueryTable from "./queryTable.js";
 import type Column from "../table/column.js";
 import type IJoinClause from "./_interfaces/IJoinClause.js";
@@ -18,6 +18,7 @@ import type IWhereClause from "./_interfaces/IWhereClause.js";
 import type IGroupByClause from "./_interfaces/IGroupByClause.js";
 import type { TablesToColumnsMapFormatGroupedColumns } from "./_types/grouping.js";
 import type { DbFunctions, DbOperators } from "./_types/ops.js";
+import type QueryParam from "./param.js";
 
 class QueryBuilder<
     TDbType extends DbType,

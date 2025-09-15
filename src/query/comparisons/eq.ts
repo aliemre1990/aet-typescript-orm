@@ -1,12 +1,9 @@
 import type { DbType } from "../../db.js";
-import type Column from "../../table/column.js";
 import ColumnComparisonOperation, { comparisonOperations } from "./_comparisonOperations.js";
-import { QueryParam } from "../queryColumn.js";
-import QueryColumn from "../queryColumn.js";
-import type ColumnSQLFunction from "../functions/_functions.js";
-import type { InferValueTypeFromComparable, InferValueTypeFromThisType } from "./_types/inferValue.js";
+import type { InferValueTypeFromComparable } from "./_types/inferValue.js";
 import type { IComparable } from "./_interfaces/IComparable.js";
 import type { IsAny } from "../../utility/common.js";
+import QueryParam from "../param.js";
 
 function eq<
     TComparing extends IComparable<TDbType, any, any, any, any>,
@@ -19,9 +16,9 @@ function eq<
 >(this: TComparing, value: TParamMedian
 ): ColumnComparisonOperation<
     TDbType,
-    TComparing,  
+    TComparing,
     [TParam]
-  
+
 >
 function eq<
     TComparing extends IComparable<TDbType, any, any, any, any>,

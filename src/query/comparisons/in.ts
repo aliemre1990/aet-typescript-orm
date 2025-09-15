@@ -2,12 +2,10 @@ import type { DbType, PgDbType } from "../../db.js";
 import type { GetArrayEquivalentPgValueType } from "../../postgresql/dataTypes.js";
 import { isNullOrUndefined } from "../../utility/guards.js";
 import ColumnComparisonOperation, { comparisonOperations } from "./_comparisonOperations.js";
-import { QueryParam } from "../queryColumn.js";
-import QueryColumn from "../queryColumn.js";
-import type ColumnSQLFunction from "../functions/_functions.js";
-import type { InferValueTypeFromComparable, InferValueTypeFromThisType } from "./_types/inferValue.js";
+import type { InferValueTypeFromComparable } from "./_types/inferValue.js";
 import type { IComparable } from "./_interfaces/IComparable.js";
 import type { IsAny, NullableArray } from "../../utility/common.js";
+import QueryParam from "../param.js";
 
 // Helper type to extract only QueryColumns from the mixed tuple
 type ExtractComparables<T extends readonly unknown[]> =

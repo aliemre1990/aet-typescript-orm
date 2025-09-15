@@ -1,9 +1,9 @@
 import type { DbType } from "../../db.js";
 import ColumnComparisonOperation, { comparisonOperations } from "./_comparisonOperations.js";
-import { QueryParam } from "../queryColumn.js";
 import type { InferValueTypeFromComparable } from "./_types/inferValue.js";
 import type { IComparable } from "./_interfaces/IComparable.js";
 import type { IsAny } from "../../utility/common.js";
+import QueryParam from "../param.js";
 
 
 
@@ -64,7 +64,7 @@ function between<
 >(this: TComparing, leftValue: TLParamMedian, rightValue: TRApplied): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    [TLParam,TRApplied]
+    [TLParam, TRApplied]
 >
 function between<
     TComparing extends IComparable<TDbType, any, any, any, any>,
@@ -78,7 +78,7 @@ function between<
 >(this: TComparing, leftValue: TLApplied, rightValue: TRParamMedian): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    [TLApplied,TRParam]
+    [TLApplied, TRParam]
 >
 
 

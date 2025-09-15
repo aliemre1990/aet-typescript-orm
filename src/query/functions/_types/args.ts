@@ -3,9 +3,7 @@ import type { PgValueTypes } from "../../../postgresql/dataTypes.js";
 import type { DeepPrettify, IsAny, UnionToTuple } from "../../../utility/common.js";
 import type AggregatedColumn from "../../aggregation/_aggregatedColumn.js";
 import type { IComparable } from "../../comparisons/_interfaces/IComparable.js";
-import type { QueryParam } from "../../queryColumn.js";
-import type QueryColumn from "../../queryColumn.js";
-import type ColumnSQLFunction from "../_functions.js";
+import type QueryParam from "../../param.js";
 import type { JSONBuildObjectParam } from "../jsonFunctions/jsonBuildObject.js";
 
 type InferFirstTypeFromArgs<TDbType extends DbType, TArgs extends

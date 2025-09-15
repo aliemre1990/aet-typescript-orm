@@ -8,7 +8,7 @@ import type { TablesToObject, TableToColumnsMap, TableToObject } from "../query/
 import type { AccumulateColumnParams, InferParamsFromOps, TResultShape } from "../query/_types/result.js";
 import type { JoinType } from "../types.js";
 import Column from "./column.js";
-import QueryColumn, { type QueryParam } from "../query/queryColumn.js";
+import QueryColumn from "../query/queryColumn.js";
 import type { QueryTableSpecsType, TableSpecsType } from "./types/tableSpecs.js";
 import type { ColumnsObjectType, GetColumnTypes, QueryColumnsObjectType } from "./types/utils.js";
 import QueryTable from "../query/queryTable.js";

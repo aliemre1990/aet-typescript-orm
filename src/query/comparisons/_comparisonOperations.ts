@@ -1,7 +1,4 @@
 import type { DbType, DbValueTypes } from "../../db.js";
-import type ColumnSQLFunction from "../functions/_functions.js";
-import type { QueryParam } from "../queryColumn.js";
-import type QueryColumn from "../queryColumn.js";
 import type { IComparable } from "./_interfaces/IComparable.js";
 import type { InferValueTypeFromComparable, InferValueTypeFromThisType } from "./_types/inferValue.js";
 
