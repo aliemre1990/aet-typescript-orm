@@ -1,16 +1,16 @@
 import { DbType, dbTypes, PgDbType } from "../db.js";
-import type { PgColumnType, PgValueTypes } from "../postgresql/dataTypes.js";
+import type { PgColumnType } from "../postgresql/dataTypes.js";
 import type ColumnComparisonOperation from "../query/comparisons/_comparisonOperations.js";
 import type { IExecuteableQuery } from "../query/_interfaces/IExecuteableQuery.js";
 import type ColumnLogicalOperation from "../query/logicalOperations.js";
 import { QueryBuilder } from "../query/queryBuilder.js";
-import type { TablesToObject, TableToColumnsMap, TableToObject } from "../query/_types/miscellaneous.js";
-import type { AccumulateColumnParams, InferParamsFromOps, TResultShape } from "../query/_types/result.js";
+import type { TablesToObject, TableToColumnsMap } from "../query/_types/miscellaneous.js";
+import type { AccumulateColumnParams, TResultShape } from "../query/_types/result.js";
 import type { JoinType } from "../types.js";
 import Column from "./column.js";
 import QueryColumn, { type ColumnsSelection } from "../query/queryColumn.js";
 import type { QueryTableSpecsType, TableSpecsType } from "./types/tableSpecs.js";
-import type { ColumnsObjectType, GetColumnTypes, QueryColumnsObjectType } from "./types/utils.js";
+import type { ColumnsObjectType, QueryColumnsObjectType } from "./types/utils.js";
 import QueryTable from "../query/queryTable.js";
 import type IJoinClause from "../query/_interfaces/IJoinClause.js";
 import type ISelectClause from "../query/_interfaces/ISelectClause.js";
@@ -57,7 +57,7 @@ class Table<
     select<
         TCb extends
         (
-            cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>,
+            cols: TableToColumnsMap<TDbType, TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>,
             ops: DbFunctions<TDbType>
         ) => TResultShape<TDbType>,
         TCbResult extends TResultShape<TDbType> = TCb extends (cols: any, ops: any) => infer TR ? TR : never
@@ -94,7 +94,7 @@ class Table<
         type: JoinType,
         table: TInnerJoinTable,
         cb: (
-            cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>, TInnerJoinResult]>>,
+            cols: TableToColumnsMap<TDbType,TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>, TInnerJoinResult]>>,
             ops: DbOperators<TDbType>
         ) => TCbResult
     ) {
@@ -113,7 +113,7 @@ class Table<
     where<
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>
     >(cb: (
-        cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>,
+        cols: TableToColumnsMap<TDbType,TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>,
         ops: DbOperators<TDbType>
     ) => TCbResult) {
         const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
@@ -127,7 +127,7 @@ class Table<
     }
 
     groupBy<const TCbResult extends (ColumnsSelection<TDbType, any> | QueryColumn<TDbType, any, any, any>)[]
-    >(cb: (cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>) => TCbResult) {
+    >(cb: (cols: TableToColumnsMap<TDbType,TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>) => TCbResult) {
         const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
             prev[curr[0]] = new QueryColumn(curr[1]);
             return prev;

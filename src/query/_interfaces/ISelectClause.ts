@@ -17,7 +17,7 @@ interface ISelectClause<
 > {
     select<
         TCb extends (
-            cols: TGroupedColumns extends undefined ? TableToColumnsMap<TablesToObject<TTables>> : TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>,
+            cols: TGroupedColumns extends undefined ? TableToColumnsMap<TDbType,TablesToObject<TTables>> : TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>,
             ops: DbFunctions<TDbType>
         ) => TResultShape<TDbType>,
         TCbResult extends TResultShape<TDbType> = TCb extends (cols: any, ops: any) => infer TR ? TR : never

@@ -45,7 +45,7 @@ class QueryBuilder<
 
     select<
         TCb extends (
-            cols: TGroupedColumns extends undefined ? TableToColumnsMap<TablesToObject<TTables>> : TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>,
+            cols: TGroupedColumns extends undefined ? TableToColumnsMap<TDbType, TablesToObject<TTables>> : TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>,
             ops: DbFunctions<TDbType>
         ) => TResultShape<TDbType>,
         TCbResult extends TResultShape<TDbType> = TCb extends (cols: any, ops: any) => infer TR ? TR : never
@@ -71,7 +71,7 @@ class QueryBuilder<
     >(
         type: JoinType,
         table: TInnerJoinTable,
-        cb: (cols: TableToColumnsMap<TablesToObject<[...TTables, TInnerJoinResult]>>, ops: DbOperators<TDbType>) => TCbResult
+        cb: (cols: TableToColumnsMap<TDbType, TablesToObject<[...TTables, TInnerJoinResult]>>, ops: DbOperators<TDbType>) => TCbResult
     ):
         IJoinClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
         ISelectClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
@@ -104,15 +104,15 @@ class QueryBuilder<
     where<
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>
     >(cb: (
-        cols: TableToColumnsMap<TablesToObject<TTables>>,
+        cols: TableToColumnsMap<TDbType, TablesToObject<TTables>>,
         ops: DbOperators<TDbType>
     ) => TCbResult):
         ISelectClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>> {
         return new QueryBuilder(this.tables) as ISelectClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>>;
     }
 
-    groupBy<const TCbResult extends (ColumnsSelection<TDbType,any> | QueryColumn<TDbType, any, any, any>)[]
-    >(cb: (cols: TableToColumnsMap<TablesToObject<TTables>>) => TCbResult) {
+    groupBy<const TCbResult extends (ColumnsSelection<TDbType, any> | QueryColumn<TDbType, any, any, any>)[]
+    >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TTables>>) => TCbResult) {
         return this as ISelectClause<TDbType, TTables, TParams, TCbResult>
     }
 

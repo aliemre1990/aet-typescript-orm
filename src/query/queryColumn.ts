@@ -43,12 +43,12 @@ class QueryColumn<
 }
 
 
-const ColumnsSelectionQueryTableObjectKey = Symbol();
+const ColumnsSelectionQueryTableObjectSymbol = Symbol();
 type ColumnsSelection<
     TDbType extends DbType,
     TQTable extends QueryTable<TDbType, any, any, any, any, any>
 > = {
-    [ColumnsSelectionQueryTableObjectKey]: TQTable;
+    [ColumnsSelectionQueryTableObjectSymbol]: TQTable;
 } & {
         [K in keyof TQTable["columns"]as TQTable["columns"][K]["column"]["name"]]: TQTable["columns"][K];
     }
@@ -59,4 +59,5 @@ export default QueryColumn;
 
 export {
     ColumnsSelection,
+    ColumnsSelectionQueryTableObjectSymbol
 }

@@ -15,7 +15,7 @@ interface IWhereClause<
 > {
     where<TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>
     >(cb: (
-        cols: TableToColumnsMap<TablesToObject<TTables>>,
+        cols: TableToColumnsMap<TDbType,TablesToObject<TTables>>,
         ops: DbOperators<TDbType>
     ) => TCbResult):
         ISelectClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>>

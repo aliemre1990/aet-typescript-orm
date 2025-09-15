@@ -13,7 +13,7 @@ interface IGroupByClause<
 > {
     groupBy<
         const TCbResult extends (ColumnsSelection<TDbType, any> | QueryColumn<TDbType, any, any, any>)[]
-    >(cb: (cols: TableToColumnsMap<TablesToObject<TTables>>) => TCbResult):
+    >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TTables>>) => TCbResult):
         ISelectClause<TDbType, TTables, TParams, TCbResult>
 
 }
