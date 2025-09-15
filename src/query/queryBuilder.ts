@@ -1,6 +1,6 @@
 import { DbType, type DbValueTypes, type PgDbType } from "../db.js";
 import type { PgValueTypes } from "../postgresql/dataTypes.js";
-import QueryColumn from "./queryColumn.js";
+import QueryColumn, { type ColumnsSelection } from "./queryColumn.js";
 import type Table from "../table/table.js";
 import type { QueryColumnsObjectType } from "../table/types/utils.js";
 import type { JoinType } from "../types.js";
@@ -25,7 +25,7 @@ class QueryBuilder<
     TTables extends readonly QueryTable<TDbType, any, any, any, any, any>[],
     TResult extends TResultShape<TDbType> | undefined = undefined,
     TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined,
-    TGroupedColumns extends ({ [key: string]: QueryColumn<TDbType, any, any, any> } | QueryColumn<TDbType, any, any, any>)[] | undefined = undefined,
+    TGroupedColumns extends (ColumnsSelection<TDbType, any> | QueryColumn<TDbType, any, any, any>)[] | undefined = undefined,
 >
     implements
     ISelectClause<TDbType, TTables, TParams, TGroupedColumns>,
@@ -111,7 +111,7 @@ class QueryBuilder<
         return new QueryBuilder(this.tables) as ISelectClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>>;
     }
 
-    groupBy<const TCbResult extends ({ [key: string]: QueryColumn<TDbType, any, any, any> } | QueryColumn<TDbType, any, any, any>)[]
+    groupBy<const TCbResult extends (ColumnsSelection<TDbType,any> | QueryColumn<TDbType, any, any, any>)[]
     >(cb: (cols: TableToColumnsMap<TablesToObject<TTables>>) => TCbResult) {
         return this as ISelectClause<TDbType, TTables, TParams, TCbResult>
     }

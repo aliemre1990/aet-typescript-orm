@@ -88,7 +88,7 @@ type IsContainsNonNull<TDbType extends DbType, TArgs extends
  */
 type InferReturnTypeFromJSONBuildObjectParam<TDbType extends DbType, TObj extends JSONBuildObjectParam<TDbType>> =
     DeepPrettify<{
-        [K in keyof TObj]:
+        [K in keyof TObj as K extends string ? K : never]:
         TObj[K] extends IComparable<TDbType, any, any, infer TFinalType, any> ? TFinalType :
         TObj[K] extends AggregatedColumn<TDbType, infer TQC> ? TQC extends IComparable<TDbType, any, any, infer TFinalType, any> ? TFinalType : never :
         TObj[K] extends JSONBuildObjectParam<TDbType> ? InferReturnTypeFromJSONBuildObjectParam<TDbType, TObj[K]> :

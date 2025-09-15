@@ -8,7 +8,7 @@ import type { TablesToObject, TableToColumnsMap, TableToObject } from "../query/
 import type { AccumulateColumnParams, InferParamsFromOps, TResultShape } from "../query/_types/result.js";
 import type { JoinType } from "../types.js";
 import Column from "./column.js";
-import QueryColumn from "../query/queryColumn.js";
+import QueryColumn, { type ColumnsSelection } from "../query/queryColumn.js";
 import type { QueryTableSpecsType, TableSpecsType } from "./types/tableSpecs.js";
 import type { ColumnsObjectType, GetColumnTypes, QueryColumnsObjectType } from "./types/utils.js";
 import QueryTable from "../query/queryTable.js";
@@ -126,7 +126,7 @@ class Table<
         return new QueryBuilder<TDbType, [typeof queryTable]>([queryTable]).where(cb);
     }
 
-    groupBy<const TCbResult extends ({ [key: string]: QueryColumn<TDbType, any, any, any> } | QueryColumn<TDbType, any, any, any>)[]
+    groupBy<const TCbResult extends (ColumnsSelection<TDbType, any> | QueryColumn<TDbType, any, any, any>)[]
     >(cb: (cols: TableToColumnsMap<TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>) => TCbResult) {
         const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
             prev[curr[0]] = new QueryColumn(curr[1]);

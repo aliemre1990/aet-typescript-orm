@@ -1,13 +1,15 @@
 import type { DbType, PgDbType } from "../../db.js";
 import type Table from "../../table/table.js";
 import type { ColumnsObjectType, QueryColumnsObjectType } from "../../table/types/utils.js";
-import type { ColumnSelection } from "../queryColumn.js";
+import type { ColumnsSelection } from "../queryColumn.js";
 import type QueryTable from "../queryTable.js";
 
 type TableToColumnsMap<T extends { [key: string]: QueryTable<any, ColumnsObjectType<DbType>, string, Table<DbType, ColumnsObjectType<DbType>, string>, QueryColumnsObjectType<DbType>, string | undefined> }> = {
-    [K in keyof T]: {
-        [C in keyof T[K]["columns"]as T[K]["columns"][C]["column"]["name"]]: T[K]["columns"][C];
-    }
+    [K in keyof T]: ColumnsSelection<DbType, T[K]>
+
+    //     {
+    //     [C in keyof T[K]["columns"] as T[K]["columns"][C]["column"]["name"]]: T[K]["columns"][C];
+    // }
 };
 
 type TableToObject<TTable extends QueryTable<DbType, ColumnsObjectType<DbType>, string, Table<DbType, ColumnsObjectType<DbType>, string>, QueryColumnsObjectType<DbType>, string | undefined>> = {
