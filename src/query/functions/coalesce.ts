@@ -28,6 +28,7 @@ function generateCoalesceFn<
     >
         (...args: TArgs & (TArgs extends CoalesceArg<TDbType, NonNullable<InferFirstTypeFromArgs<TDbType, TArgs>>>[] ? TArgs : never)) => {
 
+        // Dont move this to type arguments of the function, let it  stay here
         type FirstType = InferFirstTypeFromArgs<TDbType, TArgs>;
 
         return new ColumnSQLFunction<

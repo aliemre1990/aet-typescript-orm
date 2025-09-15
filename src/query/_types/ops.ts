@@ -50,10 +50,10 @@ type DbFunctions<TDbType extends DbType> =
     ;
 
 
-type DbOperators<TDbType extends DbType> = DeepPrettify<
+type DbOperators<TDbType extends DbType> =
     LogicalOperators<TDbType> &
     DbFunctions<TDbType>
->;
+    ;
 
 
 export {

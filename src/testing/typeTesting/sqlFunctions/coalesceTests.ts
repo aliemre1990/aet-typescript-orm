@@ -8,14 +8,40 @@ import QueryColumn from "../../../query/queryColumn.js";
 import { customersTable, employeesTable, ordersTable, usersTable } from "../_tables.js";
 import type { AssertEqual, AssertTrue } from "../_typeTestingUtilities.js";
 
+const customerIdQC = new QueryColumn<PgDbType, typeof customersTable.columns.customerId, NonNullable<typeof customersTable.columns.customerId.tableSpecs>, undefined>(customersTable.columns.customerId);
+const createdByQC = new QueryColumn<PgDbType, typeof customersTable.columns.createdBy, NonNullable<typeof customersTable.columns.createdBy.tableSpecs>, undefined>(customersTable.columns.createdBy);
+const customerNameQC = new QueryColumn<PgDbType, typeof customersTable.columns.name, NonNullable<typeof customersTable.columns.name.tableSpecs>, undefined>(customersTable.columns.name);
+const empSalaryQC = new QueryColumn<PgDbType, typeof employeesTable.columns.salary, NonNullable<typeof employeesTable.columns.salary.tableSpecs>, undefined>(employeesTable.columns.salary);
+
+
 const coalesce = generateCoalesceFn("postgresql");
 const param = generateParamFn("postgresql");
 
-const res = customersTable
+/**
+ * Coalesce with params tests
+ */
+coalesce(param("param1").type<number | null>(), param("param2"));
+coalesce(param("param1").type<number | null>(), param("param2").type<number>());
+// @ts-expect-error
+coalesce(param("param1").type<number | null>(), param("param2").type<string>());
+// @ts-expect-error
+coalesce(customerIdQC, param("param1").type<string>());
+
+
+const CoalesceWithTypedParams = customersTable
     .select((cols, { coalesce, param }) => ({
-        coalesceResult: coalesce(param("param1").type<number>(), param("param3"))
+        coalesceResult: coalesce(param("param1").type<number>(), param("param2").type<number | null>(), param("param3"))
     }))
     .exec;
+
+type CoalesceWithTypedParamsReturnType = ReturnType<typeof CoalesceWithTypedParams>;
+type CoalesceWithTypedParamsResult = { coalesceResult: number };
+type CoalesceWithTypedParamsTest = AssertTrue<AssertEqual<CoalesceWithTypedParamsResult, CoalesceWithTypedParamsReturnType>>;
+
+type CoalesceWithTypedParamsParams = typeof CoalesceWithTypedParams extends (param: infer TParam) => any ? TParam : never;
+type CoalesceWithTypeParamsParamsResult = { param1: number, param2: number | null, param3: number | null } | undefined;
+type CoalesceWithTypedParamsParamsTest = AssertTrue<AssertEqual<CoalesceWithTypedParamsParams, CoalesceWithTypeParamsParamsResult>>
+
 
 /**
  * 
@@ -36,13 +62,8 @@ type pgCoalescePlainWithParamArg1Test = AssertTrue<AssertEqual<number, pgCoalesc
 type pgCoalescePlainWithParamArg2Test = AssertTrue<AssertEqual<QueryParam<PgDbType, "param", number | null>, pgCoalescePlainWithParamArg2>>;
 
 /**
- * 
+ * Misc
  */
-const customerIdQC = new QueryColumn<PgDbType, typeof customersTable.columns.customerId, NonNullable<typeof customersTable.columns.customerId.tableSpecs>, undefined>(customersTable.columns.customerId);
-const createdByQC = new QueryColumn<PgDbType, typeof customersTable.columns.createdBy, NonNullable<typeof customersTable.columns.createdBy.tableSpecs>, undefined>(customersTable.columns.createdBy);
-const customerNameQC = new QueryColumn<PgDbType, typeof customersTable.columns.name, NonNullable<typeof customersTable.columns.name.tableSpecs>, undefined>(customersTable.columns.name);
-const empSalaryQC = new QueryColumn<PgDbType, typeof employeesTable.columns.salary, NonNullable<typeof employeesTable.columns.salary.tableSpecs>, undefined>(employeesTable.columns.salary);
-
 // @ts-expect-error
 coalesce(customerIdQC, customerNameQC);
 
