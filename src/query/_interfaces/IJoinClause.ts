@@ -12,11 +12,13 @@ import type IGroupByClause from "./IGroupByClause.js";
 import type { DbOperators } from "../_types/ops.js";
 import type IWhereClause from "./IWhereClause.js";
 import type QueryParam from "../param.js";
+import type { ColumnsSelection } from "../queryColumn.js";
 
 interface IJoinClause<
     TDbType extends DbType,
     TTables extends readonly QueryTable<TDbType, any, any, any, any, any>[],
-    TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined
+    TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined,
+    TGroupedColumns extends (ColumnsSelection<TDbType, any> | QueryColumn<TDbType, any, any, any>)[] | undefined = undefined,
 > {
 
     join<
@@ -34,7 +36,7 @@ interface IJoinClause<
     >(
         type: JoinType,
         table: TInnerJoinTable,
-        cb: (cols: TableToColumnsMap<TDbType, TablesToObject<[...TTables, TInnerJoinResult]>>, ops: DbOperators<TDbType>) => TCbResult
+        cb: (cols: TableToColumnsMap<TDbType, TablesToObject<[...TTables, TInnerJoinResult]>>, ops: DbOperators<TDbType, false>) => TCbResult
     ):
         IJoinClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
         ISelectClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &

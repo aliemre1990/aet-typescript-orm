@@ -37,7 +37,7 @@ type PgFunctions = {
     jsonbBuildObject: typeof jsonbBuildObjectFn;
 }
 
-type DbFunctions<TDbType extends DbType> =
+type DbFunctions<TDbType extends DbType, TIsAgg extends boolean> =
     {
         param: TDbType extends PgDbType ? PgParamFn : TDbType extends MySQLDbType ? MySqlParamFn : never;
     } &
@@ -45,14 +45,14 @@ type DbFunctions<TDbType extends DbType> =
         coalesce: TDbType extends PgDbType ? PgCoalesceFn : TDbType extends MySQLDbType ? MySQLCoalesceFn : never,
         round: TDbType extends PgDbType ? PgRoundFn : TDbType extends MySQLDbType ? MySQLRoundFn : never
     } &
-    AggregationFunctions<TDbType> &
-    (TDbType extends PgDbType ? PgFunctions : never)
+    (TIsAgg extends true ? AggregationFunctions<TDbType> : {}) &
+    (TDbType extends PgDbType ? PgFunctions : {})
     ;
 
 
-type DbOperators<TDbType extends DbType> =
+type DbOperators<TDbType extends DbType, TIsAgg extends boolean> =
     LogicalOperators<TDbType> &
-    DbFunctions<TDbType>
+    DbFunctions<TDbType, TIsAgg>
     ;
 
 

@@ -42,7 +42,7 @@ class QueryTable<
         TCb extends
         (
             cols: TableToColumnsMap<TDbType, TablesToObject<[QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
-            ops: DbFunctions<TDbType>
+            ops: DbFunctions<TDbType, false>
         ) => TResultShape<TDbType>,
         TCbResult extends TResultShape<TDbType> = TCb extends (cols: any, ops: any) => infer TR ? TR : never
     >(
@@ -70,7 +70,7 @@ class QueryTable<
         table: TInnerJoinTable,
         cb: (
             cols: TableToColumnsMap<TDbType, TablesToObject<[QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>, TInnerJoinResult]>>,
-            ops: DbOperators<TDbType>
+            ops: DbOperators<TDbType, false>
         ) => TCbResult
     ) {
 
@@ -82,7 +82,7 @@ class QueryTable<
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>
     >(cb: (
         cols: TableToColumnsMap<TDbType, TablesToObject<[QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
-        ops: DbOperators<TDbType>
+        ops: DbOperators<TDbType, false>
     ) => TCbResult) {
 
 

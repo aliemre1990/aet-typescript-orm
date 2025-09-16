@@ -13,12 +13,12 @@ interface ISelectClause<
     TDbType extends DbType,
     TTables extends readonly QueryTable<TDbType, any, any, any, any, any>[],
     TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined,
-    TGroupedColumns extends (ColumnsSelection<TDbType,any> | QueryColumn<TDbType, any, any, any>)[] | undefined = undefined
+    TGroupedColumns extends (ColumnsSelection<TDbType, any> | QueryColumn<TDbType, any, any, any>)[] | undefined = undefined
 > {
     select<
         TCb extends (
-            cols: TGroupedColumns extends undefined ? TableToColumnsMap<TDbType,TablesToObject<TTables>> : TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>,
-            ops: DbFunctions<TDbType>
+            cols: TGroupedColumns extends undefined ? TableToColumnsMap<TDbType, TablesToObject<TTables>> : TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>,
+            ops: DbFunctions<TDbType, TGroupedColumns extends undefined ? false : true>
         ) => TResultShape<TDbType>,
         TCbResult extends TResultShape<TDbType> = TCb extends (cols: any, ops: any) => infer TR ? TR : never
     >(

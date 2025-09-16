@@ -20,7 +20,7 @@ const MultiTableGroupByWithAutoSelectQuery = customersTable
     .join('INNER', usersTable, cols => cols.users.id.eq(cols.customers.createdBy))
     .join('INNER', shipmentsTable, cols => cols.shipments.id.eq(1))
     .groupBy(cols => [cols.customers, cols.users.id, cols.shipments])
-    .select(cols => ({
+    .select((cols, { }) => ({
         customerId: cols.customers.id,
         customerName: cols.customers.name,
         customerCreatedBy: cols.customers.createdBy,

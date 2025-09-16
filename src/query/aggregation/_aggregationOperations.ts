@@ -1,4 +1,6 @@
-import type { DbType } from "../../db.js";
+import type { DbType, DbValueTypes } from "../../db.js";
+import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
+import type { InferParamsFromFnArgs } from "../functions/_types/inferParamsFromArgs.js";
 import type QueryColumn from "../queryColumn.js";
 import type AggregatedColumn from "./_aggregatedColumn.js";
 
@@ -36,13 +38,23 @@ type AggregationOperation = (typeof aggregationOperations)[keyof typeof aggregat
 
 class BasicColumnAggregationOperation<
     TDbType extends DbType,
-    TAggColumn extends AggregatedColumn<TDbType, any>,
-    TAppliedType extends any,
-    TResultType extends any
-> {
+    TArgs extends (
+        AggregatedColumn<TDbType, any> |
+        DbValueTypes | null |
+        IComparable<TDbType, any, any, any, any>
+    )[],
+    TReturnType extends DbValueTypes | null,
+    TIsAgg extends boolean = false
+> implements IComparable<TDbType, InferParamsFromFnArgs<TArgs>, NonNullable<TReturnType>, TReturnType, TIsAgg> {
+
+    icomparableValueDummy?: NonNullable<TReturnType>;
+    icomparableFinalValueDummy?: TReturnType;
+    params?: InferParamsFromFnArgs<TArgs>;
+    isAgg?: TIsAgg;
+
     constructor(
         public dbType: TDbType,
-        public column: TAggColumn,
+        public args: TArgs,
         public operation: AggregationOperation
     ) { }
 }

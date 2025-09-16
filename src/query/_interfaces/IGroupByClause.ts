@@ -5,6 +5,7 @@ import type ISelectClause from "./ISelectClause.js";
 import type QueryColumn from "../queryColumn.js";
 import type QueryParam from "../param.js";
 import type { ColumnsSelection } from "../queryColumn.js";
+import type IWhereClause from "./IWhereClause.js";
 
 interface IGroupByClause<
     TDbType extends DbType,
@@ -14,7 +15,8 @@ interface IGroupByClause<
     groupBy<
         const TCbResult extends (ColumnsSelection<TDbType, any> | QueryColumn<TDbType, any, any, any>)[]
     >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TTables>>) => TCbResult):
-        ISelectClause<TDbType, TTables, TParams, TCbResult>
+        ISelectClause<TDbType, TTables, TParams, TCbResult> &
+        IWhereClause<TDbType, TTables, TParams, TCbResult>
 
 }
 
