@@ -1,4 +1,4 @@
-import { customersTable, shipmentsTable, usersTable } from "./_tables.js";
+import { customersTable, employeesTable, shipmentsTable, usersTable } from "./_tables.js";
 import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
 
 /**
@@ -16,25 +16,38 @@ type SingleTableGroupAutoSelectQueryTest = AssertTrue<AssertEqual<SingleTableGro
 /**
  * 
  */
-const MultiTableGroupByWithAutoSelectQuery = customersTable
+const MultiTableGroupByQuery= customersTable
     .join('INNER', usersTable, cols => cols.users.id.eq(cols.customers.createdBy))
     .join('INNER', shipmentsTable, cols => cols.shipments.id.eq(1))
-    .groupBy(cols => [cols.customers, cols.users.id, cols.shipments])
-    .select((cols, { }) => ({
+    .join('INNER', employeesTable, cols => cols.shipments.id.eq(1))
+    .groupBy(cols => [cols.customers, cols.users.id, cols.shipments, cols.employees.id])
+    .select((cols, { sum }) => ({
         customerId: cols.customers.id,
         customerName: cols.customers.name,
         customerCreatedBy: cols.customers.createdBy,
         userId: cols.users.id,
         shipmentId: cols.shipments.id,
         shipmentOrderId: cols.shipments.orderId,
-        shipmentCreatedBy: cols.shipments.createdBy
+        shipmentCreatedBy: cols.shipments.createdBy,
+        sumNull: sum(cols.employees.salary),
+        sumNotNull: sum(cols.employees.deptId)
     })
     )
     .exec;
 
-type MultiTableGroupByWithAutoSelectQueryResult = { customerId: number, customerName: string, customerCreatedBy: number, userId: number, shipmentId: number, shipmentOrderId: number, shipmentCreatedBy: number }
-type MultiTableGroupByWithAutoSelectQueryReturnType = ReturnType<typeof MultiTableGroupByWithAutoSelectQuery>;
-type MultiTableGroupByWithAutoSelectQueryTest = AssertTrue<AssertEqual<MultiTableGroupByWithAutoSelectQueryResult, MultiTableGroupByWithAutoSelectQueryReturnType>>
+type MultiTableGroupByQueryResult = {
+    customerId: number,
+    customerName: string,
+    customerCreatedBy: number,
+    userId: number,
+    shipmentId: number,
+    shipmentOrderId: number,
+    shipmentCreatedBy: number,
+    sumNull: number | null,
+    sumNotNull: number
+}
+type MultiTableGroupByQueryReturnType = ReturnType<typeof MultiTableGroupByQuery>;
+type MultiTableGroupByQueryTest = AssertTrue<AssertEqual<MultiTableGroupByQueryResult, MultiTableGroupByQueryReturnType>>
 
 /**
  * 
