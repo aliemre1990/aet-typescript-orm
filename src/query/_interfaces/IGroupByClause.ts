@@ -13,7 +13,7 @@ interface IGroupByClause<
     TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined
 > {
     groupBy<
-        const TCbResult extends (ColumnsSelection<TDbType, any> | QueryColumn<TDbType, any, any, any>)[]
+        const TCbResult extends (ColumnsSelection<TDbType, any, any> | QueryColumn<TDbType, any, any, any>)[]
     >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TTables>>) => TCbResult):
         ISelectClause<TDbType, TTables, TParams, TCbResult> &
         IWhereClause<TDbType, TTables, TParams, TCbResult>

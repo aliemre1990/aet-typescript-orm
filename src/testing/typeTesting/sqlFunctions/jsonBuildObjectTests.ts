@@ -1,14 +1,14 @@
 import { customersTable } from "../_tables.js";
 
-const simpleJsonBuildObj = customersTable.select((cols, { jsonBuildObject }) => ({ id: cols.customers.id, obj: jsonBuildObject({ id: cols.customers.id, bd: jsonBuildObject({ sd: cols.customers.name }) }) })).exec();
+const simpleJsonBuildObj = customersTable.select((cols, { jsonBuildObject }) => ({ id: cols.customers.customerId, obj: jsonBuildObject({ id: cols.customers.customerId, bd: jsonBuildObject({ sd: cols.customers.name }) }) })).exec();
 
 
 const groupedJsonBuildObj = customersTable
-    .groupBy(cols => [cols.customers.id])
-    .select((cols, { jsonBuildObject }) => ({ id: jsonBuildObject({ id: cols.customers.id }) }));
+    .groupBy(cols => [cols.customers.customerId])
+    .select((cols, { jsonBuildObject }) => ({ id: jsonBuildObject({ id: cols.customers.customerId }) }));
 
 
 const aggregatedJsonBuildObj = customersTable
-    .groupBy(cols => [cols.customers.id])
+    .groupBy(cols => [cols.customers.customerId])
     // @ts-expect-error
     .select((cols, { jsonBuildObject }) => ({ id: jsonBuildObject({ id: cols.customers.name }) }))

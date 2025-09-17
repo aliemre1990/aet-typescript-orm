@@ -1,5 +1,4 @@
-import { DbType, type DbValueTypes, type PgDbType } from "../db.js";
-import type { PgValueTypes } from "../postgresql/dataTypes.js";
+import { DbType, type DbValueTypes } from "../db.js";
 import QueryColumn, { type ColumnsSelection } from "./queryColumn.js";
 import type Table from "../table/table.js";
 import type { QueryColumnsObjectType } from "../table/types/utils.js";
@@ -16,16 +15,16 @@ import type IJoinClause from "./_interfaces/IJoinClause.js";
 import type ISelectClause from "./_interfaces/ISelectClause.js";
 import type IWhereClause from "./_interfaces/IWhereClause.js";
 import type IGroupByClause from "./_interfaces/IGroupByClause.js";
-import type { TablesToColumnsMapFormatGroupedColumns } from "./_types/grouping.js";
 import type { DbFunctions, DbOperators } from "./_types/ops.js";
 import type QueryParam from "./param.js";
+import type { GroupedTablesToColumnsMap } from "./_types/grouping.js";
 
 class QueryBuilder<
     TDbType extends DbType,
     TTables extends readonly QueryTable<TDbType, any, any, any, any, any>[],
     TResult extends TResultShape<TDbType> | undefined = undefined,
     TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined,
-    TGroupedColumns extends (ColumnsSelection<TDbType, any> | QueryColumn<TDbType, any, any, any>)[] | undefined = undefined,
+    TGroupedColumns extends (ColumnsSelection<TDbType, any, any> | QueryColumn<TDbType, any, any, any>)[] | undefined = undefined,
 >
     implements
     ISelectClause<TDbType, TTables, TParams, TGroupedColumns>,
@@ -45,7 +44,7 @@ class QueryBuilder<
 
     select<
         TCb extends (
-            cols: TGroupedColumns extends undefined ? TableToColumnsMap<TDbType, TablesToObject<TTables>> : TablesToColumnsMapFormatGroupedColumns<TTables, TGroupedColumns>,
+            cols: TGroupedColumns extends undefined ? TableToColumnsMap<TDbType, TablesToObject<TTables>> : GroupedTablesToColumnsMap<TDbType, TTables, TGroupedColumns>,
             ops: DbFunctions<TDbType, TGroupedColumns extends undefined ? false : true>
         ) => TResultShape<TDbType>,
         TCbResult extends TResultShape<TDbType> = TCb extends (cols: any, ops: any) => infer TR ? TR : never
@@ -111,7 +110,7 @@ class QueryBuilder<
         return new QueryBuilder(this.tables) as ISelectClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>, TGroupedColumns>;
     }
 
-    groupBy<const TCbResult extends (ColumnsSelection<TDbType, any> | QueryColumn<TDbType, any, any, any>)[]
+    groupBy<const TCbResult extends (ColumnsSelection<TDbType, any, any> | QueryColumn<TDbType, any, any, any>)[]
     >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TTables>>) => TCbResult) {
         return this as ISelectClause<TDbType, TTables, TParams, TCbResult> & IWhereClause<TDbType, TTables, TParams, TCbResult>;
     }

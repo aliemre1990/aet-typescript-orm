@@ -1,3 +1,4 @@
+import type { ColumnsSelection } from "../../query/queryColumn.js";
 import { customersTable, employeesTable, shipmentsTable, usersTable } from "./_tables.js";
 import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
 
@@ -5,8 +6,8 @@ import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
  * 
  */
 const SingleTableGroupAutoSelectQuery = customersTable
-    .groupBy(cols => [cols.customers.id, cols.customers.name])
-    .select(cols => ({ id: cols.customers.id, name: cols.customers.name }))
+    .groupBy(cols => [cols.customers.customerId, cols.customers.name])
+    .select(cols => ({ id: cols.customers.customerId, name: cols.customers.name }))
     .exec;
 
 type SingleTableGroupAutoSelectQueryResult = { id: number, name: string };
@@ -16,22 +17,26 @@ type SingleTableGroupAutoSelectQueryTest = AssertTrue<AssertEqual<SingleTableGro
 /**
  * 
  */
-const MultiTableGroupByQuery= customersTable
+const MultiTableGroupByQuery = customersTable
     .join('INNER', usersTable, cols => cols.users.id.eq(cols.customers.createdBy))
     .join('INNER', shipmentsTable, cols => cols.shipments.id.eq(1))
     .join('INNER', employeesTable, cols => cols.shipments.id.eq(1))
     .groupBy(cols => [cols.customers, cols.users.id, cols.shipments, cols.employees.id])
-    .select((cols, { sum }) => ({
-        customerId: cols.customers.id,
-        customerName: cols.customers.name,
-        customerCreatedBy: cols.customers.createdBy,
-        userId: cols.users.id,
-        shipmentId: cols.shipments.id,
-        shipmentOrderId: cols.shipments.orderId,
-        shipmentCreatedBy: cols.shipments.createdBy,
-        sumNull: sum(cols.employees.salary),
-        sumNotNull: sum(cols.employees.deptId)
-    })
+    .select((cols, { sum, jsonAgg }) => {
+
+        return ({
+            customerId: cols.customers.customerId,
+            customerName: cols.customers.name,
+            customerCreatedBy: cols.customers.createdBy,
+            userId: cols.users.id,
+            shipmentId: cols.shipments.id,
+            shipmentOrderId: cols.shipments.orderId,
+            shipmentCreatedBy: cols.shipments.createdBy,
+            sumNull: sum(cols.employees.salary),
+            sumNotNull: sum(cols.employees.deptId),
+            jsonAggResult: jsonAgg(cols.customers)
+        })
+    }
     )
     .exec;
 
@@ -44,9 +49,11 @@ type MultiTableGroupByQueryResult = {
     shipmentOrderId: number,
     shipmentCreatedBy: number,
     sumNull: number | null,
-    sumNotNull: number
+    sumNotNull: number,
+    jsonAggResult: [number, string, number]
 }
 type MultiTableGroupByQueryReturnType = ReturnType<typeof MultiTableGroupByQuery>;
+
 type MultiTableGroupByQueryTest = AssertTrue<AssertEqual<MultiTableGroupByQueryResult, MultiTableGroupByQueryReturnType>>
 
 /**
@@ -59,9 +66,9 @@ const GroupByWithMultilevelSelectQuery = customersTable
         return [cols.customers, cols.users.id, cols.shipments]
     })
     .select((cols, { jsonBuildObject }) => ({
-        id: cols.customers.id,
+        id: cols.customers.customerId,
         customerName: cols.customers.name,
-        customer: jsonBuildObject({ id: cols.customers.id, name: cols.customers.name, createdBy: cols.customers.createdBy }),
+        customer: jsonBuildObject({ id: cols.customers.customerId, name: cols.customers.name, createdBy: cols.customers.createdBy }),
         example: jsonBuildObject({ id: cols.shipments.id, shipment: jsonBuildObject({ id: cols.shipments.id, orderId: cols.shipments.orderId, createdBy: cols.shipments.createdBy }) })
     }))
     .exec;

@@ -1,5 +1,6 @@
 import type { DbType, MySQLDbType, PgDbType } from "../../db.js"
 import type { DeepPrettify } from "../../utility/common.js"
+import type jsonAggFn from "../aggregation/json/jsonAgg.js"
 import type generateSumFn from "../aggregation/sum.js"
 import type { generateCoalesceFn } from "../functions/coalesce.js"
 import type { jsonbBuildObjectFn, jsonBuildObjectFn } from "../functions/jsonFunctions/jsonBuildObject.js"
@@ -28,9 +29,17 @@ type LogicalOperators<TDbType extends DbType> = {
     and: TDbType extends PgDbType ? PgAndFn : TDbType extends MySQLDbType ? MySQLAndFn : never
 }
 
+
+type PgAggregationFunction = {
+    jsonAgg: typeof jsonAggFn
+}
+
 type AggregationFunctions<TDbType extends DbType> = {
     sum: TDbType extends PgDbType ? PgSumFn : TDbType extends MySQLDbType ? MySQLSumFn : never
-}
+} &
+    (TDbType extends PgDbType ? PgAggregationFunction : {})
+
+
 
 type PgFunctions = {
     jsonBuildObject: typeof jsonBuildObjectFn;

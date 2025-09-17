@@ -5,11 +5,11 @@ import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
  * 
  */
 const SingleTableAutoSelectWhereWithParamQuery = customersTable
-    .where((cols, { param }) => cols.customers.id.eq(param("whereparam")))
+    .where((cols, { param }) => cols.customers.customerId.eq(param("whereparam")))
     .select(cols => cols.customers)
     .exec;
 
-type SingleTableAutoSelectWhereWithParamQueryResult = { id: number, name: string, createdBy: number };
+type SingleTableAutoSelectWhereWithParamQueryResult = { customerId: number, name: string, createdBy: number };
 type SingleTableAutoSelectWhereWithParamQueryReturnType = ReturnType<typeof SingleTableAutoSelectWhereWithParamQuery>;
 type SingleTableAutoSelectWhereWithParamQueryTest = AssertTrue<AssertEqual<SingleTableAutoSelectWhereWithParamQueryResult, SingleTableAutoSelectWhereWithParamQueryReturnType>>
 
@@ -18,7 +18,7 @@ type SingleTableAutoSelectWhereWithParamQueryTest = AssertTrue<AssertEqual<Singl
  */
 const SingleQueryTableAutoSelectQuery = customersTable.as("cst").select(cols => cols.cst).exec;
 
-type SingleQueryTableAutoSelectQueryResult = { id: number, name: string, createdBy: number };
+type SingleQueryTableAutoSelectQueryResult = { customerId: number, name: string, createdBy: number };
 type SingleQueryTableAutoSelectQueryReturnType = ReturnType<typeof SingleQueryTableAutoSelectQuery>
 type SingleQueryTableAutoSelectQueryTest = AssertTrue<AssertEqual<SingleQueryTableAutoSelectQueryResult, SingleQueryTableAutoSelectQueryReturnType>>
 
@@ -27,7 +27,7 @@ type SingleQueryTableAutoSelectQueryTest = AssertTrue<AssertEqual<SingleQueryTab
  */
 const QueryTableJoinQuery = customersTable.as("cst")
     .join("INNER", usersTable, (cols) => cols.users.id.eq(cols.cst.createdBy))
-    .select(cols => ({ userId: cols.users.id, userName: cols.users.userName, userCreatedAt: cols.users.createdAt, cstId: cols.cst.id, cstName: cols.cst.name, cstCreatedBy: cols.cst.createdBy }))
+    .select(cols => ({ userId: cols.users.id, userName: cols.users.userName, userCreatedAt: cols.users.createdAt, cstId: cols.cst.customerId, cstName: cols.cst.name, cstCreatedBy: cols.cst.createdBy }))
     .exec;
 
 type QueryTableJoinQueryResult = { userId: number, userName: string, userCreatedAt: Date, cstId: number, cstName: string, cstCreatedBy: number };
@@ -39,7 +39,7 @@ type QueryTableJoinQueryTest = AssertTrue<AssertEqual<QueryTableJoinQueryResult,
  */
 const SingleTableAutoSelectQuery = customersTable.select(cols => cols.customers).exec;
 
-type SingleTableAutoSelectQueryResult = { id: number; name: string; createdBy: number; };
+type SingleTableAutoSelectQueryResult = { customerId: number; name: string; createdBy: number; };
 type SingleTableAutoSelectQueryReturnType = ReturnType<typeof SingleTableAutoSelectQuery>
 type SingleTableAutoSelectQueryTest = AssertTrue<AssertEqual<SingleTableAutoSelectQueryResult, SingleTableAutoSelectQueryReturnType>>;
 
@@ -48,7 +48,7 @@ type SingleTableAutoSelectQueryTest = AssertTrue<AssertEqual<SingleTableAutoSele
  */
 const SingleTableJoinWithAutoSelectQuery = customersTable
     .join('INNER', usersTable, (cols, { param }) => cols.users.id.eq(param("param1")))
-    .select(cols => ({ customerId: cols.customers.id, customerName: cols.customers.name, customerCreatedBy: cols.customers.createdBy, userId: cols.users.id, userName: cols.users.userName, userCreatedAt: cols.users.createdAt }))
+    .select(cols => ({ customerId: cols.customers.customerId, customerName: cols.customers.name, customerCreatedBy: cols.customers.createdBy, userId: cols.users.id, userName: cols.users.userName, userCreatedAt: cols.users.createdAt }))
     .exec;
 
 type SingleTableJoinWithAutoSelectQueryResult = {
@@ -90,9 +90,9 @@ const AutoSelectMultiJoins = customersTable
     .join('INNER', usersTable.as('parentUsers'), (cols, { and, coalesce, param }) => {
 
         const comp = and(
-            cols.parentUsers.id.eq(cols.customers.id),
+            cols.parentUsers.id.eq(cols.customers.customerId),
             cols.parentUsers.id.eq(param("parentUserEq1")),
-            cols.parentUsers.id.between(param("parentUserBetLeft"), cols.customers.id),
+            cols.parentUsers.id.between(param("parentUserBetLeft"), cols.customers.customerId),
             cols.parentUsers.id.eq(coalesce(param("parentUserGt2"), 1, 2, coalesce(1, 2, param("innerCoalesce")))),
             cols.parentUsers.userName.eq(param("parentUserNeq3")),
             cols.parentUsers.userName.between(cols.customers.name, cols.users.userName),
@@ -103,7 +103,7 @@ const AutoSelectMultiJoins = customersTable
     })
     .join('INNER', ordersTable, (cols) => cols.users.userName.eq(cols.customers.name))
     .select(cols => ({
-        customerId: cols.customers.id,
+        customerId: cols.customers.customerId,
         customerName: cols.customers.name,
         customerCreatedBy: cols.customers.createdBy,
         userId: cols.users.id,
@@ -112,7 +112,7 @@ const AutoSelectMultiJoins = customersTable
         parentUserId: cols.parentUsers.id,
         parentUserUserName: cols.parentUsers.userName,
         parentUserCreatedAt: cols.parentUsers.createdAt,
-        orderId: cols.orders.id,
+        orderId: cols.orders.orderId,
         orderCustomerId: cols.orders.customerId,
         orderCreatedBy: cols.orders.createdBy
     }))
@@ -166,7 +166,7 @@ const SingleLevelSelectWithJoins = customersTable
     .join('INNER', ordersTable, (cols) => {
         type t = typeof cols;
 
-        return cols.orders.id.eq(1);
+        return cols.orders.orderId.eq(1);
 
     })
     .join('INNER', shipmentsTable, (cols) => {
@@ -174,7 +174,7 @@ const SingleLevelSelectWithJoins = customersTable
 
         return cols.shipments.orderId.eq(1);
     })
-    .select((cols, { round, param }) => ({ id: cols.customers.id, orderCustomerId: cols.orders.customerId, customerName: cols.customers.name }))
+    .select((cols, { round, param }) => ({ id: cols.customers.customerId, orderCustomerId: cols.orders.customerId, customerName: cols.customers.name }))
     .exec;
 type SingleLevelSelectWithJoinsResult = { id: number, orderCustomerId: number, customerName: string }
 type SingleLevelSelectWithJoinsTest = AssertTrue<AssertEqual<SingleLevelSelectWithJoinsResult, ReturnType<typeof SingleLevelSelectWithJoins>>>;
@@ -188,7 +188,7 @@ const MultiLevelSelectWithJoins = customersTable
     .join('INNER', usersTable, (cols) => cols.users.id.eq(1))
     .join('INNER', usersTable.as("parentUsers"), (cols) => cols.parentUsers.id.eq(1))
     .select((cols, { jsonBuildObject }) => ({
-        customerId: cols.customers.id,
+        customerId: cols.customers.customerId,
         userName: cols.users.userName,
         subProp: jsonBuildObject({ parentUserId: cols.parentUsers.id, customers: jsonBuildObject(cols.customers) })
     }))
@@ -199,7 +199,7 @@ type multiLevelSelectWithJoinsExpectedResult = {
     subProp: {
         parentUserId: number,
         customers: {
-            id: number,
+            customerId: number,
             name: string,
             createdBy: number
         }

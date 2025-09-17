@@ -108,7 +108,7 @@ const InferParamsFromCoalesce = customersTable
         return res;
     })
     .join('INNER', ordersTable, (cols) => cols.users.userName.eq(cols.customers.name))
-    .select(cols => ({ id: cols.customers.id }))
+    .select(cols => ({ id: cols.customers.customerId }))
     .exec;
 
 type InferParamsFromCoalesceResult = typeof InferParamsFromCoalesce;

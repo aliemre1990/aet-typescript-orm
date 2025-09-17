@@ -5,7 +5,7 @@ import type { ColumnsSelection } from "../queryColumn.js";
 import type QueryTable from "../queryTable.js";
 
 type TableToColumnsMap<TDbType extends DbType, T extends { [key: string]: QueryTable<TDbType, any, any, any, any, any> }> = {
-    [K in keyof T]: ColumnsSelection<TDbType, T[K]>
+    [K in keyof T]: ColumnsSelection<TDbType, T[K], T[K]["columns"]>
 
     //     {
     //     [C in keyof T[K]["columns"] as T[K]["columns"][C]["column"]["name"]]: T[K]["columns"][C];
