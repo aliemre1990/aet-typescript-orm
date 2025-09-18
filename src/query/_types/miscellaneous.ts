@@ -6,10 +6,6 @@ import type QueryTable from "../queryTable.js";
 
 type TableToColumnsMap<TDbType extends DbType, T extends { [key: string]: QueryTable<TDbType, any, any, any, any, any> }> = {
     [K in keyof T]: ColumnsSelection<TDbType, T[K], T[K]["columns"]>
-
-    //     {
-    //     [C in keyof T[K]["columns"] as T[K]["columns"][C]["column"]["name"]]: T[K]["columns"][C];
-    // }
 };
 
 type TableToObject<TTable extends QueryTable<DbType, ColumnsObjectType<DbType>, string, Table<DbType, ColumnsObjectType<DbType>, string>, QueryColumnsObjectType<DbType>, string | undefined>> = {

@@ -22,7 +22,7 @@ const MultiTableGroupByQuery = customersTable
     .join('INNER', shipmentsTable, cols => cols.shipments.id.eq(1))
     .join('INNER', employeesTable, cols => cols.shipments.id.eq(1))
     .groupBy(cols => [cols.customers, cols.users.id, cols.shipments, cols.employees.id])
-    .select((cols, { sum, jsonAgg }) => {
+    .select((cols, { sum, jsonAgg, jsonBuildObject }) => {
 
         return ({
             customerId: cols.customers.customerId,
@@ -34,7 +34,9 @@ const MultiTableGroupByQuery = customersTable
             shipmentCreatedBy: cols.shipments.createdBy,
             sumNull: sum(cols.employees.salary),
             sumNotNull: sum(cols.employees.deptId),
-            jsonAggResult: jsonAgg(cols.customers)
+            jsonAggResult: jsonAgg(cols.customers),
+            jsonAggResult2: jsonAgg(cols.customers.customerId),
+            jsonAggResult3: jsonAgg(jsonBuildObject(cols.customers))
         })
     }
     )
@@ -50,7 +52,9 @@ type MultiTableGroupByQueryResult = {
     shipmentCreatedBy: number,
     sumNull: number | null,
     sumNotNull: number,
-    jsonAggResult: [number, string, number]
+    jsonAggResult: [number, string, number][],
+    jsonAggResult2: number[],
+    jsonAggResult3: { customerId: number, name: string, createdBy: number }[]
 }
 type MultiTableGroupByQueryReturnType = ReturnType<typeof MultiTableGroupByQuery>;
 

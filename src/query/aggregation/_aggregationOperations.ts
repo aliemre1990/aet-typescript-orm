@@ -22,6 +22,8 @@ const aggregationOperations = {
 
     // JSON aggregations (PostgreSQL/MySQL)
     jsonAgg: { name: 'JSON_AGG' },
+    jsonbAgg: { name: 'JSONB_AGG' },
+
     jsonObjectAgg: { name: 'JSON_OBJECT_AGG' },
 
     // Boolean aggregations

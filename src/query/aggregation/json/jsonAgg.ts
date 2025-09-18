@@ -9,7 +9,8 @@ import BasicColumnAggregationOperation, { aggregationOperations } from "../_aggr
 
 type InferReturnTypeFromArg<TArg> =
     TArg extends IComparable<any, any, any, infer TFinalType, any> ? TFinalType[] :
-    TArg extends ColumnsSelection<any, any, infer TColumns> ? MapQueryColumnsToTuple<UnionToTuple<TColumns[keyof TColumns]>> :
+    TArg extends ColumnsSelection<any, any, infer TColumns> ? MapQueryColumnsToTuple<UnionToTuple<TColumns[keyof TColumns]>>[] :
+    TArg extends IComparable<any, any, any, infer TFinalType, any> ? TFinalType[] :
     never
     ;
 
@@ -32,4 +33,17 @@ function jsonAggFn<
     >(dbTypes.postgresql, [arg], aggregationOperations.jsonAgg);
 }
 
-export default jsonAggFn;
+
+function jsonbAggFn<
+    TArg extends IComparable<PgDbType, any, any, any, any> | ColumnsSelection<PgDbType, any, any>
+>(
+    arg: TArg
+) {
+    return new BasicColumnAggregationOperation<
+        PgDbType,
+        [TArg],
+        InferReturnTypeFromArg<TArg>
+    >(dbTypes.postgresql, [arg], aggregationOperations.jsonbAgg);
+}
+
+export { jsonAggFn, jsonbAggFn };
