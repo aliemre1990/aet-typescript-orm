@@ -85,3 +85,14 @@ type GroupByWithMultilevelSelectQueryResult = {
 }
 type GroupByWithMultilevelSelectQueryReturnType = ReturnType<typeof GroupByWithMultilevelSelectQuery>;
 type GroupByWithMultilevelSelectQueryTest = AssertTrue<AssertEqual<GroupByWithMultilevelSelectQueryResult, GroupByWithMultilevelSelectQueryReturnType>>
+
+
+const GroupByHaving = customersTable
+    .join('INNER', usersTable, cols => cols.users.id.eq(cols.customers.createdBy))
+    .join('INNER', shipmentsTable, cols => cols.shipments.id.eq(1))
+    .groupBy((cols) => {
+        return [cols.customers, cols.users.id]
+    })
+    .having((cols, { param, sum, and }) => and(cols.customers.customerId.eq(param("havingParam")), sum(cols.shipments.id).eq(param("sumParam"))))
+    .select((cols) => ({ id: cols.customers.customerId }))
+    .exec;

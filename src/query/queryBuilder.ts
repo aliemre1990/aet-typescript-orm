@@ -18,6 +18,7 @@ import type IGroupByClause from "./_interfaces/IGroupByClause.js";
 import type { DbFunctions, DbOperators } from "./_types/ops.js";
 import type QueryParam from "./param.js";
 import type { GroupedTablesToColumnsMap } from "./_types/grouping.js";
+import type IHavingClause from "./_interfaces/IHavingClause.js";
 
 class QueryBuilder<
     TDbType extends DbType,
@@ -30,7 +31,8 @@ class QueryBuilder<
     ISelectClause<TDbType, TTables, TParams, TGroupedColumns>,
     IJoinClause<TDbType, TTables, TParams>,
     IWhereClause<TDbType, TTables, TParams>,
-    IGroupByClause<TDbType, TTables, TParams> {
+    IGroupByClause<TDbType, TTables, TParams>,
+    IHavingClause<TDbType, TTables, TParams, TGroupedColumns> {
 
     colsSelection?: TResult;
 
@@ -114,7 +116,17 @@ class QueryBuilder<
 
     groupBy<const TCbResult extends (ColumnsSelection<TDbType, any, any> | QueryColumn<TDbType, any, any, any>)[]
     >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TTables>>) => TCbResult) {
-        return this as ISelectClause<TDbType, TTables, TParams, TCbResult>;
+        return new QueryBuilder(this.tables) as
+            ISelectClause<TDbType, TTables, TParams, TCbResult> &
+            IHavingClause<TDbType, TTables, TParams, TCbResult>;
+    }
+
+    having<TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>
+    >(cb: (
+        cols: GroupedTablesToColumnsMap<TDbType, TTables, TGroupedColumns>,
+        ops: DbOperators<TDbType, true>
+    ) => TCbResult) {
+        return new QueryBuilder(this.tables) as ISelectClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>, TGroupedColumns>
     }
 
     exec(params?: QueryParamsToObject<TParams>):
