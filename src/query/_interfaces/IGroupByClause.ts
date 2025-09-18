@@ -15,9 +15,7 @@ interface IGroupByClause<
     groupBy<
         const TCbResult extends (ColumnsSelection<TDbType, any, any> | QueryColumn<TDbType, any, any, any>)[]
     >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TTables>>) => TCbResult):
-        ISelectClause<TDbType, TTables, TParams, TCbResult> &
-        IWhereClause<TDbType, TTables, TParams, TCbResult>
-
+        ISelectClause<TDbType, TTables, TParams, TCbResult> 
 }
 
 export default IGroupByClause;

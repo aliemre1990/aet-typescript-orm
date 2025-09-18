@@ -29,7 +29,7 @@ class QueryBuilder<
     implements
     ISelectClause<TDbType, TTables, TParams, TGroupedColumns>,
     IJoinClause<TDbType, TTables, TParams>,
-    IWhereClause<TDbType, TTables, TParams, TGroupedColumns>,
+    IWhereClause<TDbType, TTables, TParams>,
     IGroupByClause<TDbType, TTables, TParams> {
 
     colsSelection?: TResult;
@@ -106,13 +106,15 @@ class QueryBuilder<
         cols: TableToColumnsMap<TDbType, TablesToObject<TTables>>,
         ops: DbOperators<TDbType, TGroupedColumns extends undefined ? false : true>
     ) => TCbResult):
-        ISelectClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>, TGroupedColumns> {
-        return new QueryBuilder(this.tables) as ISelectClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>, TGroupedColumns>;
+        ISelectClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>> & IGroupByClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>> {
+        return new QueryBuilder(this.tables) as
+            ISelectClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>> &
+            IGroupByClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>>;
     }
 
     groupBy<const TCbResult extends (ColumnsSelection<TDbType, any, any> | QueryColumn<TDbType, any, any, any>)[]
     >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TTables>>) => TCbResult) {
-        return this as ISelectClause<TDbType, TTables, TParams, TCbResult> & IWhereClause<TDbType, TTables, TParams, TCbResult>;
+        return this as ISelectClause<TDbType, TTables, TParams, TCbResult>;
     }
 
     exec(params?: QueryParamsToObject<TParams>):
