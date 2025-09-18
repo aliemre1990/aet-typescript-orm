@@ -8,12 +8,15 @@ import type { GroupedTablesToColumnsMap } from "../_types/grouping.js";
 import type { DbFunctions } from "../_types/ops.js";
 import type QueryParam from "../param.js";
 import type { ColumnsSelection } from "../queryColumn.js";
+import type { OrderBySpecs } from "./IOrderByClause.js";
+import type { GroupBySpecs } from "./IGroupByClause.js";
 
 interface ISelectClause<
     TDbType extends DbType,
     TTables extends readonly QueryTable<TDbType, any, any, any, any, any>[],
     TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined,
-    TGroupedColumns extends (ColumnsSelection<TDbType, any, any> | QueryColumn<TDbType, any, any, any>)[] | undefined = undefined
+    TGroupedColumns extends GroupBySpecs<TDbType> | undefined = undefined,
+    TOrderBySpecs extends OrderBySpecs<TDbType> | undefined = undefined
 > {
     select<
         TCb extends (
@@ -23,7 +26,7 @@ interface ISelectClause<
         TCbResult extends TResultShape<TDbType> = TCb extends (cols: any, ops: any) => infer TR ? TR : never
     >(
         cb: TCb
-    ): IExecuteableQuery<TDbType, TCbResult, AccumulateColumnParams<TParams, TCbResult>>
+    ): IExecuteableQuery<TDbType, TCbResult, AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns>
 
 }
 

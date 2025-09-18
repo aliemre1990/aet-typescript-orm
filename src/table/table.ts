@@ -5,8 +5,7 @@ import type { IExecuteableQuery } from "../query/_interfaces/IExecuteableQuery.j
 import type ColumnLogicalOperation from "../query/logicalOperations.js";
 import { QueryBuilder } from "../query/queryBuilder.js";
 import type { TablesToObject, TableToColumnsMap } from "../query/_types/miscellaneous.js";
-import type { AccumulateColumnParams, TResultShape } from "../query/_types/result.js";
-import type { JoinType } from "../types.js";
+import type { AccumulateColumnParams, AccumulateOrderByParams, TResultShape } from "../query/_types/result.js";
 import Column from "./column.js";
 import QueryColumn, { type ColumnsSelection } from "../query/queryColumn.js";
 import type { QueryTableSpecsType, TableSpecsType } from "./types/tableSpecs.js";
@@ -17,6 +16,10 @@ import type ISelectClause from "../query/_interfaces/ISelectClause.js";
 import type IWhereClause from "../query/_interfaces/IWhereClause.js";
 import type IGroupByClause from "../query/_interfaces/IGroupByClause.js";
 import type { DbFunctions, DbOperators } from "../query/_types/ops.js";
+import type { JoinType } from "../query/_interfaces/IJoinClause.js";
+import type IOrderByClause from "../query/_interfaces/IOrderByClause.js";
+import type { OrderBySpecs } from "../query/_interfaces/IOrderByClause.js";
+import type { GroupBySpecs } from "../query/_interfaces/IGroupByClause.js";
 
 class ForeignKey {
     constructor(public column: string, public references: { table: string; column: string | 'self-parent' | 'self-child' }) { }
@@ -31,7 +34,8 @@ class Table<
     ISelectClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>]>,
     IJoinClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>]>,
     IWhereClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>]>,
-    IGroupByClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>]> {
+    IGroupByClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>]>,
+    IOrderByClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>]> {
 
     constructor(
         public DbType: TDbType,
@@ -126,7 +130,8 @@ class Table<
         return new QueryBuilder<TDbType, [typeof queryTable]>([queryTable]).where(cb);
     }
 
-    groupBy<const TCbResult extends (ColumnsSelection<TDbType, any, any> | QueryColumn<TDbType, any, any, any>)[]
+    groupBy<
+        const TCbResult extends GroupBySpecs<TDbType>
     >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>) => TCbResult) {
         const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
             prev[curr[0]] = new QueryColumn(curr[1]);
@@ -136,6 +141,20 @@ class Table<
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName, any>, TQueryColumns, undefined>(this, queryColumns);
 
         return new QueryBuilder<TDbType, [typeof queryTable]>([queryTable]).groupBy(cb);
+    }
+
+    orderBy<
+        const TCbResult extends OrderBySpecs<TDbType>
+    >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>) => TCbResult):
+        ISelectClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>], AccumulateOrderByParams<TDbType, undefined, TCbResult>> {
+        const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
+            prev[curr[0]] = new QueryColumn(curr[1]);
+            return prev;
+        }, {} as QueryColumnsObjectType<TDbType, QueryTableSpecsType>) as TQueryColumns
+
+        const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName, any>, TQueryColumns, undefined>(this, queryColumns);
+
+        return new QueryBuilder<TDbType, [typeof queryTable]>([queryTable]).orderBy(cb);
     }
 }
 

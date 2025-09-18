@@ -7,10 +7,12 @@ type AssertEqual<T, U> =
     : false
     : false;
 type AssertEqualAlt<T, U> = T extends U ? U extends T ? true : false : false;
+type AssertExtends<T, U> = T extends U ? true : false;
 
 export type {
     AssertTrue,
     AssertFalse,
     AssertEqual,
-    AssertEqualAlt
+    AssertEqualAlt,
+    AssertExtends
 }

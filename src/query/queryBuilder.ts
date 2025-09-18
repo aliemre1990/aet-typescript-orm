@@ -2,13 +2,12 @@ import { DbType, type DbValueTypes } from "../db.js";
 import QueryColumn, { type ColumnsSelection } from "./queryColumn.js";
 import type Table from "../table/table.js";
 import type { QueryColumnsObjectType } from "../table/types/utils.js";
-import type { JoinType } from "../types.js";
 import { isNullOrUndefined } from "../utility/guards.js";
 import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
 import { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
 import type { TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.js";
-import type { AccumulateColumnParams, AccumulateComparisonParams, ColumnsToResultMap, QueryParamsToObject, TResultShape } from "./_types/result.js";
+import type { AccumulateColumnParams, AccumulateComparisonParams, AccumulateOrderByParams, ColumnsToResultMap, QueryParamsToObject, TResultShape } from "./_types/result.js";
 import QueryTable from "./queryTable.js";
 import type Column from "../table/column.js";
 import type IJoinClause from "./_interfaces/IJoinClause.js";
@@ -19,20 +18,26 @@ import type { DbFunctions, DbOperators } from "./_types/ops.js";
 import type QueryParam from "./param.js";
 import type { GroupedTablesToColumnsMap } from "./_types/grouping.js";
 import type IHavingClause from "./_interfaces/IHavingClause.js";
+import type { JoinType } from "./_interfaces/IJoinClause.js";
+import type IOrderByClause from "./_interfaces/IOrderByClause.js";
+import type { OrderBySpecs } from "./_interfaces/IOrderByClause.js";
+import type { GroupBySpecs } from "./_interfaces/IGroupByClause.js";
 
 class QueryBuilder<
     TDbType extends DbType,
     TTables extends readonly QueryTable<TDbType, any, any, any, any, any>[],
     TResult extends TResultShape<TDbType> | undefined = undefined,
     TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined,
-    TGroupedColumns extends (ColumnsSelection<TDbType, any, any> | QueryColumn<TDbType, any, any, any>)[] | undefined = undefined,
+    TGroupedColumns extends GroupBySpecs<TDbType> | undefined = undefined,
+    TOrderBySpecs extends OrderBySpecs<TDbType> | undefined = undefined
 >
     implements
-    ISelectClause<TDbType, TTables, TParams, TGroupedColumns>,
+    ISelectClause<TDbType, TTables, TParams, TGroupedColumns, TOrderBySpecs>,
     IJoinClause<TDbType, TTables, TParams>,
     IWhereClause<TDbType, TTables, TParams>,
     IGroupByClause<TDbType, TTables, TParams>,
-    IHavingClause<TDbType, TTables, TParams, TGroupedColumns> {
+    IHavingClause<TDbType, TTables, TParams, TGroupedColumns>,
+    IOrderByClause<TDbType, TTables, TParams, TGroupedColumns> {
 
     colsSelection?: TResult;
 
@@ -53,7 +58,7 @@ class QueryBuilder<
     >(
         cb: TCb
     ): IExecuteableQuery<TDbType, TCbResult, AccumulateColumnParams<TParams, TCbResult>> {
-        return new QueryBuilder(this.tables) as IExecuteableQuery<TDbType, TCbResult, AccumulateColumnParams<TParams, TCbResult>>;
+        return new QueryBuilder(this.tables) as IExecuteableQuery<TDbType, TCbResult, AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns, TOrderBySpecs>;
     };
 
 
@@ -77,7 +82,8 @@ class QueryBuilder<
         IJoinClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
         ISelectClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
         IWhereClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
-        IGroupByClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> {
+        IGroupByClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
+        IOrderByClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> {
         let innerJoinTable: TInnerJoinResult;
         if ("table" in table) {
             innerJoinTable = table as TInnerJoinResult;
@@ -99,7 +105,8 @@ class QueryBuilder<
             IJoinClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
             ISelectClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
             IWhereClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
-            IGroupByClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>
+            IGroupByClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
+            IOrderByClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>
     }
 
     where<
@@ -108,17 +115,22 @@ class QueryBuilder<
         cols: TableToColumnsMap<TDbType, TablesToObject<TTables>>,
         ops: DbOperators<TDbType, TGroupedColumns extends undefined ? false : true>
     ) => TCbResult):
-        ISelectClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>> & IGroupByClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>> {
+        ISelectClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>> &
+        IGroupByClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>> &
+        IOrderByClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>> {
         return new QueryBuilder(this.tables) as
             ISelectClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>> &
-            IGroupByClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>>;
+            IGroupByClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>> &
+            IOrderByClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>>;
     }
 
-    groupBy<const TCbResult extends (ColumnsSelection<TDbType, any, any> | QueryColumn<TDbType, any, any, any>)[]
+    groupBy<
+        const TCbResult extends GroupBySpecs<TDbType>
     >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TTables>>) => TCbResult) {
         return new QueryBuilder(this.tables) as
             ISelectClause<TDbType, TTables, TParams, TCbResult> &
-            IHavingClause<TDbType, TTables, TParams, TCbResult>;
+            IHavingClause<TDbType, TTables, TParams, TCbResult> &
+            IOrderByClause<TDbType, TTables, TParams, TCbResult>;
     }
 
     having<TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>
@@ -126,7 +138,15 @@ class QueryBuilder<
         cols: GroupedTablesToColumnsMap<TDbType, TTables, TGroupedColumns>,
         ops: DbOperators<TDbType, true>
     ) => TCbResult) {
-        return new QueryBuilder(this.tables) as ISelectClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>, TGroupedColumns>
+        return new QueryBuilder(this.tables) as
+            ISelectClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>, TGroupedColumns> &
+            IOrderByClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>, TGroupedColumns>
+    }
+
+    orderBy<
+        const TCbResult extends OrderBySpecs<TDbType>
+    >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TTables>>) => TCbResult) {
+        return new QueryBuilder(this.tables) as ISelectClause<TDbType, TTables, AccumulateOrderByParams<TDbType, TParams, TCbResult>, TGroupedColumns, TCbResult>
     }
 
     exec(params?: QueryParamsToObject<TParams>):

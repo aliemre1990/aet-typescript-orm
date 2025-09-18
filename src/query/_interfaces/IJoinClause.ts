@@ -1,7 +1,6 @@
 import { DbType, type DbValueTypes } from "../../db.js";
 import type QueryColumn from "../queryColumn.js";
 import type Table from "../../table/table.js";
-import type { JoinType } from "../../types.js";
 import type ColumnComparisonOperation from "../comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "../logicalOperations.js";
 import type { TablesToObject, TableToColumnsMap } from "../_types/miscellaneous.js";
@@ -13,12 +12,22 @@ import type { DbOperators } from "../_types/ops.js";
 import type IWhereClause from "./IWhereClause.js";
 import type QueryParam from "../param.js";
 import type { ColumnsSelection } from "../queryColumn.js";
+import type IOrderByClause from "./IOrderByClause.js";
+
+const joinTypes = {
+    inner: 'INNER',
+    left: 'LEFT',
+    right: 'RIGHT',
+    full: 'FULL'
+} as const;
+
+type JoinType = typeof joinTypes[keyof typeof joinTypes];
+
 
 interface IJoinClause<
     TDbType extends DbType,
     TTables extends readonly QueryTable<TDbType, any, any, any, any, any>[],
-    TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined,
-    TGroupedColumns extends (ColumnsSelection<TDbType, any, any> | QueryColumn<TDbType, any, any, any>)[] | undefined = undefined,
+    TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined
 > {
 
     join<
@@ -41,8 +50,17 @@ interface IJoinClause<
         IJoinClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
         ISelectClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
         IWhereClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
-        IGroupByClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>
+        IGroupByClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
+        IOrderByClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>
 
 }
 
 export default IJoinClause;
+
+export {
+    joinTypes
+}
+
+export type {
+    JoinType
+}

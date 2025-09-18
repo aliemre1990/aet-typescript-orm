@@ -8,6 +8,7 @@ import type ISelectClause from "./ISelectClause.js";
 import type { DbOperators } from "../_types/ops.js";
 import type QueryParam from "../param.js";
 import type IGroupByClause from "./IGroupByClause.js";
+import type IOrderByClause from "./IOrderByClause.js";
 
 interface IWhereClause<
     TDbType extends DbType,
@@ -20,7 +21,8 @@ interface IWhereClause<
         ops: DbOperators<TDbType, false>
     ) => TCbResult):
         ISelectClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>> &
-        IGroupByClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>>
+        IGroupByClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>> &
+        IOrderByClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>>
 
 }
 

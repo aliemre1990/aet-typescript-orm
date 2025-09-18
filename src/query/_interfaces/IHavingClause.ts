@@ -9,18 +9,22 @@ import type ISelectClause from "./ISelectClause.js";
 import type ColumnComparisonOperation from "../comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "../logicalOperations.js";
 import type { GroupedTablesToColumnsMap } from "../_types/grouping.js";
+import type IOrderByClause from "./IOrderByClause.js";
+import type { GroupBySpecs } from "./IGroupByClause.js";
 
 interface IHavingClause<
     TDbType extends DbType,
     TTables extends readonly QueryTable<TDbType, any, any, any, any, any>[],
     TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined,
-    TGroupedColumns extends (ColumnsSelection<TDbType, any, any> | QueryColumn<TDbType, any, any, any>)[] | undefined = undefined
+    TGroupedColumns extends GroupBySpecs<TDbType> | undefined = undefined
 > {
     having<TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>
     >(cb: (
         cols: GroupedTablesToColumnsMap<TDbType, TTables, TGroupedColumns>,
         ops: DbOperators<TDbType, true>
-    ) => TCbResult): ISelectClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>, TGroupedColumns>
+    ) => TCbResult):
+        ISelectClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>, TGroupedColumns> &
+        IOrderByClause<TDbType, TTables, AccumulateComparisonParams<TParams, TCbResult>, TGroupedColumns>
 
 }
 
