@@ -1,5 +1,5 @@
-import type { DbType, DbValueTypes, PgDbType } from "../../../db.js";
-import type { PgValueTypes } from "../../../postgresql/dataTypes.js";
+import type { DbType, PgDbType } from "../../../db.js";
+import type { DbValueTypes } from "../../../table/column.js";
 import type { DeepPrettify, IsAny, UnionToTuple } from "../../../utility/common.js";
 import type AggregatedColumn from "../../aggregation/_aggregatedColumn.js";
 import type { IComparable } from "../../comparisons/_interfaces/IComparable.js";
@@ -20,7 +20,7 @@ type InferFirstTypeFromArgs<TDbType extends DbType, TArgs extends
 
     Rest extends (QueryParam<TDbType, string, any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
     InferFirstTypeFromArgs<TDbType, Rest> :
-    TDbType extends PgDbType ? PgValueTypes : never :
+    DbValueTypes :
 
     TValueType :
 
@@ -42,8 +42,8 @@ type InferFirstTypeFromArgs<TDbType extends DbType, TArgs extends
     First extends object ? First :
     Rest extends (QueryParam<TDbType, string, any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
     InferFirstTypeFromArgs<TDbType, Rest> :
-    TDbType extends PgDbType ? PgValueTypes : never :
-    TDbType extends PgDbType ? PgValueTypes : never
+    DbValueTypes :
+    DbValueTypes
     ;
 
 type IsContainsNonNull<TDbType extends DbType, TArgs extends

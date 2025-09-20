@@ -1,7 +1,7 @@
 import type { DbType } from "../db.js";
-import QueryColumn, { type ColumnsSelection } from "../query/queryColumn.js";
+import QueryColumn, { type QueryColumnsObjectType } from "../query/queryColumn.js";
+import type { ColumnsObjectType } from "../table/column.js";
 import type Table from "../table/table.js";
-import type { ColumnsObjectType, QueryColumnsObjectType, QueryTableSpecsType } from "../table/types/utils.js";
 import type { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
 import type { GroupBySpecs } from "./_interfaces/IGroupByClause.js";
 import type IGroupByClause from "./_interfaces/IGroupByClause.js";
@@ -17,6 +17,8 @@ import type { AccumulateColumnParams, AccumulateOrderByParams, TResultShape } fr
 import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
 import { QueryBuilder } from "./queryBuilder.js";
+
+type QueryTableSpecsType<TTableName extends string = string, TAsName extends string = string> = { tableName: TTableName, asTableName?: TAsName }
 
 class QueryTable<
     TDbType extends DbType,
@@ -53,7 +55,7 @@ class QueryTable<
         TCbResult extends TResultShape<TDbType> = TCb extends (cols: any, ops: any) => infer TR ? TR : never
     >(
         cb: TCb
-    ): IExecuteableQuery<TDbType, TCbResult, AccumulateColumnParams<undefined, TCbResult>> {
+    ): IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], TCbResult[], AccumulateColumnParams<undefined, TCbResult>> {
 
         return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>([this]).select<TCb, TCbResult>(cb);
     }
@@ -110,3 +112,7 @@ class QueryTable<
 }
 
 export default QueryTable;
+
+export type {
+    QueryTableSpecsType
+}

@@ -1,16 +1,15 @@
-import { DbType, type DbValueTypes } from "../../db.js";
+import { DbType } from "../../db.js";
 import type { AccumulateComparisonParams } from "../_types/result.js";
 import type QueryTable from "../queryTable.js";
-import type QueryColumn from "../queryColumn.js";
 import type { DbOperators } from "../_types/ops.js";
 import type QueryParam from "../param.js";
-import type { ColumnsSelection } from "../queryColumn.js";
 import type ISelectClause from "./ISelectClause.js";
 import type ColumnComparisonOperation from "../comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "../logicalOperations.js";
 import type { GroupedTablesToColumnsMap } from "../_types/grouping.js";
 import type IOrderByClause from "./IOrderByClause.js";
 import type { GroupBySpecs } from "./IGroupByClause.js";
+import type { DbValueTypes } from "../../table/column.js";
 
 interface IHavingClause<
     TDbType extends DbType,

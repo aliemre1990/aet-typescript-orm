@@ -1,7 +1,8 @@
-import type { DbType, DbValueTypes } from "../../db.js";
+import type { DbType } from "../../db.js";
+import type { ColumnType, DbValueTypes } from "../../table/column.js";
 import type Column from "../../table/column.js";
-import type { ColumnType, QueryTableSpecsType } from "../../table/types/utils.js";
 import QueryColumn from "../queryColumn.js";
+import type { QueryTableSpecsType } from "../queryTable.js";
 
 class GroupedColumn<
     TDbType extends DbType,

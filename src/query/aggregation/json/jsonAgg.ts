@@ -1,10 +1,8 @@
-import { dbTypes, type DbValueTypes, type PgDbType } from "../../../db.js";
+import { dbTypes, type PgDbType } from "../../../db.js";
 import type { UnionToTuple } from "../../../utility/common.js";
 import type { IComparable } from "../../comparisons/_interfaces/IComparable.js";
-import type JSONBuildObjectFunction from "../../functions/jsonFunctions/jsonBuildObject.js";
 import type { ColumnsSelection } from "../../queryColumn.js";
 import type QueryColumn from "../../queryColumn.js";
-import type QueryTable from "../../queryTable.js";
 import BasicColumnAggregationOperation, { aggregationOperations } from "../_aggregationOperations.js";
 
 type InferReturnTypeFromArg<TArg> =

@@ -1,4 +1,4 @@
-import { DbType, type DbValueTypes } from "../../db.js";
+import { DbType } from "../../db.js";
 import type ColumnComparisonOperation from "../comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "../logicalOperations.js";
 import type { TablesToObject, TableToColumnsMap } from "../_types/miscellaneous.js";
@@ -9,6 +9,7 @@ import type { DbOperators } from "../_types/ops.js";
 import type QueryParam from "../param.js";
 import type IGroupByClause from "./IGroupByClause.js";
 import type IOrderByClause from "./IOrderByClause.js";
+import type { DbValueTypes } from "../../table/column.js";
 
 interface IWhereClause<
     TDbType extends DbType,

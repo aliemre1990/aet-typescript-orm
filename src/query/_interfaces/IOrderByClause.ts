@@ -1,13 +1,12 @@
-import { DbType, type DbValueTypes } from "../../db.js";
-import type QueryColumn from "../queryColumn.js";
+import { DbType } from "../../db.js";
 import type { TablesToObject, TableToColumnsMap } from "../_types/miscellaneous.js";
-import type { AccumulateColumnParams, AccumulateOrderByParams } from "../_types/result.js";
+import type { AccumulateOrderByParams } from "../_types/result.js";
 import type QueryTable from "../queryTable.js";
 import type ISelectClause from "./ISelectClause.js";
 import type QueryParam from "../param.js";
-import type { ColumnsSelection } from "../queryColumn.js";
 import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
 import type { GroupBySpecs } from "./IGroupByClause.js";
+import type { DbValueTypes } from "../../table/column.js";
 
 const orderTypes = {
     asc: 'ASC',

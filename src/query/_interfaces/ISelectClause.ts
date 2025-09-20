@@ -1,4 +1,4 @@
-import { DbType, type DbValueTypes } from "../../db.js";
+import { DbType } from "../../db.js";
 import type { TablesToObject, TableToColumnsMap } from "../_types/miscellaneous.js";
 import type { AccumulateColumnParams, TResultShape } from "../_types/result.js";
 import { IExecuteableQuery } from "./IExecuteableQuery.js";
@@ -10,6 +10,7 @@ import type QueryParam from "../param.js";
 import type { ColumnsSelection } from "../queryColumn.js";
 import type { OrderBySpecs } from "./IOrderByClause.js";
 import type { GroupBySpecs } from "./IGroupByClause.js";
+import type { DbValueTypes } from "../../table/column.js";
 
 interface ISelectClause<
     TDbType extends DbType,
@@ -26,7 +27,7 @@ interface ISelectClause<
         TCbResult extends TResultShape<TDbType> = TCb extends (cols: any, ops: any) => infer TR ? TR : never
     >(
         cb: TCb
-    ): IExecuteableQuery<TDbType, TCbResult, AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns>
+    ): IExecuteableQuery<TDbType, TTables, TCbResult[], AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns, TOrderBySpecs>
 
 }
 

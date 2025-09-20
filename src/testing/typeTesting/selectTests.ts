@@ -1,3 +1,4 @@
+import type { IExecuteableQuery } from "../../query/_interfaces/IExecuteableQuery.js";
 import { customersTable, ordersTable, shipmentsTable, usersTable } from "./_tables.js";
 import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
 
@@ -9,7 +10,7 @@ const SingleTableAutoSelectWhereWithParamQuery = customersTable
     .select(cols => cols.customers)
     .exec;
 
-type SingleTableAutoSelectWhereWithParamQueryResult = { customerId: number, name: string, createdBy: number };
+type SingleTableAutoSelectWhereWithParamQueryResult = { customerId: number, name: string, createdBy: number }[];
 type SingleTableAutoSelectWhereWithParamQueryReturnType = ReturnType<typeof SingleTableAutoSelectWhereWithParamQuery>;
 type SingleTableAutoSelectWhereWithParamQueryTest = AssertTrue<AssertEqual<SingleTableAutoSelectWhereWithParamQueryResult, SingleTableAutoSelectWhereWithParamQueryReturnType>>
 
@@ -18,7 +19,9 @@ type SingleTableAutoSelectWhereWithParamQueryTest = AssertTrue<AssertEqual<Singl
  */
 const SingleQueryTableAutoSelectQuery = customersTable.as("cst").select(cols => cols.cst).exec;
 
-type SingleQueryTableAutoSelectQueryResult = { customerId: number, name: string, createdBy: number };
+type tp = (ReturnType<typeof SingleQueryTableAutoSelectQuery>) extends IExecuteableQuery<any, any, infer TResult> ? TResult : never;
+
+type SingleQueryTableAutoSelectQueryResult = { customerId: number, name: string, createdBy: number }[];
 type SingleQueryTableAutoSelectQueryReturnType = ReturnType<typeof SingleQueryTableAutoSelectQuery>
 type SingleQueryTableAutoSelectQueryTest = AssertTrue<AssertEqual<SingleQueryTableAutoSelectQueryResult, SingleQueryTableAutoSelectQueryReturnType>>
 
@@ -30,7 +33,7 @@ const QueryTableJoinQuery = customersTable.as("cst")
     .select(cols => ({ userId: cols.users.id, userName: cols.users.userName, userCreatedAt: cols.users.createdAt, cstId: cols.cst.customerId, cstName: cols.cst.name, cstCreatedBy: cols.cst.createdBy }))
     .exec;
 
-type QueryTableJoinQueryResult = { userId: number, userName: string, userCreatedAt: Date, cstId: number, cstName: string, cstCreatedBy: number };
+type QueryTableJoinQueryResult = { userId: number, userName: string, userCreatedAt: Date, cstId: number, cstName: string, cstCreatedBy: number }[];
 type QueryTableJoinQueryReturnType = ReturnType<typeof QueryTableJoinQuery>;
 type QueryTableJoinQueryTest = AssertTrue<AssertEqual<QueryTableJoinQueryResult, QueryTableJoinQueryReturnType>>
 
@@ -39,7 +42,7 @@ type QueryTableJoinQueryTest = AssertTrue<AssertEqual<QueryTableJoinQueryResult,
  */
 const SingleTableAutoSelectQuery = customersTable.select(cols => cols.customers).exec;
 
-type SingleTableAutoSelectQueryResult = { customerId: number; name: string; createdBy: number; };
+type SingleTableAutoSelectQueryResult = { customerId: number; name: string; createdBy: number; }[];
 type SingleTableAutoSelectQueryReturnType = ReturnType<typeof SingleTableAutoSelectQuery>
 type SingleTableAutoSelectQueryTest = AssertTrue<AssertEqual<SingleTableAutoSelectQueryResult, SingleTableAutoSelectQueryReturnType>>;
 
@@ -58,7 +61,7 @@ type SingleTableJoinWithAutoSelectQueryResult = {
     userId: number;
     userName: string;
     userCreatedAt: Date;
-};
+}[];
 type SingleTableJoinWithAutoSelectQueryReturnType = ReturnType<typeof SingleTableJoinWithAutoSelectQuery>;
 type SingleTableJoinWithAutoSelectQueryTest = AssertTrue<AssertEqual<SingleTableJoinWithAutoSelectQueryResult, SingleTableJoinWithAutoSelectQueryReturnType>>
 
@@ -131,7 +134,7 @@ type AutoSelectMultiJoinsResult = {
     orderId: number;
     orderCustomerId: number;
     orderCreatedBy: number;
-}
+}[]
 type AutoSelectMultiJoinsReturnType = ReturnType<typeof AutoSelectMultiJoins>
 type AutoSelectMultiJoinsTest = AssertTrue<AssertEqual<AutoSelectMultiJoinsResult, AutoSelectMultiJoinsReturnType>>;
 
@@ -176,7 +179,7 @@ const SingleLevelSelectWithJoins = customersTable
     })
     .select((cols, { round, param }) => ({ id: cols.customers.customerId, orderCustomerId: cols.orders.customerId, customerName: cols.customers.name }))
     .exec;
-type SingleLevelSelectWithJoinsResult = { id: number, orderCustomerId: number, customerName: string }
+type SingleLevelSelectWithJoinsResult = { id: number, orderCustomerId: number, customerName: string }[];
 type SingleLevelSelectWithJoinsTest = AssertTrue<AssertEqual<SingleLevelSelectWithJoinsResult, ReturnType<typeof SingleLevelSelectWithJoins>>>;
 
 type SingleLevelSelectWithJoinsParams = typeof SingleLevelSelectWithJoins extends (params: infer TParams) => any ? TParams : never;
@@ -204,6 +207,6 @@ type multiLevelSelectWithJoinsExpectedResult = {
             createdBy: number
         }
     }
-}
+}[];
 type multiLevelSelectWithJoinsResult = ReturnType<typeof MultiLevelSelectWithJoins>
 type MultiLevelSelectWithJoinsTest = AssertTrue<AssertEqual<multiLevelSelectWithJoinsExpectedResult, multiLevelSelectWithJoinsResult>>

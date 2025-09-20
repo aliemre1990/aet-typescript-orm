@@ -1,5 +1,5 @@
 import type { DbType, PgDbType } from "../../db.js";
-import type { GetArrayEquivalentPgValueType } from "../../postgresql/dataTypes.js";
+import type { GetArrayEquivalentPgValueType } from "../../table/columnTypes.js";
 import { isNullOrUndefined } from "../../utility/guards.js";
 import ColumnComparisonOperation, { comparisonOperations } from "./_comparisonOperations.js";
 import type { InferValueTypeFromComparable } from "./_types/inferValue.js";

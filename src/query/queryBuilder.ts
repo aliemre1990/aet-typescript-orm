@@ -1,7 +1,6 @@
-import { DbType, type DbValueTypes } from "../db.js";
-import QueryColumn, { type ColumnsSelection } from "./queryColumn.js";
+import { DbType } from "../db.js";
+import QueryColumn, { type QueryColumnsObjectType } from "./queryColumn.js";
 import type Table from "../table/table.js";
-import type { QueryColumnsObjectType } from "../table/types/utils.js";
 import { isNullOrUndefined } from "../utility/guards.js";
 import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
 import { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
@@ -22,11 +21,12 @@ import type { JoinType } from "./_interfaces/IJoinClause.js";
 import type IOrderByClause from "./_interfaces/IOrderByClause.js";
 import type { OrderBySpecs } from "./_interfaces/IOrderByClause.js";
 import type { GroupBySpecs } from "./_interfaces/IGroupByClause.js";
+import type { DbValueTypes } from "../table/column.js";
 
 class QueryBuilder<
     TDbType extends DbType,
     TTables extends readonly QueryTable<TDbType, any, any, any, any, any>[],
-    TResult extends TResultShape<TDbType> | undefined = undefined,
+    TResult extends TResultShape<TDbType>[] | TResultShape<TDbType> | undefined = undefined,
     TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined,
     TGroupedColumns extends GroupBySpecs<TDbType> | undefined = undefined,
     TOrderBySpecs extends OrderBySpecs<TDbType> | undefined = undefined
@@ -37,7 +37,8 @@ class QueryBuilder<
     IWhereClause<TDbType, TTables, TParams>,
     IGroupByClause<TDbType, TTables, TParams>,
     IHavingClause<TDbType, TTables, TParams, TGroupedColumns>,
-    IOrderByClause<TDbType, TTables, TParams, TGroupedColumns> {
+    IOrderByClause<TDbType, TTables, TParams, TGroupedColumns>,
+    IExecuteableQuery<TDbType, TTables, TResult, TParams> {
 
     colsSelection?: TResult;
 
@@ -57,8 +58,8 @@ class QueryBuilder<
         TCbResult extends TResultShape<TDbType> = TCb extends (cols: any, ops: any) => infer TR ? TR : never
     >(
         cb: TCb
-    ): IExecuteableQuery<TDbType, TCbResult, AccumulateColumnParams<TParams, TCbResult>> {
-        return new QueryBuilder(this.tables) as IExecuteableQuery<TDbType, TCbResult, AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns, TOrderBySpecs>;
+    ): IExecuteableQuery<TDbType, TTables, TCbResult[], AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns, TOrderBySpecs> {
+        return new QueryBuilder(this.tables) as IExecuteableQuery<TDbType, TTables, TCbResult[], AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns, TOrderBySpecs>;
     };
 
 
@@ -150,14 +151,14 @@ class QueryBuilder<
     }
 
     exec(params?: QueryParamsToObject<TParams>):
-        TResult extends TResultShape<TDbType> ?
+        TResult extends TResultShape<TDbType>[] | TResultShape<TDbType> ?
         ColumnsToResultMap<TDbType, TResult> :
         never {
         if (isNullOrUndefined(this?.colsSelection)) {
             return {} as any;
         }
 
-        return Object.keys(this.colsSelection).reduce((prev, curr) => { prev[curr] = 1; return prev; }, {} as any);
+        return "x" as any;
     }
 }
 

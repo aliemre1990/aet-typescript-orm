@@ -10,7 +10,7 @@ const SingleTableGroupAutoSelectQuery = customersTable
     .select(cols => ({ id: cols.customers.customerId, name: cols.customers.name }))
     .exec;
 
-type SingleTableGroupAutoSelectQueryResult = { id: number, name: string };
+type SingleTableGroupAutoSelectQueryResult = { id: number, name: string }[];
 type SingleTableGroupAutoSelectQueryReturnType = ReturnType<typeof SingleTableGroupAutoSelectQuery>;
 type SingleTableGroupAutoSelectQueryTest = AssertTrue<AssertEqual<SingleTableGroupAutoSelectQueryResult, SingleTableGroupAutoSelectQueryReturnType>>
 
@@ -55,7 +55,7 @@ type MultiTableGroupByQueryResult = {
     jsonAggResult: [number, string, number][],
     jsonAggResult2: number[],
     jsonAggResult3: { customerId: number, name: string, createdBy: number }[]
-}
+}[]
 type MultiTableGroupByQueryReturnType = ReturnType<typeof MultiTableGroupByQuery>;
 
 type MultiTableGroupByQueryTest = AssertTrue<AssertEqual<MultiTableGroupByQueryResult, MultiTableGroupByQueryReturnType>>
@@ -82,7 +82,7 @@ type GroupByWithMultilevelSelectQueryResult = {
     customerName: string,
     customer: { id: number, name: string, createdBy: number },
     example: { id: number, shipment: { id: number, orderId: number, createdBy: number } }
-}
+}[]
 type GroupByWithMultilevelSelectQueryReturnType = ReturnType<typeof GroupByWithMultilevelSelectQuery>;
 type GroupByWithMultilevelSelectQueryTest = AssertTrue<AssertEqual<GroupByWithMultilevelSelectQueryResult, GroupByWithMultilevelSelectQueryReturnType>>
 

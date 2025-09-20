@@ -1,4 +1,5 @@
-import type { DbType, DbValueTypes, PgDbType } from "../db.js";
+import type { DbType, PgDbType } from "../db.js";
+import type { DbValueTypes } from "./column.js";
 
 const pgColumnTypes = {
     // Numeric Types
@@ -160,7 +161,7 @@ type PgTypeToJsType<T extends PgColumnType> =
     unknown;
 
 
-type JsTypeToPgTypes<TDbType extends DbType, T extends PgValueTypes> =
+type JsTypeToPgTypes<TDbType extends DbType, T extends DbValueTypes> =
     TDbType extends PgDbType ?
     T extends number ?
     'SMALLINT' | 'INTEGER' | 'SERIAL' | 'SMALLSERIAL' | 'DECIMAL' | 'NUMERIC' | 'REAL' | 'DOUBLE PRECISION' | 'MONEY' | 'OID' | 'REGPROC' | 'REGPROCEDURE' | 'REGOPER' | 'REGOPERATOR' | 'REGCLASS' | 'REGTYPE' | 'REGROLE' | 'REGNAMESPACE' | 'REGCONFIG' | 'REGDICTIONARY' :
@@ -189,20 +190,15 @@ type JsTypeToPgTypes<TDbType extends DbType, T extends PgValueTypes> =
     never
     : never;
 
-type PgValueTypes = DbValueTypes;
 
 type GetArrayEquivalentPgValueType<T> =
-    T extends string ? string[] :
-    T extends number ? number[] :
-    T extends bigint ? bigint[] :
-    T extends boolean ? boolean[] :
-    T extends Date ? Date[] :
+    T extends string | number | bigint | boolean | Date ? T[] :
+    T extends object ? object[] :
     T;
 
 export type {
     PgColumnType,
     PgTypeToJsType,
-    PgValueTypes,
     JsTypeToPgTypes,
     GetArrayEquivalentPgValueType
 }

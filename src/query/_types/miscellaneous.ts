@@ -1,7 +1,7 @@
 import type { DbType, PgDbType } from "../../db.js";
+import type { ColumnsObjectType } from "../../table/column.js";
 import type Table from "../../table/table.js";
-import type { ColumnsObjectType, QueryColumnsObjectType } from "../../table/types/utils.js";
-import type { ColumnsSelection } from "../queryColumn.js";
+import type { ColumnsSelection, QueryColumnsObjectType } from "../queryColumn.js";
 import type QueryTable from "../queryTable.js";
 
 type TableToColumnsMap<TDbType extends DbType, T extends { [key: string]: QueryTable<TDbType, any, any, any, any, any> }> = {

@@ -1,4 +1,4 @@
-import { DbType, type DbValueTypes } from "../../db.js";
+import { DbType } from "../../db.js";
 import type QueryColumn from "../queryColumn.js";
 import type Table from "../../table/table.js";
 import type ColumnComparisonOperation from "../comparisons/_comparisonOperations.js";
@@ -13,6 +13,7 @@ import type IWhereClause from "./IWhereClause.js";
 import type QueryParam from "../param.js";
 import type { ColumnsSelection } from "../queryColumn.js";
 import type IOrderByClause from "./IOrderByClause.js";
+import type { DbValueTypes } from "../../table/column.js";
 
 const joinTypes = {
     inner: 'INNER',

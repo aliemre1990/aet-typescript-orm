@@ -1,5 +1,4 @@
-import type { DbType, DbValueTypes } from "../db.js";
-import type { ColumnType, QueryTableSpecsType } from "../table/types/utils.js";
+import type { DbType } from "../db.js";
 import eq from "./comparisons/eq.js";
 import between from "./comparisons/between.js";
 import sqlIn from "./comparisons/in.js";
@@ -8,6 +7,10 @@ import type Column from "../table/column.js";
 import type QueryTable from "./queryTable.js";
 import type GroupedColumn from "./aggregation/_groupedColumn.js";
 import type AggregatedColumn from "./aggregation/_aggregatedColumn.js";
+import type { ColumnType, DbValueTypes } from "../table/column.js";
+import type { QueryTableSpecsType } from "./queryTable.js";
+
+type QueryColumnsObjectType<TDbType extends DbType, TQTableSpecs extends QueryTableSpecsType = QueryTableSpecsType> = { [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, TQTableSpecs, string | undefined> }
 
 class QueryColumn<
     TDbType extends DbType,
@@ -69,4 +72,8 @@ export default QueryColumn;
 export {
     ColumnsSelection,
     ColumnsSelectionQueryTableObjectSymbol
+}
+
+export type {
+    QueryColumnsObjectType
 }

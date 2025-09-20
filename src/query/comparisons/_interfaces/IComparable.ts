@@ -1,4 +1,5 @@
-import type { DbType, DbValueTypes, PgDbType } from "../../../db.js";
+import type { DbType } from "../../../db.js";
+import type { DbValueTypes } from "../../../table/column.js";
 import type QueryParam from "../../param.js";
 
 interface IComparable<

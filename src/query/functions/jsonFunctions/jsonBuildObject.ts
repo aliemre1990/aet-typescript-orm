@@ -1,4 +1,5 @@
-import type { DbType, DbValueTypes, PgDbType } from "../../../db.js";
+import type { DbType,  PgDbType } from "../../../db.js";
+import type { DbValueTypes } from "../../../table/column.js";
 import type { UnionToTuple } from "../../../utility/common.js";
 import type AggregatedColumn from "../../aggregation/_aggregatedColumn.js";
 import type { IComparable } from "../../comparisons/_interfaces/IComparable.js";

@@ -1,4 +1,5 @@
-import type { DbValueTypes, PgDbType } from "../../../db.js";
+import type { PgDbType } from "../../../db.js";
+import type { IExecuteableQuery } from "../../../query/_interfaces/IExecuteableQuery.js";
 import type { InferParamsFromOps } from "../../../query/_types/result.js";
 import type ColumnComparisonOperation from "../../../query/comparisons/_comparisonOperations.js";
 import type ColumnSQLFunction from "../../../query/functions/_functions.js";
@@ -35,7 +36,7 @@ const CoalesceWithTypedParams = customersTable
     .exec;
 
 type CoalesceWithTypedParamsReturnType = ReturnType<typeof CoalesceWithTypedParams>;
-type CoalesceWithTypedParamsResult = { coalesceResult: number };
+type CoalesceWithTypedParamsResult = { coalesceResult: number }[];
 type CoalesceWithTypedParamsTest = AssertTrue<AssertEqual<CoalesceWithTypedParamsResult, CoalesceWithTypedParamsReturnType>>;
 
 type CoalesceWithTypedParamsParams = typeof CoalesceWithTypedParams extends (param: infer TParam) => any ? TParam : never;

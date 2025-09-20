@@ -1,4 +1,5 @@
-import type { DbType, DbValueTypes } from "../../db.js";
+import type { DbType } from "../../db.js";
+import type { DbValueTypes } from "../../table/column.js";
 import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
 import between from "../comparisons/between.js";
 import eq from "../comparisons/eq.js";

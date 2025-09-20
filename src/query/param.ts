@@ -1,4 +1,5 @@
-import { dbTypes, type DbType, type DbValueTypes } from "../db.js";
+import { dbTypes, type DbType } from "../db.js";
+import type { DbValueTypes } from "../table/column.js";
 import type { IComparable } from "./comparisons/_interfaces/IComparable.js";
 
 class QueryParam<
@@ -6,7 +7,7 @@ class QueryParam<
     TName extends string,
     TValueType extends DbValueTypes | null
 >
-    implements IComparable<TDbType, [QueryParam<TDbType, TName, TValueType>],  NonNullable<TValueType>, TValueType, false> {
+    implements IComparable<TDbType, [QueryParam<TDbType, TName, TValueType>], NonNullable<TValueType>, TValueType, false> {
 
     params?: [QueryParam<TDbType, TName, TValueType>];
     icomparableValueDummy?: NonNullable<TValueType>;

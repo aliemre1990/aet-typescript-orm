@@ -1,6 +1,15 @@
-import type { DbType, DbValueTypes } from "../db.js";
-import type { TableSpecsType } from "./types/tableSpecs.js";
-import type { GetColumnTypes, GetValueTypeFromColumnType } from "./types/utils.js";
+import type { DbType, PgDbType } from "../db.js";
+import type { PgColumnType, PgTypeToJsType } from "./columnTypes.js";
+import type { TableSpecsType } from "./table.js";
+
+type DbValueTypes = string | string[] | number | number[] | bigint | bigint[] | boolean | boolean[] | Date | Date[] | Buffer | object | object[];
+
+type GetColumnTypes<TDbType extends DbType> = TDbType extends PgDbType ? PgColumnType : never;
+type GetValueTypeFromColumnType<TDbType extends DbType, TColType extends TDbType extends PgDbType ? PgColumnType : never> =
+    TDbType extends PgDbType ? PgTypeToJsType<TColType> : never;
+
+type ColumnType<TDbType extends DbType> = Column<TDbType, GetColumnTypes<TDbType>, string, TableSpecsType, boolean, any, any>;
+type ColumnsObjectType<TDbType extends DbType> = { [key: string]: ColumnType<TDbType> };
 
 class Column<
     TDbType extends DbType,
@@ -31,3 +40,11 @@ class Column<
 }
 
 export default Column;
+
+export type {
+    DbValueTypes,
+    GetColumnTypes,
+    ColumnType,
+    ColumnsObjectType,
+    GetValueTypeFromColumnType
+}
