@@ -1,26 +1,23 @@
 import { dbTypes, type PgDbType } from "../../../db.js";
-import type { UnionToTuple } from "../../../utility/common.js";
 import type { IComparable } from "../../comparisons/_interfaces/IComparable.js";
-import type { ColumnsSelection } from "../../queryColumn.js";
-import type QueryColumn from "../../queryColumn.js";
 import BasicColumnAggregationOperation, { aggregationOperations } from "../_aggregationOperations.js";
 
+/**
+ * Passing row object directly to json_agg function is removed due to
+ * typescripts lack of preserving the ordering of tuples when used
+ * union to tuple trick. When typescript brings union to tuple with
+ * preserved order it will be added then.
+ */
+
+
 type InferReturnTypeFromArg<TArg> =
-    TArg extends IComparable<any, any, any, infer TFinalType, any> ? TFinalType[] :
-    TArg extends ColumnsSelection<any, any, infer TColumns> ? MapQueryColumnsToTuple<UnionToTuple<TColumns[keyof TColumns]>>[] :
     TArg extends IComparable<any, any, any, infer TFinalType, any> ? TFinalType[] :
     never
     ;
 
-type MapQueryColumnsToTuple<TQColumns> =
-    TQColumns extends readonly [infer First, ...infer Rest] ?
-    First extends QueryColumn<any, any, any, any, any, infer TFinalType> ? [TFinalType, ...MapQueryColumnsToTuple<Rest>] :
-    [] :
-    [];
-
 
 function jsonAggFn<
-    TArg extends IComparable<PgDbType, any, any, any, any> | ColumnsSelection<PgDbType, any, any>
+    TArg extends IComparable<PgDbType, any, any, any, any>
 >(
     arg: TArg
 ) {
@@ -33,7 +30,7 @@ function jsonAggFn<
 
 
 function jsonbAggFn<
-    TArg extends IComparable<PgDbType, any, any, any, any> | ColumnsSelection<PgDbType, any, any>
+    TArg extends IComparable<PgDbType, any, any, any, any>
 >(
     arg: TArg
 ) {

@@ -1,29 +1,33 @@
-import type { DbType, PgDbType } from "../../db.js";
-import type { ColumnsObjectType } from "../../table/column.js";
-import type Table from "../../table/table.js";
-import type { ColumnsSelection, QueryColumnsObjectType } from "../queryColumn.js";
+import type { DbType } from "../../db.js";
+import type { QueryBuilder } from "../queryBuilder.js";
+import type { ColumnsSelection } from "../queryColumn.js";
 import type QueryTable from "../queryTable.js";
 
-type TableToColumnsMap<TDbType extends DbType, T extends { [key: string]: QueryTable<TDbType, any, any, any, any, any> }> = {
-    [K in keyof T]: ColumnsSelection<TDbType, T[K], T[K]["columns"]>
+type TableToColumnsMap<TDbType extends DbType, T extends { [key: string]: QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, any> }> = {
+    [K in keyof T]: ColumnsSelection<
+        TDbType,
+        T[K],
+        T[K] extends QueryTable<TDbType, any, any, any, any, any> ? T[K]["columns"] :
+        T[K] extends QueryBuilder<TDbType, any, infer TResult, any, any, any, any> ? TResult extends (infer TItem)[] ? TItem :
+        TResult extends undefined ? never :
+        TResult :
+        never
+    >
 };
 
-type TableToObject<TTable extends QueryTable<DbType, ColumnsObjectType<DbType>, string, Table<DbType, ColumnsObjectType<DbType>, string>, QueryColumnsObjectType<DbType>, string | undefined>> = {
-    [K in TTable["asName"] extends undefined ? TTable["table"]["name"] : TTable["asName"] & string]: TTable
-}
-
-type TablesToObject<TTables extends readonly QueryTable<DbType, any, any, any, any, any>[]> = {
+type TablesToObject<TDbType extends DbType, TTables extends readonly (QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, any>)[]> = {
     [
     T in TTables[number]as
-    T extends QueryTable<DbType, any, any, any, any, any> ?
+    T extends QueryTable<TDbType, any, any, any, any, any> ?
     T["asName"] extends undefined ?
-    T["table"]["name"] : T["asName"] & string
-    : never
+    T["table"]["name"] : T["asName"] & string :
+    T extends QueryBuilder<TDbType, any, any, any, any, any, infer TAs> ?
+    TAs extends undefined ? never : TAs & string :
+    never
     ]: T
 }
 
 export type {
     TableToColumnsMap,
-    TableToObject,
     TablesToObject
 }

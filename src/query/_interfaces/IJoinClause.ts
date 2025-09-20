@@ -14,6 +14,7 @@ import type QueryParam from "../param.js";
 import type { ColumnsSelection } from "../queryColumn.js";
 import type IOrderByClause from "./IOrderByClause.js";
 import type { DbValueTypes } from "../../table/column.js";
+import type { QueryBuilder } from "../queryBuilder.js";
 
 const joinTypes = {
     inner: 'INNER',
@@ -27,7 +28,7 @@ type JoinType = typeof joinTypes[keyof typeof joinTypes];
 
 interface IJoinClause<
     TDbType extends DbType,
-    TTables extends readonly QueryTable<TDbType, any, any, any, any, any>[],
+    TQueryItems extends readonly (QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, any>)[],
     TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined
 > {
 
@@ -46,13 +47,13 @@ interface IJoinClause<
     >(
         type: JoinType,
         table: TInnerJoinTable,
-        cb: (cols: TableToColumnsMap<TDbType, TablesToObject<[...TTables, TInnerJoinResult]>>, ops: DbOperators<TDbType, false>) => TCbResult
+        cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType,[...TQueryItems, TInnerJoinResult]>>, ops: DbOperators<TDbType, false>) => TCbResult
     ):
-        IJoinClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
-        ISelectClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
-        IWhereClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
-        IGroupByClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
-        IOrderByClause<TDbType, [...TTables, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>
+        IJoinClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
+        ISelectClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
+        IWhereClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
+        IGroupByClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
+        IOrderByClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>
 
 }
 

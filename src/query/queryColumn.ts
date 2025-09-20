@@ -9,6 +9,7 @@ import type GroupedColumn from "./aggregation/_groupedColumn.js";
 import type AggregatedColumn from "./aggregation/_aggregatedColumn.js";
 import type { ColumnType, DbValueTypes } from "../table/column.js";
 import type { QueryTableSpecsType } from "./queryTable.js";
+import type { QueryBuilder } from "./queryBuilder.js";
 
 type QueryColumnsObjectType<TDbType extends DbType, TQTableSpecs extends QueryTableSpecsType = QueryTableSpecsType> = { [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, TQTableSpecs, string | undefined> }
 
@@ -51,17 +52,14 @@ class QueryColumn<
 const ColumnsSelectionQueryTableObjectSymbol = Symbol();
 type ColumnsSelection<
     TDbType extends DbType,
-    TQTable extends QueryTable<TDbType, any, any, any, any, any>,
-    TColumns extends { [key: string]: QueryColumn<TDbType, any, any, any, any, any> | GroupedColumn<TDbType, any, any, any, any, any> | AggregatedColumn<TDbType, any> }
+    TQItem extends QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, any>,
+    TColumns extends { [key: string]: IComparable<TDbType, any, any, any, any> }
 > = {
-    [ColumnsSelectionQueryTableObjectSymbol]: TQTable;
+    [ColumnsSelectionQueryTableObjectSymbol]: TQItem;
 }
     &
     {
-        [
-        K in keyof TColumns
-        ]:
-        TColumns[K];
+        [K in keyof TColumns]: TColumns[K];
     };
 
 

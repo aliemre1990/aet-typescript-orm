@@ -44,9 +44,9 @@ type AggregationOperation = (typeof aggregationOperations)[keyof typeof aggregat
 class BasicColumnAggregationOperation<
     TDbType extends DbType,
     TArgs extends (
-        AggregatedColumn<TDbType, any> |
+       
         DbValueTypes | null |
-        IComparable<TDbType, any, any, any, any>
+        IComparable<TDbType, any, any, any, true>
     )[],
     TReturnType extends DbValueTypes | null,
     TIsAgg extends boolean = false

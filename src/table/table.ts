@@ -64,7 +64,7 @@ class Table<
     select<
         TCb extends
         (
-            cols: TableToColumnsMap<TDbType, TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>,
+            cols: TableToColumnsMap<TDbType, TablesToObject<TDbType,[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>,
             ops: DbFunctions<TDbType, false>
         ) => TResultShape<TDbType>,
         TCbResult extends TResultShape<TDbType> = TCb extends (cols: any, ops: any) => infer TR ? TR : never
@@ -101,7 +101,7 @@ class Table<
         type: JoinType,
         table: TInnerJoinTable,
         cb: (
-            cols: TableToColumnsMap<TDbType, TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>, TInnerJoinResult]>>,
+            cols: TableToColumnsMap<TDbType, TablesToObject<TDbType,[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>, TInnerJoinResult]>>,
             ops: DbOperators<TDbType, false>
         ) => TCbResult
     ) {
@@ -120,7 +120,7 @@ class Table<
     where<
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>
     >(cb: (
-        cols: TableToColumnsMap<TDbType, TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>,
+        cols: TableToColumnsMap<TDbType, TablesToObject<TDbType,[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>,
         ops: DbOperators<TDbType, false>
     ) => TCbResult) {
         const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
@@ -135,7 +135,7 @@ class Table<
 
     groupBy<
         const TCbResult extends GroupBySpecs<TDbType>
-    >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>) => TCbResult) {
+    >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType,[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>) => TCbResult) {
         const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
             prev[curr[0]] = new QueryColumn(curr[1]);
             return prev;
@@ -148,7 +148,7 @@ class Table<
 
     orderBy<
         const TCbResult extends OrderBySpecs<TDbType>
-    >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>) => TCbResult):
+    >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType,[QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>) => TCbResult):
         ISelectClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>], AccumulateOrderByParams<TDbType, undefined, TCbResult>> {
         const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
             prev[curr[0]] = new QueryColumn(curr[1]);

@@ -1,6 +1,6 @@
 import type { DbType,  PgDbType } from "../../../db.js";
 import type { DbValueTypes } from "../../../table/column.js";
-import type { UnionToTuple } from "../../../utility/common.js";
+import type { UnionToTupleSafe } from "../../../utility/common.js";
 import type AggregatedColumn from "../../aggregation/_aggregatedColumn.js";
 import type { IComparable } from "../../comparisons/_interfaces/IComparable.js";
 import type { InferIsAggFromJSONFn, InferReturnTypeFromJSONBuildObjectParam } from "../_types/args.js";
@@ -30,7 +30,7 @@ type InferParamsFromJsonBuildObjectArg<TDbType extends DbType, TObj extends JSON
     InferParamsFromObj<TDbType, TObj>;
 
 type InferParamsFromObj<TDbType extends DbType, TObj extends JSONBuildObjectParam<TDbType>> =
-    UnionToTuple<TObj[keyof TObj]> extends readonly [infer FirstKey, ...infer RestKeys] ?
+    UnionToTupleSafe<TObj> extends readonly [infer FirstKey, ...infer RestKeys] ?
     RestKeys extends readonly any[] ?
     FirstKey extends IComparable<TDbType, infer TParams, any, any, any> ? [...(TParams extends undefined ? [] : TParams), ...InferParamsFromObjArr<TDbType, RestKeys>] :
     FirstKey extends JSONBuildObjectParam<TDbType> ? [...InferParamsFromObj<TDbType, FirstKey>, ...InferParamsFromObjArr<TDbType, RestKeys>] :

@@ -1,4 +1,3 @@
-import type { ColumnsSelection } from "../../query/queryColumn.js";
 import { customersTable, employeesTable, shipmentsTable, usersTable } from "./_tables.js";
 import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
 
@@ -34,7 +33,6 @@ const MultiTableGroupByQuery = customersTable
             shipmentCreatedBy: cols.shipments.createdBy,
             sumNull: sum(cols.employees.salary),
             sumNotNull: sum(cols.employees.deptId),
-            jsonAggResult: jsonAgg(cols.customers),
             jsonAggResult2: jsonAgg(cols.customers.customerId),
             jsonAggResult3: jsonAgg(jsonBuildObject(cols.customers))
         })
@@ -52,7 +50,6 @@ type MultiTableGroupByQueryResult = {
     shipmentCreatedBy: number,
     sumNull: number | null,
     sumNotNull: number,
-    jsonAggResult: [number, string, number][],
     jsonAggResult2: number[],
     jsonAggResult3: { customerId: number, name: string, createdBy: number }[]
 }[]

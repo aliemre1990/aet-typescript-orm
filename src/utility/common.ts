@@ -9,6 +9,10 @@ type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
 // type rt2 = ut2<rt1>;
 // type rt3 = ut3<rt2>;
 
+type ObjectValuesToArray<T> = (T extends Record<any, any>
+    ? { [K in keyof T]: T[K] & { __key: K } }[keyof T][]
+    : never
+)
 
 // More reliable version using conditional types
 type UnionToTuple<T> = UnionToIntersection<
@@ -16,6 +20,9 @@ type UnionToTuple<T> = UnionToIntersection<
 > extends (_: any) => infer W
     ? [...UnionToTuple<Exclude<T, W>>, W]
     : [];
+
+type UnionToTupleSafe<T extends Record<any, any>, TK extends PropertyKey = PropertyKey> =
+    UnionToTuple<{ [K in Extract<keyof T, TK>]: T[K] & { __key__: K } }[Extract<keyof T, TK>]>
 
 type DeepPrettify<T> = T extends Function
     ? T
@@ -55,6 +62,7 @@ type NonNullableArray<T> = T extends Array<infer TItem> ? null extends TItem ? N
 
 export type {
     UnionToTuple,
+    UnionToTupleSafe,
     DeepPrettify,
     UnionToIntersection,
     FlattenObject,

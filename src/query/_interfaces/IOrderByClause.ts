@@ -7,6 +7,7 @@ import type QueryParam from "../param.js";
 import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
 import type { GroupBySpecs } from "./IGroupByClause.js";
 import type { DbValueTypes } from "../../table/column.js";
+import type { QueryBuilder } from "../queryBuilder.js";
 
 const orderTypes = {
     asc: 'ASC',
@@ -19,15 +20,15 @@ type OrderBySpecs<TDbType extends DbType> = readonly (IComparable<TDbType, any, 
 
 interface IOrderByClause<
     TDbType extends DbType,
-    TTables extends readonly QueryTable<TDbType, any, any, any, any, any>[],
+    TQueryItems extends readonly (QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, any>)[],
     TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined,
     TGroupedColumns extends GroupBySpecs<TDbType> | undefined = undefined,
 > {
 
     orderBy<
         const  TCbResult extends OrderBySpecs<TDbType>
-    >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TTables>>) => TCbResult):
-        ISelectClause<TDbType, TTables, AccumulateOrderByParams<TDbType, TParams, TCbResult>, TGroupedColumns, TCbResult>
+    >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType,TQueryItems>>) => TCbResult):
+        ISelectClause<TDbType, TQueryItems, AccumulateOrderByParams<TDbType, TParams, TCbResult>, TGroupedColumns, TCbResult>
 
 }
 

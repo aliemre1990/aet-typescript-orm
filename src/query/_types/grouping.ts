@@ -1,8 +1,9 @@
 import type { DbType } from "../../db.js";
-import type { UnionToTuple } from "../../utility/common.js";
+import type { UnionToTupleSafe } from "../../utility/common.js";
 import type { GroupBySpecs } from "../_interfaces/IGroupByClause.js";
-import type AggregatedColumn from "../aggregation/_aggregatedColumn.js";
-import type GroupedColumn from "../aggregation/_groupedColumn.js";
+import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
+import type { IGroupedComparable } from "../comparisons/_interfaces/IGroupedComparable.js";
+import type { QueryBuilder } from "../queryBuilder.js";
 import type { ColumnsSelection } from "../queryColumn.js";
 import type QueryColumn from "../queryColumn.js";
 import type QueryTable from "../queryTable.js";
@@ -21,10 +22,10 @@ type SpreadGroupedColumns<TDbType extends DbType, TGroupedColumns extends GroupB
     [] : [];
 
 type SpreadGroupedTable<TGroupedTable extends ColumnsSelection<any, any, any>> =
-    UnionToTuple<TGroupedTable[Extract<keyof TGroupedTable, string>]>
+    UnionToTupleSafe<TGroupedTable, string>
 
 //
-type IsGroupedColumnsContains<TGroupedColumns extends QueryColumn<any, any, any, any>[], TQueryColumnToCheck extends QueryColumn<any, any, any, any>> =
+type IsGroupedColumnsContains<TDbType extends DbType, TGroupedColumns extends GroupBySpecs<TDbType>, TQueryColumnToCheck extends QueryColumn<any, any, any, any>> =
     TGroupedColumns extends [infer First, ...infer Rest] ?
     First extends QueryColumn<any, infer TCol1, any, any> ?
     TQueryColumnToCheck extends QueryColumn<any, infer TCol2, any, any> ?
@@ -32,10 +33,10 @@ type IsGroupedColumnsContains<TGroupedColumns extends QueryColumn<any, any, any,
     TCol2 extends TCol1 ?
     true :
     Rest extends QueryColumn<any, any, any, any>[] ?
-    IsGroupedColumnsContains<Rest, TQueryColumnToCheck> :
+    IsGroupedColumnsContains<TDbType, Rest, TQueryColumnToCheck> :
     false :
     Rest extends QueryColumn<any, any, any, any>[] ?
-    IsGroupedColumnsContains<Rest, TQueryColumnToCheck> :
+    IsGroupedColumnsContains<TDbType, Rest, TQueryColumnToCheck> :
     false :
     false :
     false :
@@ -44,26 +45,65 @@ type IsGroupedColumnsContains<TGroupedColumns extends QueryColumn<any, any, any,
 //
 type GroupedTablesToColumnsMap<
     TDbType extends DbType,
-    TTables extends readonly QueryTable<any, any, any, any, any, any>[],
+    TQueryItems extends readonly (QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, any>)[],
     TGroupedColumns extends GroupBySpecs<TDbType> | undefined
 > =
     TGroupedColumns extends undefined ?
     undefined :
     {
-        [T in TTables[number]as T["asName"] extends undefined ? T["table"]["name"] : T["asName"] & string]:
+        [
+        T in TQueryItems[number]as
+        T extends QueryTable<TDbType, any, any, any, any, infer TAs> ?
+        TAs extends undefined ? T["table"]["name"] :
+        TAs & string :
+        T extends QueryBuilder<TDbType, any, any, any, any, any, infer TAs> ?
+        TAs extends undefined ? never :
+        TAs & string :
+        never
+        ]:
         ColumnsSelection<TDbType, T,
             {
                 [
-                Kc in keyof T["columns"]
+                Kc in keyof
+                (
+                    T extends QueryTable<TDbType, any, any, any, any, any> ? T["columns"] :
+                    T extends QueryBuilder<TDbType, any, infer TResult, any, any, any, any> ?
+                    TResult extends (infer TItem)[] ? TItem : TResult extends undefined ? never :
+                    TResult :
+                    never
+                )
                 ]:
                 TGroupedColumns extends GroupBySpecs<TDbType> ?
-                IsGroupedColumnsContains<SpreadGroupedColumns<TDbType, TGroupedColumns>, T["columns"][Kc]> extends true ?
-                T["columns"][Kc] extends QueryColumn<infer TDbType, infer TColumn, infer TQTableSpecs, infer TAsName> ?
-                GroupedColumn<TDbType, TColumn, TQTableSpecs, TAsName> :
+                IsGroupedColumnsContains<
+                    TDbType,
+                    SpreadGroupedColumns<TDbType, TGroupedColumns>,
+                    (
+                        T extends QueryTable<TDbType, any, any, any, any, any> ? T["columns"] :
+                        T extends QueryBuilder<TDbType, any, infer TResult, any, any, any, any> ?
+                        TResult extends (infer TItem)[] ? TItem : TResult extends undefined ? never :
+                        TResult :
+                        never
+                    )[Kc]
+                > extends true ?
+                (
+                    T extends QueryTable<TDbType, any, any, any, any, any> ? T["columns"] :
+                    T extends QueryBuilder<TDbType, any, infer TResult, any, any, any, any> ?
+                    TResult extends (infer TItem)[] ? TItem : TResult extends undefined ? never :
+                    TResult :
+                    never
+                )[Kc] extends IComparable<TDbType, infer TParams, infer TValueType, infer TFinalValueType, any> ?
+                IGroupedComparable<TDbType, TParams, TValueType, TFinalValueType, false> :
                 never :
-                AggregatedColumn<T["columns"][Kc] extends QueryColumn<infer TDbType, any, any, any> ? TDbType : never, T["columns"][Kc]> :
+                (
+                    T extends QueryTable<TDbType, any, any, any, any, any> ? T["columns"] :
+                    T extends QueryBuilder<TDbType, any, infer TResult, any, any, any, any> ?
+                    TResult extends (infer TItem)[] ? TItem : TResult extends undefined ? never :
+                    TResult :
+                    never
+                )[Kc] extends IComparable<TDbType, infer TParams, infer TValueType, infer TFinalValueType, any> ?
+                IGroupedComparable<TDbType, TParams, TValueType, TFinalValueType, true> :
+                never :
                 never
-
             }
         >
     }
