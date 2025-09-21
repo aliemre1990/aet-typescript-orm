@@ -25,7 +25,7 @@ type SpreadGroupedTable<TGroupedTable extends ColumnsSelection<any, any, any>> =
     RecordToTupleSafe<TGroupedTable, string>
 
 //
-type IsGroupedColumnsContains<TDbType extends DbType, TGroupedColumns extends GroupBySpecs<TDbType>, TQueryColumnToCheck extends QueryColumn<any, any, any, any>> =
+type IsGroupedColumnsContains<TDbType extends DbType, TGroupedColumns extends IComparable<TDbType, any, any, any, false>[], TQueryColumnToCheck extends QueryColumn<any, any, any, any>> =
     TGroupedColumns extends [infer First, ...infer Rest] ?
     First extends QueryColumn<any, infer TCol1, any, any> ?
     TQueryColumnToCheck extends QueryColumn<any, infer TCol2, any, any> ?

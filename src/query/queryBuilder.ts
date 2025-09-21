@@ -213,7 +213,7 @@ type ConvertTablesToQueryTables<TFrom> =
 function from<
     TFrom extends readonly (
         Table<TDbType, any, any, any> |
-        QueryTable<TDbType, any, any, any, any, string> |
+        QueryTable<TDbType, any, any, any, any, any> |
         IExecuteableQuery<TDbType, any, any, any, any, any, string>
     )[],
     TDbType extends DbType = InferDbTypeFromFromTypes<TFrom>
