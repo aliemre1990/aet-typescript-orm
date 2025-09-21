@@ -1,10 +1,10 @@
-import type { DbType, PgDbType } from "../../../db.js";
-import type { DbValueTypes } from "../../../table/column.js";
-import type { DeepPrettify, IsAny, UnionToTupleSafe } from "../../../utility/common.js";
-import type AggregatedColumn from "../../aggregation/_aggregatedColumn.js";
-import type { IComparable } from "../../_interfaces/IComparable.js";
-import type QueryParam from "../../param.js";
-import type { JSONBuildObjectParam } from "../jsonFunctions/jsonBuildObject.js";
+import type { DbType, PgDbType } from "../../db.js";
+import type { DbValueTypes } from "../../table/column.js";
+import type { DeepPrettify, IsAny, UnionToTupleSafe } from "../../utility/common.js";
+import type AggregatedColumn from "../aggregation/_aggregatedColumn.js";
+import type { IComparable } from "../_interfaces/IComparable.js";
+import type QueryParam from "../param.js";
+import type { JSONBuildObjectParam } from "../functions/jsonFunctions/jsonBuildObject.js";
 
 type InferFirstTypeFromArgs<TDbType extends DbType, TArgs extends
     (

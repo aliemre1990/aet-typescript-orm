@@ -4,8 +4,7 @@ import type { IComparable } from "../_interfaces/IComparable.js";
 import between from "../comparisons/between.js";
 import eq from "../comparisons/eq.js";
 import sqlIn from "../comparisons/in.js";
-import type QueryParam from "../param.js";
-import type { InferParamsFromFnArgs } from "./_types/inferParamsFromArgs.js";
+import type { InferParamsFromFnArgs } from "../_types/inferParamsFromArgs.js";
 
 const sqlFunctions = {
     coalesce: { name: 'COALESCE' },

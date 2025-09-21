@@ -4,9 +4,7 @@ import type { IComparable } from "../_interfaces/IComparable.js";
 import between from "../comparisons/between.js";
 import eq from "../comparisons/eq.js";
 import sqlIn from "../comparisons/in.js";
-import type { InferParamsFromFnArgs } from "../functions/_types/inferParamsFromArgs.js";
-import type QueryColumn from "../queryColumn.js";
-import type AggregatedColumn from "./_aggregatedColumn.js";
+import type { InferParamsFromFnArgs } from "../_types/inferParamsFromArgs.js";
 
 
 const aggregationOperations = {

@@ -6,7 +6,7 @@ import type { IComparable } from "../../_interfaces/IComparable.js";
 import between from "../../comparisons/between.js";
 import eq from "../../comparisons/eq.js";
 import sqlIn from "../../comparisons/in.js";
-import type { InferIsAggFromJSONFn, InferReturnTypeFromJSONBuildObjectParam } from "../_types/args.js";
+import type { InferIsAggFromJSONFn, InferReturnTypeFromJSONBuildObjectParam } from "../../_types/args.js";
 
 class JSONBuildObjectFunction<
     TDbType extends PgDbType,
