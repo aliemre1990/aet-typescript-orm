@@ -2,6 +2,7 @@ import type { DbType } from "../db.js";
 import QueryColumn, { type QueryColumnsObjectType } from "../query/queryColumn.js";
 import type { ColumnsObjectType } from "../table/column.js";
 import type Table from "../table/table.js";
+import type { IDbType } from "./_interfaces/IDbType.js";
 import type { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
 import type { GroupBySpecs } from "./_interfaces/IGroupByClause.js";
 import type IGroupByClause from "./_interfaces/IGroupByClause.js";
@@ -16,7 +17,7 @@ import type { DbFunctions, DbOperators } from "./_types/ops.js";
 import type { AccumulateColumnParams, AccumulateOrderByParams, TResultShape } from "./_types/result.js";
 import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
-import { QueryBuilder } from "./queryBuilder.js";
+import QueryBuilder from "./queryBuilder.js";
 
 type QueryTableSpecsType<TTableName extends string = string, TAsName extends string = string> = { tableName: TTableName, asTableName?: TAsName }
 
@@ -28,28 +29,33 @@ class QueryTable<
     TQColumns extends QueryColumnsObjectType<TDbType>,
     TAsName extends string | undefined = undefined
 > implements
+    IDbType<TDbType>,
     ISelectClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>,
     IJoinClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>,
     IWhereClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>,
     IGroupByClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>,
     IOrderByClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]> {
 
-    constructor(public table: TTable, public columns: TQColumns, public asName?: TAsName) { }
+    dbType: TDbType;
+
+    constructor(dbType: TDbType, public table: TTable, public columns: TQColumns, public asName?: TAsName) {
+        this.dbType = dbType;
+    }
 
     as<TAsName extends string>(val: TAsName) {
         const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
-            prev[curr[0]] = new QueryColumn(curr[1].column, curr[1].asName);
+            prev[curr[0]] = new QueryColumn(this.dbType, curr[1].column, curr[1].asName);
             return prev;
 
         }, {} as QueryColumnsObjectType<TDbType, QueryTableSpecsType>) as { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], { tableName: TTableName, asTableName: TAsName }, string | undefined> };
 
-        return new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, typeof queryColumns, TAsName>(this.table, queryColumns, val);
+        return new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, typeof queryColumns, TAsName>(this.dbType, this.table, queryColumns, val);
     }
 
     select<
         TCb extends
         (
-            cols: TableToColumnsMap<TDbType, TablesToObject<TDbType,[QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
+            cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
             ops: DbFunctions<TDbType, false>
         ) => TResultShape<TDbType>,
         TCbResult extends TResultShape<TDbType> = TCb extends (cols: any, ops: any) => infer TR ? TR : never
@@ -57,7 +63,7 @@ class QueryTable<
         cb: TCb
     ): IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], TCbResult[], AccumulateColumnParams<undefined, TCbResult>> {
 
-        return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>([this]).select<TCb, TCbResult>(cb);
+        return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>(this.dbType, this).select<TCb, TCbResult>(cb);
     }
 
     join<
@@ -77,36 +83,36 @@ class QueryTable<
         type: JoinType,
         table: TInnerJoinTable,
         cb: (
-            cols: TableToColumnsMap<TDbType, TablesToObject<TDbType,[QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>, TInnerJoinResult]>>,
+            cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>, TInnerJoinResult]>>,
             ops: DbOperators<TDbType, false>
         ) => TCbResult
     ) {
 
-        return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>([this])
+        return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>(this.dbType, this)
             .join(type, table, cb);
     }
 
     where<
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>
     >(cb: (
-        cols: TableToColumnsMap<TDbType, TablesToObject<TDbType,[QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
+        cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
         ops: DbOperators<TDbType, false>
     ) => TCbResult) {
-        return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>([this]).where(cb);
+        return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>(this.dbType, this).where(cb);
     }
 
 
     groupBy<
         const TCbResult extends GroupBySpecs<TDbType>
-    >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType,[QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>) => TCbResult) {
-        return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>([this]).groupBy(cb);
+    >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>) => TCbResult) {
+        return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>(this.dbType, this).groupBy(cb);
     }
 
     orderBy<
         const  TCbResult extends OrderBySpecs<TDbType>
-    >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType,[QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>) => TCbResult):
+    >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>) => TCbResult):
         ISelectClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], AccumulateOrderByParams<TDbType, undefined, TCbResult>> {
-        return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>([this]).orderBy(cb);
+        return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>(this.dbType, this).orderBy(cb);
     }
 
 }

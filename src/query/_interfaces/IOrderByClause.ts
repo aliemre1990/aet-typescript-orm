@@ -7,7 +7,7 @@ import type QueryParam from "../param.js";
 import type { IComparable } from "./IComparable.js";
 import type { GroupBySpecs } from "./IGroupByClause.js";
 import type { DbValueTypes } from "../../table/column.js";
-import type { QueryBuilder } from "../queryBuilder.js";
+import type QueryBuilder from "../queryBuilder.js";
 
 const orderTypes = {
     asc: 'ASC',

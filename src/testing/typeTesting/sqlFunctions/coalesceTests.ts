@@ -1,4 +1,4 @@
-import type { PgDbType } from "../../../db.js";
+import { dbTypes, type PgDbType } from "../../../db.js";
 import type { IExecuteableQuery } from "../../../query/_interfaces/IExecuteableQuery.js";
 import type { InferParamsFromOps } from "../../../query/_types/result.js";
 import type ColumnComparisonOperation from "../../../query/comparisons/_comparisonOperations.js";
@@ -9,10 +9,10 @@ import QueryColumn from "../../../query/queryColumn.js";
 import { customersTable, employeesTable, ordersTable, usersTable } from "../_tables.js";
 import type { AssertEqual, AssertTrue } from "../_typeTestingUtilities.js";
 
-const customerIdQC = new QueryColumn<PgDbType, typeof customersTable.columns.customerId, NonNullable<typeof customersTable.columns.customerId.tableSpecs>, undefined>(customersTable.columns.customerId);
-const createdByQC = new QueryColumn<PgDbType, typeof customersTable.columns.createdBy, NonNullable<typeof customersTable.columns.createdBy.tableSpecs>, undefined>(customersTable.columns.createdBy);
-const customerNameQC = new QueryColumn<PgDbType, typeof customersTable.columns.name, NonNullable<typeof customersTable.columns.name.tableSpecs>, undefined>(customersTable.columns.name);
-const empSalaryQC = new QueryColumn<PgDbType, typeof employeesTable.columns.salary, NonNullable<typeof employeesTable.columns.salary.tableSpecs>, undefined>(employeesTable.columns.salary);
+const customerIdQC = new QueryColumn<PgDbType, typeof customersTable.columns.customerId, NonNullable<typeof customersTable.columns.customerId.tableSpecs>, undefined>(dbTypes.postgresql, customersTable.columns.customerId);
+const createdByQC = new QueryColumn<PgDbType, typeof customersTable.columns.createdBy, NonNullable<typeof customersTable.columns.createdBy.tableSpecs>, undefined>(dbTypes.postgresql, customersTable.columns.createdBy);
+const customerNameQC = new QueryColumn<PgDbType, typeof customersTable.columns.name, NonNullable<typeof customersTable.columns.name.tableSpecs>, undefined>(dbTypes.postgresql, customersTable.columns.name);
+const empSalaryQC = new QueryColumn<PgDbType, typeof employeesTable.columns.salary, NonNullable<typeof employeesTable.columns.salary.tableSpecs>, undefined>(dbTypes.postgresql, employeesTable.columns.salary);
 
 
 const coalesce = generateCoalesceFn("postgresql");

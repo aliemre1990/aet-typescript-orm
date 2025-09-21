@@ -3,15 +3,13 @@ import type { TablesToObject, TableToColumnsMap } from "../_types/miscellaneous.
 import type { AccumulateColumnParams, TResultShape } from "../_types/result.js";
 import { IExecuteableQuery } from "./IExecuteableQuery.js";
 import type QueryTable from "../queryTable.js";
-import type QueryColumn from "../queryColumn.js";
 import type { GroupedTablesToColumnsMap } from "../_types/grouping.js";
 import type { DbFunctions } from "../_types/ops.js";
 import type QueryParam from "../param.js";
-import type { ColumnsSelection } from "../queryColumn.js";
 import type { OrderBySpecs } from "./IOrderByClause.js";
 import type { GroupBySpecs } from "./IGroupByClause.js";
 import type { DbValueTypes } from "../../table/column.js";
-import type { QueryBuilder } from "../queryBuilder.js";
+import type QueryBuilder from "../queryBuilder.js";
 
 interface ISelectClause<
     TDbType extends DbType,

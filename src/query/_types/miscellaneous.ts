@@ -1,5 +1,5 @@
 import type { DbType } from "../../db.js";
-import type { QueryBuilder } from "../queryBuilder.js";
+import type QueryBuilder from "../queryBuilder.js";
 import type { ColumnsSelection } from "../queryColumn.js";
 import type QueryTable from "../queryTable.js";
 

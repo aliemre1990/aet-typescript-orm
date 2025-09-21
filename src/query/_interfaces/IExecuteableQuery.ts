@@ -2,7 +2,7 @@ import { DbType } from "../../db.js";
 import type { DbValueTypes } from "../../table/column.js";
 import type { ColumnsToResultMap, QueryParamsToObject, TResultShape } from "../_types/result.js";
 import type QueryParam from "../param.js";
-import type { QueryBuilder } from "../queryBuilder.js";
+import type QueryBuilder from "../queryBuilder.js";
 import type QueryTable from "../queryTable.js";
 import type { GroupBySpecs } from "./IGroupByClause.js";
 import type { OrderBySpecs } from "./IOrderByClause.js";

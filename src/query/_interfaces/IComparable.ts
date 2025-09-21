@@ -4,6 +4,7 @@ import type QueryParam from "../param.js";
 import type between from "../comparisons/between.js";
 import type eq from "../comparisons/eq.js";
 import type sqlIn from "../comparisons/in.js";
+import type { IDbType } from "./IDbType.js";
 
 interface IComparable<
     TDbType extends DbType,
@@ -11,8 +12,8 @@ interface IComparable<
     TValueType extends DbValueTypes,
     TFinalValueType extends TValueType | null,
     TIsAgg extends boolean
-> {
-    dbType?: TDbType;
+> extends IDbType<TDbType> {
+    dbType: TDbType;
     icomparableValueDummy?: TValueType;
     icomparableFinalValueDummy?: TFinalValueType;
     params?: TParams;

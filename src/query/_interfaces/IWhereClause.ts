@@ -10,7 +10,7 @@ import type QueryParam from "../param.js";
 import type IGroupByClause from "./IGroupByClause.js";
 import type IOrderByClause from "./IOrderByClause.js";
 import type { DbValueTypes } from "../../table/column.js";
-import type { QueryBuilder } from "../queryBuilder.js";
+import type QueryBuilder from "../queryBuilder.js";
 
 interface IWhereClause<
     TDbType extends DbType,

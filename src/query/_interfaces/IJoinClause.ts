@@ -11,10 +11,9 @@ import type IGroupByClause from "./IGroupByClause.js";
 import type { DbOperators } from "../_types/ops.js";
 import type IWhereClause from "./IWhereClause.js";
 import type QueryParam from "../param.js";
-import type { ColumnsSelection } from "../queryColumn.js";
 import type IOrderByClause from "./IOrderByClause.js";
 import type { DbValueTypes } from "../../table/column.js";
-import type { QueryBuilder } from "../queryBuilder.js";
+import type QueryBuilder from "../queryBuilder.js";
 
 const joinTypes = {
     inner: 'INNER',

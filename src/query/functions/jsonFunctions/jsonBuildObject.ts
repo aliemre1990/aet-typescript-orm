@@ -1,4 +1,4 @@
-import type { DbType, PgDbType } from "../../../db.js";
+import { dbTypes, type DbType, type PgDbType } from "../../../db.js";
 import type { DbValueTypes } from "../../../table/column.js";
 import type { RecordToTupleSafe } from "../../../utility/common.js";
 import type { IComparable } from "../../_interfaces/IComparable.js";
@@ -14,16 +14,19 @@ class JSONBuildObjectFunction<
     TIsAgg extends boolean = InferIsAggFromJSONFn<TDbType, TObj>
 > implements IComparable<TDbType, InferParamsFromJsonBuildObjectArg<TDbType, TObj>, NonNullable<TReturnType>, TReturnType, TIsAgg> {
 
+    dbType: TDbType;
     icomparableValueDummy?: NonNullable<TReturnType>;
     icomparableFinalValueDummy?: TReturnType;
     params?: InferParamsFromJsonBuildObjectArg<TDbType, TObj>;
     isAgg?: TIsAgg;
-    dbType?: TDbType;
+
 
     constructor(
+        dbType: TDbType,
         public obj: TObj,
         public isJsonB: boolean,
     ) {
+        this.dbType = dbType;
     }
 
     eq: typeof eq = eq;
@@ -64,30 +67,28 @@ type JSONBuildObjectParam<TDbType extends DbType> = {
 }
 
 function jsonBuildObjectFn<
-    TObj extends JSONBuildObjectParam<TDbType>,
-    TDbType extends PgDbType = PgDbType
+    TObj extends JSONBuildObjectParam<PgDbType>
 >
     (obj: TObj) {
 
     return new JSONBuildObjectFunction<
-        TDbType,
+        PgDbType,
         TObj
     >(
-        obj, false
+        dbTypes.postgresql, obj, false
     )
 }
 
 function jsonbBuildObjectFn<
-    TObj extends JSONBuildObjectParam<TDbType>,
-    TDbType extends PgDbType = PgDbType
+    TObj extends JSONBuildObjectParam<PgDbType>
 >
     (obj: TObj) {
 
     return new JSONBuildObjectFunction<
-        TDbType,
+        PgDbType,
         TObj
     >(
-        obj, true
+        dbTypes.postgresql, obj, true
     )
 }
 

@@ -7,7 +7,7 @@ import type Column from "../table/column.js";
 import type QueryTable from "./queryTable.js";
 import type { ColumnType, DbValueTypes } from "../table/column.js";
 import type { QueryTableSpecsType } from "./queryTable.js";
-import type { QueryBuilder } from "./queryBuilder.js";
+import type QueryBuilder from "./queryBuilder.js";
 
 type QueryColumnsObjectType<TDbType extends DbType, TQTableSpecs extends QueryTableSpecsType = QueryTableSpecsType> = { [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, TQTableSpecs, string | undefined> }
 
@@ -21,9 +21,10 @@ class QueryColumn<
 > implements IComparable<TDbType, undefined, TValueType, TFinalValueType, false> {
     qTableSpecs?: TQTableSpecs;
 
+    dbType: TDbType;
+
     asName?: TAsName;
     params?: undefined;
-    dbType?: TDbType;
     icomparableValueDummy?: TValueType;
     icomparableFinalValueDummy?: TFinalValueType;
     isAgg?: false;
@@ -32,12 +33,13 @@ class QueryColumn<
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 
-    constructor(public column: TColumn, asName?: TAsName) {
+    constructor(dbType: TDbType, public column: TColumn, asName?: TAsName) {
         this.asName = asName;
+        this.dbType = dbType;
     }
 
     as<TAsName extends string>(val: TAsName) {
-        return new QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>(this.column, val);
+        return new QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>(this.dbType, this.column, val);
     }
 
     setQTableSpecs(val: TQTableSpecs) {

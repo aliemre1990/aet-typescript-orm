@@ -22,6 +22,7 @@ import type IOrderByClause from "./_interfaces/IOrderByClause.js";
 import type { OrderBySpecs } from "./_interfaces/IOrderByClause.js";
 import type { GroupBySpecs } from "./_interfaces/IGroupByClause.js";
 import type { DbValueTypes } from "../table/column.js";
+import type { IDbType } from "./_interfaces/IDbType.js";
 
 type FromType<TDbType extends DbType> = QueryTable<TDbType, any, any, any, any, any> |
     QueryBuilder<TDbType, any, any, any, any, any, any> |
@@ -35,9 +36,10 @@ class QueryBuilder<
     TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined,
     TGroupedColumns extends GroupBySpecs<TDbType> | undefined = undefined,
     TOrderBySpecs extends OrderBySpecs<TDbType> | undefined = undefined,
-    TAs extends string | undefined = string
+    TAs extends string | undefined = undefined
 >
     implements
+    IDbType<TDbType>,
     ISelectClause<TDbType, TQueryItems, TParams, TGroupedColumns, TOrderBySpecs>,
     IJoinClause<TDbType, TQueryItems, TParams>,
     IWhereClause<TDbType, TQueryItems, TParams>,
@@ -45,6 +47,7 @@ class QueryBuilder<
     IHavingClause<TDbType, TQueryItems, TParams, TGroupedColumns>,
     IOrderByClause<TDbType, TQueryItems, TParams, TGroupedColumns> {
 
+    dbType: TDbType;
 
     asName?: TAs;
 
@@ -54,12 +57,26 @@ class QueryBuilder<
 
     from: FromType<TDbType>
 
-    constructor(from: FromType<TDbType>, colsSelection?: TResult) {
+    constructor(dbType: TDbType, from: FromType<TDbType>, data?: { asName: TAs, colsSelection?: TResult }) {
+        this.dbType = dbType;
         this.from = from;
 
         this.queryItems = (Array.isArray(from) ? [...from] as const : [from]) as TQueryItems;
 
-        this.colsSelection = colsSelection;
+        this.colsSelection = data?.colsSelection;
+        this.asName = data?.asName;
+    }
+
+    as<TAs extends string>(asName: TAs) {
+        return new QueryBuilder<
+            TDbType,
+            TQueryItems,
+            TResult,
+            TParams,
+            TGroupedColumns,
+            TOrderBySpecs,
+            TAs
+        >(this.dbType, this.from, { asName, colsSelection: this.colsSelection })
     }
 
     select<
@@ -71,7 +88,7 @@ class QueryBuilder<
     >(
         cb: TCb
     ): IExecuteableQuery<TDbType, TQueryItems, TCbResult[], AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns, TOrderBySpecs> {
-        return new QueryBuilder(this.from) as IExecuteableQuery<TDbType, TQueryItems, TCbResult[], AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns, TOrderBySpecs>;
+        return new QueryBuilder(this.dbType, this.from) as IExecuteableQuery<TDbType, TQueryItems, TCbResult[], AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns, TOrderBySpecs>;
     };
 
 
@@ -90,7 +107,7 @@ class QueryBuilder<
     >(
         type: JoinType,
         table: TInnerJoinTable,
-        cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType,[...TQueryItems, TInnerJoinResult]>>, ops: DbOperators<TDbType, false>) => TCbResult
+        cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [...TQueryItems, TInnerJoinResult]>>, ops: DbOperators<TDbType, false>) => TCbResult
     ):
         IJoinClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
         ISelectClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
@@ -103,18 +120,18 @@ class QueryBuilder<
         } else if ("name" in table) {
 
             const innerQueryColumns = Object.entries(table.columns).reduce((prev, curr) => {
-                prev[curr[0]] = new QueryColumn(curr[1] as Column<TDbType, any, any, any>);
+                prev[curr[0]] = new QueryColumn(this.dbType, curr[1] as Column<TDbType, any, any, any>);
                 return prev;
             }, {} as QueryColumnsObjectType<TDbType>);
 
-            innerJoinTable = new QueryTable(table, innerQueryColumns) as TInnerJoinResult;
+            innerJoinTable = new QueryTable(this.dbType, table, innerQueryColumns) as TInnerJoinResult;
         } else {
             throw Error('Invalid inner join table type.');
         }
 
         // const newTables = [...this.tables, innerJoinTable];
 
-        return new QueryBuilder(this.from) as
+        return new QueryBuilder(this.dbType, this.from) as
             IJoinClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
             ISelectClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
             IWhereClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
@@ -131,7 +148,7 @@ class QueryBuilder<
         ISelectClause<TDbType, TQueryItems, AccumulateComparisonParams<TParams, TCbResult>> &
         IGroupByClause<TDbType, TQueryItems, AccumulateComparisonParams<TParams, TCbResult>> &
         IOrderByClause<TDbType, TQueryItems, AccumulateComparisonParams<TParams, TCbResult>> {
-        return new QueryBuilder(this.from) as
+        return new QueryBuilder(this.dbType, this.from) as
             ISelectClause<TDbType, TQueryItems, AccumulateComparisonParams<TParams, TCbResult>> &
             IGroupByClause<TDbType, TQueryItems, AccumulateComparisonParams<TParams, TCbResult>> &
             IOrderByClause<TDbType, TQueryItems, AccumulateComparisonParams<TParams, TCbResult>>;
@@ -140,7 +157,7 @@ class QueryBuilder<
     groupBy<
         const TCbResult extends GroupBySpecs<TDbType>
     >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, TQueryItems>>) => TCbResult) {
-        return new QueryBuilder(this.from) as
+        return new QueryBuilder(this.dbType, this.from) as
             ISelectClause<TDbType, TQueryItems, TParams, TCbResult> &
             IHavingClause<TDbType, TQueryItems, TParams, TCbResult> &
             IOrderByClause<TDbType, TQueryItems, TParams, TCbResult>;
@@ -151,7 +168,7 @@ class QueryBuilder<
         cols: GroupedTablesToColumnsMap<TDbType, TQueryItems, TGroupedColumns>,
         ops: DbOperators<TDbType, true>
     ) => TCbResult) {
-        return new QueryBuilder(this.from) as
+        return new QueryBuilder(this.dbType, this.from) as
             ISelectClause<TDbType, TQueryItems, AccumulateComparisonParams<TParams, TCbResult>, TGroupedColumns> &
             IOrderByClause<TDbType, TQueryItems, AccumulateComparisonParams<TParams, TCbResult>, TGroupedColumns>
     }
@@ -159,7 +176,7 @@ class QueryBuilder<
     orderBy<
         const TCbResult extends OrderBySpecs<TDbType>
     >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, TQueryItems>>) => TCbResult) {
-        return new QueryBuilder(this.from) as ISelectClause<TDbType, TQueryItems, AccumulateOrderByParams<TDbType, TParams, TCbResult>, TGroupedColumns, TCbResult>
+        return new QueryBuilder(this.dbType, this.from) as ISelectClause<TDbType, TQueryItems, AccumulateOrderByParams<TDbType, TParams, TCbResult>, TGroupedColumns, TCbResult>
     }
 
     exec(params?: QueryParamsToObject<TParams>):
@@ -174,6 +191,4 @@ class QueryBuilder<
     }
 }
 
-export {
-    QueryBuilder
-}
+export default QueryBuilder;

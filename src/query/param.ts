@@ -12,12 +12,16 @@ class QueryParam<
 >
     implements IComparable<TDbType, [QueryParam<TDbType, TName, TValueType>], NonNullable<TValueType>, TValueType, false> {
 
+    dbType: TDbType;
+
     params?: [QueryParam<TDbType, TName, TValueType>];
     icomparableValueDummy?: NonNullable<TValueType>;
     icomparableFinalValueDummy?: TValueType;
     isAgg?: false;
 
-    constructor(public dbType: TDbType, public name: TName) { }
+    constructor(dbType: TDbType, public name: TName) {
+        this.dbType = dbType;
+    }
 
     type<TValueType extends DbValueTypes | null>() {
         return new QueryParam<TDbType, TName, TValueType>(this.dbType, this.name);

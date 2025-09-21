@@ -1,4 +1,5 @@
 import type { DbType, PgDbType } from "../db.js";
+import type { IDbType } from "../query/_interfaces/IDbType.js";
 import type { PgColumnType, PgTypeToJsType } from "./columnTypes.js";
 import type { TableSpecsType } from "./table.js";
 
@@ -19,7 +20,9 @@ class Column<
     TIsNull extends boolean = false,
     TValueType extends DbValueTypes = GetValueTypeFromColumnType<TDbType, TColumnType>,
     TFinalValueType extends DbValueTypes | null = TIsNull extends true ? TValueType | null : TValueType
-> {
+> implements IDbType<TDbType> {
+
+    dbType: TDbType;
 
     tableSpecs?: TTableSpecs;
 
@@ -27,11 +30,14 @@ class Column<
     finalValue?: TFinalValueType;
 
     constructor(
+        dbType: TDbType,
         public name: TColumnName,
         public type: TColumnType,
         public isNullable: TIsNull,
         public defaultValue?: string
-    ) { }
+    ) {
+        this.dbType = dbType;
+    }
 
     setTableSpecs(val: TTableSpecs) {
         this.tableSpecs = val;
