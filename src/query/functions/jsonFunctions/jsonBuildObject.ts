@@ -1,7 +1,6 @@
 import type { DbType, PgDbType } from "../../../db.js";
 import type { DbValueTypes } from "../../../table/column.js";
 import type { RecordToTupleSafe } from "../../../utility/common.js";
-import type AggregatedColumn from "../../aggregation/_aggregatedColumn.js";
 import type { IComparable } from "../../_interfaces/IComparable.js";
 import between from "../../comparisons/between.js";
 import eq from "../../comparisons/eq.js";
@@ -61,7 +60,6 @@ type InferParamsFromObjArr<TDbType extends DbType, TRest extends readonly any[]>
 type JSONBuildObjectParam<TDbType extends DbType> = {
     [key: string]:
     IComparable<TDbType, any, any, any, any> |
-    AggregatedColumn<TDbType, any> |
     JSONBuildObjectParam<TDbType>
 }
 

@@ -5,8 +5,6 @@ import sqlIn from "./comparisons/in.js";
 import type { IComparable } from "./_interfaces/IComparable.js";
 import type Column from "../table/column.js";
 import type QueryTable from "./queryTable.js";
-import type GroupedColumn from "./aggregation/_groupedColumn.js";
-import type AggregatedColumn from "./aggregation/_aggregatedColumn.js";
 import type { ColumnType, DbValueTypes } from "../table/column.js";
 import type { QueryTableSpecsType } from "./queryTable.js";
 import type { QueryBuilder } from "./queryBuilder.js";
