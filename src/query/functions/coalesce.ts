@@ -1,7 +1,7 @@
 import type { DbType } from "../../db.js";
 import type { DbValueTypes } from "../../table/column.js";
 import type { IsAny } from "../../utility/common.js";
-import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
+import type { IComparable } from "../_interfaces/IComparable.js";
 import QueryParam from "../param.js";
 import ColumnSQLFunction, { sqlFunctions } from "./_functions.js";
 import type { InferFirstTypeFromArgs, IsContainsNonNull } from "./_types/args.js";

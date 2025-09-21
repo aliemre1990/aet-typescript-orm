@@ -1,8 +1,11 @@
-import type { DbType,  PgDbType } from "../../../db.js";
+import type { DbType, PgDbType } from "../../../db.js";
 import type { DbValueTypes } from "../../../table/column.js";
 import type { UnionToTupleSafe } from "../../../utility/common.js";
 import type AggregatedColumn from "../../aggregation/_aggregatedColumn.js";
-import type { IComparable } from "../../comparisons/_interfaces/IComparable.js";
+import type { IComparable } from "../../_interfaces/IComparable.js";
+import between from "../../comparisons/between.js";
+import eq from "../../comparisons/eq.js";
+import sqlIn from "../../comparisons/in.js";
 import type { InferIsAggFromJSONFn, InferReturnTypeFromJSONBuildObjectParam } from "../_types/args.js";
 
 class JSONBuildObjectFunction<
@@ -23,6 +26,10 @@ class JSONBuildObjectFunction<
         public isJsonB: boolean,
     ) {
     }
+
+    eq: typeof eq = eq;
+    sqlIn: typeof sqlIn = sqlIn;
+    between: typeof between = between;
 }
 
 type InferParamsFromJsonBuildObjectArg<TDbType extends DbType, TObj extends JSONBuildObjectParam<TDbType>> =

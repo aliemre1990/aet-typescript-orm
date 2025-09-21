@@ -1,8 +1,9 @@
 import type { DbType } from "../../db.js";
 import type { DbValueTypes } from "../../table/column.js";
-import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
+import type { IComparable } from "../_interfaces/IComparable.js";
 import between from "../comparisons/between.js";
 import eq from "../comparisons/eq.js";
+import sqlIn from "../comparisons/in.js";
 import type { InferParamsFromFnArgs } from "../functions/_types/inferParamsFromArgs.js";
 import type QueryColumn from "../queryColumn.js";
 import type AggregatedColumn from "./_aggregatedColumn.js";
@@ -44,7 +45,7 @@ type AggregationOperation = (typeof aggregationOperations)[keyof typeof aggregat
 class BasicColumnAggregationOperation<
     TDbType extends DbType,
     TArgs extends (
-       
+
         DbValueTypes | null |
         IComparable<TDbType, any, any, any, true>
     )[],
@@ -58,6 +59,7 @@ class BasicColumnAggregationOperation<
     isAgg?: TIsAgg;
 
     eq: typeof eq = eq;
+    sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 
     constructor(

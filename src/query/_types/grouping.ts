@@ -1,7 +1,7 @@
 import type { DbType } from "../../db.js";
 import type { UnionToTupleSafe } from "../../utility/common.js";
 import type { GroupBySpecs } from "../_interfaces/IGroupByClause.js";
-import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
+import type { IComparable } from "../_interfaces/IComparable.js";
 import type { QueryBuilder } from "../queryBuilder.js";
 import type { ColumnsSelection } from "../queryColumn.js";
 import type QueryColumn from "../queryColumn.js";

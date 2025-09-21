@@ -1,6 +1,6 @@
 import type { DbType } from "../../db.js";
 import type { IsAny } from "../../utility/common.js";
-import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
+import type { IComparable } from "../_interfaces/IComparable.js";
 import type QueryParam from "../param.js";
 import ColumnSQLFunction, { sqlFunctions } from "./_functions.js";
 

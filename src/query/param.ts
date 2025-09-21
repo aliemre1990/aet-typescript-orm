@@ -1,6 +1,9 @@
 import { dbTypes, type DbType } from "../db.js";
 import type { DbValueTypes } from "../table/column.js";
-import type { IComparable } from "./comparisons/_interfaces/IComparable.js";
+import type { IComparable } from "./_interfaces/IComparable.js";
+import between from "./comparisons/between.js";
+import eq from "./comparisons/eq.js";
+import sqlIn from "./comparisons/in.js";
 
 class QueryParam<
     TDbType extends DbType,
@@ -19,6 +22,10 @@ class QueryParam<
     type<TValueType extends DbValueTypes | null>() {
         return new QueryParam<TDbType, TName, TValueType>(this.dbType, this.name);
     }
+
+    eq: typeof eq = eq;
+    sqlIn: typeof sqlIn = sqlIn;
+    between: typeof between = between;
 }
 
 

@@ -1,7 +1,6 @@
 import type { DbType } from "../../db.js";
 import type { DbValueTypes } from "../../table/column.js";
-import type { IComparable } from "./_interfaces/IComparable.js";
-import type { InferValueTypeFromComparable, InferValueTypeFromThisType } from "./_types/inferValue.js";
+import type { IComparable } from "../_interfaces/IComparable.js";
 
 const comparisonOperations = {
     eq: { name: 'EQ' },
@@ -22,6 +21,9 @@ const comparisonOperations = {
 } as const;
 
 type ComparisonOperation = (typeof comparisonOperations)[keyof typeof comparisonOperations];
+
+type InferValueTypeFromComparable<TDbType extends DbType, T> =
+    T extends IComparable<TDbType, any, infer TValueType, any, any> ? TValueType : never;
 
 class ColumnComparisonOperation<
     TDbType extends DbType,
@@ -50,5 +52,6 @@ export {
 }
 
 export type {
-    ComparisonOperation
+    ComparisonOperation,
+    InferValueTypeFromComparable
 }

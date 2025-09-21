@@ -2,15 +2,14 @@ import type { DbType, PgDbType } from "../../../db.js";
 import type { DbValueTypes } from "../../../table/column.js";
 import type { DeepPrettify, IsAny, UnionToTupleSafe } from "../../../utility/common.js";
 import type AggregatedColumn from "../../aggregation/_aggregatedColumn.js";
-import type { IComparable } from "../../comparisons/_interfaces/IComparable.js";
+import type { IComparable } from "../../_interfaces/IComparable.js";
 import type QueryParam from "../../param.js";
 import type { JSONBuildObjectParam } from "../jsonFunctions/jsonBuildObject.js";
 
 type InferFirstTypeFromArgs<TDbType extends DbType, TArgs extends
     (
-        QueryParam<TDbType, string, any> |
-        DbValueTypes |
-        IComparable<TDbType, any, any, any, any>
+        IComparable<TDbType, any, any, any, any> |
+        DbValueTypes
     )[]
 > =
     TArgs extends readonly [infer First, ...infer Rest] ?
@@ -18,7 +17,7 @@ type InferFirstTypeFromArgs<TDbType extends DbType, TArgs extends
 
     IsAny<TValueType> extends true ?
 
-    Rest extends (QueryParam<TDbType, string, any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
+    Rest extends (IComparable<TDbType, any, any, any, any> | DbValueTypes)[] ?
     InferFirstTypeFromArgs<TDbType, Rest> :
     DbValueTypes :
 
@@ -40,7 +39,7 @@ type InferFirstTypeFromArgs<TDbType extends DbType, TArgs extends
 
     First extends object[] ? First :
     First extends object ? First :
-    Rest extends (QueryParam<TDbType, string, any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
+    Rest extends (IComparable<TDbType, any, any, any, any> | DbValueTypes)[] ?
     InferFirstTypeFromArgs<TDbType, Rest> :
     DbValueTypes :
     DbValueTypes
@@ -48,34 +47,21 @@ type InferFirstTypeFromArgs<TDbType extends DbType, TArgs extends
 
 type IsContainsNonNull<TDbType extends DbType, TArgs extends
     (
-        QueryParam<TDbType, string, any> |
-        DbValueTypes |
-        IComparable<TDbType, any, any, any, any>
+        IComparable<TDbType, any, any, any, any> |
+        DbValueTypes
+
     )[]
 > = TArgs extends readonly [infer First, ...infer Rest] ?
 
-    First extends QueryParam<TDbType, string, infer TValueType> ?
-
-    IsAny<TValueType> extends true ?
-    Rest extends (QueryParam<TDbType, string, any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
-    IsContainsNonNull<TDbType, Rest> :
-    false :
-
-    null extends TValueType ?
-    Rest extends (QueryParam<TDbType, string, any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
-    IsContainsNonNull<TDbType, Rest> :
-    false :
-    true :
-
     First extends IComparable<TDbType, any, any, infer TFinalType, any> ?
     null extends TFinalType ?
-    Rest extends (QueryParam<TDbType, string, any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
+    Rest extends (IComparable<TDbType, any, any, any, any> | DbValueTypes)[] ?
     IsContainsNonNull<TDbType, Rest> :
     false :
     true :
 
     null extends First ?
-    Rest extends (QueryParam<TDbType, string, any> | DbValueTypes | IComparable<TDbType, any, any, any, any>)[] ?
+    Rest extends (IComparable<TDbType, any, any, any, any> | DbValueTypes)[] ?
     IsContainsNonNull<TDbType, Rest> :
     false :
     true :

@@ -1,5 +1,5 @@
 import { dbTypes, type PgDbType } from "../../../db.js";
-import type { IComparable } from "../../comparisons/_interfaces/IComparable.js";
+import type { IComparable } from "../../_interfaces/IComparable.js";
 import BasicColumnAggregationOperation, { aggregationOperations } from "../_aggregationOperations.js";
 
 /**

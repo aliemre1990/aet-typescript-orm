@@ -9,7 +9,7 @@ import type IWhereClause from "./IWhereClause.js";
 import type IHavingClause from "./IHavingClause.js";
 import type IOrderByClause from "./IOrderByClause.js";
 import type { DbValueTypes } from "../../table/column.js";
-import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
+import type { IComparable } from "./IComparable.js";
 import type { QueryBuilder } from "../queryBuilder.js";
 
 type GroupBySpecs<TDbType extends DbType> = readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, false>)[];

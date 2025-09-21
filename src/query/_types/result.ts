@@ -2,7 +2,7 @@ import type { DbType } from "../../db.js";
 import type { DeepPrettify, UnionToTupleSafe } from "../../utility/common.js";
 import type ColumnComparisonOperation from "../comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "../logicalOperations.js";
-import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
+import type { IComparable } from "../_interfaces/IComparable.js";
 import type QueryParam from "../param.js";
 import type { OrderBySpecs, OrderType } from "../_interfaces/IOrderByClause.js";
 
