@@ -2,7 +2,6 @@ import type { DbType } from "../../db.js";
 import type { UnionToTupleSafe } from "../../utility/common.js";
 import type { GroupBySpecs } from "../_interfaces/IGroupByClause.js";
 import type { IComparable } from "../comparisons/_interfaces/IComparable.js";
-import type { IGroupedComparable } from "../comparisons/_interfaces/IGroupedComparable.js";
 import type { QueryBuilder } from "../queryBuilder.js";
 import type { ColumnsSelection } from "../queryColumn.js";
 import type QueryColumn from "../queryColumn.js";
@@ -92,7 +91,7 @@ type GroupedTablesToColumnsMap<
                     TResult :
                     never
                 )[Kc] extends IComparable<TDbType, infer TParams, infer TValueType, infer TFinalValueType, any> ?
-                IGroupedComparable<TDbType, TParams, TValueType, TFinalValueType, false> :
+                IComparable<TDbType, TParams, TValueType, TFinalValueType, false> :
                 never :
                 (
                     T extends QueryTable<TDbType, any, any, any, any, any> ? T["columns"] :
@@ -101,7 +100,7 @@ type GroupedTablesToColumnsMap<
                     TResult :
                     never
                 )[Kc] extends IComparable<TDbType, infer TParams, infer TValueType, infer TFinalValueType, any> ?
-                IGroupedComparable<TDbType, TParams, TValueType, TFinalValueType, true> :
+                IComparable<TDbType, TParams, TValueType, TFinalValueType, true> :
                 never :
                 never
             }

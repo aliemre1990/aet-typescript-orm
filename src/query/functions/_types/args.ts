@@ -100,7 +100,7 @@ type InferReturnTypeFromJSONBuildObjectParam<TDbType extends DbType, TObj extend
  */
 type InferIsAggFromJSONFn<TDbType extends DbType, TObj extends JSONBuildObjectParam<TDbType>> =
     UnionToTupleSafe<TObj> extends readonly [infer FirstKey, ...infer RestKeys] ?
-    FirstKey extends AggregatedColumn<TDbType, any> ? true :
+    FirstKey extends IComparable<TDbType, any, any, any, true> ? true :
     FirstKey extends JSONBuildObjectParam<TDbType> ? InferIsAggFromJSONFn<TDbType, FirstKey> :
     InferIsAggFromJSONFnKeys<TDbType, RestKeys> :
     false;

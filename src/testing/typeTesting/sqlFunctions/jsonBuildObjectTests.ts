@@ -10,4 +10,5 @@ const groupedJsonBuildObj = customersTable
 
 const aggregatedJsonBuildObj = customersTable
     .groupBy(cols => [cols.customers.customerId])
+    // @ts-expect-error
     .select((cols, { jsonBuildObject }) => ({ id: jsonBuildObject({ id: cols.customers.name }) }))
