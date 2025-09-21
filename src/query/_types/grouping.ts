@@ -1,5 +1,5 @@
 import type { DbType } from "../../db.js";
-import type { UnionToTupleSafe } from "../../utility/common.js";
+import type { RecordToTupleSafe } from "../../utility/common.js";
 import type { GroupBySpecs } from "../_interfaces/IGroupByClause.js";
 import type { IComparable } from "../_interfaces/IComparable.js";
 import type { QueryBuilder } from "../queryBuilder.js";
@@ -21,7 +21,7 @@ type SpreadGroupedColumns<TDbType extends DbType, TGroupedColumns extends GroupB
     [] : [];
 
 type SpreadGroupedTable<TGroupedTable extends ColumnsSelection<any, any, any>> =
-    UnionToTupleSafe<TGroupedTable, string>
+    RecordToTupleSafe<TGroupedTable, string>
 
 //
 type IsGroupedColumnsContains<TDbType extends DbType, TGroupedColumns extends GroupBySpecs<TDbType>, TQueryColumnToCheck extends QueryColumn<any, any, any, any>> =

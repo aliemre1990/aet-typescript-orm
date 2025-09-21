@@ -1,5 +1,5 @@
 import type { DbType } from "../../db.js";
-import type { DeepPrettify, UnionToTupleSafe } from "../../utility/common.js";
+import type { DeepPrettify, RecordToTupleSafe } from "../../utility/common.js";
 import type ColumnComparisonOperation from "../comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "../logicalOperations.js";
 import type { IComparable } from "../_interfaces/IComparable.js";
@@ -180,7 +180,7 @@ type AccumulateColumnParams<TParams extends readonly QueryParam<any, any, any>[]
 
 
 type InferParamsFromColumns<TResult extends TResultShape<DbType>> =
-    UnionToTupleSafe<TResult, string> extends readonly [infer First, ...infer Rest] ?
+    RecordToTupleSafe<TResult, string> extends readonly [infer First, ...infer Rest] ?
     First extends IComparable<any, infer TParams, any, any, any> ? [...(TParams extends undefined ? [] : TParams), ...InferParamsFromColumnsArr<Rest>] :
     Rest extends readonly any[] ? InferParamsFromColumnsArr<Rest> :
     [] :
