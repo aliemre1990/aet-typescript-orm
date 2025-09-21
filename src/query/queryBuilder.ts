@@ -24,14 +24,15 @@ import type { GroupBySpecs } from "./_interfaces/IGroupByClause.js";
 import type { DbValueTypes } from "../table/column.js";
 import type { IDbType } from "./_interfaces/IDbType.js";
 
-type FromType<TDbType extends DbType> = QueryTable<TDbType, any, any, any, any, any> |
-    QueryBuilder<TDbType, any, any, any, any, any, any> |
-    readonly (QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, any>)[]
+type FromType<TDbType extends DbType> =
+    QueryTable<TDbType, any, any, any, any, any> |
+    IExecuteableQuery<TDbType, any, any, any, any, any, any> |
+    readonly (QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any>)[]
 
 
 class QueryBuilder<
     TDbType extends DbType,
-    TQueryItems extends readonly (QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, any>)[],
+    TQueryItems extends readonly (QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any>)[],
     TResult extends TResultShape<TDbType>[] | TResultShape<TDbType> | undefined = undefined,
     TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined,
     TGroupedColumns extends GroupBySpecs<TDbType> | undefined = undefined,
@@ -191,4 +192,32 @@ class QueryBuilder<
     }
 }
 
+type InferDbTypeFromFromTypes<TFrom> =
+    TFrom extends IDbType<infer TDbType> ? TDbType :
+    TFrom extends readonly [infer First, ...infer Rest] ?
+    First extends IDbType<infer TDbType> ? TDbType :
+    never :
+    never;
+
+function from<
+    TFrom extends readonly (QueryTable<TDbType, any, any, any, any, string> | IExecuteableQuery<TDbType, any, any, any, any, any, string>)[],
+    TDbType extends DbType = InferDbTypeFromFromTypes<TFrom>
+>(...from: TFrom) {
+    let dbType: TDbType;
+    if ('dbType' in from) {
+        dbType = from.dbType as TDbType;
+    } else {
+        dbType = from[0].dbType as TDbType;
+    }
+
+
+    return new QueryBuilder<TDbType, TFrom>(dbType, from);
+}
+
+
+
 export default QueryBuilder;
+
+export {
+    from
+}

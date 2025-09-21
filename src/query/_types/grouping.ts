@@ -6,6 +6,7 @@ import type QueryBuilder from "../queryBuilder.js";
 import type { ColumnsSelection } from "../queryColumn.js";
 import type QueryColumn from "../queryColumn.js";
 import type QueryTable from "../queryTable.js";
+import type { IExecuteableQuery } from "../_interfaces/IExecuteableQuery.js";
 
 //
 type SpreadGroupedColumns<TDbType extends DbType, TGroupedColumns extends GroupBySpecs<TDbType>> =
@@ -44,7 +45,7 @@ type IsGroupedColumnsContains<TDbType extends DbType, TGroupedColumns extends Gr
 //
 type GroupedTablesToColumnsMap<
     TDbType extends DbType,
-    TQueryItems extends readonly (QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, any>)[],
+    TQueryItems extends readonly (QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any>)[],
     TGroupedColumns extends GroupBySpecs<TDbType> | undefined
 > =
     TGroupedColumns extends undefined ?
@@ -78,7 +79,7 @@ type GroupedTablesToColumnsMap<
                     SpreadGroupedColumns<TDbType, TGroupedColumns>,
                     (
                         T extends QueryTable<TDbType, any, any, any, any, any> ? T["columns"] :
-                        T extends QueryBuilder<TDbType, any, infer TResult, any, any, any, any> ?
+                        T extends IExecuteableQuery<TDbType, any, infer TResult, any, any, any, any> ?
                         TResult extends (infer TItem)[] ? TItem : TResult extends undefined ? never :
                         TResult :
                         never
@@ -86,7 +87,7 @@ type GroupedTablesToColumnsMap<
                 > extends true ?
                 (
                     T extends QueryTable<TDbType, any, any, any, any, any> ? T["columns"] :
-                    T extends QueryBuilder<TDbType, any, infer TResult, any, any, any, any> ?
+                    T extends IExecuteableQuery<TDbType, any, infer TResult, any, any, any, any> ?
                     TResult extends (infer TItem)[] ? TItem : TResult extends undefined ? never :
                     TResult :
                     never
@@ -95,7 +96,7 @@ type GroupedTablesToColumnsMap<
                 never :
                 (
                     T extends QueryTable<TDbType, any, any, any, any, any> ? T["columns"] :
-                    T extends QueryBuilder<TDbType, any, infer TResult, any, any, any, any> ?
+                    T extends IExecuteableQuery<TDbType, any, infer TResult, any, any, any, any> ?
                     TResult extends (infer TItem)[] ? TItem : TResult extends undefined ? never :
                     TResult :
                     never

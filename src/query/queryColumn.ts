@@ -8,6 +8,7 @@ import type QueryTable from "./queryTable.js";
 import type { ColumnType, DbValueTypes } from "../table/column.js";
 import type { QueryTableSpecsType } from "./queryTable.js";
 import type QueryBuilder from "./queryBuilder.js";
+import type { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
 
 type QueryColumnsObjectType<TDbType extends DbType, TQTableSpecs extends QueryTableSpecsType = QueryTableSpecsType> = { [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, TQTableSpecs, string | undefined> }
 
@@ -51,7 +52,7 @@ class QueryColumn<
 const ColumnsSelectionQueryTableObjectSymbol = Symbol();
 type ColumnsSelection<
     TDbType extends DbType,
-    TQItem extends QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, any>,
+    TQItem extends QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any>,
     TColumns extends { [key: string]: IComparable<TDbType, any, any, any, any> }
 > = {
     [ColumnsSelectionQueryTableObjectSymbol]: TQItem;
