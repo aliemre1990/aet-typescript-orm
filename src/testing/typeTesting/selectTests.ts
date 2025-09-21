@@ -3,11 +3,11 @@ import { from } from "../../query/queryBuilder.js";
 import { customersTable, employeesTable, ordersTable, shipmentsTable, usersTable } from "./_tables.js";
 import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
 
-// const selectQuery = customersTable
-//     .where((cols, { param }) => cols.customers.customerId.eq(param("whereparam")))
-//     .select(cols => cols.customers)
-//     .as("ali");
-// from(employeesTable.as("employees"), selectQuery).select(cols => cols.employees.);
+const selectQuery = customersTable
+    .where((cols, { param }) => cols.customers.customerId.eq(param("whereparam")))
+    .select(cols => cols.customers)
+    .as("ali");
+from(employeesTable.as("zartZurt"), selectQuery).select(cols => ({ zart: cols.zartZurt.id })).exec();
 
 
 /**

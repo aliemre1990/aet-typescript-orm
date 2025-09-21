@@ -1,13 +1,13 @@
 import { DbType } from "../db.js";
 import QueryColumn, { type QueryColumnsObjectType } from "./queryColumn.js";
-import type Table from "../table/table.js";
+import Table from "../table/table.js";
 import { isNullOrUndefined } from "../utility/guards.js";
 import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
 import { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
 import type { TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.js";
 import type { AccumulateColumnParams, AccumulateComparisonParams, AccumulateOrderByParams, ColumnsToResultMap, QueryParamsToObject, TResultShape } from "./_types/result.js";
-import QueryTable from "./queryTable.js";
+import QueryTable, { type QueryTableSpecsType } from "./queryTable.js";
 import type Column from "../table/column.js";
 import type IJoinClause from "./_interfaces/IJoinClause.js";
 import type ISelectClause from "./_interfaces/ISelectClause.js";
@@ -21,7 +21,7 @@ import type { JoinType } from "./_interfaces/IJoinClause.js";
 import type IOrderByClause from "./_interfaces/IOrderByClause.js";
 import type { OrderBySpecs } from "./_interfaces/IOrderByClause.js";
 import type { GroupBySpecs } from "./_interfaces/IGroupByClause.js";
-import type { DbValueTypes } from "../table/column.js";
+import type { ColumnType, DbValueTypes } from "../table/column.js";
 import type { IDbType } from "./_interfaces/IDbType.js";
 
 type FromType<TDbType extends DbType> =
@@ -199,19 +199,44 @@ type InferDbTypeFromFromTypes<TFrom> =
     never :
     never;
 
+type ConvertTablesToQueryTables<TFrom> =
+    TFrom extends readonly [infer First, ...infer Rest] ?
+    First extends Table<infer TDbType, infer TColumns, infer TTableName> ?
+    readonly [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], { tableName: TTableName }, undefined> }, undefined>, ...ConvertTablesToQueryTables<Rest>] :
+    First extends QueryTable<any, any, any, any, any, any> ?
+    readonly [First, ...ConvertTablesToQueryTables<Rest>] :
+    First extends IExecuteableQuery<any, any, any, any, any, any, any> ?
+    readonly [First, ...ConvertTablesToQueryTables<Rest>] :
+    ConvertTablesToQueryTables<Rest> :
+    readonly [];
+
 function from<
-    TFrom extends readonly (QueryTable<TDbType, any, any, any, any, string> | IExecuteableQuery<TDbType, any, any, any, any, any, string>)[],
+    TFrom extends readonly (
+        Table<TDbType, any, any, any> |
+        QueryTable<TDbType, any, any, any, any, string> |
+        IExecuteableQuery<TDbType, any, any, any, any, any, string>
+    )[],
     TDbType extends DbType = InferDbTypeFromFromTypes<TFrom>
 >(...from: TFrom) {
-    let dbType: TDbType;
-    if ('dbType' in from) {
-        dbType = from.dbType as TDbType;
-    } else {
-        dbType = from[0].dbType as TDbType;
-    }
 
 
-    return new QueryBuilder<TDbType, TFrom>(dbType, from);
+    let dbType = from[0].dbType as TDbType;
+
+    const fromResult = from.map(item => {
+        if (item instanceof Table) {
+
+            const queryColumns = Object.entries(item.columns).reduce((prev, curr) => {
+                prev[curr[0]] = new QueryColumn(item.dbType, curr[1] as ColumnType<TDbType>);
+                return prev;
+            }, {} as QueryColumnsObjectType<TDbType, QueryTableSpecsType>)
+
+            return new QueryTable(item.dbType, item, queryColumns);
+        } else {
+            return item;
+        }
+    }) as unknown as ConvertTablesToQueryTables<TFrom>;
+
+    return new QueryBuilder<TDbType, ConvertTablesToQueryTables<TFrom>>(dbType, fromResult);
 }
 
 
