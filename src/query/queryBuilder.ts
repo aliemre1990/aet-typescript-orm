@@ -7,7 +7,7 @@ import { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
 import type { TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.js";
 import type { AccumulateColumnParams, AccumulateComparisonParams, AccumulateOrderByParams, ColumnsToResultMap, QueryParamsToObject, TResultShape } from "./_types/result.js";
-import QueryTable, { type QueryTableSpecsType } from "./queryTable.js";
+import QueryTable from "./queryTable.js";
 import type Column from "../table/column.js";
 import type IJoinClause from "./_interfaces/IJoinClause.js";
 import type ISelectClause from "./_interfaces/ISelectClause.js";

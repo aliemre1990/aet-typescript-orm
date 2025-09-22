@@ -8,7 +8,7 @@ import type { TablesToObject, TableToColumnsMap } from "../query/_types/miscella
 import type { AccumulateColumnParams, AccumulateOrderByParams, TResultShape } from "../query/_types/result.js";
 import Column, { type ColumnsObjectType } from "./column.js";
 import QueryColumn, { type QueryColumnsObjectType } from "../query/queryColumn.js";
-import QueryTable, { type QueryTableSpecsType } from "../query/queryTable.js";
+import QueryTable from "../query/queryTable.js";
 import type IJoinClause from "../query/_interfaces/IJoinClause.js";
 import type ISelectClause from "../query/_interfaces/ISelectClause.js";
 import type IWhereClause from "../query/_interfaces/IWhereClause.js";
@@ -33,7 +33,7 @@ class Table<
     TDbType extends DbType,
     TColumns extends ColumnsObjectType<TDbType>,
     TTableName extends string,
-    TQueryColumns extends QueryColumnsObjectType<TDbType> = { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], QueryTableSpecsType<TTableName>, undefined> }
+    TQueryColumns extends QueryColumnsObjectType<TDbType> = { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], { tableName: TTableName }, undefined> }
 > implements
     IDbType<TDbType>,
     ISelectClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>]>,

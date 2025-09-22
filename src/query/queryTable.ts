@@ -19,8 +19,6 @@ import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.
 import type ColumnLogicalOperation from "./logicalOperations.js";
 import QueryBuilder from "./queryBuilder.js";
 
-type QueryTableSpecsType<TTableName extends string = string, TAsName extends string | undefined = undefined> = { tableName: TTableName, asTableName?: TAsName }
-
 class QueryTable<
     TDbType extends DbType,
     TColumns extends ColumnsObjectType<TDbType>,
@@ -108,7 +106,3 @@ class QueryTable<
 }
 
 export default QueryTable;
-
-export type {
-    QueryTableSpecsType
-}
