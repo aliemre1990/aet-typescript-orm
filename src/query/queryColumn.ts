@@ -19,7 +19,7 @@ class QueryColumn<
     TAsName extends string | undefined = undefined,
     TValueType extends DbValueTypes = TColumn extends Column<TDbType, any, any, any, any, infer TValType> ? TValType : never,
     TFinalValueType extends TValueType | null = TColumn extends Column<TDbType, any, any, any, any, any, infer TFinalValType> ? TFinalValType : never
-> implements IComparable<TDbType, undefined, TValueType, TFinalValueType, false> {
+> implements IComparable<TDbType, undefined, TValueType, TFinalValueType, false, any> {
     qTableSpecs?: TQTableSpecs;
 
     dbType: TDbType;
@@ -53,7 +53,7 @@ const ColumnsSelectionQueryTableObjectSymbol = Symbol();
 type ColumnsSelection<
     TDbType extends DbType,
     TQItem extends QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any>,
-    TColumns extends { [key: string]: IComparable<TDbType, any, any, any, any> }
+    TColumns extends { [key: string]: IComparable<TDbType, any, any, any, any, any> }
 > = {
     [ColumnsSelectionQueryTableObjectSymbol]: TQItem;
 }

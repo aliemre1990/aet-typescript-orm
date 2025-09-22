@@ -45,26 +45,35 @@ class BasicColumnAggregationOperation<
     TArgs extends (
 
         DbValueTypes | null |
-        IComparable<TDbType, any, any, any, true>
+        IComparable<TDbType, any, any, any, true, any>
     )[],
     TReturnType extends DbValueTypes | null,
-    TIsAgg extends boolean = false
-> implements IComparable<TDbType, InferParamsFromFnArgs<TArgs>, NonNullable<TReturnType>, TReturnType, TIsAgg> {
+    TIsAgg extends boolean = false,
+    TAs extends string | undefined = undefined
+> implements IComparable<TDbType, InferParamsFromFnArgs<TArgs>, NonNullable<TReturnType>, TReturnType, TIsAgg, TAs> {
 
     icomparableValueDummy?: NonNullable<TReturnType>;
     icomparableFinalValueDummy?: TReturnType;
     params?: InferParamsFromFnArgs<TArgs>;
     isAgg?: TIsAgg;
+    asName?: TAs;
 
     eq: typeof eq = eq;
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 
+    as<TAs extends string>(asName: TAs) {
+        return new BasicColumnAggregationOperation<TDbType, TArgs, TReturnType, TIsAgg, TAs>(this.dbType, this.args, this.operation, asName);
+    }
+
     constructor(
         public dbType: TDbType,
         public args: TArgs,
-        public operation: AggregationOperation
-    ) { }
+        public operation: AggregationOperation,
+        asName?: TAs
+    ) {
+        this.asName = asName;
+    }
 }
 
 export default BasicColumnAggregationOperation;

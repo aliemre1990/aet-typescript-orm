@@ -22,27 +22,35 @@ class ColumnSQLFunction<
     TSQLFunction extends SQLFunction,
     TArgs extends (
         DbValueTypes | null |
-        IComparable<TDbType, any, any, any, any>
+        IComparable<TDbType, any, any, any, any, any>
     )[],
     TReturnType extends DbValueTypes | null,
-    TIsAgg extends boolean = false
-> implements IComparable<TDbType, InferParamsFromFnArgs<TArgs>, NonNullable<TReturnType>, TReturnType, TIsAgg> {
+    TIsAgg extends boolean = false,
+    TAs extends string | undefined = undefined
+> implements IComparable<TDbType, InferParamsFromFnArgs<TArgs>, NonNullable<TReturnType>, TReturnType, TIsAgg, TAs> {
 
     icomparableValueDummy?: NonNullable<TReturnType>;
     icomparableFinalValueDummy?: TReturnType;
     params?: InferParamsFromFnArgs<TArgs>;
     isAgg?: TIsAgg;
 
+    asName?: TAs;
 
     eq: typeof eq = eq;
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 
+    as<TAs extends string>(asName: TAs) {
+        return new ColumnSQLFunction<TDbType, TSQLFunction, TArgs, TReturnType, TIsAgg, TAs>(this.dbType, this.args, this.sqlFunction, asName);
+    }
+
     constructor(
         public dbType: TDbType,
         public args: TArgs,
         public sqlFunction: TSQLFunction,
+        asName?: TAs
     ) {
+        this.asName = asName;
     }
 }
 

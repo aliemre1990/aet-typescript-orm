@@ -18,7 +18,7 @@ type ConvertMediansInArray<T extends any[], TDbType extends DbType, TValueType e
 type CoalesceArg<TDbType extends DbType, TValueType extends DbValueTypes> =
     | TValueType | null
     | QueryParam<TDbType, string, TValueType | null>
-    | IComparable<TDbType, any, TValueType, any, any>;
+    | IComparable<TDbType, any, TValueType, any, any, any>;
 
 
 function generateCoalesceFn<

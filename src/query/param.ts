@@ -8,9 +8,10 @@ import sqlIn from "./comparisons/in.js";
 class QueryParam<
     TDbType extends DbType,
     TName extends string,
-    TValueType extends DbValueTypes | null
+    TValueType extends DbValueTypes | null,
+    TAs extends string | undefined = undefined
 >
-    implements IComparable<TDbType, [QueryParam<TDbType, TName, TValueType>], NonNullable<TValueType>, TValueType, false> {
+    implements IComparable<TDbType, [QueryParam<TDbType, TName, TValueType>], NonNullable<TValueType>, TValueType, false, TAs> {
 
     dbType: TDbType;
 
@@ -19,8 +20,15 @@ class QueryParam<
     icomparableFinalValueDummy?: TValueType;
     isAgg?: false;
 
-    constructor(dbType: TDbType, public name: TName) {
+    asName?: TAs;
+
+    constructor(dbType: TDbType, public name: TName, asName?: TAs) {
         this.dbType = dbType;
+        this.asName = asName;
+    }
+
+    as<TAs extends string>(asName: TAs) {
+        return new QueryParam<TDbType, TName, TValueType, TAs>(this.dbType, this.name, asName);
     }
 
     type<TValueType extends DbValueTypes | null>() {

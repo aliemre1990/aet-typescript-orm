@@ -11,17 +11,21 @@ interface IComparable<
     TParams extends QueryParam<TDbType, string, any>[] | undefined,
     TValueType extends DbValueTypes,
     TFinalValueType extends TValueType | null,
-    TIsAgg extends boolean
+    TIsAgg extends boolean,
+    TAs extends string | undefined
 > extends IDbType<TDbType> {
     dbType: TDbType;
     icomparableValueDummy?: TValueType;
     icomparableFinalValueDummy?: TFinalValueType;
     params?: TParams;
     isAgg?: TIsAgg;
+    asName?: TAs;
 
     eq: typeof eq;
     sqlIn: typeof sqlIn;
     between: typeof between;
+
+    as<TAs extends string>(asName: TAs): IComparable<TDbType, TParams, TValueType, TFinalValueType, TIsAgg, TAs>
 }
 
 export type {

@@ -17,7 +17,7 @@ const orderTypes = {
 
 type OrderType = typeof orderTypes[keyof typeof orderTypes];
 
-type OrderBySpecs<TDbType extends DbType> = readonly (IComparable<TDbType, any, any, any, false> | [IComparable<TDbType, any, any, any, false>, OrderType])[];
+type OrderBySpecs<TDbType extends DbType> = readonly (IComparable<TDbType, any, any, any, false, any> | [IComparable<TDbType, any, any, any, false, any>, OrderType])[];
 
 interface IOrderByClause<
     TDbType extends DbType,
