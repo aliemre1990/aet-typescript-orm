@@ -13,7 +13,7 @@ class JSONBuildObjectFunction<
     TReturnType extends DbValueTypes | null = TDbType extends PgDbType ? InferReturnTypeFromJSONBuildObjectParam<TDbType, TObj> : never,
     TIsAgg extends boolean = InferIsAggFromJSONFn<TDbType, TObj>,
     TAs extends string | undefined = undefined
-> implements IComparable<TDbType, InferParamsFromJsonBuildObjectArg<TDbType, TObj>, NonNullable<TReturnType>, TReturnType, TIsAgg, TAs> {
+> implements IComparable<TDbType, any, InferParamsFromJsonBuildObjectArg<TDbType, TObj>, NonNullable<TReturnType>, TReturnType, TIsAgg, TAs> {
 
     dbType: TDbType;
     icomparableValueDummy?: NonNullable<TReturnType>;
@@ -49,10 +49,10 @@ type InferParamsFromJsonBuildObjectArg<TDbType extends DbType, TObj extends JSON
 type InferParamsFromObj<TDbType extends DbType, TObj extends JSONBuildObjectParam<TDbType>> =
     RecordToTupleSafe<TObj> extends readonly [infer FirstKey, ...infer RestKeys] ?
     RestKeys extends readonly any[] ?
-    FirstKey extends IComparable<TDbType, infer TParams, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams), ...InferParamsFromObjArr<TDbType, RestKeys>] :
+    FirstKey extends IComparable<TDbType, any, infer TParams, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams), ...InferParamsFromObjArr<TDbType, RestKeys>] :
     FirstKey extends JSONBuildObjectParam<TDbType> ? [...InferParamsFromObj<TDbType, FirstKey>, ...InferParamsFromObjArr<TDbType, RestKeys>] :
     [...InferParamsFromObjArr<TDbType, RestKeys>] :
-    FirstKey extends IComparable<TDbType, infer TParams, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams)] :
+    FirstKey extends IComparable<TDbType, any, infer TParams, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams)] :
     FirstKey extends JSONBuildObjectParam<TDbType> ? [...InferParamsFromObj<TDbType, FirstKey>] :
     [] :
     [];
@@ -60,17 +60,17 @@ type InferParamsFromObj<TDbType extends DbType, TObj extends JSONBuildObjectPara
 type InferParamsFromObjArr<TDbType extends DbType, TRest extends readonly any[]> =
     TRest extends readonly [infer FirstKey, ...infer RestKeys] ?
     RestKeys extends readonly any[] ?
-    FirstKey extends IComparable<TDbType, infer TParams, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams), ...InferParamsFromObjArr<TDbType, RestKeys>] :
+    FirstKey extends IComparable<TDbType, any, infer TParams, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams), ...InferParamsFromObjArr<TDbType, RestKeys>] :
     FirstKey extends JSONBuildObjectParam<TDbType> ? [...InferParamsFromObj<TDbType, FirstKey>, ...InferParamsFromObjArr<TDbType, RestKeys>] :
     [...InferParamsFromObjArr<TDbType, RestKeys>] :
-    FirstKey extends IComparable<TDbType, infer TParams, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams)] :
+    FirstKey extends IComparable<TDbType, any, infer TParams, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams)] :
     FirstKey extends JSONBuildObjectParam<TDbType> ? [...InferParamsFromObj<TDbType, FirstKey>] :
     [] :
     [];
 
 type JSONBuildObjectParam<TDbType extends DbType> = {
     [key: string]:
-    IComparable<TDbType, any, any, any, any, any> |
+    IComparable<TDbType, any, any, any, any, any, any> |
     JSONBuildObjectParam<TDbType>
 }
 

@@ -25,7 +25,7 @@ type SpreadGroupedTable<TGroupedTable extends ColumnsSelection<any, any, any>> =
     RecordToTupleSafe<TGroupedTable, string>
 
 //
-type IsGroupedColumnsContains<TDbType extends DbType, TGroupedColumns extends IComparable<TDbType, any, any, any, false, any>[], TQueryColumnToCheck extends QueryColumn<any, any, any, any>> =
+type IsGroupedColumnsContains<TDbType extends DbType, TGroupedColumns extends IComparable<TDbType, any, any, any, any, false, any>[], TQueryColumnToCheck extends QueryColumn<any, any, any, any>> =
     TGroupedColumns extends [infer First, ...infer Rest] ?
     First extends QueryColumn<any, infer TCol1, any, any> ?
     TQueryColumnToCheck extends QueryColumn<any, infer TCol2, any, any> ?
@@ -91,8 +91,8 @@ type GroupedTablesToColumnsMap<
                     TResult extends (infer TItem)[] ? TItem : TResult extends undefined ? never :
                     TResult :
                     never
-                )[Kc] extends IComparable<TDbType, infer TParams, infer TValueType, infer TFinalValueType, any, any> ?
-                IComparable<TDbType, TParams, TValueType, TFinalValueType, false, any> :
+                )[Kc] extends IComparable<TDbType, infer TId, infer TParams, infer TValueType, infer TFinalValueType, any, infer TAs> ?
+                IComparable<TDbType, TId, TParams, TValueType, TFinalValueType, false, TAs> :
                 never :
                 (
                     T extends QueryTable<TDbType, any, any, any, any, any> ? T["columns"] :
@@ -100,8 +100,8 @@ type GroupedTablesToColumnsMap<
                     TResult extends (infer TItem)[] ? TItem : TResult extends undefined ? never :
                     TResult :
                     never
-                )[Kc] extends IComparable<TDbType, infer TParams, infer TValueType, infer TFinalValueType, any, any> ?
-                IComparable<TDbType, TParams, TValueType, TFinalValueType, true, any> :
+                )[Kc] extends IComparable<TDbType, infer TId, infer TParams, infer TValueType, infer TFinalValueType, any, infer TAs> ?
+                IComparable<TDbType, TId, TParams, TValueType, TFinalValueType, true, TAs> :
                 never :
                 never
             }

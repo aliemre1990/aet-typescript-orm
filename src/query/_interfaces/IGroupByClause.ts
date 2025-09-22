@@ -13,7 +13,7 @@ import type { IComparable } from "./IComparable.js";
 import type QueryBuilder from "../queryBuilder.js";
 import type { IExecuteableQuery } from "./IExecuteableQuery.js";
 
-type GroupBySpecs<TDbType extends DbType> = readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, false, any>)[];
+type GroupBySpecs<TDbType extends DbType> = readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, false, any>)[];
 
 interface IGroupByClause<
     TDbType extends DbType,

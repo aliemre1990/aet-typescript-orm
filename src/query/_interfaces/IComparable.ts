@@ -8,6 +8,7 @@ import type { IDbType } from "./IDbType.js";
 
 interface IComparable<
     TDbType extends DbType,
+    TComparableId extends string,
     TParams extends QueryParam<TDbType, string, any>[] | undefined,
     TValueType extends DbValueTypes,
     TFinalValueType extends TValueType | null,
@@ -25,7 +26,7 @@ interface IComparable<
     sqlIn: typeof sqlIn;
     between: typeof between;
 
-    as<TAs extends string>(asName: TAs): IComparable<TDbType, TParams, TValueType, TFinalValueType, TIsAgg, TAs>
+    as<TAs extends string>(asName: TAs): IComparable<TDbType, TComparableId, TParams, TValueType, TFinalValueType, TIsAgg, TAs>
 }
 
 export type {

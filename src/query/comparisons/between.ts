@@ -9,7 +9,7 @@ import QueryParam from "../param.js";
 
 // params
 function between<
-    TComparing extends IComparable<TDbType, any, any, any, any, any>,
+    TComparing extends IComparable<TDbType, any, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TLParamMedian extends QueryParam<TDbType, string, any>,
     TLParamName extends TLParamMedian extends QueryParam<any, infer U, any> ? U : never,
@@ -19,7 +19,7 @@ function between<
     TRParamName extends TRParamMedian extends QueryParam<any, infer U, any> ? U : never,
     TRParamValue extends TRParamMedian extends QueryParam<any, any, infer TVal> ? TVal : never,
     TRParam extends QueryParam<TDbType, TRParamName, IsAny<TRParamValue> extends true ? TValueType | null : TRParamValue>,
-    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any> ? DbType : never
+    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any, any> ? DbType : never
 >(this: TComparing, leftValue: TLParamMedian, rightValue: TRParamMedian
 ): ColumnComparisonOperation<
     TDbType,
@@ -27,54 +27,54 @@ function between<
     [TLParam, TRParam]
 >
 function between<
-    TComparing extends IComparable<TDbType, any, any, any, any, any>,
+    TComparing extends IComparable<TDbType, any, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TLParamMedian extends QueryParam<TDbType, string, any>,
     TLParamName extends TLParamMedian extends QueryParam<any, infer U, any> ? U : never,
     TLParamValue extends TLParamMedian extends QueryParam<any, any, infer TVal> ? TVal : never,
     TLParam extends QueryParam<TDbType, TLParamName, IsAny<TLParamValue> extends true ? TValueType | null : TLParamValue>,
-    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any> ? DbType : never
+    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any, any> ? DbType : never
 >(this: TComparing, leftValue: TLParamMedian, rightValue: TValueType | null): ColumnComparisonOperation<
     TDbType,
     TComparing,
     [TLParam]
 >
 function between<
-    TComparing extends IComparable<TDbType, any, any, any, any, any>,
+    TComparing extends IComparable<TDbType, any, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TRParamMedian extends QueryParam<TDbType, string, any>,
     TRParamName extends TRParamMedian extends QueryParam<any, infer U, any> ? U : never,
     TRParamValue extends TRParamMedian extends QueryParam<any, any, infer TVal> ? TVal : never,
     TRParam extends QueryParam<TDbType, TRParamName, IsAny<TRParamValue> extends true ? TValueType | null : TRParamValue>,
-    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any> ? DbType : never
+    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any, any> ? DbType : never
 >(this: TComparing, leftValue: TValueType | null, rightValue: TRParamMedian): ColumnComparisonOperation<
     TDbType,
     TComparing,
     [TRParam]
 >
 function between<
-    TComparing extends IComparable<TDbType, any, any, any, any, any>,
+    TComparing extends IComparable<TDbType, any, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TLParamMedian extends QueryParam<TDbType, string, any>,
     TLParamName extends TLParamMedian extends QueryParam<any, infer U, any> ? U : never,
     TLParamValue extends TLParamMedian extends QueryParam<any, any, infer TVal> ? TVal : never,
     TLParam extends QueryParam<TDbType, TLParamName, IsAny<TLParamValue> extends true ? TValueType | null : TLParamValue>,
-    TRApplied extends IComparable<TDbType, any, TValueType, any, any, any>,
-    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any> ? DbType : never
+    TRApplied extends IComparable<TDbType, any, any, TValueType, any, any, any>,
+    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any, any> ? DbType : never
 >(this: TComparing, leftValue: TLParamMedian, rightValue: TRApplied): ColumnComparisonOperation<
     TDbType,
     TComparing,
     [TLParam, TRApplied]
 >
 function between<
-    TComparing extends IComparable<TDbType, any, any, any, any, any>,
+    TComparing extends IComparable<TDbType, any, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TRParamMedian extends QueryParam<TDbType, string, any>,
     TRParamName extends TRParamMedian extends QueryParam<any, infer U, any> ? U : never,
     TRParamValue extends TRParamMedian extends QueryParam<any, any, infer TVal> ? TVal : never,
     TRParam extends QueryParam<TDbType, TRParamName, IsAny<TRParamValue> extends true ? TValueType | null : TRParamValue>,
-    TLApplied extends IComparable<TDbType, any, TValueType, any, any, any>,
-    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any> ? DbType : never
+    TLApplied extends IComparable<TDbType, any, any, TValueType, any, any, any>,
+    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any, any> ? DbType : never
 >(this: TComparing, leftValue: TLApplied, rightValue: TRParamMedian): ColumnComparisonOperation<
     TDbType,
     TComparing,
@@ -84,20 +84,20 @@ function between<
 
 // All same
 function between<
-    TComparing extends IComparable<TDbType, any, any, any, any, any>,
+    TComparing extends IComparable<TDbType, any, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
-    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any> ? DbType : never
+    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any, any> ? DbType : never
 >(this: TComparing, leftValue: TValueType | null, rightValue: TValueType | null): ColumnComparisonOperation<
     TDbType,
     TComparing,
     undefined
 >
 function between<
-    TComparing extends IComparable<TDbType, any, any, any, any, any>,
+    TComparing extends IComparable<TDbType, any, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
-    TLApplied extends IComparable<TDbType, any, TValueType, any, any, any>,
-    TRApplied extends IComparable<TDbType, any, TValueType, any, any, any>,
-    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any> ? DbType : never
+    TLApplied extends IComparable<TDbType, any, any, TValueType, any, any, any>,
+    TRApplied extends IComparable<TDbType, any, any, TValueType, any, any, any>,
+    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any, any> ? DbType : never
 >(this: TComparing, leftValue: TLApplied, rightValue: TRApplied): ColumnComparisonOperation<
     TDbType,
     TComparing,
@@ -108,20 +108,20 @@ function between<
 
 // Column and value
 function between<
-    TComparing extends IComparable<TDbType, any, any, any, any, any>,
+    TComparing extends IComparable<TDbType, any, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
-    TLApplied extends IComparable<TDbType, any, TValueType, any, any, any>,
-    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any> ? DbType : never
+    TLApplied extends IComparable<TDbType, any, any, TValueType, any, any, any>,
+    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any, any> ? DbType : never
 >(this: TComparing, leftValue: TLApplied, rightValue: TValueType | null): ColumnComparisonOperation<
     TDbType,
     TComparing,
     [TLApplied]
 >
 function between<
-    TComparing extends IComparable<TDbType, any, any, any, any, any>,
+    TComparing extends IComparable<TDbType, any, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
-    TRApplied extends IComparable<TDbType, any, TValueType, any, any, any>,
-    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any> ? DbType : never
+    TRApplied extends IComparable<TDbType, any, any, TValueType, any, any, any>,
+    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any, any> ? DbType : never
 >(this: TComparing, leftValue: TValueType | null, rightValue: TRApplied): ColumnComparisonOperation<
     TDbType,
     TComparing,
@@ -131,7 +131,7 @@ function between<
 
 //Implementation
 function between<
-    TComparing extends IComparable<TDbType, any, any, any, any, any>,
+    TComparing extends IComparable<TDbType, any, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TLParamMedian extends QueryParam<TDbType, string, any> | undefined,
     TLParamName extends (TLParamMedian extends QueryParam<any, infer U, any> ? U : never) | undefined,
@@ -139,9 +139,9 @@ function between<
     TRParamMedian extends QueryParam<TDbType, string, any> | undefined,
     TRParamName extends (TRParamMedian extends QueryParam<any, infer U, any> ? U : never) | undefined,
     TRParamValue extends TRParamMedian extends QueryParam<any, any, infer TVal> ? TVal : never,
-    TLApplied extends IComparable<TDbType, any, TValueType, any, any, any> | undefined,
-    TRApplied extends IComparable<TDbType, any, TValueType, any, any, any> | undefined,
-    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any> ? DbType : never
+    TLApplied extends IComparable<TDbType, any, any, TValueType, any, any, any> | undefined,
+    TRApplied extends IComparable<TDbType, any, any, TValueType, any, any, any> | undefined,
+    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any, any> ? DbType : never
 >
     (
         this: TComparing,
