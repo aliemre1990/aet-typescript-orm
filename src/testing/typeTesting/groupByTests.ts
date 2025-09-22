@@ -13,6 +13,10 @@ type SingleTableGroupAutoSelectQueryResult = { id: number, name: string }[];
 type SingleTableGroupAutoSelectQueryReturnType = ReturnType<typeof SingleTableGroupAutoSelectQuery>;
 type SingleTableGroupAutoSelectQueryTest = AssertTrue<AssertEqual<SingleTableGroupAutoSelectQueryResult, SingleTableGroupAutoSelectQueryReturnType>>
 
+
+const res = employeesTable.as("emp");
+type typeofcol = typeof res.columns.salary;
+
 /**
  * 
  */

@@ -19,7 +19,7 @@ import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.
 import type ColumnLogicalOperation from "./logicalOperations.js";
 import QueryBuilder from "./queryBuilder.js";
 
-type QueryTableSpecsType<TTableName extends string = string, TAsName extends string = string> = { tableName: TTableName, asTableName?: TAsName }
+type QueryTableSpecsType<TTableName extends string = string, TAsName extends string | undefined = undefined> = { tableName: TTableName, asTableName?: TAsName }
 
 class QueryTable<
     TDbType extends DbType,
@@ -40,16 +40,6 @@ class QueryTable<
 
     constructor(dbType: TDbType, public table: TTable, public columns: TQColumns, public asName?: TAsName) {
         this.dbType = dbType;
-    }
-
-    as<TAsName extends string>(val: TAsName) {
-        const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
-            prev[curr[0]] = new QueryColumn(this.dbType, curr[1].column, curr[1].asName);
-            return prev;
-
-        }, {} as QueryColumnsObjectType<TDbType, QueryTableSpecsType>) as { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], { tableName: TTableName, asTableName: TAsName }, string | undefined> };
-
-        return new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, typeof queryColumns, TAsName>(this.dbType, this.table, queryColumns, val);
     }
 
     select<

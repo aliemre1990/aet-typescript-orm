@@ -33,7 +33,7 @@ class Table<
     TDbType extends DbType,
     TColumns extends ColumnsObjectType<TDbType>,
     TTableName extends string,
-    TQueryColumns extends QueryColumnsObjectType<TDbType, QueryTableSpecsType> = { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], QueryTableSpecsType<TTableName>, undefined> }
+    TQueryColumns extends QueryColumnsObjectType<TDbType> = { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], QueryTableSpecsType<TTableName>, undefined> }
 > implements
     IDbType<TDbType>,
     ISelectClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>]>,
@@ -60,7 +60,7 @@ class Table<
             prev[curr[0]] = new QueryColumn(this.dbType, curr[1]);
             return prev;
 
-        }, {} as QueryColumnsObjectType<TDbType, { tableName: TTableName, asTableName: TAsName }>) as { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], { tableName: TTableName, asTableName: TAsName }, undefined> };
+        }, {} as QueryColumnsObjectType<TDbType>) as { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], { tableName: TTableName, asTableName: TAsName }, undefined> };
 
         return new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, typeof queryColumns, TAsName>(this.dbType, this, queryColumns, val);
     }
@@ -80,7 +80,7 @@ class Table<
             .reduce((prev, ent) => {
                 prev[ent[1].name] = new QueryColumn(this.dbType, ent[1]);
                 return prev;
-            }, {} as QueryColumnsObjectType<TDbType, QueryTableSpecsType>) as TQueryColumns;
+            }, {} as QueryColumnsObjectType<TDbType>) as TQueryColumns;
 
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>(this.dbType, this as any, queryColumns);
 
@@ -112,7 +112,7 @@ class Table<
         const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
             prev[curr[0]] = new QueryColumn(this.dbType, curr[1]);
             return prev;
-        }, {} as QueryColumnsObjectType<TDbType, QueryTableSpecsType>) as TQueryColumns
+        }, {} as QueryColumnsObjectType<TDbType>) as TQueryColumns
 
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>(this.dbType, this, queryColumns);
 
@@ -130,7 +130,7 @@ class Table<
         const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
             prev[curr[0]] = new QueryColumn(this.dbType, curr[1]);
             return prev;
-        }, {} as QueryColumnsObjectType<TDbType, QueryTableSpecsType>) as TQueryColumns
+        }, {} as QueryColumnsObjectType<TDbType>) as TQueryColumns
 
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName, any>, TQueryColumns, undefined>(this.dbType, this, queryColumns);
 
@@ -143,7 +143,7 @@ class Table<
         const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
             prev[curr[0]] = new QueryColumn(this.dbType, curr[1]);
             return prev;
-        }, {} as QueryColumnsObjectType<TDbType, QueryTableSpecsType>) as TQueryColumns
+        }, {} as QueryColumnsObjectType<TDbType>) as TQueryColumns
 
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName, any>, TQueryColumns, undefined>(this.dbType, this, queryColumns);
 
@@ -157,7 +157,7 @@ class Table<
         const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
             prev[curr[0]] = new QueryColumn(this.dbType, curr[1]);
             return prev;
-        }, {} as QueryColumnsObjectType<TDbType, QueryTableSpecsType>) as TQueryColumns
+        }, {} as QueryColumnsObjectType<TDbType>) as TQueryColumns
 
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName, any>, TQueryColumns, undefined>(this.dbType, this, queryColumns);
 

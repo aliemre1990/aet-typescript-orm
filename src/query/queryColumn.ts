@@ -10,21 +10,21 @@ import type { QueryTableSpecsType } from "./queryTable.js";
 import type QueryBuilder from "./queryBuilder.js";
 import type { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
 
-type QueryColumnsObjectType<TDbType extends DbType, TQTableSpecs extends QueryTableSpecsType = QueryTableSpecsType> = { [key: string]: QueryColumn<TDbType, any, any, any> }
+type QueryColumnsObjectType<TDbType extends DbType> = { [key: string]: QueryColumn<TDbType, any, any, any> }
 
 type InferIdFromQueryColumn<
     TDbType extends DbType,
     TColumn extends ColumnType<TDbType>,
-    TQTableSpecs extends QueryTableSpecsType,
+    TQTableSpecs extends { tableName: string, asTableName?: string },
     TAsName extends string | undefined,
 > =
-    `Column-${TColumn extends Column<TDbType, any, infer TColName, any> ? TColName : never};Table-${TQTableSpecs extends { tableName: infer TTableName } ? TTableName : never};As-${TAsName extends string ? TAsName : "undefined"}`
+    `Column-${TColumn extends Column<TDbType, any, infer TColName, any, any, any, any> ? TColName : never};Table-${TQTableSpecs extends { tableName: infer TTableName } ? TTableName : never};TableAs-${TQTableSpecs extends { asTableName?: infer TAsTable } ? TAsTable extends undefined ? "undefined" : TAsTable : never};As-${TAsName extends string ? TAsName : "undefined"}`
     ;
 
 class QueryColumn<
     TDbType extends DbType,
     TColumn extends ColumnType<TDbType>,
-    TQTableSpecs extends QueryTableSpecsType,
+    TQTableSpecs extends { tableName: string, asTableName?: string },
     TAsName extends string | undefined = undefined,
     TValueType extends DbValueTypes = TColumn extends Column<TDbType, any, any, any, any, infer TValType> ? TValType : never,
     TFinalValueType extends TValueType | null = TColumn extends Column<TDbType, any, any, any, any, any, infer TFinalValType> ? TFinalValType : never,

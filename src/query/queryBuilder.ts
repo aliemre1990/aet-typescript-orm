@@ -228,7 +228,7 @@ function from<
             const queryColumns = Object.entries(item.columns).reduce((prev, curr) => {
                 prev[curr[0]] = new QueryColumn(item.dbType, curr[1] as ColumnType<TDbType>);
                 return prev;
-            }, {} as QueryColumnsObjectType<TDbType, QueryTableSpecsType>)
+            }, {} as QueryColumnsObjectType<TDbType>)
 
             return new QueryTable(item.dbType, item, queryColumns);
         } else {
