@@ -6,18 +6,31 @@ import between from "../../comparisons/between.js";
 import eq from "../../comparisons/eq.js";
 import sqlIn from "../../comparisons/in.js";
 import type { InferIsAggFromJSONFn, InferReturnTypeFromJSONBuildObjectParam } from "../../_types/args.js";
+import type { InferTypeName } from "../../_types/comparableIdInference.js";
+
+type InferIdFromJsonBuildObjectFunction<
+    TDbType extends PgDbType,
+    TObj extends JSONBuildObjectParam<TDbType>,
+    TReturnType extends DbValueTypes | null = TDbType extends PgDbType ? InferReturnTypeFromJSONBuildObjectParam<TDbType, TObj> : never,
+    TIsAgg extends boolean = InferIsAggFromJSONFn<TDbType, TObj>,
+    TAs extends string | undefined = undefined
+> =
+    `Function-json_build_object;DbType-${typeof dbTypes.postgresql};Args-(${InferTypeName<TObj>});ReturnType-${InferTypeName<TReturnType>};IsAgg-${TIsAgg extends true ? "true" : "false"};As-${TAs extends string ? TAs : "undefined"}`
+    ;
 
 class JSONBuildObjectFunction<
     TDbType extends PgDbType,
     TObj extends JSONBuildObjectParam<TDbType>,
     TReturnType extends DbValueTypes | null = TDbType extends PgDbType ? InferReturnTypeFromJSONBuildObjectParam<TDbType, TObj> : never,
     TIsAgg extends boolean = InferIsAggFromJSONFn<TDbType, TObj>,
-    TAs extends string | undefined = undefined
-> implements IComparable<TDbType, any, InferParamsFromJsonBuildObjectArg<TDbType, TObj>, NonNullable<TReturnType>, TReturnType, TIsAgg, TAs> {
+    TAs extends string | undefined = undefined,
+    TComparableId extends string = InferIdFromJsonBuildObjectFunction<TDbType, TObj, TReturnType, TIsAgg, TAs>
+> implements IComparable<TDbType, TComparableId, InferParamsFromJsonBuildObjectArg<TDbType, TObj>, NonNullable<TReturnType>, TReturnType, TIsAgg, TAs> {
 
     dbType: TDbType;
     icomparableValueDummy?: NonNullable<TReturnType>;
     icomparableFinalValueDummy?: TReturnType;
+    icomparableIdDummy?: TComparableId;
     params?: InferParamsFromJsonBuildObjectArg<TDbType, TObj>;
     isAgg?: TIsAgg;
 

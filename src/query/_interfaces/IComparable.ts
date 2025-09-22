@@ -18,15 +18,18 @@ interface IComparable<
     dbType: TDbType;
     icomparableValueDummy?: TValueType;
     icomparableFinalValueDummy?: TFinalValueType;
+    icomparableIdDummy?: TComparableId;
     params?: TParams;
     isAgg?: TIsAgg;
     asName?: TAs;
+
+
 
     eq: typeof eq;
     sqlIn: typeof sqlIn;
     between: typeof between;
 
-    as<TAs extends string>(asName: TAs): IComparable<TDbType, TComparableId, TParams, TValueType, TFinalValueType, TIsAgg, TAs>
+    as<TAs extends string>(asName: TAs): IComparable<TDbType, string, TParams, TValueType, TFinalValueType, TIsAgg, TAs>
 }
 
 export type {

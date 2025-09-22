@@ -55,6 +55,17 @@ type NullableArray<T> = T extends Array<infer TItem> ? (TItem | null)[] : never;
 
 type NonNullableArray<T> = T extends Array<infer TItem> ? null extends TItem ? NonNullable<TItem>[] : TItem[] : T;
 
+type JoinTuple<T extends readonly string[], Delimiter extends string> =
+    T extends readonly [infer First, ...infer Rest]
+    ? First extends string
+    ? Rest extends readonly string[]
+    ? Rest["length"] extends 0
+    ? First
+    : `${First}${Delimiter}${JoinTuple<Rest, Delimiter>}`
+    : First
+    : ""
+    : "";
+
 export type {
     UnionToTuple,
     RecordToTupleSafe,
@@ -65,5 +76,6 @@ export type {
     IsUnion,
     IsAny,
     NullableArray,
-    NonNullableArray
+    NonNullableArray,
+    JoinTuple
 }

@@ -10,7 +10,16 @@ import type { QueryTableSpecsType } from "./queryTable.js";
 import type QueryBuilder from "./queryBuilder.js";
 import type { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
 
-type QueryColumnsObjectType<TDbType extends DbType, TQTableSpecs extends QueryTableSpecsType = QueryTableSpecsType> = { [key: string]: QueryColumn<TDbType, ColumnType<TDbType>, TQTableSpecs, string | undefined> }
+type QueryColumnsObjectType<TDbType extends DbType, TQTableSpecs extends QueryTableSpecsType = QueryTableSpecsType> = { [key: string]: QueryColumn<TDbType, any, any, any> }
+
+type InferIdFromQueryColumn<
+    TDbType extends DbType,
+    TColumn extends ColumnType<TDbType>,
+    TQTableSpecs extends QueryTableSpecsType,
+    TAsName extends string | undefined,
+> =
+    `Column-${TColumn extends Column<TDbType, any, infer TColName, any> ? TColName : never};Table-${TQTableSpecs extends { tableName: infer TTableName } ? TTableName : never};As-${TAsName extends string ? TAsName : "undefined"}`
+    ;
 
 class QueryColumn<
     TDbType extends DbType,
@@ -18,8 +27,9 @@ class QueryColumn<
     TQTableSpecs extends QueryTableSpecsType,
     TAsName extends string | undefined = undefined,
     TValueType extends DbValueTypes = TColumn extends Column<TDbType, any, any, any, any, infer TValType> ? TValType : never,
-    TFinalValueType extends TValueType | null = TColumn extends Column<TDbType, any, any, any, any, any, infer TFinalValType> ? TFinalValType : never
-> implements IComparable<TDbType, any, undefined, TValueType, TFinalValueType, false, any> {
+    TFinalValueType extends TValueType | null = TColumn extends Column<TDbType, any, any, any, any, any, infer TFinalValType> ? TFinalValType : never,
+    TComparableId extends string = InferIdFromQueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>
+> implements IComparable<TDbType, TComparableId, undefined, TValueType, TFinalValueType, false, any> {
     qTableSpecs?: TQTableSpecs;
 
     dbType: TDbType;
@@ -28,6 +38,7 @@ class QueryColumn<
     params?: undefined;
     icomparableValueDummy?: TValueType;
     icomparableFinalValueDummy?: TFinalValueType;
+    icomparableIdDummy?: TComparableId;
     isAgg?: false;
 
     eq: typeof eq = eq;
