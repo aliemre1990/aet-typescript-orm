@@ -8,8 +8,6 @@ import type QueryTable from "./queryTable.js";
 import type { ColumnType, DbValueTypes } from "../table/column.js";
 import type { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
 
-type QueryTableSpecsType<TTableName extends string = string, TAsName extends string | undefined = undefined> = { tableName: TTableName, asTableName?: TAsName }
-
 type QueryColumnsObjectType<TDbType extends DbType> = { [key: string]: QueryColumn<TDbType, any, any, any> }
 
 type InferIdFromQueryColumn<
@@ -18,7 +16,7 @@ type InferIdFromQueryColumn<
     TQTableSpecs extends { tableName: string, asTableName?: string },
     TAsName extends string | undefined,
 > =
-    `Column-${TColumn extends Column<TDbType, any, infer TColName, any, any, any, any> ? TColName : never};Table-${TQTableSpecs extends { tableName: infer TTableName } ? TTableName : never};TableAs-${TQTableSpecs extends { asTableName?: infer TAsTable } ? TAsTable extends undefined ? "undefined" : TAsTable : never};As-${TAsName extends string ? TAsName : "undefined"}`
+    `${TQTableSpecs extends { asTableName?: infer TAsTable } ? TAsTable extends undefined ? "undefined" : TAsTable : never}-${TQTableSpecs extends { tableName: infer TTableName } ? TTableName : never}-${TAsName extends string ? TAsName : "undefined"}-${TColumn extends Column<TDbType, any, infer TColName, any, any, any, any> ? TColName : never}`
     ;
 
 class QueryColumn<

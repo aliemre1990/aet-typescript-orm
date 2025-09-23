@@ -63,7 +63,7 @@ class QueryTable<
             TInnerCols,
             TInnerTableName,
             Table<TDbType, TInnerCols, TInnerTableName>,
-            { [K in keyof TInnerCols]: QueryColumn<TDbType, TInnerCols[K], { tableName: TInnerTableName }> }
+            { [K in keyof TInnerCols]: QueryColumn<TDbType, TInnerCols[K], { tableName: TInnerTableName, asTableName: undefined }> }
         > :
         TInnerJoinTable,
 

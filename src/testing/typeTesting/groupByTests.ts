@@ -1,3 +1,4 @@
+import type { IComparable } from "../../query/_interfaces/IComparable.js";
 import { customersTable, employeesTable, shipmentsTable, usersTable } from "./_tables.js";
 import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
 
@@ -26,6 +27,8 @@ const MultiTableGroupByQuery = customersTable
     .join('INNER', employeesTable, cols => cols.shipments.id.eq(1))
     .groupBy(cols => [cols.customers, cols.users.id, cols.shipments, cols.employees.id])
     .select((cols, { sum, jsonAgg, jsonBuildObject }) => {
+
+        type t = (typeof cols.employees.salary);
 
         return ({
             customerId: cols.customers.customerId,

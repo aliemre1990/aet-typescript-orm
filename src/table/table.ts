@@ -33,7 +33,7 @@ class Table<
     TDbType extends DbType,
     TColumns extends ColumnsObjectType<TDbType>,
     TTableName extends string,
-    TQueryColumns extends QueryColumnsObjectType<TDbType> = { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], { tableName: TTableName }, undefined> }
+    TQueryColumns extends QueryColumnsObjectType<TDbType> = { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], { tableName: TTableName, asTableName: undefined }, undefined> }
 > implements
     IDbType<TDbType>,
     ISelectClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>]>,
@@ -97,7 +97,7 @@ class Table<
             TInnerCols,
             TInnerTableName,
             Table<TDbType, TInnerCols, TInnerTableName>,
-            { [K in keyof TInnerCols]: QueryColumn<TDbType, TInnerCols[K], { tableName: TInnerTableName }> }
+            { [K in keyof TInnerCols]: QueryColumn<TDbType, TInnerCols[K], { tableName: TInnerTableName, asTableName: undefined }> }
         > :
         TInnerJoinTable,
 
