@@ -4,8 +4,8 @@ import type { IComparable } from "../_interfaces/IComparable.js";
 import type QueryParam from "../param.js";
 import ColumnSQLFunction, { sqlFunctions } from "./_functions.js";
 
-type IsExplicitTypeNumber<TDbType extends DbType, TFirstArg extends QueryParam<TDbType, string, any> | IComparable<TDbType, any, any, number, any, any, any> | number | null> =
-    TFirstArg extends QueryParam<TDbType, string, infer TValueType> ? IsAny<TValueType> extends true ? TFirstArg :
+type IsExplicitTypeNumber<TDbType extends DbType, TFirstArg extends QueryParam<TDbType, string, any, any, any> | IComparable<TDbType, any, any, number, any, any, any> | number | null> =
+    TFirstArg extends QueryParam<TDbType, string, infer TValueType, any, any> ? IsAny<TValueType> extends true ? TFirstArg :
     number extends TValueType ? TFirstArg : never :
     TFirstArg
     ;
@@ -13,16 +13,16 @@ type IsExplicitTypeNumber<TDbType extends DbType, TFirstArg extends QueryParam<T
 
 function generateRoundFn<TDbType extends DbType>(dbType: TDbType) {
     return <
-        TFirstArg extends QueryParam<TDbType, string, any> | IComparable<TDbType, any, any, number, any, any, any> | number | null,
-        TSecondArg extends QueryParam<TDbType, string, any> | IComparable<TDbType, any, any, number, any, any, any> | number | null,
+        TFirstArg extends QueryParam<TDbType, string, any, any, any> | IComparable<TDbType, any, any, number, any, any, any> | number | null,
+        TSecondArg extends QueryParam<TDbType, string, any, any, any> | IComparable<TDbType, any, any, number, any, any, any> | number | null,
     >(firstArg: TFirstArg & (IsExplicitTypeNumber<TDbType, TFirstArg>), secondArg: TSecondArg & (IsExplicitTypeNumber<TDbType, TSecondArg>)) => {
 
-        type TFirstArgFormatted = TFirstArg extends QueryParam<TDbType, infer TParamName, infer TValueType> ?
-            IsAny<TValueType> extends true ? QueryParam<TDbType, TParamName, number | null> : QueryParam<TDbType, TParamName, TValueType> :
+        type TFirstArgFormatted = TFirstArg extends QueryParam<TDbType, infer TParamName, infer TValueType, any, any> ?
+            IsAny<TValueType> extends true ? QueryParam<TDbType, TParamName, number | null, any, any> : QueryParam<TDbType, TParamName, TValueType, any, any> :
             TFirstArg;
 
         type TSecondArgFormatted = TSecondArg extends QueryParam<TDbType, infer TParamName, infer TValueType> ?
-            IsAny<TValueType> extends true ? QueryParam<TDbType, TParamName, number | null> : QueryParam<TDbType, TParamName, TValueType> :
+            IsAny<TValueType> extends true ? QueryParam<TDbType, TParamName, number | null, any, any> : QueryParam<TDbType, TParamName, TValueType, any, any> :
             TSecondArg;
 
         let firstArgValue: TFirstArg = firstArg;

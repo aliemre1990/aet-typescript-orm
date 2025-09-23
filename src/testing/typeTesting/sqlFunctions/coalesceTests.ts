@@ -68,7 +68,7 @@ type pgCoalescePlainWithParamLengthTest = AssertTrue<AssertEqual<3, pgCoalescePl
 type pgCoalescePlainWithParamReturnTypeTest = AssertTrue<AssertEqual<number, pgCoalescePlainWithParamReturnType>>
 type pgCoalescePlainWithParamArg0Test = AssertTrue<AssertEqual<number, pgCoalescePlainWithParamArg0>>;
 type pgCoalescePlainWithParamArg1Test = AssertTrue<AssertEqual<number, pgCoalescePlainWithParamArg1>>;
-type pgCoalescePlainWithParamArg2Test = AssertTrue<AssertEqual<QueryParam<PgDbType, "param", number | null>, pgCoalescePlainWithParamArg2>>;
+type pgCoalescePlainWithParamArg2Test = AssertTrue<AssertEqual<QueryParam<PgDbType, "param", number | null, any, any>, pgCoalescePlainWithParamArg2>>;
 
 /**
  * Misc
@@ -152,9 +152,9 @@ type betweenCoalesceParamedParams = InferParamsFromOps<typeofBetweenCoalescePara
 
 type betweenCoalesceParamedParamLengthTest = AssertTrue<AssertEqual<2, betweenCoalesceParamedParams["length"]>>;
 
-type betweenCoalesceParamedFirstParamRes = QueryParam<PgDbType, "betLeft", string | null>;
+type betweenCoalesceParamedFirstParamRes = QueryParam<PgDbType, "betLeft", string | null, any, any>;
 type betweenCoalesceParamedFirstParamTest = AssertTrue<AssertEqual<betweenCoalesceParamedFirstParamRes, betweenCoalesceParamedParams[0]>>;
 
-type betweenCoalesceParamedSecondParamRes = QueryParam<PgDbType, "betRight", string | null>;
+type betweenCoalesceParamedSecondParamRes = QueryParam<PgDbType, "betRight", string | null, any, any>;
 type betweenCoalesceParamedSecondParamTest = AssertTrue<AssertEqual<betweenCoalesceParamedSecondParamRes, betweenCoalesceParamedParams[1]>>;
 

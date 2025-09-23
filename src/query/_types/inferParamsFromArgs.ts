@@ -1,8 +1,4 @@
 import type { IComparable } from "../_interfaces/IComparable.js";
-import type QueryParam from "../param.js";
-import type ColumnSQLFunction from "../functions/_functions.js";
-
-type InferParamsFromFn<T> = T extends ColumnSQLFunction<any, any, infer TArgs, any, any> ? InferParamsFromFnArgs<TArgs> : never;
 
 type InferParamsFromFnArgs<T> =
     T extends readonly [infer FirstArg, ...infer RestArgs] ?

@@ -10,7 +10,7 @@ function eq<
     TParamMedian extends QueryParam<TDbType, string, any, any, any>,
     TParamName extends TParamMedian extends QueryParam<any, infer U, any, any, any> ? U : never,
     TParamValue extends TParamMedian extends QueryParam<any, any, infer TVal, any, any> ? TVal : never,
-    TParam extends QueryParam<TDbType, TParamName, IsAny<TParamValue> extends true ? TValueType | null : TParamValue>,
+    TParam extends QueryParam<TDbType, TParamName, IsAny<TParamValue> extends true ? TValueType | null : TParamValue, any, any>,
     TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any, any> ? DbType : never,
 >(this: TComparing, value: TParamMedian
 ): ColumnComparisonOperation<

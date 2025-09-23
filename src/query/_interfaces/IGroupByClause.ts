@@ -18,7 +18,7 @@ type GroupBySpecs<TDbType extends DbType> = readonly (ColumnsSelection<TDbType, 
 interface IGroupByClause<
     TDbType extends DbType,
     TQueryItems extends readonly (QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any>)[],
-    TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined
+    TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null, any, any>[] | undefined = undefined
 > {
     groupBy<
         const TCbResult extends GroupBySpecs<TDbType>

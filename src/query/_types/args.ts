@@ -12,7 +12,7 @@ type InferFirstTypeFromArgs<TDbType extends DbType, TArgs extends
     )[]
 > =
     TArgs extends readonly [infer First, ...infer Rest] ?
-    First extends QueryParam<TDbType, string, infer TValueType> ?
+    First extends QueryParam<TDbType, string, infer TValueType, any, any> ?
 
     IsAny<TValueType> extends true ?
 

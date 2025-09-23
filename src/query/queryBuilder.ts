@@ -34,7 +34,7 @@ class QueryBuilder<
     TDbType extends DbType,
     TQueryItems extends readonly (QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any>)[],
     TResult extends TResultShape<TDbType>[] | TResultShape<TDbType> | undefined = undefined,
-    TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null>[] | undefined = undefined,
+    TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null, any, any>[] | undefined = undefined,
     TGroupedColumns extends GroupBySpecs<TDbType> | undefined = undefined,
     TOrderBySpecs extends OrderBySpecs<TDbType> | undefined = undefined,
     TAs extends string | undefined = undefined
