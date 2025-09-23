@@ -5,6 +5,8 @@ import between from "../comparisons/between.js";
 import eq from "../comparisons/eq.js";
 import sqlIn from "../comparisons/in.js";
 import type { InferParamsFromFnArgs } from "../_types/inferParamsFromArgs.js";
+import type { JoinTuple } from "../../utility/common.js";
+import type { InferTypeName, InferTypeNamesFromArgs } from "../_types/comparableIdInference.js";
 
 const sqlFunctions = {
     coalesce: { name: 'COALESCE' },
@@ -17,6 +19,19 @@ const sqlFunctions = {
 type SQLFunction = (typeof sqlFunctions)[keyof typeof sqlFunctions];
 
 
+type InferIdFromFunction<
+    TDbType extends DbType,
+    TSQLFunction extends SQLFunction,
+    TArgs extends (
+        DbValueTypes | null |
+        IComparable<TDbType, any, any, any, any, any, any>
+    )[],
+    TReturnType extends DbValueTypes | null,
+    TAs extends string | undefined = undefined
+> =
+    `${Lowercase<TSQLFunction["name"]>}(${InferTypeNamesFromArgs<TArgs>}):${InferTypeName<TReturnType>} as ${TAs extends string ? TAs : "undefined"}`
+    ;
+
 class ColumnSQLFunction<
     TDbType extends DbType,
     TSQLFunction extends SQLFunction,
@@ -26,11 +41,13 @@ class ColumnSQLFunction<
     )[],
     TReturnType extends DbValueTypes | null,
     TIsAgg extends boolean = false,
-    TAs extends string | undefined = undefined
-> implements IComparable<TDbType, any, InferParamsFromFnArgs<TArgs>, NonNullable<TReturnType>, TReturnType, TIsAgg, TAs> {
+    TAs extends string | undefined = undefined,
+    TComparableId extends string = InferIdFromFunction<TDbType, TSQLFunction, TArgs, TReturnType, TAs>
+> implements IComparable<TDbType, TComparableId, InferParamsFromFnArgs<TArgs>, NonNullable<TReturnType>, TReturnType, TIsAgg, TAs> {
 
     icomparableValueDummy?: NonNullable<TReturnType>;
     icomparableFinalValueDummy?: TReturnType;
+    icomparableIdDummy?: TComparableId;
     params?: InferParamsFromFnArgs<TArgs>;
     isAgg?: TIsAgg;
 

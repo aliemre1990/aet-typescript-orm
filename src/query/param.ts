@@ -1,23 +1,35 @@
 import { dbTypes, type DbType } from "../db.js";
 import type { DbValueTypes } from "../table/column.js";
 import type { IComparable } from "./_interfaces/IComparable.js";
+import type { InferTypeName } from "./_types/comparableIdInference.js";
 import between from "./comparisons/between.js";
 import eq from "./comparisons/eq.js";
 import sqlIn from "./comparisons/in.js";
+
+type InferIdFromParam<
+    TName extends string,
+    TValueType extends DbValueTypes | null,
+> =
+    `$${TName}::${InferTypeName<TValueType>}`
+    ;
+
 
 class QueryParam<
     TDbType extends DbType,
     TName extends string,
     TValueType extends DbValueTypes | null,
-    TAs extends string | undefined = undefined
+    TAs extends string | undefined = undefined,
+    TComparableId extends string = InferIdFromParam<TName, TValueType>
+
 >
-    implements IComparable<TDbType, any, [QueryParam<TDbType, TName, TValueType>], NonNullable<TValueType>, TValueType, false, TAs> {
+    implements IComparable<TDbType, TComparableId, [QueryParam<TDbType, TName, TValueType>], NonNullable<TValueType>, TValueType, false, TAs> {
 
     dbType: TDbType;
 
     params?: [QueryParam<TDbType, TName, TValueType>];
     icomparableValueDummy?: NonNullable<TValueType>;
     icomparableFinalValueDummy?: TValueType;
+    icomparableIdDummy?: TComparableId;
     isAgg?: false;
 
     asName?: TAs;
