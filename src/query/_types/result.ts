@@ -154,7 +154,7 @@ type InferParamsFromOpsArray<T extends readonly any[]> =
 type InferParamsFromComparables<T> =
     T extends readonly [infer First, ...infer Rest] ?
     First extends IComparable<any, any, infer TParams, any, any, any, any> ?
-    [...(TParams extends QueryParam<any, any, any, any, any>[] ? TParams : []), ...InferParamsFromComparables<Rest>] :
+    [...(TParams extends undefined ? [] : TParams), ...InferParamsFromComparables<Rest>] :
     [...InferParamsFromComparables<Rest>] :
     [];
 

@@ -11,7 +11,7 @@ import type { IExecuteableQuery } from "../_interfaces/IExecuteableQuery.js";
 //
 type SpreadGroupedColumns<TDbType extends DbType, TGroupedColumns extends GroupBySpecs<TDbType>> =
     TGroupedColumns extends readonly [infer First, ...infer Rest] ?
-    First extends QueryColumn<any, any, any, any> ?
+    First extends IComparable<TDbType, any, any, any, any, any, any> ?
     Rest extends GroupBySpecs<TDbType> ?
     [First, ...SpreadGroupedColumns<TDbType, Rest>] :
     [First] :
@@ -27,15 +27,15 @@ type SpreadGroupedTable<TGroupedTable extends ColumnsSelection<any, any, any>> =
 //
 type IsGroupedColumnsContains<TDbType extends DbType, TGroupedColumns extends IComparable<TDbType, any, any, any, any, false, any>[], TQueryColumnToCheck extends QueryColumn<any, any, any, any>> =
     TGroupedColumns extends [infer First, ...infer Rest] ?
-    First extends QueryColumn<any, infer TCol1, any, any> ?
-    TQueryColumnToCheck extends QueryColumn<any, infer TCol2, any, any> ?
-    TCol1 extends TCol2 ?
-    TCol2 extends TCol1 ?
+    First extends IComparable<TDbType, infer TId, any, any, any, any, any> ?
+    TQueryColumnToCheck extends IComparable<TDbType, infer TIdToCheck, any, any, any, any, any> ?
+    TId extends TIdToCheck ?
+    TIdToCheck extends TId ?
     true :
-    Rest extends QueryColumn<any, any, any, any>[] ?
+    Rest extends IComparable<TDbType, any, any, any, any, any, any>[] ?
     IsGroupedColumnsContains<TDbType, Rest, TQueryColumnToCheck> :
     false :
-    Rest extends QueryColumn<any, any, any, any>[] ?
+    Rest extends IComparable<TDbType, any, any, any, any, any, any>[] ?
     IsGroupedColumnsContains<TDbType, Rest, TQueryColumnToCheck> :
     false :
     false :
@@ -56,7 +56,7 @@ type GroupedTablesToColumnsMap<
         T extends QueryTable<TDbType, any, any, any, any, infer TAs> ?
         TAs extends undefined ? T["table"]["name"] :
         TAs & string :
-        T extends QueryBuilder<TDbType, any, any, any, any, any, infer TAs> ?
+        T extends IExecuteableQuery<TDbType, any, any, any, any, any, infer TAs> ?
         TAs extends undefined ? never :
         TAs & string :
         never
@@ -67,7 +67,7 @@ type GroupedTablesToColumnsMap<
                 Kc in keyof
                 (
                     T extends QueryTable<TDbType, any, any, any, any, any> ? T["columns"] :
-                    T extends QueryBuilder<TDbType, any, infer TResult, any, any, any, any> ?
+                    T extends IExecuteableQuery<TDbType, any, infer TResult, any, any, any, any> ?
                     TResult extends (infer TItem)[] ? TItem : TResult extends undefined ? never :
                     TResult :
                     never

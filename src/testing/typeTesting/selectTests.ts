@@ -1,13 +1,21 @@
 import type { IExecuteableQuery } from "../../query/_interfaces/IExecuteableQuery.js";
-import { from } from "../../query/queryBuilder.js";
+import type ISelectClause from "../../query/_interfaces/ISelectClause.js";
+import QueryBuilder, { from } from "../../query/queryBuilder.js";
 import { customersTable, employeesTable, ordersTable, shipmentsTable, usersTable } from "./_tables.js";
 import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
 
 const selectQuery = customersTable
     .where((cols, { param }) => cols.customers.customerId.eq(param("whereparam")))
-    .select(cols => cols.customers)
+    .select((cols, { round }) => ({ id: cols.customers.customerId, roundResult: round(cols.customers.createdBy, 2) }))
     .as("ali");
-from(employeesTable.as("zartZurt"), selectQuery).select(cols => ({ zart: cols.zartZurt.id })).exec();
+
+
+from(employeesTable.as("zartZurt"), selectQuery).groupBy(cols => [cols.ali.roundResult]).select(cols => ({ zart: cols.ali.roundResult })).exec();
+
+const fromRes = from(employeesTable.as("zartZurt"), selectQuery).groupBy(cols => [cols.ali])
+type tp1 = typeof fromRes;
+type tp2 = typeof fromRes extends ISelectClause<any, infer tit, any, infer tgroup, any> ? tgroup : never
+
 
 
 /**

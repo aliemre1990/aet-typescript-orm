@@ -8,6 +8,7 @@ function generateSumFn<TDbType extends DbType>(dbType: TDbType) {
     >(arg: TAggColumn) => {
         return new BasicColumnAggregationOperation<
             TDbType,
+            typeof aggregationOperations.sum,
             [TAggColumn],
             TAggColumn extends IComparable<TDbType, any, any, any, infer TFinalType, any, any> ? TFinalType : never
         >(dbType, [arg], aggregationOperations.sum);

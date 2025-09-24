@@ -6,13 +6,7 @@ import between from "./comparisons/between.js";
 import eq from "./comparisons/eq.js";
 import sqlIn from "./comparisons/in.js";
 
-type InferIdFromParam<
-    TName extends string,
-    TValueType extends DbValueTypes | null,
-> =
-    `$${TName}::${InferTypeName<TValueType>}`
-    ;
-
+type InferIdFromParam<TName extends string, TValueType extends DbValueTypes | null> = `$${TName}::${InferTypeName<TValueType>}`;
 
 class QueryParam<
     TDbType extends DbType,
@@ -44,7 +38,7 @@ class QueryParam<
     }
 
     type<TValueType extends DbValueTypes | null>() {
-        return new QueryParam<TDbType, TName, TValueType>(this.dbType, this.name);
+        return new QueryParam<TDbType, TName, TValueType, TAs>(this.dbType, this.name, this.asName);
     }
 
     eq: typeof eq = eq;

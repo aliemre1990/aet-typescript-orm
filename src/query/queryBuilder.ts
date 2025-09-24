@@ -23,6 +23,7 @@ import type { OrderBySpecs } from "./_interfaces/IOrderByClause.js";
 import type { GroupBySpecs } from "./_interfaces/IGroupByClause.js";
 import type { ColumnType, DbValueTypes } from "../table/column.js";
 import type { IDbType } from "./_interfaces/IDbType.js";
+import type { IComparable } from "./_interfaces/IComparable.js";
 
 type FromType<TDbType extends DbType> =
     QueryTable<TDbType, any, any, any, any, any> |
@@ -192,6 +193,69 @@ class QueryBuilder<
     }
 }
 
+
+type ConvertComparableIdsOfSelectResult<
+    TDbType extends DbType,
+    T extends IExecuteableQuery<TDbType, any, any, any, any, any, any>
+> =
+    T extends IExecuteableQuery<TDbType, infer TQueryItems, infer TResult, infer TParams, infer TGroupedColumns, infer TOrderBySpecs, infer TAs> ?
+    TResult extends undefined ?
+    never :
+    TResult extends (infer TItem extends TResultShape<TDbType>)[] ?
+    IExecuteableQuery<
+        TDbType,
+        TQueryItems,
+        {
+            [K in Extract<keyof TItem, string>]: TItem[K] extends IComparable<TDbType, infer TId, infer TParams, infer TValueType, infer TFinalValueType, any, infer TColAs> ?
+            IComparable<TDbType, `${TAs}-${K}-${TId}`, TParams, TValueType, TFinalValueType, false, TColAs> :
+            never
+        },
+        TParams,
+        TGroupedColumns,
+        TOrderBySpecs,
+        TAs
+    > :
+    TResult extends TResultShape<TDbType> ?
+    IExecuteableQuery<
+        TDbType,
+        TQueryItems,
+        {
+            [K in Extract<keyof TResult, string>]: TResult[K] extends IComparable<TDbType, infer TId, infer TParams, infer TValueType, infer TFinalValueType, any, infer TColAs> ?
+            IComparable<TDbType, `${TAs}-${K}-${TId}`, TParams, TValueType, TFinalValueType, false, TColAs> :
+            never
+        },
+        TParams,
+        TGroupedColumns,
+        TOrderBySpecs,
+        TAs
+    > :
+    never :
+    never;
+
+type SetComparableIdsOfSubQueries<
+    TDbType extends DbType,
+    TFrom extends readonly (
+        QueryTable<TDbType, any, any, any, any, any> |
+        IExecuteableQuery<TDbType, any, any, any, any, any, any>
+    )[]
+> = TFrom extends readonly [infer First, ...infer Rest] ?
+    First extends IExecuteableQuery<TDbType, any, any, any, any, any, any> ?
+    Rest extends readonly (
+        QueryTable<TDbType, any, any, any, any, any> |
+        IExecuteableQuery<TDbType, any, any, any, any, any, any>
+    )[] ?
+    readonly [ConvertComparableIdsOfSelectResult<TDbType, First>, ...SetComparableIdsOfSubQueries<TDbType, Rest>] :
+    readonly [ConvertComparableIdsOfSelectResult<TDbType, First>] :
+    Rest extends readonly (
+        QueryTable<TDbType, any, any, any, any, any> |
+        IExecuteableQuery<TDbType, any, any, any, any, any, any>
+    )[] ?
+    readonly [First, ...SetComparableIdsOfSubQueries<TDbType, Rest>] :
+    readonly [First] :
+    readonly []
+    ;
+
+
 type InferDbTypeFromFromTypes<TFrom> =
     TFrom extends IDbType<infer TDbType> ? TDbType :
     TFrom extends readonly [infer First, ...infer Rest] ?
@@ -236,7 +300,7 @@ function from<
         }
     }) as unknown as ConvertTablesToQueryTables<TFrom>;
 
-    return new QueryBuilder<TDbType, ConvertTablesToQueryTables<TFrom>>(dbType, fromResult);
+    return new QueryBuilder<TDbType, SetComparableIdsOfSubQueries<TDbType, ConvertTablesToQueryTables<TFrom>>>(dbType, fromResult);
 }
 
 
