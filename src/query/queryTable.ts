@@ -27,12 +27,7 @@ class QueryTable<
     TQColumns extends QueryColumnsObjectType<TDbType>,
     TAsName extends string | undefined = undefined
 > implements
-    IDbType<TDbType>,
-    ISelectClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>,
-    IJoinClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>,
-    IWhereClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>,
-    IGroupByClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>,
-    IOrderByClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]> {
+    IDbType<TDbType> {
 
     dbType: TDbType;
 

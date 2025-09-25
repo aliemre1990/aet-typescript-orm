@@ -1,20 +1,22 @@
+import type { PgDbType } from "../../db.js";
 import type { IExecuteableQuery } from "../../query/_interfaces/IExecuteableQuery.js";
 import type ISelectClause from "../../query/_interfaces/ISelectClause.js";
+import type { AccumulateSubQueryParams, SetComparableIdsOfSubQueries } from "../../query/_types/subQueryUtility.js";
 import QueryBuilder, { from } from "../../query/queryBuilder.js";
 import { customersTable, employeesTable, ordersTable, shipmentsTable, usersTable } from "./_tables.js";
 import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
 
 const selectQuery = customersTable
     .where((cols, { param }) => cols.customers.customerId.eq(param("whereparam")))
-    .select((cols, { round }) => ({ id: cols.customers.customerId, roundResult: round(cols.customers.createdBy, 2) }))
+    .select((cols, { round, param }) => ({ id: cols.customers.customerId, roundResult: round(cols.customers.createdBy, param("ali")) }))
     .as("ali");
 
 
-from(employeesTable.as("zartZurt"), selectQuery).groupBy(cols => [cols.ali.roundResult]).select(cols => ({ zart: cols.ali.roundResult })).exec();
+const res = from(employeesTable.as("zartZurt"), selectQuery).groupBy(cols => [cols.ali.roundResult]).select(cols => ({ zart: cols.ali.roundResult })).exec;
 
-const fromRes = from(employeesTable.as("zartZurt"), selectQuery).groupBy(cols => [cols.ali])
+const fromRes = from(employeesTable.as("zartZurt"), selectQuery);
 type tp1 = typeof fromRes;
-type tp2 = typeof fromRes extends ISelectClause<any, infer tit, any, infer tgroup, any> ? tgroup : never
+type tp2 = tp1 extends QueryBuilder<any, infer tit, any, any, any, any, any> ? tit : never;
 
 
 

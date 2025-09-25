@@ -24,6 +24,7 @@ import type { GroupBySpecs } from "./_interfaces/IGroupByClause.js";
 import type { ColumnType, DbValueTypes } from "../table/column.js";
 import type { IDbType } from "./_interfaces/IDbType.js";
 import type { IComparable } from "./_interfaces/IComparable.js";
+import type { AccumulateSubQueryParams, ConvertTablesToQueryTables, InferDbTypeFromFromFirstIDbType, SetComparableIdsOfSubQueries } from "./_types/subQueryUtility.js";
 
 type FromType<TDbType extends DbType> =
     QueryTable<TDbType, any, any, any, any, any> |
@@ -194,85 +195,6 @@ class QueryBuilder<
 }
 
 
-type ConvertComparableIdsOfSelectResult<
-    TDbType extends DbType,
-    T extends IExecuteableQuery<TDbType, any, any, any, any, any, any>
-> =
-    T extends IExecuteableQuery<TDbType, infer TQueryItems, infer TResult, infer TParams, infer TGroupedColumns, infer TOrderBySpecs, infer TAs> ?
-    TResult extends undefined ?
-    never :
-    TResult extends (infer TItem extends TResultShape<TDbType>)[] ?
-    IExecuteableQuery<
-        TDbType,
-        TQueryItems,
-        {
-            [K in Extract<keyof TItem, string>]: TItem[K] extends IComparable<TDbType, infer TId, infer TParams, infer TValueType, infer TFinalValueType, any, infer TColAs> ?
-            IComparable<TDbType, `${TAs}-${K}-${TId}`, TParams, TValueType, TFinalValueType, false, TColAs> :
-            never
-        },
-        TParams,
-        TGroupedColumns,
-        TOrderBySpecs,
-        TAs
-    > :
-    TResult extends TResultShape<TDbType> ?
-    IExecuteableQuery<
-        TDbType,
-        TQueryItems,
-        {
-            [K in Extract<keyof TResult, string>]: TResult[K] extends IComparable<TDbType, infer TId, infer TParams, infer TValueType, infer TFinalValueType, any, infer TColAs> ?
-            IComparable<TDbType, `${TAs}-${K}-${TId}`, TParams, TValueType, TFinalValueType, false, TColAs> :
-            never
-        },
-        TParams,
-        TGroupedColumns,
-        TOrderBySpecs,
-        TAs
-    > :
-    never :
-    never;
-
-type SetComparableIdsOfSubQueries<
-    TDbType extends DbType,
-    TFrom extends readonly (
-        QueryTable<TDbType, any, any, any, any, any> |
-        IExecuteableQuery<TDbType, any, any, any, any, any, any>
-    )[]
-> = TFrom extends readonly [infer First, ...infer Rest] ?
-    First extends IExecuteableQuery<TDbType, any, any, any, any, any, any> ?
-    Rest extends readonly (
-        QueryTable<TDbType, any, any, any, any, any> |
-        IExecuteableQuery<TDbType, any, any, any, any, any, any>
-    )[] ?
-    readonly [ConvertComparableIdsOfSelectResult<TDbType, First>, ...SetComparableIdsOfSubQueries<TDbType, Rest>] :
-    readonly [ConvertComparableIdsOfSelectResult<TDbType, First>] :
-    Rest extends readonly (
-        QueryTable<TDbType, any, any, any, any, any> |
-        IExecuteableQuery<TDbType, any, any, any, any, any, any>
-    )[] ?
-    readonly [First, ...SetComparableIdsOfSubQueries<TDbType, Rest>] :
-    readonly [First] :
-    readonly []
-    ;
-
-
-type InferDbTypeFromFromTypes<TFrom> =
-    TFrom extends IDbType<infer TDbType> ? TDbType :
-    TFrom extends readonly [infer First, ...infer Rest] ?
-    First extends IDbType<infer TDbType> ? TDbType :
-    never :
-    never;
-
-type ConvertTablesToQueryTables<TFrom> =
-    TFrom extends readonly [infer First, ...infer Rest] ?
-    First extends Table<infer TDbType, infer TColumns, infer TTableName> ?
-    readonly [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], { tableName: TTableName }, undefined> }, undefined>, ...ConvertTablesToQueryTables<Rest>] :
-    First extends QueryTable<any, any, any, any, any, any> ?
-    readonly [First, ...ConvertTablesToQueryTables<Rest>] :
-    First extends IExecuteableQuery<any, any, any, any, any, any, any> ?
-    readonly [First, ...ConvertTablesToQueryTables<Rest>] :
-    ConvertTablesToQueryTables<Rest> :
-    readonly [];
 
 function from<
     TFrom extends readonly (
@@ -280,9 +202,10 @@ function from<
         QueryTable<TDbType, any, any, any, any, any> |
         IExecuteableQuery<TDbType, any, any, any, any, any, string>
     )[],
-    TDbType extends DbType = InferDbTypeFromFromTypes<TFrom>
+    TDbType extends DbType = InferDbTypeFromFromFirstIDbType<TFrom>
 >(...from: TFrom) {
 
+    type TFromRes = ConvertTablesToQueryTables<TFrom>;
 
     let dbType = from[0].dbType as TDbType;
 
@@ -298,9 +221,9 @@ function from<
         } else {
             return item;
         }
-    }) as unknown as ConvertTablesToQueryTables<TFrom>;
+    }) as TFromRes;
 
-    return new QueryBuilder<TDbType, SetComparableIdsOfSubQueries<TDbType, ConvertTablesToQueryTables<TFrom>>>(dbType, fromResult);
+    return new QueryBuilder<TDbType, SetComparableIdsOfSubQueries<TDbType, TFromRes>, undefined, AccumulateSubQueryParams<TDbType, TFromRes>>(dbType, fromResult);
 }
 
 
