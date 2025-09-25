@@ -12,6 +12,7 @@ import type { DbValueTypes } from "../../table/column.js";
 import type { IComparable } from "./IComparable.js";
 import type QueryBuilder from "../queryBuilder.js";
 import type { IExecuteableQuery } from "./IExecuteableQuery.js";
+import type { DbFunctions } from "../_types/ops.js";
 
 type GroupBySpecs<TDbType extends DbType> = readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, false, any>)[];
 
@@ -22,7 +23,10 @@ interface IGroupByClause<
 > {
     groupBy<
         const TCbResult extends GroupBySpecs<TDbType>
-    >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, TQueryItems>>) => TCbResult):
+    >(cb: (
+        cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, TQueryItems>>,
+        ops: DbFunctions<TDbType, false>
+    ) => TCbResult):
         ISelectClause<TDbType, TQueryItems, TParams, TCbResult> &
         IHavingClause<TDbType, TQueryItems, TParams, TCbResult> &
         IOrderByClause<TDbType, TQueryItems, TParams, TCbResult>

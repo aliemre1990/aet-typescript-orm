@@ -159,7 +159,10 @@ class QueryBuilder<
 
     groupBy<
         const TCbResult extends GroupBySpecs<TDbType>
-    >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, TQueryItems>>) => TCbResult) {
+    >(cb: (
+        cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, TQueryItems>>,
+        ops: DbFunctions<TDbType, false>
+    ) => TCbResult) {
         return new QueryBuilder(this.dbType, this.from) as
             ISelectClause<TDbType, TQueryItems, TParams, TCbResult> &
             IHavingClause<TDbType, TQueryItems, TParams, TCbResult> &

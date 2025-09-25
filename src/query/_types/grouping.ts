@@ -7,6 +7,7 @@ import type { ColumnsSelection } from "../queryColumn.js";
 import type QueryColumn from "../queryColumn.js";
 import type QueryTable from "../queryTable.js";
 import type { IExecuteableQuery } from "../_interfaces/IExecuteableQuery.js";
+import type ColumnSQLFunction from "../functions/_functions.js";
 
 //
 type SpreadGroupedColumns<TDbType extends DbType, TGroupedColumns extends GroupBySpecs<TDbType>> =
@@ -41,6 +42,19 @@ type IsGroupedColumnsContains<TDbType extends DbType, TGroupedColumns extends IC
     false :
     false :
     false;
+
+type GetFunctionsFromGroupBySpecs<TDbType extends DbType, TGroupedColumns extends GroupBySpecs<TDbType> | undefined> =
+    TGroupedColumns extends undefined ? [] :
+
+    TGroupedColumns extends readonly [infer First, ...infer Rest] ?
+    First extends ColumnSQLFunction<TDbType, any, any, any, any, string, any> ?
+    Rest extends readonly any[] ?
+    [First, ...GetFunctionsFromGroupBySpecs<TDbType, Rest>] :
+    [First] :
+    Rest extends readonly any[] ?
+    [...GetFunctionsFromGroupBySpecs<TDbType, Rest>] :
+    [] :
+    [];
 
 //
 type GroupedTablesToColumnsMap<
@@ -107,6 +121,15 @@ type GroupedTablesToColumnsMap<
             }
         >
     }
+    & (
+        GetFunctionsFromGroupBySpecs<TDbType, TGroupedColumns>["length"] extends 0 ? {} :
+        {
+            ["__grouping_functions__"]: {
+                [Fn in GetFunctionsFromGroupBySpecs<TDbType, TGroupedColumns>[number] as Fn extends IComparable<TDbType, any, any, any, any, any, infer TAs extends string> ? TAs : never]: Fn
+            }
+        }
+
+    )
 
 export type {
     GroupedTablesToColumnsMap,

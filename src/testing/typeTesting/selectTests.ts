@@ -12,7 +12,7 @@ const selectQuery = customersTable
     .as("ali");
 
 
-const res = from(employeesTable.as("zartZurt"), selectQuery).groupBy(cols => [cols.ali.roundResult]).select(cols => ({ zart: cols.ali.roundResult })).exec;
+const res = from(employeesTable.as("zartZurt"), selectQuery).groupBy((cols, { round }) => [cols.ali.roundResult, round(cols.ali.id, 2).as("roundFn")]).select(cols => ({ zart: cols.__grouping_functions__.roundFn })).exec;
 
 const fromRes = from(employeesTable.as("zartZurt"), selectQuery);
 type tp1 = typeof fromRes;
