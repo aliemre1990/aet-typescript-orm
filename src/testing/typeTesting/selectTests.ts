@@ -20,6 +20,13 @@ type tp2 = tp1 extends QueryBuilder<any, infer tit, any, any, any, any, any> ? t
 
 
 
+const joinQuery = customersTable
+    .join('INNER', employeesTable, cols => cols.employees.id.eq(cols.customers.customerId))
+    .join('LEFT', selectQuery, cols => cols.ali.id.eq(cols.customers.customerId))
+    .select(cols => ({ id: cols.ali.id }))
+    .exec;
+
+
 /**
  * 
  */
@@ -171,7 +178,7 @@ type AutoSelectMultiJoinsParamsResult = {
     innerCoalesce: number | null; //
     parentUserNeq3: string | null;
     innerParentUserParam1: string | null;
-} | undefined;
+};
 type AutoSelectMultiJoinsParamsType = typeof AutoSelectMultiJoins extends (param: infer TParams) => any ? TParams : never;
 type AutoSelectMultiJoinsParamsText = AssertTrue<AssertEqual<AutoSelectMultiJoinsParamsResult, AutoSelectMultiJoinsParamsType>>
 

@@ -114,12 +114,16 @@ type ColumnsToResultMap<TDbType extends DbType, T extends TResultShape<TDbType>[
     >
 
 // Convert array of QueryParam to object type
-type QueryParamsToObject<T extends readonly QueryParam<any, any, any, any, any>[] | undefined> = T extends undefined ?
-    undefined :
+type QueryParamsToObject<T extends readonly QueryParam<any, any, any, any, any>[] | undefined> =
+    T extends undefined ? undefined :
+    T extends QueryParam<any, any, any, any, any>[] ?
+    T["length"] extends 0 ? undefined :
     T extends readonly QueryParam<any, any, any, any, any>[] ? {
         [K in T[number]as K extends QueryParam<any, infer Name, any, any, any> ? Name : never]:
         K extends QueryParam<any, any, infer ValueType, any, any> ? ValueType : never
-    } : undefined;
+    }
+    : never
+    : undefined;
 
 
 //

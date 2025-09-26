@@ -47,7 +47,7 @@ type CoalesceWithTypedParamsResult = { coalesceResult: number }[];
 type CoalesceWithTypedParamsTest = AssertTrue<AssertEqual<CoalesceWithTypedParamsResult, CoalesceWithTypedParamsReturnType>>;
 
 type CoalesceWithTypedParamsParams = typeof CoalesceWithTypedParams extends (param: infer TParam) => any ? TParam : never;
-type CoalesceWithTypeParamsParamsResult = { param1: number, param2: number | null, param3: number | null } | undefined;
+type CoalesceWithTypeParamsParamsResult = { param1: number, param2: number | null, param3: number | null };
 type CoalesceWithTypedParamsParamsTest = AssertTrue<AssertEqual<CoalesceWithTypedParamsParams, CoalesceWithTypeParamsParamsResult>>
 
 
@@ -128,7 +128,7 @@ type InferParamsFromCoalesceParamsResult = {
     param4: number | null;
     coalesceAnd1: string | null;
     coalesceAnd2: Date | null;
-} | undefined;
+};
 type InferParamsFromCoalesceTest = AssertTrue<AssertEqual<InferParamsFromCoalesceParamsResult, InferParamsFromCoalesceParams>>;
 
 /**

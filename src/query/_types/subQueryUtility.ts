@@ -90,24 +90,16 @@ type ConvertTablesToQueryTables<TFrom> =
 
 type AccumulateSubQueryParams<
     TDbType extends DbType,
-    TFrom extends readonly (
-        QueryTable<TDbType, any, any, any, any, any> |
-        IExecuteableQuery<TDbType, any, any, any, any, any, any>
-    )[]
+    TFrom extends readonly any[],
+    TParams extends QueryParam<TDbType, any, any, any, any>[] | undefined = undefined
 > =
     TFrom extends readonly [infer First, ...infer Rest] ?
-    First extends IExecuteableQuery<TDbType, any, any, infer TParams, any, any, any> ?
-    Rest extends readonly (
-        QueryTable<TDbType, any, any, any, any, any> |
-        IExecuteableQuery<TDbType, any, any, any, any, any, any>
-    )[] ?
+    First extends IExecuteableQuery<TDbType, any, any, infer TInnerParams, any, any, any> ?
+    Rest extends any[] ?
+    [...(TParams extends undefined ? [] : TParams), ...(TInnerParams extends undefined ? [] : TInnerParams), ...AccumulateSubQueryParams<TDbType, Rest>] :
+    [...(TParams extends undefined ? [] : TParams), ...(TInnerParams extends undefined ? [] : TInnerParams)] :
+    Rest extends any[] ?
     [...(TParams extends undefined ? [] : TParams), ...AccumulateSubQueryParams<TDbType, Rest>] :
-    [...(TParams extends undefined ? [] : TParams)] :
-    Rest extends readonly (
-        QueryTable<TDbType, any, any, any, any, any> |
-        IExecuteableQuery<TDbType, any, any, any, any, any, any>
-    )[] ?
-    [...AccumulateSubQueryParams<TDbType, Rest>] :
     [] :
     []
 

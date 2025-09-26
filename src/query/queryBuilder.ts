@@ -96,9 +96,9 @@ class QueryBuilder<
 
 
     join<
-        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any>,
+        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, string>,
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>,
-        TInnerJoinResult extends QueryTable<TDbType, any, any, any, any, any> = TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
+        TInnerJoinResult extends QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any> = TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
         QueryTable<
             TDbType,
             TInnerCols,
@@ -112,11 +112,11 @@ class QueryBuilder<
         table: TInnerJoinTable,
         cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [...TQueryItems, TInnerJoinResult]>>, ops: DbOperators<TDbType, false>) => TCbResult
     ):
-        IJoinClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
-        ISelectClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
-        IWhereClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
-        IGroupByClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
-        IOrderByClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> {
+        IJoinClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>> &
+        ISelectClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>> &
+        IWhereClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>> &
+        IGroupByClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>> &
+        IOrderByClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>> {
         let innerJoinTable: TInnerJoinResult;
         if ("table" in table) {
             innerJoinTable = table as TInnerJoinResult;
@@ -135,11 +135,11 @@ class QueryBuilder<
         // const newTables = [...this.tables, innerJoinTable];
 
         return new QueryBuilder(this.dbType, this.from) as
-            IJoinClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
-            ISelectClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
-            IWhereClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
-            IGroupByClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>> &
-            IOrderByClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>
+            IJoinClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>> &
+            ISelectClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>> &
+            IWhereClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>> &
+            IGroupByClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>> &
+            IOrderByClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>>
     }
 
     where<
@@ -185,10 +185,17 @@ class QueryBuilder<
         return new QueryBuilder(this.dbType, this.from) as ISelectClause<TDbType, TQueryItems, AccumulateOrderByParams<TDbType, TParams, TCbResult>, TGroupedColumns, TCbResult>
     }
 
-    exec(params?: QueryParamsToObject<TParams>):
+    exec(
+        ...args: TParams extends undefined
+            ? []
+            : [params: QueryParamsToObject<TParams>]
+    ):
         TResult extends TResultShape<TDbType>[] | TResultShape<TDbType> ?
         ColumnsToResultMap<TDbType, TResult> :
         never {
+
+        const params = args[0];
+
         if (isNullOrUndefined(this?.colsSelection)) {
             return {} as any;
         }

@@ -23,7 +23,7 @@ interface IExecuteableQuery<
 
     as<TAs extends string>(asName: TAs): IExecuteableQuery<TDbType, TQueryItems, TResult, TParams, TGroupedColumns, TOrderBySpecs, TAs>;
 
-    exec: (params?: QueryParamsToObject<TParams>) =>
+    exec: (...args: TParams extends undefined ? [] : [params: QueryParamsToObject<TParams>]) =>
         TResult extends TResultShape<TDbType>[] | TResultShape<TDbType> ?
         ColumnsToResultMap<TDbType, TResult> :
         never
