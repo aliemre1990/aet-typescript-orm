@@ -208,7 +208,7 @@ type SingleLevelSelectWithJoinsResult = { id: number, orderCustomerId: number, c
 type SingleLevelSelectWithJoinsTest = AssertTrue<AssertEqual<SingleLevelSelectWithJoinsResult, ReturnType<typeof SingleLevelSelectWithJoins>>>;
 
 type SingleLevelSelectWithJoinsParams = typeof SingleLevelSelectWithJoins extends (params: infer TParams) => any ? TParams : never;
-type SingleLevelSelectWithJoinsParamsTest = AssertTrue<AssertEqual<undefined, SingleLevelSelectWithJoinsParams>>;
+type SingleLevelSelectWithJoinsParamsTest = AssertTrue<AssertEqual<unknown, SingleLevelSelectWithJoinsParams>>;
 /**
  * 
  */

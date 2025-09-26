@@ -45,16 +45,18 @@ interface IJoinClause<
             { [K in keyof TInnerCols]: QueryColumn<TDbType, TInnerCols[K], { tableName: TInnerTableName, asTableName: undefined }> }
         > :
         TInnerJoinTable,
+        TAccumulatedParams extends QueryParam<TDbType, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>,
+        TAccumulatedParamsResult extends QueryParam<TDbType, any, any, any, any>[] | undefined = TAccumulatedParams["length"] extends 0 ? undefined : TAccumulatedParams
     >(
         type: JoinType,
         table: TInnerJoinTable,
         cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [...TQueryItems, TInnerJoinResult]>>, ops: DbOperators<TDbType, false>) => TCbResult
     ):
-        IJoinClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>> &
-        ISelectClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>> &
-        IWhereClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>> &
-        IGroupByClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>> &
-        IOrderByClause<TDbType, [...TQueryItems, TInnerJoinResult], AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>>
+        IJoinClause<TDbType, [...TQueryItems, TInnerJoinResult], TAccumulatedParamsResult> &
+        ISelectClause<TDbType, [...TQueryItems, TInnerJoinResult], TAccumulatedParamsResult> &
+        IWhereClause<TDbType, [...TQueryItems, TInnerJoinResult], TAccumulatedParamsResult> &
+        IGroupByClause<TDbType, [...TQueryItems, TInnerJoinResult], TAccumulatedParamsResult> &
+        IOrderByClause<TDbType, [...TQueryItems, TInnerJoinResult], TAccumulatedParamsResult>
 
 }
 
