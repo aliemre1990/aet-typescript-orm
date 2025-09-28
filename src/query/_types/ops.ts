@@ -1,11 +1,24 @@
 import type { DbType, MySQLDbType, PgDbType } from "../../db.js"
 import type { jsonAggFn, jsonbAggFn } from "../aggregation/json/jsonAgg.js"
 import type generateSumFn from "../aggregation/sum.js"
+import type { generateArithmeticAddition } from "../arithmetic/addition.js"
+import type { generateArithmeticExponentiation } from "../arithmetic/exponentiation.js"
 import type { generateCoalesceFn } from "../functions/coalesce.js"
 import type { jsonbBuildObjectFn, jsonBuildObjectFn } from "../functions/jsonFunctions/jsonBuildObject.js"
 import type generateRoundFn from "../functions/round.js"
 import type { generateAndFn, } from "../logicalOperations.js"
 import type { generateParamFn } from "../param.js"
+
+type PgArithmeticAddition = ReturnType<typeof generateArithmeticAddition<PgDbType>>;
+type MySqlArithmeticAddition = ReturnType<typeof generateArithmeticAddition<MySQLDbType>>;
+
+type PgArithmeticExponentiation = ReturnType<typeof generateArithmeticExponentiation<PgDbType>>;
+
+type ArithmeticOperations<TDbType extends DbType> = {
+    arithmeticAdd: TDbType extends PgDbType ? PgArithmeticAddition : MySqlArithmeticAddition
+} &
+    (TDbType extends PgDbType ? { arithmeticExponentiation: PgArithmeticExponentiation } : {});
+
 
 type PgParamFn = ReturnType<typeof generateParamFn<PgDbType>>;
 type MySqlParamFn = ReturnType<typeof generateParamFn<MySQLDbType>>;
@@ -55,7 +68,8 @@ type DbFunctions<TDbType extends DbType, TIsAgg extends boolean> =
         round: TDbType extends PgDbType ? PgRoundFn : TDbType extends MySQLDbType ? MySQLRoundFn : never
     } &
     (TIsAgg extends true ? AggregationFunctions<TDbType> : {}) &
-    (TDbType extends PgDbType ? PgFunctions : {})
+    (TDbType extends PgDbType ? PgFunctions : {}) &
+    ArithmeticOperations<TDbType>
     ;
 
 

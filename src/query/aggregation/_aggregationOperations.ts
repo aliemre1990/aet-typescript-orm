@@ -42,7 +42,7 @@ const aggregationOperations = {
 type AggregationOperation = (typeof aggregationOperations)[keyof typeof aggregationOperations];
 
 
-type InferIdAggregation<
+type InferAggregationId<
     TDbType extends DbType,
     TAggregationOperation extends AggregationOperation,
     TArgs extends (
@@ -67,7 +67,7 @@ class BasicColumnAggregationOperation<
     TReturnType extends DbValueTypes | null,
     TIsAgg extends boolean = false,
     TAs extends string | undefined = undefined,
-    TComparableId extends string = InferIdAggregation<TDbType, TAggregationOperation, TArgs, TReturnType, TAs>
+    TComparableId extends string = InferAggregationId<TDbType, TAggregationOperation, TArgs, TReturnType, TAs>
 > implements IComparable<TDbType, TComparableId, InferParamsFromFnArgs<TArgs>, NonNullable<TReturnType>, TReturnType, TIsAgg, TAs> {
 
     icomparableValueDummy?: NonNullable<TReturnType>;
