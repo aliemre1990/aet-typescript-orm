@@ -57,7 +57,7 @@ class QueryTable<
         TCbResult extends TResultShape<TDbType> = TCb extends (cols: any, ops: any) => infer TR ? TR : never
     >(
         cb: TCb
-    ): IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], TCbResult[], AccumulateColumnParams<undefined, TCbResult>> {
+    ): IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], TCbResult, AccumulateColumnParams<undefined, TCbResult>> {
 
         return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>(this.dbType, this).select<TCb, TCbResult>(cb);
     }

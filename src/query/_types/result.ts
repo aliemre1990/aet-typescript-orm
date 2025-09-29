@@ -95,21 +95,15 @@ type TResultShape<TDbType extends DbType> = {
 
 
 //
-type ColumnsToResultMap<TDbType extends DbType, T extends TResultShape<TDbType>[] | TResultShape<TDbType> | undefined> =
+type ColumnsToResultMap<TDbType extends DbType, T extends TResultShape<TDbType> | undefined> =
     DeepPrettify<
         T extends undefined ? undefined :
-        T extends (infer TResult)[] ?
-        {
-            [K in keyof TResult as TResult[K] extends IComparable<TDbType, any, any, any, any, any, any, any> ? K : never]:
-            TResult[K] extends IComparable<TDbType, any, any, any, infer TFinalType, any, any, any> ? TFinalType :
-            never
-        }[] :
         T extends TResultShape<TDbType> ?
         {
             [K in keyof T as T[K] extends IComparable<TDbType, any, any, any, any, any, any, any> ? K : never]:
             T[K] extends IComparable<TDbType, any, any, any, infer TFinalType, any, any, any> ? TFinalType :
             never
-        } :
+        }[] :
         never
     >
 

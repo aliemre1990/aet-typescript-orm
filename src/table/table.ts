@@ -84,7 +84,7 @@ class Table<
         TCbResult extends TResultShape<TDbType> = TCb extends (cols: any, ops: any) => infer TR ? TR : never
     >(
         cb: TCb
-    ): IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>, undefined>], TCbResult[], AccumulateColumnParams<undefined, TCbResult>> {
+    ): IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>, undefined>], TCbResult, AccumulateColumnParams<undefined, TCbResult>> {
 
         const queryColumns = this.columnsList.map((col) => {
             return new QueryColumn(this.dbType, col);
@@ -161,13 +161,13 @@ class Table<
 
     orderBy<
         const TCbResult extends OrderBySpecs<TDbType>
-    >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>,  MapToQueryColumns<TTableName, TColumns>, undefined>]>>) => TCbResult):
-        ISelectClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>,  MapToQueryColumns<TTableName, TColumns>, undefined>], AccumulateOrderByParams<TDbType, undefined, TCbResult>> {
+    >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>, undefined>]>>) => TCbResult):
+        ISelectClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>, undefined>], AccumulateOrderByParams<TDbType, undefined, TCbResult>> {
         const queryColumns = this.columnsList.map((col) => {
             return new QueryColumn(this.dbType, col);
         }) as MapToQueryColumns<TTableName, TColumns>;
 
-        const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>,  MapToQueryColumns<TTableName, TColumns>, undefined>(this.dbType, this, queryColumns);
+        const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>, undefined>(this.dbType, this, queryColumns);
 
         return new QueryBuilder<TDbType, [typeof queryTable]>(this.dbType, queryTable).orderBy(cb);
     }

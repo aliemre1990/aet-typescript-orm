@@ -35,7 +35,7 @@ type FromType<TDbType extends DbType> =
 class QueryBuilder<
     TDbType extends DbType,
     TQueryItems extends readonly (QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any>)[],
-    TResult extends TResultShape<TDbType>[] | TResultShape<TDbType> | undefined = undefined,
+    TResult extends TResultShape<TDbType> | undefined = undefined,
     TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null, any, any, any>[] | undefined = undefined,
     TGroupedColumns extends GroupBySpecs<TDbType> | undefined = undefined,
     TOrderBySpecs extends OrderBySpecs<TDbType> | undefined = undefined,
@@ -90,8 +90,8 @@ class QueryBuilder<
         TCbResult extends TResultShape<TDbType> = TCb extends (cols: any, ops: any) => infer TR ? TR : never
     >(
         cb: TCb
-    ): IExecuteableQuery<TDbType, TQueryItems, TCbResult[], AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns, TOrderBySpecs> {
-        return new QueryBuilder(this.dbType, this.from) as IExecuteableQuery<TDbType, TQueryItems, TCbResult[], AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns, TOrderBySpecs>;
+    ): IExecuteableQuery<TDbType, TQueryItems, TCbResult, AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns, TOrderBySpecs> {
+        return new QueryBuilder(this.dbType, this.from) as IExecuteableQuery<TDbType, TQueryItems, TCbResult, AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns, TOrderBySpecs>;
     };
 
 
@@ -191,7 +191,7 @@ class QueryBuilder<
             ? []
             : [params: QueryParamsToObject<TParams>]
     ):
-        TResult extends TResultShape<TDbType>[] | TResultShape<TDbType> ?
+        TResult extends TResultShape<TDbType> ?
         ColumnsToResultMap<TDbType, TResult> :
         never {
 
