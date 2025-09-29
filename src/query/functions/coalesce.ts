@@ -7,8 +7,8 @@ import ColumnSQLFunction, { sqlFunctions } from "./_functions.js";
 import type { InferFirstTypeFromArgs, IsContainsNonNull } from "../_types/args.js";
 
 type ConvertMedianToParam<T, TDbType extends DbType, TConvert extends DbValueTypes | null> =
-    T extends QueryParam<any, infer U, infer TValueType, any, any>
-    ? QueryParam<TDbType, U, IsAny<TValueType> extends true ? TConvert : TValueType, any, any>
+    T extends QueryParam<any, infer U, infer TValueType, infer TAs, infer TDefaultFieldKey, infer TId>
+    ? QueryParam<TDbType, U, IsAny<TValueType> extends true ? TConvert : TValueType, TAs, TDefaultFieldKey, TId>
     : T;
 
 type ConvertMediansInArray<T extends any[], TDbType extends DbType, TValueType extends DbValueTypes | null> = {
@@ -17,13 +17,21 @@ type ConvertMediansInArray<T extends any[], TDbType extends DbType, TValueType e
 
 type CoalesceArg<TDbType extends DbType, TValueType extends DbValueTypes> =
     | TValueType | null
-    | QueryParam<TDbType, string, TValueType | null, any, any>
-    | IComparable<TDbType, any, any, TValueType, any, any, any>;
+    | QueryParam<TDbType, string, TValueType | null, any, any, any>
+    | IComparable<TDbType, any, any, TValueType, any, any, any, any>;
 
 
 function generateCoalesceFn<
     TDbType extends DbType
->(dbType: TDbType) {
+>(dbType: TDbType):
+    <TArgs extends any[]>(
+        ...args: TArgs & (TArgs extends CoalesceArg<TDbType, NonNullable<InferFirstTypeFromArgs<TDbType, TArgs>>>[] ? TArgs : never)
+    ) => ColumnSQLFunction<
+        TDbType,
+        typeof sqlFunctions.coalesce,
+        ConvertMediansInArray<TArgs, TDbType, InferFirstTypeFromArgs<TDbType, TArgs> | null>,
+        IsContainsNonNull<TDbType, TArgs> extends true ? NonNullable<InferFirstTypeFromArgs<TDbType, TArgs>> : InferFirstTypeFromArgs<TDbType, TArgs> | null
+    > {
     return <
         TArgs extends any[]
     >

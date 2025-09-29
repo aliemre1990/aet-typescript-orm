@@ -8,8 +8,8 @@ import type { AssertEqual, AssertExtends, AssertTrue } from "./_typeTestingUtili
  * 
  */
 const SimpleOrderByQuery = customersTable
-    .where((cols, { param }) => cols.customers.customerId.eq(param("whereparam")))
-    .orderBy(cols => [cols.customers.name, [cols.customers.customerId, 'ASC']]);
+    .where((cols, { param }) => cols.customers.id.eq(param("whereparam")))
+    .orderBy(cols => [cols.customers.name, [cols.customers.id, 'ASC']]);
 
 type SimpleOrderByQueryType = typeof SimpleOrderByQuery;
 type SimpleOrderByQuerySpecs = SimpleOrderByQueryType extends ISelectClause<any, any, any, any, infer Specs> ? Specs : never;

@@ -4,30 +4,30 @@ import { ForeignKey, pgColumn, pgTable } from "../../table/table.js";
 
 const usersTable = pgTable(
     'users',
-    {
-        id: pgColumn('id', pgColumnTypes.serial, false),
-        userName: pgColumn('userName', pgColumnTypes.varchar, false),
-        createdAt: pgColumn('createdAt', pgColumnTypes.date, false),
-    }
+    [
+        pgColumn('id', pgColumnTypes.serial, false),
+        pgColumn('userName', pgColumnTypes.varchar, false),
+        pgColumn('createdAt', pgColumnTypes.date, false),
+    ]
 )
 
 const employeesTable = pgTable(
     'employees',
-    {
-        id: pgColumn('id', pgColumnTypes.serial, false),
-        userName: pgColumn('name', pgColumnTypes.varchar, false),
-        salary: pgColumn('salary', pgColumnTypes.decimal, true),
-        deptId: pgColumn('deptId', pgColumnTypes.int, false)
-    }
+    [
+        pgColumn('id', pgColumnTypes.serial, false),
+        pgColumn('name', pgColumnTypes.varchar, false),
+        pgColumn('salary', pgColumnTypes.decimal, true),
+        pgColumn('deptId', pgColumnTypes.int, false)
+    ]
 )
 
 const customersTable = pgTable(
     'customers',
-    {
-        customerId: pgColumn('id', pgColumnTypes.serial, false),
-        name: pgColumn('name', pgColumnTypes.varchar, false),
-        createdBy: pgColumn('createdBy', pgColumnTypes.int, false)
-    },
+    [
+        pgColumn('id', pgColumnTypes.serial, false),
+        pgColumn('name', pgColumnTypes.varchar, false),
+        pgColumn('createdBy', pgColumnTypes.int, false)
+    ],
     undefined,
     undefined,
     [
@@ -38,11 +38,11 @@ const customersTable = pgTable(
 
 const ordersTable = pgTable(
     'orders',
-    {
-        orderId: pgColumn('id', pgColumnTypes.serial, false),
-        customerId: pgColumn('customerId', pgColumnTypes.int, false),
-        createdBy: pgColumn('createdBy', pgColumnTypes.int, false)
-    },
+    [
+        pgColumn('id', pgColumnTypes.serial, false),
+        pgColumn('customerId', pgColumnTypes.int, false),
+        pgColumn('createdBy', pgColumnTypes.int, false)
+    ],
     undefined,
     undefined,
     [
@@ -53,11 +53,11 @@ const ordersTable = pgTable(
 
 const shipmentsTable = pgTable(
     'shipments',
-    {
-        id: pgColumn('id', pgColumnTypes.serial, false),
-        orderId: pgColumn('orderId', pgColumnTypes.serial, false),
-        createdBy: pgColumn('createdBy', pgColumnTypes.int, false)
-    },
+    [
+        pgColumn('id', pgColumnTypes.serial, false),
+        pgColumn('orderId', pgColumnTypes.serial, false),
+        pgColumn('createdBy', pgColumnTypes.int, false)
+    ],
     undefined,
     undefined,
     [

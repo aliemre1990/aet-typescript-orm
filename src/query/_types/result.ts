@@ -7,7 +7,7 @@ import type QueryParam from "../param.js";
 import type { OrderBySpecs, OrderType } from "../_interfaces/IOrderByClause.js";
 
 type TResultShape<TDbType extends DbType> = {
-    [key: string]: IComparable<TDbType, any, any, any, any, false, any>;
+    [key: string]: IComparable<TDbType, any, any, any, any, false, any, any>;
 };
 
 
@@ -100,27 +100,27 @@ type ColumnsToResultMap<TDbType extends DbType, T extends TResultShape<TDbType>[
         T extends undefined ? undefined :
         T extends (infer TResult)[] ?
         {
-            [K in keyof TResult as TResult[K] extends IComparable<TDbType, any, any, any, any, any, any> ? K : never]:
-            TResult[K] extends IComparable<TDbType, any, any, any, infer TFinalType, any, any> ? TFinalType :
+            [K in keyof TResult as TResult[K] extends IComparable<TDbType, any, any, any, any, any, any, any> ? K : never]:
+            TResult[K] extends IComparable<TDbType, any, any, any, infer TFinalType, any, any, any> ? TFinalType :
             never
         }[] :
         T extends TResultShape<TDbType> ?
         {
-            [K in keyof T as T[K] extends IComparable<TDbType, any, any, any, any, any, any> ? K : never]:
-            T[K] extends IComparable<TDbType, any, any, any, infer TFinalType, any, any> ? TFinalType :
+            [K in keyof T as T[K] extends IComparable<TDbType, any, any, any, any, any, any, any> ? K : never]:
+            T[K] extends IComparable<TDbType, any, any, any, infer TFinalType, any, any, any> ? TFinalType :
             never
         } :
         never
     >
 
 // Convert array of QueryParam to object type
-type QueryParamsToObject<T extends readonly QueryParam<any, any, any, any, any>[] | undefined> =
+type QueryParamsToObject<T extends readonly QueryParam<any, any, any, any, any, any>[] | undefined> =
     T extends undefined ? undefined :
-    T extends QueryParam<any, any, any, any, any>[] ?
+    T extends QueryParam<any, any, any, any, any, any>[] ?
     T["length"] extends 0 ? undefined :
-    T extends readonly QueryParam<any, any, any, any, any>[] ? {
-        [K in T[number]as K extends QueryParam<any, infer Name, any, any, any> ? Name : never]:
-        K extends QueryParam<any, any, infer ValueType, any, any> ? ValueType : never
+    T extends readonly QueryParam<any, any, any, any, any, any>[] ? {
+        [K in T[number]as K extends QueryParam<any, infer Name, any, any, any, any> ? Name : never]:
+        K extends QueryParam<any, any, infer ValueType, any, any, any> ? ValueType : never
     }
     : never
     : undefined;
@@ -129,10 +129,10 @@ type QueryParamsToObject<T extends readonly QueryParam<any, any, any, any, any>[
 //
 type InferParamsFromOps<T> =
     T extends ColumnComparisonOperation<any, infer TComparing, infer TApplied, any> ?
-    TComparing extends IComparable<any, any, any, any, any, any, any> ? TApplied extends IComparable<any, any, any, any, any, any, any>[] ?
+    TComparing extends IComparable<any, any, any, any, any, any, any, any> ? TApplied extends IComparable<any, any, any, any, any, any, any, any>[] ?
     [...InferParamsFromComparables<[TComparing]>, ...InferParamsFromComparables<TApplied>,] :
     [...InferParamsFromComparables<[TComparing]>] :
-    TApplied extends readonly IComparable<any, any, any, any, any, any, any>[] ?
+    TApplied extends readonly IComparable<any, any, any, any, any, any, any, any>[] ?
     [...InferParamsFromComparables<TApplied>] :
     [] :
     T extends ColumnLogicalOperation<any, infer TOps> ?
@@ -142,11 +142,11 @@ type InferParamsFromOps<T> =
 type InferParamsFromOpsArray<T extends readonly any[]> =
     T extends readonly [infer First, ...infer Rest] ?
     First extends ColumnComparisonOperation<any, infer TComparing, infer TApplied, any> ?
-    TComparing extends IComparable<any, any, any, any, any, any, any> ? TApplied extends IComparable<any, any, any, any, any, any, any>[] ?
+    TComparing extends IComparable<any, any, any, any, any, any, any, any> ? TApplied extends IComparable<any, any, any, any, any, any, any, any>[] ?
     [...InferParamsFromComparables<[TComparing]>, ...InferParamsFromComparables<TApplied>, ...InferParamsFromOpsArray<Rest>] :
     [...InferParamsFromComparables<[TComparing]>, ...InferParamsFromOpsArray<Rest>] :
 
-    TApplied extends IComparable<any, any, any, any, any, any, any>[] ?
+    TApplied extends IComparable<any, any, any, any, any, any, any, any>[] ?
     [...InferParamsFromComparables<TApplied>, ...InferParamsFromOpsArray<Rest>] :
 
     InferParamsFromOpsArray<Rest> :
@@ -157,7 +157,7 @@ type InferParamsFromOpsArray<T extends readonly any[]> =
 
 type InferParamsFromComparables<T> =
     T extends readonly [infer First, ...infer Rest] ?
-    First extends IComparable<any, any, infer TParams, any, any, any, any> ?
+    First extends IComparable<any, any, infer TParams, any, any, any, any, any> ?
     [...(TParams extends undefined ? [] : TParams), ...InferParamsFromComparables<Rest>] :
     [...InferParamsFromComparables<Rest>] :
     [];
@@ -167,32 +167,32 @@ type InferParamsFromComparables<T> =
 /**
  * 
  */
-type AccumulateComparisonParams<TParams extends readonly QueryParam<any, any, any, any, any>[] | undefined, TCbResult extends ColumnComparisonOperation<any, any, any, any> | ColumnLogicalOperation<any, any>> =
+type AccumulateComparisonParams<TParams extends readonly QueryParam<any, any, any, any, any, any>[] | undefined, TCbResult extends ColumnComparisonOperation<any, any, any, any> | ColumnLogicalOperation<any, any>> =
     TParams extends undefined ?
     InferParamsFromOps<TCbResult>["length"] extends 0 ? undefined : InferParamsFromOps<TCbResult> :
-    TParams extends QueryParam<any, any, any, any, any>[] ? [...TParams, ...InferParamsFromOps<TCbResult>] :
+    TParams extends QueryParam<any, any, any, any, any, any>[] ? [...TParams, ...InferParamsFromOps<TCbResult>] :
     never;
 
 /**
  * 
  */
-type AccumulateColumnParams<TParams extends readonly QueryParam<any, any, any, any, any>[] | undefined, TResult extends TResultShape<DbType>> =
+type AccumulateColumnParams<TParams extends readonly QueryParam<any, any, any, any, any, any>[] | undefined, TResult extends TResultShape<DbType>> =
     TParams extends undefined ?
     InferParamsFromColumns<TResult>["length"] extends 0 ? undefined : InferParamsFromColumns<TResult> :
-    TParams extends QueryParam<any, any, any, any, any>[] ? [...TParams, ...InferParamsFromColumns<TResult>] :
+    TParams extends QueryParam<any, any, any, any, any, any>[] ? [...TParams, ...InferParamsFromColumns<TResult>] :
     never;
 
 
 type InferParamsFromColumns<TResult extends TResultShape<DbType>> =
     RecordToTupleSafe<TResult, string> extends readonly [infer First, ...infer Rest] ?
-    First extends IComparable<any, any, infer TParams, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams), ...InferParamsFromColumnsArr<Rest>] :
+    First extends IComparable<any, any, infer TParams, any, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams), ...InferParamsFromColumnsArr<Rest>] :
     Rest extends readonly any[] ? InferParamsFromColumnsArr<Rest> :
     [] :
     [];
 
 type InferParamsFromColumnsArr<TCols> =
     TCols extends readonly [infer First, ...infer Rest] ?
-    First extends IComparable<any, any, infer TParams, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams), ...InferParamsFromColumnsArr<Rest>] :
+    First extends IComparable<any, any, infer TParams, any, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams), ...InferParamsFromColumnsArr<Rest>] :
     Rest extends readonly any[] ? InferParamsFromColumnsArr<Rest> :
     [] :
     [];
@@ -203,20 +203,20 @@ type InferParamsFromColumnsArr<TCols> =
  */
 type AccumulateOrderByParams<
     TDbType extends DbType,
-    TParams extends readonly QueryParam<any, any, any, any, any>[] | undefined,
+    TParams extends readonly QueryParam<any, any, any, any, any, any>[] | undefined,
     TOrderByParams extends OrderBySpecs<TDbType>
 > =
     TParams extends undefined ?
     InferParamsFromOrderByParams<TDbType, TOrderByParams>["length"] extends 0 ? undefined : InferParamsFromOrderByParams<TDbType, TOrderByParams> :
-    TParams extends QueryParam<any, any, any, any, any>[] ? [...TParams, ...InferParamsFromOrderByParams<TDbType, TOrderByParams>] :
+    TParams extends QueryParam<any, any, any, any, any, any>[] ? [...TParams, ...InferParamsFromOrderByParams<TDbType, TOrderByParams>] :
     never;
 
 type InferParamsFromOrderByParams<TDbType extends DbType, TOrderByParams extends OrderBySpecs<TDbType>> =
     TOrderByParams extends readonly [infer First, ...infer Rest] ?
-    First extends IComparable<TDbType, any, infer TParams, any, any, false, any> ? Rest extends OrderBySpecs<TDbType> ?
+    First extends IComparable<TDbType, any, infer TParams, any, any, false, any, any> ? Rest extends OrderBySpecs<TDbType> ?
     [...(TParams extends undefined ? [] : TParams), InferParamsFromOrderByParams<TDbType, Rest>] :
     [...(TParams extends undefined ? [] : TParams)] :
-    First extends [IComparable<TDbType, any, infer TParams, any, any, false, any>, OrderType] ? Rest extends OrderBySpecs<TDbType> ?
+    First extends [IComparable<TDbType, any, infer TParams, any, any, false, any, any>, OrderType] ? Rest extends OrderBySpecs<TDbType> ?
     [...(TParams extends undefined ? [] : TParams), InferParamsFromOrderByParams<TDbType, Rest>] :
     [...(TParams extends undefined ? [] : TParams)] :
     [] :

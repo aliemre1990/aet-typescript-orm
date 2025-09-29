@@ -24,10 +24,11 @@ class QueryColumn<
     TColumn extends ColumnType<TDbType>,
     TQTableSpecs extends { tableName: string, asTableName?: string },
     TAsName extends string | undefined = undefined,
+    TDefaultFieldKey extends string = TColumn["name"],
     TValueType extends DbValueTypes = TColumn extends Column<TDbType, any, any, any, any, infer TValType> ? TValType : never,
     TFinalValueType extends TValueType | null = TColumn extends Column<TDbType, any, any, any, any, any, infer TFinalValType> ? TFinalValType : never,
     TComparableId extends string = InferIdFromQueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>
-> implements IComparable<TDbType, TComparableId, undefined, TValueType, TFinalValueType, false, any> {
+> implements IComparable<TDbType, TComparableId, undefined, TValueType, TFinalValueType, false, TDefaultFieldKey, any> {
     qTableSpecs?: TQTableSpecs;
 
     dbType: TDbType;
@@ -38,6 +39,7 @@ class QueryColumn<
     icomparableFinalValueDummy?: TFinalValueType;
     icomparableIdDummy?: TComparableId;
     isAgg?: false;
+    defaultFieldKey: TDefaultFieldKey;
 
     eq: typeof eq = eq;
     sqlIn: typeof sqlIn = sqlIn;
@@ -46,10 +48,11 @@ class QueryColumn<
     constructor(dbType: TDbType, public column: TColumn, asName?: TAsName) {
         this.asName = asName;
         this.dbType = dbType;
+        this.defaultFieldKey = column.name as TDefaultFieldKey;
     }
 
     as<TAsName extends string>(val: TAsName) {
-        return new QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>(this.dbType, this.column, val);
+        return new QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName, TDefaultFieldKey>(this.dbType, this.column, val);
     }
 
     setQTableSpecs(val: TQTableSpecs) {
@@ -62,7 +65,7 @@ const ColumnsSelectionQueryTableObjectSymbol = Symbol();
 type ColumnsSelection<
     TDbType extends DbType,
     TQItem extends QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any>,
-    TColumns extends { [key: string]: IComparable<TDbType, any, any, any, any, any, any> }
+    TColumns extends { [key: string]: IComparable<TDbType, any, any, any, any, any, any, any> }
 > = {
     [ColumnsSelectionQueryTableObjectSymbol]: TQItem;
 }

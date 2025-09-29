@@ -1,6 +1,6 @@
 import { DbType } from "../db.js";
 import QueryColumn, { type QueryColumnsObjectType } from "./queryColumn.js";
-import Table from "../table/table.js";
+import Table, { type MapToQueryColumns } from "../table/table.js";
 import { isNullOrUndefined } from "../utility/guards.js";
 import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
 import { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
@@ -36,7 +36,7 @@ class QueryBuilder<
     TDbType extends DbType,
     TQueryItems extends readonly (QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any>)[],
     TResult extends TResultShape<TDbType>[] | TResultShape<TDbType> | undefined = undefined,
-    TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null, any, any>[] | undefined = undefined,
+    TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null, any, any, any>[] | undefined = undefined,
     TGroupedColumns extends GroupBySpecs<TDbType> | undefined = undefined,
     TOrderBySpecs extends OrderBySpecs<TDbType> | undefined = undefined,
     TAs extends string | undefined = undefined
@@ -104,11 +104,11 @@ class QueryBuilder<
             TInnerCols,
             TInnerTableName,
             Table<TDbType, TInnerCols, TInnerTableName>,
-            { [K in keyof TInnerCols]: QueryColumn<TDbType, TInnerCols[K], { tableName: TInnerTableName, asTableName: undefined }> }
+            MapToQueryColumns<TDbType, TInnerCols>
         > :
         TInnerJoinTable,
-        TAccumulatedParams extends QueryParam<TDbType, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>,
-        TAccumulatedParamsResult extends QueryParam<TDbType, any, any, any, any>[] | undefined = TAccumulatedParams["length"] extends 0 ? undefined : TAccumulatedParams
+        TAccumulatedParams extends QueryParam<TDbType, any, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>,
+        TAccumulatedParamsResult extends QueryParam<TDbType, any, any, any, any, any>[] | undefined = TAccumulatedParams["length"] extends 0 ? undefined : TAccumulatedParams
     >(
         type: JoinType,
         table: TInnerJoinTable,
@@ -124,11 +124,9 @@ class QueryBuilder<
         if ("table" in table) {
             innerJoinTable = table as TInnerJoinResult;
         } else if ("name" in table) {
-
-            const innerQueryColumns = Object.entries(table.columns).reduce((prev, curr) => {
-                prev[curr[0]] = new QueryColumn(this.dbType, curr[1] as Column<TDbType, any, any, any>);
-                return prev;
-            }, {} as QueryColumnsObjectType<TDbType>);
+            const innerQueryColumns = table.columnsList.map((col: Column<TDbType, any, any, any, any, any, any>) => {
+                return new QueryColumn(this.dbType, col);
+            }) as QueryColumn<TDbType, any, any, any, any, any, any>[];
 
             innerJoinTable = new QueryTable(this.dbType, table, innerQueryColumns) as TInnerJoinResult;
         } else {
@@ -211,7 +209,7 @@ class QueryBuilder<
 
 function from<
     TFrom extends readonly (
-        Table<TDbType, any, any, any> |
+        Table<TDbType, any, any> |
         QueryTable<TDbType, any, any, any, any, any> |
         IExecuteableQuery<TDbType, any, any, any, any, any, string>
     )[],
@@ -225,10 +223,10 @@ function from<
     const fromResult = from.map(item => {
         if (item instanceof Table) {
 
-            const queryColumns = Object.entries(item.columns).reduce((prev, curr) => {
-                prev[curr[0]] = new QueryColumn(item.dbType, curr[1] as ColumnType<TDbType>);
-                return prev;
-            }, {} as QueryColumnsObjectType<TDbType>)
+
+            const queryColumns = item.columnsList.map((col: Column<TDbType, any, any, any, any, any, any>) => {
+                return new QueryColumn(item.dbType, col);
+            }) as QueryColumn<TDbType, any, any, any, any, any, any>[];
 
             return new QueryTable(item.dbType, item, queryColumns);
         } else {

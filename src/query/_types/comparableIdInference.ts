@@ -5,20 +5,24 @@ import type { IComparable } from "../_interfaces/IComparable.js";
 
 type InferTypeNamesFromArgArray<TArgs extends readonly (
     DbValueTypes | null |
-    IComparable<any, any, any, any, any, any, any>
+    IComparable<any, any, any, any, any, any, any, any>
 )[]> =
     TArgs extends readonly [infer First, ...infer Rest] ?
-    First extends DbValueTypes | null | IComparable<any, any, any, any, any, any, any> ?
-    Rest extends readonly (DbValueTypes | null | IComparable<any, any, any, any, any, any, any>)[] ?
+    First extends DbValueTypes | null ?
+    Rest extends readonly (DbValueTypes | null | IComparable<any, any, any, any, any, any, any, any>)[] ?
     [InferTypeName<First>, ...InferTypeNamesFromArgArray<Rest>] :
     [InferTypeName<First>] :
+    First extends IComparable<any, infer TId, any, any, any, any, any, any> ?
+    Rest extends readonly (DbValueTypes | null | IComparable<any, any, any, any, any, any, any, any>)[] ?
+    [TId, ...InferTypeNamesFromArgArray<Rest>] :
+    [TId] :
     [] :
     [];
 
 type InferTypeNamesFromArgs<
     TArgs extends readonly (
         DbValueTypes | null |
-        IComparable<any, any, any, any, any, any, any>
+        IComparable<any, any, any, any, any, any, any, any>
     )[]
 > = JoinTuple<InferTypeNamesFromArgArray<TArgs>, ",">;
 
@@ -57,7 +61,7 @@ type InferTypeName<T> =
     (Date)[] extends T ? "Date[]" :
     null extends T ? "null" :
     undefined extends T ? "undefined" :
-    T extends IComparable<any, infer TId, any, any, any, any, any> ? `${TId extends undefined ? "" : TId}` :
+    T extends IComparable<any, infer TId, any, any, any, any, any, any> ? `${TId extends undefined ? "" : TId}` :
     T extends (infer TObj)[] ? `{${InferTypeName<TObj>}}[]` :
     T extends object ? `{${ObjectPropsToString<T>}}` :
     "unknown";

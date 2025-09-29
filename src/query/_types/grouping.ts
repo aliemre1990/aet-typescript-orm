@@ -12,7 +12,7 @@ import type ColumnSQLFunction from "../functions/_functions.js";
 //
 type SpreadGroupedColumns<TDbType extends DbType, TGroupedColumns extends GroupBySpecs<TDbType>> =
     TGroupedColumns extends readonly [infer First, ...infer Rest] ?
-    First extends IComparable<TDbType, any, any, any, any, any, any> ?
+    First extends IComparable<TDbType, any, any, any, any, any, any, any> ?
     Rest extends GroupBySpecs<TDbType> ?
     [First, ...SpreadGroupedColumns<TDbType, Rest>] :
     [First] :
@@ -26,17 +26,17 @@ type SpreadGroupedTable<TGroupedTable extends ColumnsSelection<any, any, any>> =
     RecordToTupleSafe<TGroupedTable, string>
 
 //
-type IsGroupedColumnsContains<TDbType extends DbType, TGroupedColumns extends IComparable<TDbType, any, any, any, any, false, any>[], TQueryColumnToCheck extends QueryColumn<any, any, any, any>> =
+type IsGroupedColumnsContains<TDbType extends DbType, TGroupedColumns extends IComparable<TDbType, any, any, any, any, false, any, any>[], TQueryColumnToCheck extends QueryColumn<any, any, any, any>> =
     TGroupedColumns extends [infer First, ...infer Rest] ?
-    First extends IComparable<TDbType, infer TId, any, any, any, any, any> ?
-    TQueryColumnToCheck extends IComparable<TDbType, infer TIdToCheck, any, any, any, any, any> ?
+    First extends IComparable<TDbType, infer TId, any, any, any, any, any, any> ?
+    TQueryColumnToCheck extends IComparable<TDbType, infer TIdToCheck, any, any, any, any, any, any> ?
     TId extends TIdToCheck ?
     TIdToCheck extends TId ?
     true :
-    Rest extends IComparable<TDbType, any, any, any, any, any, any>[] ?
+    Rest extends IComparable<TDbType, any, any, any, any, any, any, any>[] ?
     IsGroupedColumnsContains<TDbType, Rest, TQueryColumnToCheck> :
     false :
-    Rest extends IComparable<TDbType, any, any, any, any, any, any>[] ?
+    Rest extends IComparable<TDbType, any, any, any, any, any, any, any>[] ?
     IsGroupedColumnsContains<TDbType, Rest, TQueryColumnToCheck> :
     false :
     false :
@@ -47,7 +47,7 @@ type GetFunctionsFromGroupBySpecs<TDbType extends DbType, TGroupedColumns extend
     TGroupedColumns extends undefined ? [] :
 
     TGroupedColumns extends readonly [infer First, ...infer Rest] ?
-    First extends ColumnSQLFunction<TDbType, any, any, any, any, string, any> ?
+    First extends ColumnSQLFunction<TDbType, any, any, any, any, string, any, any> ?
     Rest extends readonly any[] ?
     [First, ...GetFunctionsFromGroupBySpecs<TDbType, Rest>] :
     [First] :
@@ -105,8 +105,8 @@ type GroupedTablesToColumnsMap<
                     TResult extends (infer TItem)[] ? TItem : TResult extends undefined ? never :
                     TResult :
                     never
-                )[Kc] extends IComparable<TDbType, infer TId, infer TParams, infer TValueType, infer TFinalValueType, any, infer TAs> ?
-                IComparable<TDbType, TId, TParams, TValueType, TFinalValueType, false, TAs> :
+                )[Kc] extends IComparable<TDbType, infer TId, infer TParams, infer TValueType, infer TFinalValueType, any, infer TDefaultFieldKey, infer TAs> ?
+                IComparable<TDbType, TId, TParams, TValueType, TFinalValueType, false, TDefaultFieldKey, TAs> :
                 never :
                 (
                     T extends QueryTable<TDbType, any, any, any, any, any> ? T["columns"] :
@@ -114,8 +114,8 @@ type GroupedTablesToColumnsMap<
                     TResult extends (infer TItem)[] ? TItem : TResult extends undefined ? never :
                     TResult :
                     never
-                )[Kc] extends IComparable<TDbType, infer TId, infer TParams, infer TValueType, infer TFinalValueType, any, infer TAs> ?
-                IComparable<TDbType, TId, TParams, TValueType, TFinalValueType, true, TAs> :
+                )[Kc] extends IComparable<TDbType, infer TId, infer TParams, infer TValueType, infer TFinalValueType, any, infer TDefaultFieldKey, infer TAs> ?
+                IComparable<TDbType, TId, TParams, TValueType, TFinalValueType, true, TDefaultFieldKey, TAs> :
                 never :
                 never
             }
@@ -125,7 +125,7 @@ type GroupedTablesToColumnsMap<
         GetFunctionsFromGroupBySpecs<TDbType, TGroupedColumns>["length"] extends 0 ? {} :
         {
             ["__grouping_functions__"]: {
-                [Fn in GetFunctionsFromGroupBySpecs<TDbType, TGroupedColumns>[number] as Fn extends IComparable<TDbType, any, any, any, any, any, infer TAs extends string> ? TAs : never]: Fn
+                [Fn in GetFunctionsFromGroupBySpecs<TDbType, TGroupedColumns>[number]as Fn extends IComparable<TDbType, any, any, any, any, any, any, infer TAs extends string> ? TAs : never]: Fn
             }
         }
 

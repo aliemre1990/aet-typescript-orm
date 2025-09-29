@@ -22,40 +22,55 @@ import type { IDbType } from "../query/_interfaces/IDbType.js";
 
 type TableSpecsType<TTableName extends string = string> = { tableName: TTableName }
 
-type TableType<TDbType extends DbType, TColumns extends ColumnsObjectType<TDbType>, TTableName extends string = string> = Table<TDbType, TColumns, TTableName>;
-type TablesObjectType<TDbType extends DbType> = { [key: string]: TableType<TDbType, ColumnsObjectType<TDbType>> };
-
 class ForeignKey {
     constructor(public column: string, public references: { table: string; column: string | 'self-parent' | 'self-child' }) { }
 }
 
+type MapToQueryColumns<TTableName extends string, TColumns extends readonly any[], TAsTableName extends string | undefined = undefined> =
+    TColumns extends readonly [infer First, ...infer Rest] ?
+    First extends Column<infer TDbType, infer TType, infer TColumnName, infer TTableSpecs, infer TIsNullable> ?
+    [QueryColumn<TDbType, Column<TDbType, TType, TColumnName, TTableSpecs, TIsNullable>, { tableName: TTableName, asTableName: TAsTableName }, undefined>, ...MapToQueryColumns<TTableName, Rest>] :
+    never :
+    []
+    ;
+
+type MapToColumnsRecord<TColumns extends readonly Column<any, any, any, any, any, any, any>[]> = {
+    [C in TColumns[number]as C["name"]]: C
+}
+
 class Table<
     TDbType extends DbType,
-    TColumns extends ColumnsObjectType<TDbType>,
-    TTableName extends string,
-    TQueryColumns extends QueryColumnsObjectType<TDbType> = { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], { tableName: TTableName, asTableName: undefined }, undefined> }
+    TColumns extends readonly Column<TDbType, any, any, any, any, any, any>[],
+    TTableName extends string
 > implements
     IDbType<TDbType> {
 
     dbType: TDbType;
 
+    columns: MapToColumnsRecord<TColumns>;
+
     constructor(
         dbType: TDbType,
         public name: TTableName,
-        public columns: TColumns,
+        public columnsList: TColumns,
         public primaryKeys?: (string[])[],
         public uniqueKeys?: (string[])[],
         public foreignKeys?: ForeignKey[]
     ) {
         this.dbType = dbType;
+
+        this.columns = columnsList.reduce((prev, curr) => {
+            prev[curr.name] = curr;
+
+            return prev;
+        }, {} as { [key: string]: Column<TDbType, any, any, any, any, any, any> }) as typeof this.columns;
+
     }
 
     as<TAsName extends string>(val: TAsName) {
-        const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
-            prev[curr[0]] = new QueryColumn(this.dbType, curr[1]);
-            return prev;
-
-        }, {} as QueryColumnsObjectType<TDbType>) as { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], { tableName: TTableName, asTableName: TAsName }, undefined> };
+        const queryColumns = this.columnsList.map((col) => {
+            return new QueryColumn(this.dbType, col);
+        }) as MapToQueryColumns<TTableName, TColumns, TAsName>;
 
         return new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, typeof queryColumns, TAsName>(this.dbType, this, queryColumns, val);
     }
@@ -63,21 +78,19 @@ class Table<
     select<
         TCb extends
         (
-            cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>,
+            cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>, undefined>]>>,
             ops: DbFunctions<TDbType, false>
         ) => TResultShape<TDbType>,
         TCbResult extends TResultShape<TDbType> = TCb extends (cols: any, ops: any) => infer TR ? TR : never
     >(
         cb: TCb
-    ): IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>], TCbResult[], AccumulateColumnParams<undefined, TCbResult>> {
+    ): IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>, undefined>], TCbResult[], AccumulateColumnParams<undefined, TCbResult>> {
 
-        const queryColumns = Object.entries(this.columns)
-            .reduce((prev, ent) => {
-                prev[ent[1].name] = new QueryColumn(this.dbType, ent[1]);
-                return prev;
-            }, {} as QueryColumnsObjectType<TDbType>) as TQueryColumns;
+        const queryColumns = this.columnsList.map((col) => {
+            return new QueryColumn(this.dbType, col);
+        }) as MapToQueryColumns<TTableName, TColumns>;
 
-        const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>(this.dbType, this as any, queryColumns);
+        const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>, undefined>(this.dbType, this, queryColumns);
 
 
         return new QueryBuilder<TDbType, [typeof queryTable]>(this.dbType, queryTable).select<TCb, TCbResult>(cb);
@@ -100,16 +113,15 @@ class Table<
         type: JoinType,
         table: TInnerJoinTable,
         cb: (
-            cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>, TInnerJoinResult]>>,
+            cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>>, TInnerJoinResult]>>,
             ops: DbOperators<TDbType, false>
         ) => TCbResult
     ) {
-        const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
-            prev[curr[0]] = new QueryColumn(this.dbType, curr[1]);
-            return prev;
-        }, {} as QueryColumnsObjectType<TDbType>) as TQueryColumns
+        const queryColumns = this.columnsList.map((col) => {
+            return new QueryColumn(this.dbType, col);
+        }) as MapToQueryColumns<TTableName, TColumns>;
 
-        const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns>(this.dbType, this, queryColumns);
+        const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>>(this.dbType, this, queryColumns);
 
 
         return new QueryBuilder<TDbType, [typeof queryTable]>(this.dbType, queryTable)
@@ -119,15 +131,14 @@ class Table<
     where<
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>
     >(cb: (
-        cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>,
+        cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>, undefined>]>>,
         ops: DbOperators<TDbType, false>
     ) => TCbResult) {
-        const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
-            prev[curr[0]] = new QueryColumn(this.dbType, curr[1]);
-            return prev;
-        }, {} as QueryColumnsObjectType<TDbType>) as TQueryColumns
+        const queryColumns = this.columnsList.map((col) => {
+            return new QueryColumn(this.dbType, col);
+        }) as MapToQueryColumns<TTableName, TColumns>;
 
-        const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName, any>, TQueryColumns, undefined>(this.dbType, this, queryColumns);
+        const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>, undefined>(this.dbType, this, queryColumns);
 
         return new QueryBuilder<TDbType, [typeof queryTable]>(this.dbType, queryTable).where(cb);
     }
@@ -135,30 +146,28 @@ class Table<
     groupBy<
         const TCbResult extends GroupBySpecs<TDbType>
     >(cb: (
-        cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>,
+        cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>, undefined>]>>,
         ops: DbFunctions<TDbType, false>
     ) => TCbResult
     ) {
-        const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
-            prev[curr[0]] = new QueryColumn(this.dbType, curr[1]);
-            return prev;
-        }, {} as QueryColumnsObjectType<TDbType>) as TQueryColumns
+        const queryColumns = this.columnsList.map((col) => {
+            return new QueryColumn(this.dbType, col);
+        }) as MapToQueryColumns<TTableName, TColumns>;
 
-        const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName, any>, TQueryColumns, undefined>(this.dbType, this, queryColumns);
+        const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>, undefined>(this.dbType, this, queryColumns);
 
         return new QueryBuilder<TDbType, [typeof queryTable]>(this.dbType, queryTable).groupBy(cb);
     }
 
     orderBy<
         const TCbResult extends OrderBySpecs<TDbType>
-    >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>]>>) => TCbResult):
-        ISelectClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, TQueryColumns, undefined>], AccumulateOrderByParams<TDbType, undefined, TCbResult>> {
-        const queryColumns = Object.entries(this.columns).reduce((prev, curr) => {
-            prev[curr[0]] = new QueryColumn(this.dbType, curr[1]);
-            return prev;
-        }, {} as QueryColumnsObjectType<TDbType>) as TQueryColumns
+    >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>,  MapToQueryColumns<TTableName, TColumns>, undefined>]>>) => TCbResult):
+        ISelectClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>,  MapToQueryColumns<TTableName, TColumns>, undefined>], AccumulateOrderByParams<TDbType, undefined, TCbResult>> {
+        const queryColumns = this.columnsList.map((col) => {
+            return new QueryColumn(this.dbType, col);
+        }) as MapToQueryColumns<TTableName, TColumns>;
 
-        const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName, any>, TQueryColumns, undefined>(this.dbType, this, queryColumns);
+        const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>,  MapToQueryColumns<TTableName, TColumns>, undefined>(this.dbType, this, queryColumns);
 
         return new QueryBuilder<TDbType, [typeof queryTable]>(this.dbType, queryTable).orderBy(cb);
     }
@@ -166,7 +175,7 @@ class Table<
 
 function pgTable<
     TTableName extends string,
-    TColumns extends Record<string, Column<PgDbType, PgColumnType, string, TableSpecsType<string>, boolean>>,
+    const TColumns extends Column<PgDbType, PgColumnType, string, TableSpecsType<string>, boolean>[],
 >(
     name: TTableName,
     columns: TColumns,
@@ -175,7 +184,15 @@ function pgTable<
     foreignKeys?: ForeignKey[]
 ) {
 
-    type TFinalColumns = { [K in keyof TColumns]: Column<PgDbType, TColumns[K]["type"], TColumns[K]["name"], TableSpecsType<TTableName>, TColumns[K]["isNullable"]> };
+    type MapToFinalColumns<TColumns extends readonly any[]> =
+        TColumns extends readonly [infer First, ...infer Rest] ?
+        First extends Column<infer TDbType, infer TType, infer TColumnName, any, infer TIsNullable> ?
+        [Column<TDbType, TType, TColumnName, TableSpecsType<TTableName>, TIsNullable>, ...MapToFinalColumns<Rest>] :
+        never :
+        []
+        ;
+
+    type TFinalColumns = MapToFinalColumns<TColumns>;
 
     return new Table<PgDbType, TFinalColumns, TTableName>(
         dbTypes.postgresql,
@@ -209,6 +226,5 @@ export {
 
 export type {
     TableSpecsType,
-    TableType,
-    TablesObjectType
+    MapToQueryColumns
 }

@@ -13,10 +13,11 @@ class QueryParam<
     TName extends string,
     TValueType extends DbValueTypes | null,
     TAs extends string | undefined = undefined,
+    TDefaultFieldKey extends string = `$${TName}`,
     TComparableId extends string = InferIdFromParam<TName, TValueType>
 
 >
-    implements IComparable<TDbType, TComparableId, [QueryParam<TDbType, TName, TValueType>], NonNullable<TValueType>, TValueType, false, TAs> {
+    implements IComparable<TDbType, TComparableId, [QueryParam<TDbType, TName, TValueType>], NonNullable<TValueType>, TValueType, false, TDefaultFieldKey, TAs> {
 
     dbType: TDbType;
 
@@ -27,18 +28,21 @@ class QueryParam<
     isAgg?: false;
 
     asName?: TAs;
+    defaultFieldKey: TDefaultFieldKey;
 
     constructor(dbType: TDbType, public name: TName, asName?: TAs) {
         this.dbType = dbType;
         this.asName = asName;
+
+        this.defaultFieldKey = `$${name}` as TDefaultFieldKey;
     }
 
     as<TAs extends string>(asName: TAs) {
-        return new QueryParam<TDbType, TName, TValueType, TAs>(this.dbType, this.name, asName);
+        return new QueryParam<TDbType, TName, TValueType, TAs, TDefaultFieldKey>(this.dbType, this.name, asName);
     }
 
     type<TValueType extends DbValueTypes | null>() {
-        return new QueryParam<TDbType, TName, TValueType, TAs>(this.dbType, this.name, this.asName);
+        return new QueryParam<TDbType, TName, TValueType, TAs, TDefaultFieldKey>(this.dbType, this.name, this.asName);
     }
 
     eq: typeof eq = eq;

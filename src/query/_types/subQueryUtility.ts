@@ -1,4 +1,5 @@
 import type { DbType } from "../../db.js";
+import type { MapToQueryColumns } from "../../table/table.js";
 import type Table from "../../table/table.js";
 import type { IComparable } from "../_interfaces/IComparable.js";
 import type { IDbType } from "../_interfaces/IDbType.js";
@@ -20,8 +21,8 @@ type ConvertComparableIdsOfSelectResult<
         TDbType,
         TQueryItems,
         {
-            [K in Extract<keyof TItem, string>]: TItem[K] extends IComparable<TDbType, infer TId, infer TParams, infer TValueType, infer TFinalValueType, any, infer TColAs> ?
-            IComparable<TDbType, `${TAs}-${K}-${TId}`, TParams, TValueType, TFinalValueType, false, TColAs> :
+            [K in Extract<keyof TItem, string>]: TItem[K] extends IComparable<TDbType, infer TId, infer TParams, infer TValueType, infer TFinalValueType, any, infer TDefaultFieldKey, infer TColAs> ?
+            IComparable<TDbType, `${TAs}-${K}-${TId}`, TParams, TValueType, TFinalValueType, false, TDefaultFieldKey, TColAs> :
             never
         },
         TParams,
@@ -34,8 +35,8 @@ type ConvertComparableIdsOfSelectResult<
         TDbType,
         TQueryItems,
         {
-            [K in Extract<keyof TResult, string>]: TResult[K] extends IComparable<TDbType, infer TId, infer TParams, infer TValueType, infer TFinalValueType, any, infer TColAs> ?
-            IComparable<TDbType, `${TAs}-${K}-${TId}`, TParams, TValueType, TFinalValueType, false, TColAs> :
+            [K in Extract<keyof TResult, string>]: TResult[K] extends IComparable<TDbType, infer TId, infer TParams, infer TValueType, infer TFinalValueType, any, infer TDefaultFieldKey, infer TColAs> ?
+            IComparable<TDbType, `${TAs}-${K}-${TId}`, TParams, TValueType, TFinalValueType, false, TDefaultFieldKey, TColAs> :
             never
         },
         TParams,
@@ -80,7 +81,7 @@ type InferDbTypeFromFromFirstIDbType<TFrom> =
 type ConvertTablesToQueryTables<TFrom> =
     TFrom extends readonly [infer First, ...infer Rest] ?
     First extends Table<infer TDbType, infer TColumns, infer TTableName> ?
-    [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, { [K in keyof TColumns]: QueryColumn<TDbType, TColumns[K], { tableName: TTableName }, undefined> }, undefined>, ...ConvertTablesToQueryTables<Rest>] :
+    [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TColumns>>, ...ConvertTablesToQueryTables<Rest>] :
     First extends QueryTable<any, any, any, any, any, any> ?
     [First, ...ConvertTablesToQueryTables<Rest>] :
     First extends IExecuteableQuery<any, any, any, any, any, any, any> ?
@@ -91,7 +92,7 @@ type ConvertTablesToQueryTables<TFrom> =
 type AccumulateSubQueryParams<
     TDbType extends DbType,
     TFrom extends readonly any[],
-    TParams extends QueryParam<TDbType, any, any, any, any>[] | undefined = undefined
+    TParams extends QueryParam<TDbType, any, any, any, any, any>[] | undefined = undefined
 > =
     TFrom extends readonly [infer First, ...infer Rest] ?
     First extends IExecuteableQuery<TDbType, any, any, infer TInnerParams, any, any, any> ?

@@ -24,7 +24,7 @@ type InferIdFromFunction<
     TSQLFunction extends SQLFunction,
     TArgs extends (
         DbValueTypes | null |
-        IComparable<TDbType, any, any, any, any, any, any>
+        IComparable<TDbType, any, any, any, any, any, any, any>
     )[],
     TReturnType extends DbValueTypes | null,
     TAs extends string | undefined = undefined
@@ -37,19 +37,21 @@ class ColumnSQLFunction<
     TSQLFunction extends SQLFunction,
     TArgs extends (
         DbValueTypes | null |
-        IComparable<TDbType, any, any, any, any, any, any>
+        IComparable<TDbType, any, any, any, any, any, any, any>
     )[],
     TReturnType extends DbValueTypes | null,
     TIsAgg extends boolean = false,
     TAs extends string | undefined = undefined,
+    TDefaultFieldKey extends string = `${TSQLFunction["name"]}()`,
     TComparableId extends string = InferIdFromFunction<TDbType, TSQLFunction, TArgs, TReturnType, TAs>
-> implements IComparable<TDbType, TComparableId, InferParamsFromFnArgs<TArgs>, NonNullable<TReturnType>, TReturnType, TIsAgg, TAs> {
+> implements IComparable<TDbType, TComparableId, InferParamsFromFnArgs<TArgs>, NonNullable<TReturnType>, TReturnType, TIsAgg, TDefaultFieldKey, TAs> {
 
     icomparableValueDummy?: NonNullable<TReturnType>;
     icomparableFinalValueDummy?: TReturnType;
     icomparableIdDummy?: TComparableId;
     params?: InferParamsFromFnArgs<TArgs>;
     isAgg?: TIsAgg;
+    defaultFieldKey: TDefaultFieldKey;
 
     asName?: TAs;
 
@@ -57,8 +59,8 @@ class ColumnSQLFunction<
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 
-    as<TAs extends string>(asName: TAs) {
-        return new ColumnSQLFunction<TDbType, TSQLFunction, TArgs, TReturnType, TIsAgg, TAs>(this.dbType, this.args, this.sqlFunction, asName);
+    as<TAs extends string>(asName: TAs): ColumnSQLFunction<TDbType, TSQLFunction, TArgs, TReturnType, TIsAgg, TAs, TDefaultFieldKey> {
+        return new ColumnSQLFunction<TDbType, TSQLFunction, TArgs, TReturnType, TIsAgg, TAs, TDefaultFieldKey>(this.dbType, this.args, this.sqlFunction, asName);
     }
 
     constructor(
@@ -68,6 +70,7 @@ class ColumnSQLFunction<
         asName?: TAs
     ) {
         this.asName = asName;
+        this.defaultFieldKey = `${sqlFunction.name}()` as TDefaultFieldKey;
     }
 }
 

@@ -9,21 +9,21 @@ import QueryParam from "../param.js";
 // Helper type to extract only QueryColumns from the mixed tuple
 type ExtractComparables<T extends readonly unknown[]> =
     T extends readonly [infer First, ...infer Rest] ?
-    First extends IComparable<any, any, any, any, any, any, any> ?
+    First extends IComparable<any, any, any, any, any, any, any, any> ?
     [First, ...ExtractComparables<Rest>] :
     ExtractComparables<Rest> :
     [];
 
 
 function sqlIn<
-    TComparing extends IComparable<TDbType, any, any, any, any, any, any>,
+    TComparing extends IComparable<TDbType, any, any, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
-    TParamMedian extends QueryParam<TDbType, string, any, any, any>,
-    TParamName extends TParamMedian extends QueryParam<any, infer U, any, any, any> ? U : never,
-    TParamValue extends TParamMedian extends QueryParam<any, any, infer TVal, any, any> ? TVal : never,
+    TParamMedian extends QueryParam<TDbType, string, any, any, any, any>,
+    TParamName extends TParamMedian extends QueryParam<any, infer U, any, any, any, any> ? U : never,
+    TParamValue extends TParamMedian extends QueryParam<any, any, infer TVal, any, any, any> ? TVal : never,
     // Find a way to make array nullable
-    TParam extends QueryParam<TDbType, TParamName, (IsAny<TParamValue> extends true ? NullableArray<GetArrayEquivalentPgValueType<TValueType>> | null : TParamValue), any, any>,
-    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any, any> ? DbType : never
+    TParam extends QueryParam<TDbType, TParamName, (IsAny<TParamValue> extends true ? NullableArray<GetArrayEquivalentPgValueType<TValueType>> | null : TParamValue), any, any, any>,
+    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any, any, any> ? DbType : never
 >(this: TComparing, param: TParamMedian
 ): ColumnComparisonOperation<
     TDbType,
@@ -31,10 +31,10 @@ function sqlIn<
     [TParam]
 >
 function sqlIn<
-    TComparing extends IComparable<TDbType, any, any, any, any, any, any>,
+    TComparing extends IComparable<TDbType, any, any, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
-    TValues extends readonly (TValueType | IComparable<TDbType, any, any, TValueType, any, any, any>)[],
-    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any, any> ? DbType : never
+    TValues extends readonly (TValueType | IComparable<TDbType, any, any, TValueType, any, any, any, any>)[],
+    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any, any, any> ? DbType : never
 >(
     this: TComparing,
     ...values: TValues
@@ -46,13 +46,13 @@ function sqlIn<
 
 
 function sqlIn<
-    TComparing extends IComparable<TDbType, any, any, any, any, any, any>,
+    TComparing extends IComparable<TDbType, any, any, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
-    TParamMedian extends QueryParam<TDbType, string, any, any, any> | undefined,
-    TParamName extends TParamMedian extends QueryParam<any, infer U, any, any, any> ? U : never,
-    TParamValue extends TParamMedian extends QueryParam<any, any, infer TVal, any, any> ? TVal : never,
-    TValues extends readonly (TValueType | IComparable<TDbType, any, any, TValueType, any, any, any>)[],
-    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any, any> ? DbType : never
+    TParamMedian extends QueryParam<TDbType, string, any, any, any, any> | undefined,
+    TParamName extends TParamMedian extends QueryParam<any, infer U, any, any, any, any> ? U : never,
+    TParamValue extends TParamMedian extends QueryParam<any, any, infer TVal, any, any, any> ? TVal : never,
+    TValues extends readonly (TValueType | IComparable<TDbType, any, any, TValueType, any, any, any, any>)[],
+    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any, any, any> ? DbType : never
 >
     (
         this: TComparing,

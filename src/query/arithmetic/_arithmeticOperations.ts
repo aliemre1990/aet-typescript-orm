@@ -45,7 +45,7 @@ type InferArithmeticOpId<
     TArgs extends (
 
         DbValueTypes | null |
-        IComparable<TDbType, any, any, any, any, true, any>
+        IComparable<TDbType, any, any, any, any, true, any, any>
     )[],
     TReturnType extends DbValueTypes | null,
     TAs extends string | undefined = undefined
@@ -59,13 +59,14 @@ class SQLArithmeticOperation<
     TArgs extends (
 
         DbValueTypes | null |
-        IComparable<TDbType, any, any, any, any, true, any>
+        IComparable<TDbType, any, any, any, any, true, any, any>
     )[],
     TReturnType extends DbValueTypes | null,
     TIsAgg extends boolean = false,
     TAs extends string | undefined = undefined,
+    TDefaultFieldKey extends string = `${TArithmeticOperation["name"]}()`,
     TComparableId extends string = InferArithmeticOpId<TDbType, TArithmeticOperation, TArgs, TReturnType, TAs>
-> implements IComparable<TDbType, TComparableId, InferParamsFromFnArgs<TArgs>, NonNullable<TReturnType>, TReturnType, TIsAgg, TAs> {
+> implements IComparable<TDbType, TComparableId, InferParamsFromFnArgs<TArgs>, NonNullable<TReturnType>, TReturnType, TIsAgg, TDefaultFieldKey, TAs> {
 
     icomparableValueDummy?: NonNullable<TReturnType>;
     icomparableFinalValueDummy?: TReturnType;
@@ -73,13 +74,14 @@ class SQLArithmeticOperation<
     params?: InferParamsFromFnArgs<TArgs>;
     isAgg?: TIsAgg;
     asName?: TAs;
+    defaultFieldKey: TDefaultFieldKey;
 
     eq: typeof eq = eq;
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 
     as<TAs extends string>(asName: TAs) {
-        return new SQLArithmeticOperation<TDbType, TArithmeticOperation, TArgs, TReturnType, TIsAgg, TAs>(this.dbType, this.args, this.operation, asName);
+        return new SQLArithmeticOperation<TDbType, TArithmeticOperation, TArgs, TReturnType, TIsAgg, TAs, TDefaultFieldKey>(this.dbType, this.args, this.operation, asName);
     }
 
     constructor(
@@ -89,6 +91,7 @@ class SQLArithmeticOperation<
         asName?: TAs
     ) {
         this.asName = asName;
+        this.defaultFieldKey = `${operation.name}()` as TDefaultFieldKey;
     }
 }
 

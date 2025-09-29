@@ -23,12 +23,12 @@ const comparisonOperations = {
 type ComparisonOperation = (typeof comparisonOperations)[keyof typeof comparisonOperations];
 
 type InferValueTypeFromComparable<TDbType extends DbType, T> =
-    T extends IComparable<TDbType, any, any, infer TValueType, any, any, any> ? TValueType : never;
+    T extends IComparable<TDbType, any, any, infer TValueType, any, any, any, any> ? TValueType : never;
 
 class ColumnComparisonOperation<
     TDbType extends DbType,
-    TComparing extends IComparable<TDbType, any, any, any, any, any, any>,
-    TApplied extends IComparable<TDbType, any, any, any, any, any, any>[] | undefined,
+    TComparing extends IComparable<TDbType, any, any, any, any, any, any, any>,
+    TApplied extends IComparable<TDbType, any, any, any, any, any, any, any>[] | undefined,
     TValueType extends DbValueTypes = InferValueTypeFromComparable<TDbType, TComparing>
 > {
 

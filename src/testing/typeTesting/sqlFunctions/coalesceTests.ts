@@ -9,7 +9,7 @@ import QueryColumn from "../../../query/queryColumn.js";
 import { customersTable, employeesTable, ordersTable, usersTable } from "../_tables.js";
 import type { AssertEqual, AssertTrue } from "../_typeTestingUtilities.js";
 
-const customerIdQC = new QueryColumn<PgDbType, typeof customersTable.columns.customerId, NonNullable<typeof customersTable.columns.customerId.tableSpecs>, undefined>(dbTypes.postgresql, customersTable.columns.customerId);
+const customerIdQC = new QueryColumn<PgDbType, typeof customersTable.columns.id, NonNullable<typeof customersTable.columns.id.tableSpecs>, undefined>(dbTypes.postgresql, customersTable.columns.id);
 const createdByQC = new QueryColumn<PgDbType, typeof customersTable.columns.createdBy, NonNullable<typeof customersTable.columns.createdBy.tableSpecs>, undefined>(dbTypes.postgresql, customersTable.columns.createdBy);
 const customerNameQC = new QueryColumn<PgDbType, typeof customersTable.columns.name, NonNullable<typeof customersTable.columns.name.tableSpecs>, undefined>(dbTypes.postgresql, customersTable.columns.name);
 const empSalaryQC = new QueryColumn<PgDbType, typeof employeesTable.columns.salary, NonNullable<typeof employeesTable.columns.salary.tableSpecs>, undefined>(dbTypes.postgresql, employeesTable.columns.salary);
@@ -33,7 +33,7 @@ const CoalesceWithTypedParams = customersTable
     .select((cols, { coalesce, param }) => {
 
         const coalesceResult = coalesce(param("param1").type<number>(), param("param2").type<number | null>(), param("param3"));
-        type coalesceId = typeof coalesceResult extends IComparable<any, infer TId, any, any, any, any, any> ? TId : never;
+        type coalesceId = typeof coalesceResult extends IComparable<any, infer TId, any, any, any, any, any, any> ? TId : never;
 
         return ({
             coalesceResult: coalesce(param("param1").type<number>(), param("param2").type<number | null>(), param("param3"))
@@ -57,11 +57,11 @@ type CoalesceWithTypedParamsParamsTest = AssertTrue<AssertEqual<CoalesceWithType
 const pgCoalescePlainWithParam = coalesce(1, 2, param("param"));
 
 type pgCoalescePlainWithParamType = typeof pgCoalescePlainWithParam;
-type pgCoalescePlainWithParamArgs = pgCoalescePlainWithParamType extends ColumnSQLFunction<any, any, infer TArgs, any, any, any, any> ? TArgs : never;
+type pgCoalescePlainWithParamArgs = pgCoalescePlainWithParamType extends ColumnSQLFunction<any, any, infer TArgs, any, any, any, any, any> ? TArgs : never;
 type pgCoalescePlainWithParamArg0 = pgCoalescePlainWithParamArgs[0];
 type pgCoalescePlainWithParamArg1 = pgCoalescePlainWithParamArgs[1];
 type pgCoalescePlainWithParamArg2 = pgCoalescePlainWithParamArgs[2];
-type pgCoalescePlainWithParamReturnType = pgCoalescePlainWithParamType extends ColumnSQLFunction<any, any, any, infer TRet, any, any, any> ? TRet : never;
+type pgCoalescePlainWithParamReturnType = pgCoalescePlainWithParamType extends ColumnSQLFunction<any, any, any, infer TRet, any, any, any, any> ? TRet : never;
 
 type pgCoalescePlainWithParamLengthTest = AssertTrue<AssertEqual<3, pgCoalescePlainWithParamArgs["length"]>>;
 type pgCoalescePlainWithParamReturnTypeTest = AssertTrue<AssertEqual<number, pgCoalescePlainWithParamReturnType>>
@@ -82,7 +82,7 @@ const nonNullCoalesce = coalesce(customerIdQC, 2);
 
 const nullCoalesce = coalesce(empSalaryQC);
 type NullCoalesce = typeof nullCoalesce;
-type NullCoalesceRetType = NullCoalesce extends ColumnSQLFunction<any, any, any, infer TRet, any, any, any> ? TRet : never;
+type NullCoalesceRetType = NullCoalesce extends ColumnSQLFunction<any, any, any, infer TRet, any, any, any,any> ? TRet : never;
 type NullCoalesceTest = AssertTrue<AssertEqual<number | null, NullCoalesceRetType>>
 
 // @ts-expect-error
@@ -116,7 +116,7 @@ const InferParamsFromCoalesce = customersTable
         return res;
     })
     .join('INNER', ordersTable, (cols) => cols.users.userName.eq(cols.customers.name))
-    .select(cols => ({ id: cols.customers.customerId }))
+    .select(cols => ({ id: cols.customers.id }))
     .exec;
 
 type InferParamsFromCoalesceResult = typeof InferParamsFromCoalesce;

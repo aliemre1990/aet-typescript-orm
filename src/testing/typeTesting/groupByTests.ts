@@ -6,8 +6,8 @@ import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
  * 
  */
 const SingleTableGroupAutoSelectQuery = customersTable
-    .groupBy(cols => [cols.customers.customerId, cols.customers.name])
-    .select(cols => ({ id: cols.customers.customerId, name: cols.customers.name }))
+    .groupBy(cols => [cols.customers.id, cols.customers.name])
+    .select(cols => ({ id: cols.customers.id, name: cols.customers.name }))
     .exec;
 
 type SingleTableGroupAutoSelectQueryResult = { id: number, name: string }[];
@@ -31,7 +31,7 @@ const MultiTableGroupByQuery = customersTable
         type t = (typeof cols.employees.salary);
 
         return ({
-            customerId: cols.customers.customerId,
+            customerId: cols.customers.id,
             customerName: cols.customers.name,
             customerCreatedBy: cols.customers.createdBy,
             userId: cols.users.id,
@@ -40,7 +40,7 @@ const MultiTableGroupByQuery = customersTable
             shipmentCreatedBy: cols.shipments.createdBy,
             sumNull: sum(cols.employees.salary),
             sumNotNull: sum(cols.employees.deptId),
-            jsonAggResult2: jsonAgg(cols.customers.customerId),
+            jsonAggResult2: jsonAgg(cols.customers.id),
             jsonAggResult3: jsonAgg(jsonBuildObject(cols.customers))
         })
     }
@@ -58,7 +58,7 @@ type MultiTableGroupByQueryResult = {
     sumNull: number | null,
     sumNotNull: number,
     jsonAggResult2: number[],
-    jsonAggResult3: { customerId: number, name: string, createdBy: number }[]
+    jsonAggResult3: { id: number, name: string, createdBy: number }[]
 }[]
 type MultiTableGroupByQueryReturnType = ReturnType<typeof MultiTableGroupByQuery>;
 
@@ -74,9 +74,9 @@ const GroupByWithMultilevelSelectQuery = customersTable
         return [cols.customers, cols.users.id, cols.shipments]
     })
     .select((cols, { jsonBuildObject }) => ({
-        id: cols.customers.customerId,
+        id: cols.customers.id,
         customerName: cols.customers.name,
-        customer: jsonBuildObject({ id: cols.customers.customerId, name: cols.customers.name, createdBy: cols.customers.createdBy }),
+        customer: jsonBuildObject({ id: cols.customers.id, name: cols.customers.name, createdBy: cols.customers.createdBy }),
         example: jsonBuildObject({ id: cols.shipments.id, shipment: jsonBuildObject({ id: cols.shipments.id, orderId: cols.shipments.orderId, createdBy: cols.shipments.createdBy }) })
     }))
     .exec;
@@ -97,6 +97,6 @@ const GroupByHaving = customersTable
     .groupBy((cols) => {
         return [cols.customers, cols.users.id]
     })
-    .having((cols, { param, sum, and }) => and(cols.customers.customerId.eq(param("havingParam")), sum(cols.shipments.id).eq(param("sumParam"))))
-    .select((cols) => ({ id: cols.customers.customerId }))
+    .having((cols, { param, sum, and }) => and(cols.customers.id.eq(param("havingParam")), sum(cols.shipments.id).eq(param("sumParam"))))
+    .select((cols) => ({ id: cols.customers.id }))
     .exec;
