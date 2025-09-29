@@ -23,15 +23,7 @@ type CoalesceArg<TDbType extends DbType, TValueType extends DbValueTypes> =
 
 function generateCoalesceFn<
     TDbType extends DbType
->(dbType: TDbType):
-    <TArgs extends any[]>(
-        ...args: TArgs & (TArgs extends CoalesceArg<TDbType, NonNullable<InferFirstTypeFromArgs<TDbType, TArgs>>>[] ? TArgs : never)
-    ) => ColumnSQLFunction<
-        TDbType,
-        typeof sqlFunctions.coalesce,
-        ConvertMediansInArray<TArgs, TDbType, InferFirstTypeFromArgs<TDbType, TArgs> | null>,
-        IsContainsNonNull<TDbType, TArgs> extends true ? NonNullable<InferFirstTypeFromArgs<TDbType, TArgs>> : InferFirstTypeFromArgs<TDbType, TArgs> | null
-    > {
+>(dbType: TDbType) {
     return <
         TArgs extends any[]
     >

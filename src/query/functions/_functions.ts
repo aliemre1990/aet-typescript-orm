@@ -5,7 +5,6 @@ import between from "../comparisons/between.js";
 import eq from "../comparisons/eq.js";
 import sqlIn from "../comparisons/in.js";
 import type { InferParamsFromFnArgs } from "../_types/inferParamsFromArgs.js";
-import type { JoinTuple } from "../../utility/common.js";
 import type { InferTypeName, InferTypeNamesFromArgs } from "../_types/comparableIdInference.js";
 
 const sqlFunctions = {
@@ -59,7 +58,7 @@ class ColumnSQLFunction<
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 
-    as<TAs extends string>(asName: TAs): ColumnSQLFunction<TDbType, TSQLFunction, TArgs, TReturnType, TIsAgg, TAs, TDefaultFieldKey> {
+    as<TAs extends string>(asName: TAs) {
         return new ColumnSQLFunction<TDbType, TSQLFunction, TArgs, TReturnType, TIsAgg, TAs, TDefaultFieldKey>(this.dbType, this.args, this.sqlFunction, asName);
     }
 

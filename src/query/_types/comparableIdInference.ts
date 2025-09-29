@@ -3,17 +3,14 @@ import type { DbValueTypes } from "../../table/column.js";
 import type { JoinTuple, RecordToTupleSafe } from "../../utility/common.js";
 import type { IComparable } from "../_interfaces/IComparable.js";
 
-type InferTypeNamesFromArgArray<TArgs extends readonly (
-    DbValueTypes | null |
-    IComparable<any, any, any, any, any, any, any, any>
-)[]> =
+type InferTypeNamesFromArgArray<TArgs extends readonly any[]> =
     TArgs extends readonly [infer First, ...infer Rest] ?
     First extends DbValueTypes | null ?
-    Rest extends readonly (DbValueTypes | null | IComparable<any, any, any, any, any, any, any, any>)[] ?
+    Rest extends readonly any[] ?
     [InferTypeName<First>, ...InferTypeNamesFromArgArray<Rest>] :
     [InferTypeName<First>] :
     First extends IComparable<any, infer TId, any, any, any, any, any, any> ?
-    Rest extends readonly (DbValueTypes | null | IComparable<any, any, any, any, any, any, any, any>)[] ?
+    Rest extends readonly any[] ?
     [TId, ...InferTypeNamesFromArgArray<Rest>] :
     [TId] :
     [] :
