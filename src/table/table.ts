@@ -76,14 +76,13 @@ class Table<
     }
 
     select<
-        TCb extends
-        (
+        const TCbResult extends TResultShape<TDbType>
+
+    >(
+        cb: (
             cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>, undefined>]>>,
             ops: DbFunctions<TDbType, false>
-        ) => TResultShape<TDbType>,
-        TCbResult extends TResultShape<TDbType> = TCb extends (cols: any, ops: any) => infer TR ? TR : never
-    >(
-        cb: TCb
+        ) => TCbResult
     ): IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>, undefined>], TCbResult, AccumulateColumnParams<undefined, TCbResult>> {
 
         const queryColumns = this.columnsList.map((col) => {
@@ -93,7 +92,7 @@ class Table<
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>, undefined>(this.dbType, this, queryColumns);
 
 
-        return new QueryBuilder<TDbType, [typeof queryTable]>(this.dbType, queryTable).select<TCb, TCbResult>(cb);
+        return new QueryBuilder<TDbType, [typeof queryTable]>(this.dbType, queryTable).select(cb);
     }
 
     join<

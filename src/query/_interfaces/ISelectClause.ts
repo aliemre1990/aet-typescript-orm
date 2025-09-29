@@ -19,13 +19,12 @@ interface ISelectClause<
     TOrderBySpecs extends OrderBySpecs<TDbType> | undefined = undefined
 > {
     select<
-        TCb extends (
+        const TCbResult extends TResultShape<TDbType>
+    >(
+        cb: (
             cols: TGroupedColumns extends undefined ? TableToColumnsMap<TDbType, TablesToObject<TDbType, TQueryItems>> : GroupedTablesToColumnsMap<TDbType, TQueryItems, TGroupedColumns>,
             ops: DbFunctions<TDbType, TGroupedColumns extends undefined ? false : true>
-        ) => TResultShape<TDbType>,
-        TCbResult extends TResultShape<TDbType> = TCb extends (cols: any, ops: any) => infer TR ? TR : never
-    >(
-        cb: TCb
+        ) => TCbResult
     ): IExecuteableQuery<TDbType, TQueryItems, TCbResult, AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns, TOrderBySpecs>
 
 }

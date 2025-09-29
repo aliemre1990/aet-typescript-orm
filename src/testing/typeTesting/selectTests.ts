@@ -23,7 +23,7 @@ const selectQuery = customersTable
 const joinQuery = customersTable
     .join('INNER', employeesTable, cols => cols.employees.id.eq(cols.customers.id))
     .join('LEFT', selectQuery, cols => cols.ali.id.eq(cols.customers.id))
-    .select(cols => [cols.ali.id] as const)
+    .select(cols => [cols.ali.id])
     .exec;
 
 
@@ -32,7 +32,7 @@ const joinQuery = customersTable
  */
 const SingleTableAutoSelectWhereWithParamQuery = customersTable
     .where((cols, { param }) => cols.customers.id.eq(param("whereparam")))
-    .select(cols => [cols.customers.id, cols.customers.name, cols.customers.createdBy] as const)
+    .select(cols => [cols.customers.id, cols.customers.name, cols.customers.createdBy])
     .exec;
 
 type SingleTableAutoSelectWhereWithParamQueryResult = { id: number, name: string, createdBy: number }[];
@@ -42,7 +42,7 @@ type SingleTableAutoSelectWhereWithParamQueryTest = AssertTrue<AssertEqual<Singl
 /**
  * 
  */
-const SingleQueryTableAutoSelectQuery = customersTable.as("cst").select(cols => [cols.cst.id, cols.cst.name, cols.cst.createdBy] as const).exec;
+const SingleQueryTableAutoSelectQuery = customersTable.as("cst").select(cols => [cols.cst.id, cols.cst.name, cols.cst.createdBy]).exec;
 
 type tp = (ReturnType<typeof SingleQueryTableAutoSelectQuery>) extends IExecuteableQuery<any, any, infer TResult> ? TResult : never;
 
@@ -62,7 +62,7 @@ const QueryTableJoinQuery = customersTable.as("cst")
         cols.cst.id.as("cstId"),
         cols.cst.name.as("cstName"),
         cols.cst.createdBy.as("cstCreatedBy")
-    ] as const))
+    ]))
     .exec;
 
 type QueryTableJoinQueryResult = { userId: number, userName: string, userCreatedAt: Date, cstId: number, cstName: string, cstCreatedBy: number }[];
@@ -72,7 +72,7 @@ type QueryTableJoinQueryTest = AssertTrue<AssertEqual<QueryTableJoinQueryResult,
 /**
  * 
  */
-const SingleTableAutoSelectQuery = customersTable.select(cols => [cols.customers.id, cols.customers.name, cols.customers.createdBy] as const).exec;
+const SingleTableAutoSelectQuery = customersTable.select(cols => [cols.customers.id, cols.customers.name, cols.customers.createdBy]).exec;
 
 type SingleTableAutoSelectQueryResult = { id: number; name: string; createdBy: number; }[];
 type SingleTableAutoSelectQueryReturnType = ReturnType<typeof SingleTableAutoSelectQuery>
@@ -90,7 +90,7 @@ const SingleTableJoinWithAutoSelectQuery = customersTable
         cols.users.id.as("userId"),
         cols.users.userName,
         cols.users.createdAt.as("userCreatedAt")
-    ] as const)
+    ])
     .exec;
 
 type SingleTableJoinWithAutoSelectQueryResult = {
@@ -157,7 +157,7 @@ const AutoSelectMultiJoins = customersTable
         cols.orders.id.as("orderId"),
         cols.orders.customerId.as("orderCustomerId"),
         cols.orders.createdBy.as("orderCreatedBy")
-    ] as const)
+    ])
     .exec;
 
 
@@ -222,7 +222,7 @@ const SingleLevelSelectWithJoins = customersTable
         cols.customers.id,
         cols.orders.customerId.as("orderCustomerId"),
         cols.customers.name.as("customerName")
-    ] as const)
+    ])
     .exec;
 type SingleLevelSelectWithJoinsResult = { id: number, orderCustomerId: number, customerName: string }[];
 type SingleLevelSelectWithJoinsTest = AssertTrue<AssertEqual<SingleLevelSelectWithJoinsResult, ReturnType<typeof SingleLevelSelectWithJoins>>>;
@@ -240,7 +240,7 @@ const MultiLevelSelectWithJoins = customersTable
         round(cols.customers.id, param("roundParam")).as("roundResult"),
         cols.users.userName,
         jsonBuildObject({ parentUserId: cols.parentUsers.id, customers: jsonBuildObject(cols.customers) }).as("subProp")
-    ] as const)
+    ])
     .exec;
 type multiLevelSelectWithJoinsExpectedResult = {
     customerId: number,

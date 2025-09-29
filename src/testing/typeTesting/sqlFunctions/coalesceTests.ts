@@ -38,7 +38,7 @@ const CoalesceWithTypedParams = customersTable
 
         return [
             coalesce(param("param1").type<number>(), param("param2").type<number | null>(), param("param3")).as("coalesceResult")
-        ] as const
+        ]
     }
     ).exec;
 type CoalesceWithTypedParamsReturnType = ReturnType<typeof CoalesceWithTypedParams>;
@@ -115,7 +115,7 @@ const InferParamsFromCoalesce = customersTable
         return res;
     })
     .join('INNER', ordersTable, (cols) => cols.users.userName.eq(cols.customers.name))
-    .select(cols => [cols.customers.id] as const)
+    .select(cols => [cols.customers.id])
     .exec;
 
 type InferParamsFromCoalesceResult = typeof InferParamsFromCoalesce;
