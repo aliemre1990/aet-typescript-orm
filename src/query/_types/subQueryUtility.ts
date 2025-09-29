@@ -9,36 +9,28 @@ import type QueryColumn from "../queryColumn.js";
 import type QueryTable from "../queryTable.js";
 import type { TResultShape } from "./result.js";
 
+type MapSubQueryComparables<TAs extends string, TResult extends readonly any[]> =
+    TResult extends readonly [infer First, ...infer Rest] ?
+    First extends IComparable<infer TDbType, infer TId, infer TParams, infer TValueType, infer TFinalValueType, any, infer TDefaultFieldKey, infer TColAs> ?
+    Rest extends readonly any[] ?
+    [IComparable<TDbType, `${TAs}-${TColAs extends undefined ? TDefaultFieldKey : TAs}-${TId}`, TParams, TValueType, TFinalValueType, false, TColAs extends undefined ? TDefaultFieldKey : TColAs, undefined>, ...MapSubQueryComparables<TAs, Rest>] :
+    [IComparable<TDbType, `${TAs}-${TColAs extends undefined ? TDefaultFieldKey : TAs}-${TId}`, TParams, TValueType, TFinalValueType, false, TColAs extends undefined ? TDefaultFieldKey : TColAs, undefined>] :
+    never :
+    []
+    ;
+
 type ConvertComparableIdsOfSelectResult<
     TDbType extends DbType,
     T extends IExecuteableQuery<TDbType, any, any, any, any, any, any>
 > =
-    T extends IExecuteableQuery<TDbType, infer TQueryItems, infer TResult, infer TParams, infer TGroupedColumns, infer TOrderBySpecs, infer TAs> ?
+    T extends IExecuteableQuery<TDbType, infer TQueryItems, infer TResult, infer TParams, infer TGroupedColumns, infer TOrderBySpecs, infer TAs extends string> ?
     TResult extends undefined ?
     never :
-    TResult extends (infer TItem extends TResultShape<TDbType>)[] ?
+    TResult extends TResultShape<TDbType>[] ?
     IExecuteableQuery<
         TDbType,
         TQueryItems,
-        {
-            [K in Extract<keyof TItem, string>]: TItem[K] extends IComparable<TDbType, infer TId, infer TParams, infer TValueType, infer TFinalValueType, any, infer TDefaultFieldKey, infer TColAs> ?
-            IComparable<TDbType, `${TAs}-${K}-${TId}`, TParams, TValueType, TFinalValueType, false, TDefaultFieldKey, TColAs> :
-            never
-        },
-        TParams,
-        TGroupedColumns,
-        TOrderBySpecs,
-        TAs
-    > :
-    TResult extends TResultShape<TDbType> ?
-    IExecuteableQuery<
-        TDbType,
-        TQueryItems,
-        {
-            [K in Extract<keyof TResult, string>]: TResult[K] extends IComparable<TDbType, infer TId, infer TParams, infer TValueType, infer TFinalValueType, any, infer TDefaultFieldKey, infer TColAs> ?
-            IComparable<TDbType, `${TAs}-${K}-${TId}`, TParams, TValueType, TFinalValueType, false, TDefaultFieldKey, TColAs> :
-            never
-        },
+        MapSubQueryComparables<TAs, TResult>,
         TParams,
         TGroupedColumns,
         TOrderBySpecs,

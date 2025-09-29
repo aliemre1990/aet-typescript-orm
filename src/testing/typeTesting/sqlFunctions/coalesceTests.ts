@@ -1,6 +1,7 @@
 import { dbTypes, type PgDbType } from "../../../db.js";
 import type { IComparable } from "../../../query/_interfaces/IComparable.js";
-import type { InferParamsFromOps } from "../../../query/_types/result.js";
+import type { IExecuteableQuery } from "../../../query/_interfaces/IExecuteableQuery.js";
+import type { AccumulateColumnParams, InferParamsFromOps } from "../../../query/_types/result.js";
 import type ColumnComparisonOperation from "../../../query/comparisons/_comparisonOperations.js";
 import type ColumnSQLFunction from "../../../query/functions/_functions.js";
 import { generateCoalesceFn } from "../../../query/functions/coalesce.js";
@@ -35,13 +36,11 @@ const CoalesceWithTypedParams = customersTable
         const coalesceResult = coalesce(param("param1").type<number>(), param("param2").type<number | null>(), param("param3"));
         type coalesceId = typeof coalesceResult extends IComparable<any, infer TId, any, any, any, any, any, any> ? TId : never;
 
-        return ({
-            coalesceResult: coalesce(param("param1").type<number>(), param("param2").type<number | null>(), param("param3"))
-        })
+        return [
+            coalesce(param("param1").type<number>(), param("param2").type<number | null>(), param("param3")).as("coalesceResult")
+        ] as const
     }
-    )
-    .exec;
-
+    ).exec;
 type CoalesceWithTypedParamsReturnType = ReturnType<typeof CoalesceWithTypedParams>;
 type CoalesceWithTypedParamsResult = { coalesceResult: number }[];
 type CoalesceWithTypedParamsTest = AssertTrue<AssertEqual<CoalesceWithTypedParamsResult, CoalesceWithTypedParamsReturnType>>;
@@ -82,7 +81,7 @@ const nonNullCoalesce = coalesce(customerIdQC, 2);
 
 const nullCoalesce = coalesce(empSalaryQC);
 type NullCoalesce = typeof nullCoalesce;
-type NullCoalesceRetType = NullCoalesce extends ColumnSQLFunction<any, any, any, infer TRet, any, any, any,any> ? TRet : never;
+type NullCoalesceRetType = NullCoalesce extends ColumnSQLFunction<any, any, any, infer TRet, any, any, any, any> ? TRet : never;
 type NullCoalesceTest = AssertTrue<AssertEqual<number | null, NullCoalesceRetType>>
 
 // @ts-expect-error
@@ -116,7 +115,7 @@ const InferParamsFromCoalesce = customersTable
         return res;
     })
     .join('INNER', ordersTable, (cols) => cols.users.userName.eq(cols.customers.name))
-    .select(cols => ({ id: cols.customers.id }))
+    .select(cols => [cols.customers.id] as const)
     .exec;
 
 type InferParamsFromCoalesceResult = typeof InferParamsFromCoalesce;

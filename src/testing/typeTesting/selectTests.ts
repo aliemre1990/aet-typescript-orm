@@ -8,22 +8,22 @@ import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
 
 const selectQuery = customersTable
     .where((cols, { param }) => cols.customers.id.eq(param("whereparam")))
-    .select((cols, { round, param }) => ({ id: cols.customers.id, roundResult: round(cols.customers.createdBy, param("ali")) }))
+    .select((cols, { round, param }) => ([cols.customers.id, round(cols.customers.createdBy, param("ali"))]))
     .as("ali");
 
 
-const res = from(employeesTable.as("zartZurt"), selectQuery).groupBy((cols, { round }) => [cols.ali.roundResult, round(cols.ali.id, 2).as("roundFn")]).select(cols => ({ zart: cols.__grouping_functions__.roundFn })).exec;
+// const res = from(employeesTable.as("zartZurt"), selectQuery).groupBy((cols, { round }) => [cols.ali.roundResult, round(cols.ali.id, 2).as("roundFn")]).select(cols => ({ zart: cols.__grouping_functions__.roundFn })).exec;
 
-const fromRes = from(employeesTable.as("zartZurt"), selectQuery);
-type tp1 = typeof fromRes;
-type tp2 = tp1 extends QueryBuilder<any, infer tit, any, any, any, any, any> ? tit : never;
+// const fromRes = from(employeesTable.as("zartZurt"), selectQuery);
+// type tp1 = typeof fromRes;
+// type tp2 = tp1 extends QueryBuilder<any, infer tit, any, any, any, any, any> ? tit : never;
 
 
 
 const joinQuery = customersTable
     .join('INNER', employeesTable, cols => cols.employees.id.eq(cols.customers.id))
     .join('LEFT', selectQuery, cols => cols.ali.id.eq(cols.customers.id))
-    .select(cols => ({ id: cols.ali.id }))
+    .select(cols => [cols.ali.id] as const)
     .exec;
 
 
@@ -32,7 +32,7 @@ const joinQuery = customersTable
  */
 const SingleTableAutoSelectWhereWithParamQuery = customersTable
     .where((cols, { param }) => cols.customers.id.eq(param("whereparam")))
-    .select(cols => cols.customers)
+    .select(cols => [cols.customers.id, cols.customers.name, cols.customers.createdBy] as const)
     .exec;
 
 type SingleTableAutoSelectWhereWithParamQueryResult = { id: number, name: string, createdBy: number }[];
@@ -42,7 +42,7 @@ type SingleTableAutoSelectWhereWithParamQueryTest = AssertTrue<AssertEqual<Singl
 /**
  * 
  */
-const SingleQueryTableAutoSelectQuery = customersTable.as("cst").select(cols => cols.cst).exec;
+const SingleQueryTableAutoSelectQuery = customersTable.as("cst").select(cols => [cols.cst.id, cols.cst.name, cols.cst.createdBy] as const).exec;
 
 type tp = (ReturnType<typeof SingleQueryTableAutoSelectQuery>) extends IExecuteableQuery<any, any, infer TResult> ? TResult : never;
 
@@ -55,7 +55,14 @@ type SingleQueryTableAutoSelectQueryTest = AssertTrue<AssertEqual<SingleQueryTab
  */
 const QueryTableJoinQuery = customersTable.as("cst")
     .join("INNER", usersTable, (cols) => cols.users.id.eq(cols.cst.createdBy))
-    .select(cols => ({ userId: cols.users.id, userName: cols.users.userName, userCreatedAt: cols.users.createdAt, cstId: cols.cst.id, cstName: cols.cst.name, cstCreatedBy: cols.cst.createdBy }))
+    .select(cols => ([
+        cols.users.id.as("userId"),
+        cols.users.userName,
+        cols.users.createdAt.as("userCreatedAt"),
+        cols.cst.id.as("cstId"),
+        cols.cst.name.as("cstName"),
+        cols.cst.createdBy.as("cstCreatedBy")
+    ] as const))
     .exec;
 
 type QueryTableJoinQueryResult = { userId: number, userName: string, userCreatedAt: Date, cstId: number, cstName: string, cstCreatedBy: number }[];
@@ -65,7 +72,7 @@ type QueryTableJoinQueryTest = AssertTrue<AssertEqual<QueryTableJoinQueryResult,
 /**
  * 
  */
-const SingleTableAutoSelectQuery = customersTable.select(cols => cols.customers).exec;
+const SingleTableAutoSelectQuery = customersTable.select(cols => [cols.customers.id, cols.customers.name, cols.customers.createdBy] as const).exec;
 
 type SingleTableAutoSelectQueryResult = { id: number; name: string; createdBy: number; }[];
 type SingleTableAutoSelectQueryReturnType = ReturnType<typeof SingleTableAutoSelectQuery>
@@ -76,7 +83,14 @@ type SingleTableAutoSelectQueryTest = AssertTrue<AssertEqual<SingleTableAutoSele
  */
 const SingleTableJoinWithAutoSelectQuery = customersTable
     .join('INNER', usersTable, (cols, { param }) => cols.users.id.eq(param("param1")))
-    .select(cols => ({ customerId: cols.customers.id, customerName: cols.customers.name, customerCreatedBy: cols.customers.createdBy, userId: cols.users.id, userName: cols.users.userName, userCreatedAt: cols.users.createdAt }))
+    .select(cols => [
+        cols.customers.id.as("customerId"),
+        cols.customers.name.as("customerName"),
+        cols.customers.createdBy.as("customerCreatedBy"),
+        cols.users.id.as("userId"),
+        cols.users.userName,
+        cols.users.createdAt.as("userCreatedAt")
+    ] as const)
     .exec;
 
 type SingleTableJoinWithAutoSelectQueryResult = {
@@ -130,20 +144,20 @@ const AutoSelectMultiJoins = customersTable
         return comp;
     })
     .join('INNER', ordersTable, (cols) => cols.users.userName.eq(cols.customers.name))
-    .select(cols => ({
-        customerId: cols.customers.id,
-        customerName: cols.customers.name,
-        customerCreatedBy: cols.customers.createdBy,
-        userId: cols.users.id,
-        userUserName: cols.users.userName,
-        userCreatedAt: cols.users.createdAt,
-        parentUserId: cols.parentUsers.id,
-        parentUserUserName: cols.parentUsers.userName,
-        parentUserCreatedAt: cols.parentUsers.createdAt,
-        orderId: cols.orders.id,
-        orderCustomerId: cols.orders.customerId,
-        orderCreatedBy: cols.orders.createdBy
-    }))
+    .select(cols => [
+        cols.customers.id.as("customerId"),
+        cols.customers.name.as("customerName"),
+        cols.customers.createdBy.as("customerCreatedBy"),
+        cols.users.id.as("userId"),
+        cols.users.userName.as("userUserName"),
+        cols.users.createdAt.as("userCreatedAt"),
+        cols.parentUsers.id.as("parentUserId"),
+        cols.parentUsers.userName.as("parentUserUserName"),
+        cols.parentUsers.createdAt.as("parentUserCreatedAt"),
+        cols.orders.id.as("orderId"),
+        cols.orders.customerId.as("orderCustomerId"),
+        cols.orders.createdBy.as("orderCreatedBy")
+    ] as const)
     .exec;
 
 
@@ -204,7 +218,11 @@ const SingleLevelSelectWithJoins = customersTable
 
         return cols.shipments.orderId.eq(1);
     })
-    .select((cols, { round, param }) => ({ id: cols.customers.id, orderCustomerId: cols.orders.customerId, customerName: cols.customers.name }))
+    .select((cols, { round, param }) => [
+        cols.customers.id,
+        cols.orders.customerId.as("orderCustomerId"),
+        cols.customers.name.as("customerName")
+    ] as const)
     .exec;
 type SingleLevelSelectWithJoinsResult = { id: number, orderCustomerId: number, customerName: string }[];
 type SingleLevelSelectWithJoinsTest = AssertTrue<AssertEqual<SingleLevelSelectWithJoinsResult, ReturnType<typeof SingleLevelSelectWithJoins>>>;
@@ -217,15 +235,17 @@ type SingleLevelSelectWithJoinsParamsTest = AssertTrue<AssertEqual<unknown, Sing
 const MultiLevelSelectWithJoins = customersTable
     .join('INNER', usersTable, (cols) => cols.users.id.eq(1))
     .join('INNER', usersTable.as("parentUsers"), (cols) => cols.parentUsers.id.eq(1))
-    .select((cols, { jsonBuildObject }) => ({
-        customerId: cols.customers.id,
-        userName: cols.users.userName,
-        subProp: jsonBuildObject({ parentUserId: cols.parentUsers.id, customers: jsonBuildObject(cols.customers) })
-    }))
+    .select((cols, { jsonBuildObject, round, param }) => [
+        cols.customers.id.as("customerId"),
+        round(cols.customers.id, param("roundParam")).as("roundResult"),
+        cols.users.userName,
+        jsonBuildObject({ parentUserId: cols.parentUsers.id, customers: jsonBuildObject(cols.customers) }).as("subProp")
+    ] as const)
     .exec;
 type multiLevelSelectWithJoinsExpectedResult = {
     customerId: number,
     userName: string,
+    roundResult: number | null
     subProp: {
         parentUserId: number,
         customers: {

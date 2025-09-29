@@ -1,14 +1,12 @@
 import type { DbType } from "../../db.js";
-import type { DeepPrettify, RecordToTupleSafe } from "../../utility/common.js";
+import type { DeepPrettify } from "../../utility/common.js";
 import type ColumnComparisonOperation from "../comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "../logicalOperations.js";
 import type { IComparable } from "../_interfaces/IComparable.js";
 import type QueryParam from "../param.js";
 import type { OrderBySpecs, OrderType } from "../_interfaces/IOrderByClause.js";
 
-type TResultShape<TDbType extends DbType> = {
-    [key: string]: IComparable<TDbType, any, any, any, any, false, any, any>;
-};
+type TResultShape<TDbType extends DbType> = readonly IComparable<TDbType, any, any, any, any, false, any, any>[]
 
 
 // //
@@ -100,8 +98,14 @@ type ColumnsToResultMap<TDbType extends DbType, T extends TResultShape<TDbType> 
         T extends undefined ? undefined :
         T extends TResultShape<TDbType> ?
         {
-            [K in keyof T as T[K] extends IComparable<TDbType, any, any, any, any, any, any, any> ? K : never]:
-            T[K] extends IComparable<TDbType, any, any, any, infer TFinalType, any, any, any> ? TFinalType :
+            [
+            R in T[number]as R extends IComparable<TDbType, any, any, any, any, any, infer TDefaultKey, infer TAs> ?
+            TAs extends undefined ?
+            TDefaultKey :
+            TAs :
+            never
+            ]:
+            R extends IComparable<TDbType, any, any, any, infer TFinalType, any, any, any> ? TFinalType :
             never
         }[] :
         never
@@ -170,27 +174,19 @@ type AccumulateComparisonParams<TParams extends readonly QueryParam<any, any, an
 /**
  * 
  */
-type AccumulateColumnParams<TParams extends readonly QueryParam<any, any, any, any, any, any>[] | undefined, TResult extends TResultShape<DbType>> =
+type AccumulateColumnParams<TParams extends readonly QueryParam<any, any, any, any, any, any>[] | undefined, TResult extends readonly any[]> =
     TParams extends undefined ?
     InferParamsFromColumns<TResult>["length"] extends 0 ? undefined : InferParamsFromColumns<TResult> :
     TParams extends QueryParam<any, any, any, any, any, any>[] ? [...TParams, ...InferParamsFromColumns<TResult>] :
     never;
 
 
-type InferParamsFromColumns<TResult extends TResultShape<DbType>> =
-    RecordToTupleSafe<TResult, string> extends readonly [infer First, ...infer Rest] ?
-    First extends IComparable<any, any, infer TParams, any, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams), ...InferParamsFromColumnsArr<Rest>] :
-    Rest extends readonly any[] ? InferParamsFromColumnsArr<Rest> :
+type InferParamsFromColumns<TResult extends readonly any[]> =
+    TResult extends readonly [infer First, ...infer Rest] ?
+    First extends IComparable<any, any, infer TParams, any, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams), ...InferParamsFromColumns<Rest>] :
+    Rest extends readonly any[] ? InferParamsFromColumns<Rest> :
     [] :
     [];
-
-type InferParamsFromColumnsArr<TCols> =
-    TCols extends readonly [infer First, ...infer Rest] ?
-    First extends IComparable<any, any, infer TParams, any, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams), ...InferParamsFromColumnsArr<Rest>] :
-    Rest extends readonly any[] ? InferParamsFromColumnsArr<Rest> :
-    [] :
-    [];
-
 
 /**
  * 

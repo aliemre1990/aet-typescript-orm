@@ -65,13 +65,13 @@ const ColumnsSelectionQueryTableObjectSymbol = Symbol();
 type ColumnsSelection<
     TDbType extends DbType,
     TQItem extends QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any>,
-    TColumns extends { [key: string]: IComparable<TDbType, any, any, any, any, any, any, any> }
-> = {
-    [ColumnsSelectionQueryTableObjectSymbol]: TQItem;
-}
-    &
+    TColumns extends readonly IComparable<TDbType, any, any, any, any, any, any, any>[]
+> =
     {
-        [K in keyof TColumns]: TColumns[K];
+        [ColumnsSelectionQueryTableObjectSymbol]: TQItem;
+    } &
+    {
+        [K in TColumns[number]as K["defaultFieldKey"]]: K;
     };
 
 

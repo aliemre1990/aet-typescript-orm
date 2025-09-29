@@ -7,7 +7,7 @@ import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
  */
 const SingleTableGroupAutoSelectQuery = customersTable
     .groupBy(cols => [cols.customers.id, cols.customers.name])
-    .select(cols => ({ id: cols.customers.id, name: cols.customers.name }))
+    .select(cols => [cols.customers.id, cols.customers.name])
     .exec;
 
 type SingleTableGroupAutoSelectQueryResult = { id: number, name: string }[];
@@ -30,19 +30,19 @@ const MultiTableGroupByQuery = customersTable
 
         type t = (typeof cols.employees.salary);
 
-        return ({
-            customerId: cols.customers.id,
-            customerName: cols.customers.name,
-            customerCreatedBy: cols.customers.createdBy,
-            userId: cols.users.id,
-            shipmentId: cols.shipments.id,
-            shipmentOrderId: cols.shipments.orderId,
-            shipmentCreatedBy: cols.shipments.createdBy,
-            sumNull: sum(cols.employees.salary),
-            sumNotNull: sum(cols.employees.deptId),
-            jsonAggResult2: jsonAgg(cols.customers.id),
-            jsonAggResult3: jsonAgg(jsonBuildObject(cols.customers))
-        })
+        return [
+            cols.customers.id.as("customerId"),
+            cols.customers.name.as("customerName"),
+            cols.customers.createdBy.as("customerCreatedBy"),
+            cols.users.id.as("userId"),
+            cols.shipments.id.as("shipmentId"),
+            cols.shipments.orderId.as("shipmentOrderId"),
+            cols.shipments.createdBy.as("shipmentCreatedBy"),
+            sum(cols.employees.salary).as("sumNull"),
+            sum(cols.employees.deptId).as("sumNotNull"),
+            jsonAgg(cols.customers.id).as("jsonAggResult2"),
+            jsonAgg(jsonBuildObject(cols.customers)).as("jsonAggResult3")
+        ]
     }
     )
     .exec;
@@ -73,12 +73,12 @@ const GroupByWithMultilevelSelectQuery = customersTable
     .groupBy((cols) => {
         return [cols.customers, cols.users.id, cols.shipments]
     })
-    .select((cols, { jsonBuildObject }) => ({
-        id: cols.customers.id,
-        customerName: cols.customers.name,
-        customer: jsonBuildObject({ id: cols.customers.id, name: cols.customers.name, createdBy: cols.customers.createdBy }),
-        example: jsonBuildObject({ id: cols.shipments.id, shipment: jsonBuildObject({ id: cols.shipments.id, orderId: cols.shipments.orderId, createdBy: cols.shipments.createdBy }) })
-    }))
+    .select((cols, { jsonBuildObject }) => [
+        cols.customers.id,
+        cols.customers.name.as("customerName"),
+        jsonBuildObject({ id: cols.customers.id, name: cols.customers.name, createdBy: cols.customers.createdBy }).as("customer"),
+        jsonBuildObject({ id: cols.shipments.id, shipment: jsonBuildObject({ id: cols.shipments.id, orderId: cols.shipments.orderId, createdBy: cols.shipments.createdBy }) }).as("example")
+    ])
     .exec;
 
 type GroupByWithMultilevelSelectQueryResult = {
@@ -98,5 +98,5 @@ const GroupByHaving = customersTable
         return [cols.customers, cols.users.id]
     })
     .having((cols, { param, sum, and }) => and(cols.customers.id.eq(param("havingParam")), sum(cols.shipments.id).eq(param("sumParam"))))
-    .select((cols) => ({ id: cols.customers.id }))
+    .select((cols) => [cols.customers.id])
     .exec;
