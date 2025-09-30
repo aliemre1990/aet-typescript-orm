@@ -4,10 +4,13 @@ import type { IComparable } from "../_interfaces/IComparable.js";
 import type QueryParam from "../param.js";
 import ColumnSQLFunction, { sqlFunctions } from "./_functions.js";
 
-type IsExplicitTypeNumber<TDbType extends DbType, TFirstArg extends QueryParam<TDbType, string, any, any, any> | IComparable<TDbType, any, any, number, any, any, any, any> | number | null> =
-    TFirstArg extends QueryParam<TDbType, string, infer TValueType, any, any> ? IsAny<TValueType> extends true ? TFirstArg :
-    number extends TValueType ? TFirstArg : never :
-    TFirstArg
+/**
+ * Used to drop argument to never if non number type of argument is provided.
+ */
+type IsArgAnyOrNumber<TDbType extends DbType, TFirstArg extends QueryParam<TDbType, string, any, any, any> | IComparable<TDbType, any, any, number, any, any, any, any> | number | null> =
+    TFirstArg extends QueryParam<TDbType, string, infer TValueType, any, any> ? IsAny<TValueType> extends true ? {} :
+    number extends TValueType ? {} : never :
+    {}
     ;
 
 
@@ -16,7 +19,7 @@ function generateRoundFn<TDbType extends DbType>(dbType: TDbType) {
         TFirstArg extends QueryParam<TDbType, string, any, any, any> | IComparable<TDbType, any, any, number, any, any, any, any> | number | null,
         TSecondArg extends QueryParam<TDbType, string, any, any, any> | IComparable<TDbType, any, any, number, any, any, any, any> | number | null,
 
-    >(firstArg: TFirstArg & (IsExplicitTypeNumber<TDbType, TFirstArg>), secondArg: TSecondArg & (IsExplicitTypeNumber<TDbType, TSecondArg>)) => {
+    >(firstArg: TFirstArg & (IsArgAnyOrNumber<TDbType, TFirstArg>), secondArg: TSecondArg & (IsArgAnyOrNumber<TDbType, TSecondArg>)) => {
 
         type TFirstArgFormatted = TFirstArg extends QueryParam<TDbType, infer TParamName, infer TValueType, any, any> ?
             IsAny<TValueType> extends true ? QueryParam<TDbType, TParamName, number | null, any, any, any> : QueryParam<TDbType, TParamName, TValueType, any, any, any> :

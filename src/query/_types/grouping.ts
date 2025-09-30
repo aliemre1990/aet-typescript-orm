@@ -2,12 +2,9 @@ import type { DbType } from "../../db.js";
 import type { RecordToTupleSafe } from "../../utility/common.js";
 import type { GroupBySpecs } from "../_interfaces/IGroupByClause.js";
 import type { IComparable } from "../_interfaces/IComparable.js";
-import type QueryBuilder from "../queryBuilder.js";
-import type QueryColumn from "../queryColumn.js";
 import type QueryTable from "../queryTable.js";
 import type { IExecuteableQuery } from "../_interfaces/IExecuteableQuery.js";
 import type ColumnSQLFunction from "../functions/_functions.js";
-import type { TResultShape } from "./result.js";
 import type ColumnsSelection from "../ColumnsSelection.js";
 
 //
