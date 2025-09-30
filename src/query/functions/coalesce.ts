@@ -27,7 +27,11 @@ function generateCoalesceFn<
     return <
         TArgs extends any[]
     >
-        (...args: TArgs & (TArgs extends CoalesceArg<TDbType, NonNullable<InferFirstTypeFromArgs<TDbType, TArgs>>>[] ? TArgs : never)) => {
+        /**
+         * (TArgs extends CoalesceArg<TDbType, NonNullable<InferFirstTypeFromArgs<TDbType, TArgs>>>[] ? {} : never)
+         * Ensures all arguments are same type.
+         */
+        (...args: TArgs & (TArgs extends CoalesceArg<TDbType, NonNullable<InferFirstTypeFromArgs<TDbType, TArgs>>>[] ? {} : never)) => {
 
         // Dont move this to type arguments of the function, let it  stay here
         type FirstType = InferFirstTypeFromArgs<TDbType, TArgs>;
