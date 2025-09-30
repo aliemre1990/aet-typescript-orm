@@ -1,10 +1,7 @@
 import type { DbType } from "../../db.js";
-import type { IComparable } from "../_interfaces/IComparable.js";
 import type { IExecuteableQuery } from "../_interfaces/IExecuteableQuery.js";
-import type QueryBuilder from "../queryBuilder.js";
-import type { ColumnsSelection } from "../queryColumn.js";
+import type ColumnsSelection from "../ColumnsSelection.js";
 import type QueryTable from "../queryTable.js";
-
 
 type TableToColumnsMap<TDbType extends DbType, T extends { [key: string]: QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any> }> = {
     [K in keyof T]: ColumnsSelection<

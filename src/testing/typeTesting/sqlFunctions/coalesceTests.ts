@@ -1,7 +1,6 @@
 import { dbTypes, type PgDbType } from "../../../db.js";
 import type { IComparable } from "../../../query/_interfaces/IComparable.js";
-import type { IExecuteableQuery } from "../../../query/_interfaces/IExecuteableQuery.js";
-import type { AccumulateColumnParams, InferParamsFromOps } from "../../../query/_types/result.js";
+import type { InferParamsFromOps } from "../../../query/_types/paramAccumulationComparison.js";
 import type ColumnComparisonOperation from "../../../query/comparisons/_comparisonOperations.js";
 import type ColumnSQLFunction from "../../../query/functions/_functions.js";
 import { generateCoalesceFn } from "../../../query/functions/coalesce.js";

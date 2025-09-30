@@ -5,20 +5,18 @@ import type { IExecuteableQuery } from "../query/_interfaces/IExecuteableQuery.j
 import type ColumnLogicalOperation from "../query/logicalOperations.js";
 import QueryBuilder from "../query/queryBuilder.js";
 import type { TablesToObject, TableToColumnsMap } from "../query/_types/miscellaneous.js";
-import type { AccumulateColumnParams, AccumulateOrderByParams, TResultShape } from "../query/_types/result.js";
-import Column, { type ColumnsObjectType } from "./column.js";
-import QueryColumn, { type QueryColumnsObjectType } from "../query/queryColumn.js";
+import type { TResultShape } from "../query/_types/result.js";
+import Column from "./column.js";
+import QueryColumn from "../query/queryColumn.js";
 import QueryTable from "../query/queryTable.js";
-import type IJoinClause from "../query/_interfaces/IJoinClause.js";
 import type ISelectClause from "../query/_interfaces/ISelectClause.js";
-import type IWhereClause from "../query/_interfaces/IWhereClause.js";
-import type IGroupByClause from "../query/_interfaces/IGroupByClause.js";
 import type { DbFunctions, DbOperators } from "../query/_types/ops.js";
 import type { JoinType } from "../query/_interfaces/IJoinClause.js";
-import type IOrderByClause from "../query/_interfaces/IOrderByClause.js";
 import type { OrderBySpecs } from "../query/_interfaces/IOrderByClause.js";
 import type { GroupBySpecs } from "../query/_interfaces/IGroupByClause.js";
 import type { IDbType } from "../query/_interfaces/IDbType.js";
+import type { AccumulateOrderByParams } from "../query/_types/paramAccumulationOrderBy.js";
+import type { AccumulateColumnParams } from "../query/_types/paramAccumulationSelect.js";
 
 type TableSpecsType<TTableName extends string = string> = { tableName: TTableName }
 

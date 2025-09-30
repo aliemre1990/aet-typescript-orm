@@ -4,7 +4,6 @@ import type Table from "../../table/table.js";
 import type ColumnComparisonOperation from "../comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "../logicalOperations.js";
 import type { TablesToObject, TableToColumnsMap } from "../_types/miscellaneous.js";
-import type { AccumulateComparisonParams } from "../_types/result.js";
 import type QueryTable from "../queryTable.js";
 import type ISelectClause from "./ISelectClause.js";
 import type IGroupByClause from "./IGroupByClause.js";
@@ -16,6 +15,7 @@ import type { DbValueTypes } from "../../table/column.js";
 import type QueryBuilder from "../queryBuilder.js";
 import type { IExecuteableQuery } from "./IExecuteableQuery.js";
 import type { AccumulateSubQueryParams } from "../_types/subQueryUtility.js";
+import type { AccumulateComparisonParams } from "../_types/paramAccumulationComparison.js";
 
 const joinTypes = {
     inner: 'INNER',

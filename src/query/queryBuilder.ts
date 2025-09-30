@@ -1,12 +1,12 @@
 import { DbType } from "../db.js";
-import QueryColumn, { type QueryColumnsObjectType } from "./queryColumn.js";
+import QueryColumn from "./queryColumn.js";
 import Table, { type MapToQueryColumns } from "../table/table.js";
 import { isNullOrUndefined } from "../utility/guards.js";
 import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
 import { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
 import type { TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.js";
-import type { AccumulateColumnParams, AccumulateComparisonParams, AccumulateOrderByParams, ColumnsToResultMap, QueryParamsToObject, TResultShape } from "./_types/result.js";
+import type { ColumnsToResultMap, QueryParamsToObject, TResultShape } from "./_types/result.js";
 import QueryTable from "./queryTable.js";
 import type Column from "../table/column.js";
 import type IJoinClause from "./_interfaces/IJoinClause.js";
@@ -21,10 +21,12 @@ import type { JoinType } from "./_interfaces/IJoinClause.js";
 import type IOrderByClause from "./_interfaces/IOrderByClause.js";
 import type { OrderBySpecs } from "./_interfaces/IOrderByClause.js";
 import type { GroupBySpecs } from "./_interfaces/IGroupByClause.js";
-import type { ColumnType, DbValueTypes } from "../table/column.js";
+import type { DbValueTypes } from "../table/column.js";
 import type { IDbType } from "./_interfaces/IDbType.js";
-import type { IComparable } from "./_interfaces/IComparable.js";
 import type { AccumulateSubQueryParams, ConvertTablesToQueryTables, InferDbTypeFromFromFirstIDbType, SetComparableIdsOfSubQueries } from "./_types/subQueryUtility.js";
+import type { AccumulateComparisonParams } from "./_types/paramAccumulationComparison.js";
+import type { AccumulateOrderByParams } from "./_types/paramAccumulationOrderBy.js";
+import type { AccumulateColumnParams } from "./_types/paramAccumulationSelect.js";
 
 type FromType<TDbType extends DbType> =
     QueryTable<TDbType, any, any, any, any, any> |

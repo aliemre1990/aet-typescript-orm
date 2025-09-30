@@ -1,5 +1,4 @@
 import { DbType } from "../../db.js";
-import type { AccumulateComparisonParams } from "../_types/result.js";
 import type QueryTable from "../queryTable.js";
 import type { DbOperators } from "../_types/ops.js";
 import type QueryParam from "../param.js";
@@ -12,6 +11,7 @@ import type { GroupBySpecs } from "./IGroupByClause.js";
 import type { DbValueTypes } from "../../table/column.js";
 import type QueryBuilder from "../queryBuilder.js";
 import type { IExecuteableQuery } from "./IExecuteableQuery.js";
+import type { AccumulateComparisonParams } from "../_types/paramAccumulationComparison.js";
 
 interface IHavingClause<
     TDbType extends DbType,

@@ -4,7 +4,6 @@ import type QueryTable from "../queryTable.js";
 import type ISelectClause from "./ISelectClause.js";
 import type QueryColumn from "../queryColumn.js";
 import type QueryParam from "../param.js";
-import type { ColumnsSelection } from "../queryColumn.js";
 import type IWhereClause from "./IWhereClause.js";
 import type IHavingClause from "./IHavingClause.js";
 import type IOrderByClause from "./IOrderByClause.js";
@@ -13,6 +12,7 @@ import type { IComparable } from "./IComparable.js";
 import type QueryBuilder from "../queryBuilder.js";
 import type { IExecuteableQuery } from "./IExecuteableQuery.js";
 import type { DbFunctions } from "../_types/ops.js";
+import type ColumnsSelection from "../ColumnsSelection.js";
 
 type GroupBySpecs<TDbType extends DbType> = readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, false, any, any>)[];
 
