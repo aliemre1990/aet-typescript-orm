@@ -2,7 +2,7 @@ import { DbType } from "../../db.js";
 import type { DbValueTypes } from "../../table/column.js";
 import type { ColumnsToResultMap, QueryParamsToObject, TResultShape } from "../_types/result.js";
 import type QueryParam from "../param.js";
-import type QueryBuilder from "../queryBuilder.js";
+import type { FromType, JoinSpecsType } from "../queryBuilder.js";
 import type QueryTable from "../queryTable.js";
 import type { IDbType } from "./IDbType.js";
 import type { GroupBySpecs } from "./IGroupByClause.js";
@@ -10,7 +10,8 @@ import type { OrderBySpecs } from "./IOrderByClause.js";
 
 interface IExecuteableQuery<
     TDbType extends DbType,
-    TQueryItems extends readonly (QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, string>)[],
+    TFrom extends FromType<TDbType>,
+    TJoinSpecs extends JoinSpecsType<TDbType> | undefined,
     TResult extends TResultShape<TDbType> | undefined = undefined,
     TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null, any, any, any>[] | undefined = undefined,
     TGroupedColumns extends GroupBySpecs<TDbType> | undefined = undefined,
@@ -21,7 +22,7 @@ interface IExecuteableQuery<
     dbType: TDbType;
     asName?: TAs;
 
-    as<TAs extends string>(asName: TAs): IExecuteableQuery<TDbType, TQueryItems, TResult, TParams, TGroupedColumns, TOrderBySpecs, TAs>;
+    as<TAs extends string>(asName: TAs): IExecuteableQuery<TDbType, TFrom, TJoinSpecs, TResult, TParams, TGroupedColumns, TOrderBySpecs, TAs>;
 
     exec: (...args: TParams extends undefined ? [] : [params: QueryParamsToObject<TParams>]) =>
         TResult extends TResultShape<TDbType> ?

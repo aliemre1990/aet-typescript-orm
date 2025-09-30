@@ -53,15 +53,16 @@ class QueryTable<
             cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
             ops: DbFunctions<TDbType, false>
         ) => TCbResult
-    ): IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], TCbResult, AccumulateColumnParams<undefined, TCbResult>> {
+    ): IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined, TCbResult, AccumulateColumnParams<undefined, TCbResult>> {
 
-        return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>(this.dbType, this).select(cb);
+        return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined>(this.dbType, [this]).select(cb);
     }
 
     join<
-        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any>,
+        TJoinType extends JoinType,
+        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any, string>,
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>,
-        TInnerJoinResult extends QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any> = TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
+        TInnerJoinResult extends QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any, any> = TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
         QueryTable<
             TDbType,
             TInnerCols,
@@ -72,15 +73,15 @@ class QueryTable<
         TInnerJoinTable,
 
     >(
-        type: JoinType,
+        type: TJoinType,
         table: TInnerJoinTable,
         cb: (
-            cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>, TInnerJoinResult]>>,
+            cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], [{ joinType: TJoinType, table: TInnerJoinResult }]>>,
             ops: DbOperators<TDbType, false>
         ) => TCbResult
     ) {
 
-        return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>(this.dbType, this)
+        return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined>(this.dbType, [this])
             .join(type, table, cb);
     }
 
@@ -90,7 +91,7 @@ class QueryTable<
         cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
         ops: DbOperators<TDbType, false>
     ) => TCbResult) {
-        return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>(this.dbType, this).where(cb);
+        return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined>(this.dbType, [this]).where(cb);
     }
 
 
@@ -100,14 +101,14 @@ class QueryTable<
         cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
         ops: DbFunctions<TDbType, false>
     ) => TCbResult) {
-        return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>(this.dbType, this).groupBy(cb);
+        return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined>(this.dbType, [this]).groupBy(cb);
     }
 
     orderBy<
         const  TCbResult extends OrderBySpecs<TDbType>
     >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>) => TCbResult):
         ISelectClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], AccumulateOrderByParams<TDbType, undefined, TCbResult>> {
-        return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>(this.dbType, this).orderBy(cb);
+        return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined>(this.dbType, [this]).orderBy(cb);
     }
 
 }

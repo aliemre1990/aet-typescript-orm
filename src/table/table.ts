@@ -75,13 +75,12 @@ class Table<
 
     select<
         const TCbResult extends TResultShape<TDbType>
-
     >(
         cb: (
             cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>, undefined>]>>,
             ops: DbFunctions<TDbType, false>
         ) => TCbResult
-    ): IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>, undefined>], TCbResult, AccumulateColumnParams<undefined, TCbResult>> {
+    ): IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>, undefined>], undefined, TCbResult, AccumulateColumnParams<undefined, TCbResult>> {
 
         const queryColumns = this.columnsList.map((col) => {
             return new QueryColumn(this.dbType, col);
@@ -90,13 +89,14 @@ class Table<
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>, undefined>(this.dbType, this, queryColumns);
 
 
-        return new QueryBuilder<TDbType, [typeof queryTable]>(this.dbType, queryTable).select(cb);
+        return new QueryBuilder<TDbType, [typeof queryTable], undefined>(this.dbType, [queryTable]).select(cb);
     }
 
     join<
-        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any>,
+        TJoinType extends JoinType,
+        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any, string>,
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>,
-        TInnerJoinResult extends QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any> = TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
+        TInnerJoinResult extends QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any, any> = TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
         QueryTable<
             TDbType,
             TInnerCols,
@@ -107,10 +107,10 @@ class Table<
         TInnerJoinTable,
 
     >(
-        type: JoinType,
+        type: TJoinType,
         table: TInnerJoinTable,
         cb: (
-            cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>>, TInnerJoinResult]>>,
+            cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>>], [{ joinType: TJoinType, table: TInnerJoinResult }]>>,
             ops: DbOperators<TDbType, false>
         ) => TCbResult
     ) {
@@ -121,7 +121,7 @@ class Table<
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>>(this.dbType, this, queryColumns);
 
 
-        return new QueryBuilder<TDbType, [typeof queryTable]>(this.dbType, queryTable)
+        return new QueryBuilder<TDbType, [typeof queryTable], undefined>(this.dbType, [queryTable])
             .join(type, table, cb);
     }
 
@@ -137,7 +137,7 @@ class Table<
 
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>, undefined>(this.dbType, this, queryColumns);
 
-        return new QueryBuilder<TDbType, [typeof queryTable]>(this.dbType, queryTable).where(cb);
+        return new QueryBuilder<TDbType, [typeof queryTable], undefined>(this.dbType, [queryTable]).where(cb);
     }
 
     groupBy<
@@ -153,7 +153,7 @@ class Table<
 
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>, undefined>(this.dbType, this, queryColumns);
 
-        return new QueryBuilder<TDbType, [typeof queryTable]>(this.dbType, queryTable).groupBy(cb);
+        return new QueryBuilder<TDbType, [typeof queryTable], undefined>(this.dbType, [queryTable]).groupBy(cb);
     }
 
     orderBy<
@@ -166,7 +166,7 @@ class Table<
 
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TTableName, TColumns>, undefined>(this.dbType, this, queryColumns);
 
-        return new QueryBuilder<TDbType, [typeof queryTable]>(this.dbType, queryTable).orderBy(cb);
+        return new QueryBuilder<TDbType, [typeof queryTable], undefined>(this.dbType, [queryTable]).orderBy(cb);
     }
 }
 

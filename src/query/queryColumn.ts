@@ -6,7 +6,6 @@ import type { IComparable } from "./_interfaces/IComparable.js";
 import type Column from "../table/column.js";
 import type QueryTable from "./queryTable.js";
 import type { ColumnType, DbValueTypes } from "../table/column.js";
-import type { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
 
 type QueryColumnsObjectType<TDbType extends DbType> = { [key: string]: QueryColumn<TDbType, any, any, any> }
 

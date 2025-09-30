@@ -6,6 +6,7 @@ import type QueryTable from "../queryTable.js";
 import type { IExecuteableQuery } from "../_interfaces/IExecuteableQuery.js";
 import type ColumnSQLFunction from "../functions/_functions.js";
 import type ColumnsSelection from "../ColumnsSelection.js";
+import type { FromType, JoinSpecsType } from "../queryBuilder.js";
 
 //
 type SpreadGroupedColumns<TDbType extends DbType, TGroupedColumns extends GroupBySpecs<TDbType>> =
@@ -72,18 +73,19 @@ type MapGroupedColumns<TDbType extends DbType, TGroupedColumns extends GroupBySp
 //
 type GroupedTablesToColumnsMap<
     TDbType extends DbType,
-    TQueryItems extends readonly (QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any>)[],
+    TFrom extends FromType<TDbType>,
+    TInnerJoinSpecs extends JoinSpecsType<TDbType> | undefined,
     TGroupedColumns extends GroupBySpecs<TDbType> | undefined
 > =
     TGroupedColumns extends undefined ?
     undefined :
     {
         [
-        T in TQueryItems[number]as
+        T in TFrom[number]as
         T extends QueryTable<TDbType, any, any, any, any, infer TAs> ?
         TAs extends undefined ? T["table"]["name"] :
         TAs & string :
-        T extends IExecuteableQuery<TDbType, any, any, any, any, any, infer TAs> ?
+        T extends IExecuteableQuery<TDbType, any, any, any, any, any, any, infer TAs> ?
         TAs extends undefined ? never :
         TAs & string :
         never
@@ -97,7 +99,7 @@ type GroupedTablesToColumnsMap<
                 TGroupedColumns,
                 (
                     T extends QueryTable<TDbType, any, any, any, any, any> ? T["columnsList"] :
-                    T extends IExecuteableQuery<TDbType, any, infer TResult, any, any, any, any> ?
+                    T extends IExecuteableQuery<TDbType, any, any, infer TResult, any, any, any, any> ?
                     TResult extends undefined ? never :
                     TResult :
                     never
@@ -106,6 +108,39 @@ type GroupedTablesToColumnsMap<
 
         >
     }
+    & (
+        TInnerJoinSpecs extends undefined ? {} :
+        TInnerJoinSpecs extends JoinSpecsType<TDbType> ?
+        {
+            [
+            T in TInnerJoinSpecs[number]as T["table"] extends QueryTable<TDbType, any, any, any, any, any> ?
+            T["table"]["asName"] extends undefined ?
+            T["table"]["table"]["name"] : T["table"]["asName"] & string :
+            T extends IExecuteableQuery<TDbType, any, any, any, any, any, any, infer TAs> ?
+            TAs extends undefined ? never : TAs & string :
+            never
+            ]:
+
+            ColumnsSelection<
+                TDbType,
+                T["table"],
+                TGroupedColumns extends GroupBySpecs<TDbType> ?
+                MapGroupedColumns<
+                    TDbType,
+                    TGroupedColumns,
+                    (
+                        T["table"] extends QueryTable<TDbType, any, any, any, any, any> ? T["table"]["columnsList"] :
+                        T["table"] extends IExecuteableQuery<TDbType, any, any, infer TResult, any, any, any, any> ?
+                        TResult extends undefined ? never :
+                        TResult :
+                        never
+                    )
+                > : never
+
+            >
+        }
+        : never
+    )
     & (
         GetFunctionsFromGroupBySpecs<TDbType, TGroupedColumns>["length"] extends 0 ? {} :
         {

@@ -12,7 +12,7 @@ const SimpleOrderByQuery = customersTable
     .orderBy(cols => [cols.customers.name, [cols.customers.id, 'ASC']]);
 
 type SimpleOrderByQueryType = typeof SimpleOrderByQuery;
-type SimpleOrderByQuerySpecs = SimpleOrderByQueryType extends ISelectClause<any, any, any, any, infer Specs> ? Specs : never;
+type SimpleOrderByQuerySpecs = SimpleOrderByQueryType extends ISelectClause<any, any, any, any, any, infer Specs> ? Specs : never;
 
 type SimpleOrderByQuerySpecsLengthTest = AssertTrue<AssertEqual<2, SimpleOrderByQuerySpecs["length"]>>
 

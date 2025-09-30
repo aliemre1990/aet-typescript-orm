@@ -21,15 +21,16 @@ type MapSubQueryComparables<TAs extends string, TResult extends readonly any[]> 
 
 type ConvertComparableIdsOfSelectResult<
     TDbType extends DbType,
-    T extends IExecuteableQuery<TDbType, any, any, any, any, any, any>
+    T extends IExecuteableQuery<TDbType, any, any, any, any, any, any, any>
 > =
-    T extends IExecuteableQuery<TDbType, infer TQueryItems, infer TResult, infer TParams, infer TGroupedColumns, infer TOrderBySpecs, infer TAs extends string> ?
+    T extends IExecuteableQuery<TDbType, infer TFrom, infer TJoinSpecs, infer TResult, infer TParams, infer TGroupedColumns, infer TOrderBySpecs, infer TAs extends string> ?
     TResult extends undefined ?
     never :
     TResult extends TResultShape<TDbType>[] ?
     IExecuteableQuery<
         TDbType,
-        TQueryItems,
+        TFrom,
+        TJoinSpecs,
         MapSubQueryComparables<TAs, TResult>,
         TParams,
         TGroupedColumns,
@@ -43,19 +44,19 @@ type SetComparableIdsOfSubQueries<
     TDbType extends DbType,
     TFrom extends readonly (
         QueryTable<TDbType, any, any, any, any, any> |
-        IExecuteableQuery<TDbType, any, any, any, any, any, any>
+        IExecuteableQuery<TDbType, any, any, any, any, any, any, any>
     )[]
 > = TFrom extends readonly [infer First, ...infer Rest] ?
-    First extends IExecuteableQuery<TDbType, any, any, any, any, any, any> ?
+    First extends IExecuteableQuery<TDbType, any, any, any, any, any, any, any> ?
     Rest extends readonly (
         QueryTable<TDbType, any, any, any, any, any> |
-        IExecuteableQuery<TDbType, any, any, any, any, any, any>
+        IExecuteableQuery<TDbType, any, any, any, any, any, any, any>
     )[] ?
     [ConvertComparableIdsOfSelectResult<TDbType, First>, ...SetComparableIdsOfSubQueries<TDbType, Rest>] :
     [ConvertComparableIdsOfSelectResult<TDbType, First>] :
     Rest extends readonly (
         QueryTable<TDbType, any, any, any, any, any> |
-        IExecuteableQuery<TDbType, any, any, any, any, any, any>
+        IExecuteableQuery<TDbType, any, any, any, any, any, any, any>
     )[] ?
     [First, ...SetComparableIdsOfSubQueries<TDbType, Rest>] :
     [First] :
@@ -76,7 +77,7 @@ type ConvertTablesToQueryTables<TFrom> =
     [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TColumns>>, ...ConvertTablesToQueryTables<Rest>] :
     First extends QueryTable<any, any, any, any, any, any> ?
     [First, ...ConvertTablesToQueryTables<Rest>] :
-    First extends IExecuteableQuery<any, any, any, any, any, any, any> ?
+    First extends IExecuteableQuery<any, any, any, any, any, any, any, any> ?
     [First, ...ConvertTablesToQueryTables<Rest>] :
     ConvertTablesToQueryTables<Rest> :
     [];
@@ -87,7 +88,7 @@ type AccumulateSubQueryParams<
     TParams extends QueryParam<TDbType, any, any, any, any, any>[] | undefined = undefined
 > =
     TFrom extends readonly [infer First, ...infer Rest] ?
-    First extends IExecuteableQuery<TDbType, any, any, infer TInnerParams, any, any, any> ?
+    First extends IExecuteableQuery<TDbType, any, any, any, infer TInnerParams, any, any, any> ?
     Rest extends any[] ?
     [...(TParams extends undefined ? [] : TParams), ...(TInnerParams extends undefined ? [] : TInnerParams), ...AccumulateSubQueryParams<TDbType, Rest>] :
     [...(TParams extends undefined ? [] : TParams), ...(TInnerParams extends undefined ? [] : TInnerParams)] :

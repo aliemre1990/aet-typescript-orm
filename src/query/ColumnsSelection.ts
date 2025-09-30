@@ -6,7 +6,7 @@ import type QueryTable from "./queryTable.js";
 const ColumnsSelectionQueryTableObjectSymbol = Symbol();
 type ColumnsSelection<
     TDbType extends DbType,
-    TQItem extends QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any>,
+    TQItem extends QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any, any>,
     TColumns extends readonly IComparable<TDbType, any, any, any, any, any, any, any>[]
 > =
     {

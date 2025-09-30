@@ -11,10 +11,12 @@ import type { GroupBySpecs } from "./IGroupByClause.js";
 import type { DbValueTypes } from "../../table/column.js";
 import type QueryBuilder from "../queryBuilder.js";
 import type { AccumulateColumnParams } from "../_types/paramAccumulationSelect.js";
+import type { FromType, JoinSpecsType } from "../queryBuilder.js";
 
 interface ISelectClause<
     TDbType extends DbType,
-    TQueryItems extends readonly (QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any>)[],
+    TFrom extends FromType<TDbType>,
+    TJoinSpecs extends JoinSpecsType<TDbType> | undefined,
     TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null, any, any, any>[] | undefined = undefined,
     TGroupedColumns extends GroupBySpecs<TDbType> | undefined = undefined,
     TOrderBySpecs extends OrderBySpecs<TDbType> | undefined = undefined
@@ -23,10 +25,10 @@ interface ISelectClause<
         const TCbResult extends TResultShape<TDbType>
     >(
         cb: (
-            cols: TGroupedColumns extends undefined ? TableToColumnsMap<TDbType, TablesToObject<TDbType, TQueryItems>> : GroupedTablesToColumnsMap<TDbType, TQueryItems, TGroupedColumns>,
+            cols: TGroupedColumns extends undefined ? TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>> : GroupedTablesToColumnsMap<TDbType, TFrom, TJoinSpecs, TGroupedColumns>,
             ops: DbFunctions<TDbType, TGroupedColumns extends undefined ? false : true>
         ) => TCbResult
-    ): IExecuteableQuery<TDbType, TQueryItems, TCbResult, AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns, TOrderBySpecs>
+    ): IExecuteableQuery<TDbType, TFrom, TJoinSpecs, TCbResult, AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns, TOrderBySpecs>
 
 }
 
