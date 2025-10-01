@@ -1,6 +1,6 @@
 import { dbTypes, type DbType, type MySQLDbType, type PgDbType } from "../../db.js";
 import type { DbValueTypes } from "../../table/column.js";
-import { IComparableValueDummySymbol, type IComparable } from "../_interfaces/IComparable.js";
+import { IComparableFinalValueDummySymbol, IComparableIdDummySymbol, IComparableValueDummySymbol, type IComparable } from "../_interfaces/IComparable.js";
 import between from "../comparisons/between.js";
 import eq from "../comparisons/eq.js";
 import sqlIn from "../comparisons/in.js";
@@ -69,8 +69,8 @@ class SQLArithmeticOperation<
 > implements IComparable<TDbType, TComparableId, InferParamsFromFnArgs<TArgs>, NonNullable<TReturnType>, TReturnType, TIsAgg, TDefaultFieldKey, TAs> {
 
     [IComparableValueDummySymbol]?: NonNullable<TReturnType>;
-    icomparableFinalValueDummy?: TReturnType;
-    icomparableIdDummy?: TComparableId;
+    [IComparableFinalValueDummySymbol]?: TReturnType;
+    [IComparableIdDummySymbol]?: TComparableId;
     params?: InferParamsFromFnArgs<TArgs>;
     isAgg?: TIsAgg;
     asName?: TAs;
