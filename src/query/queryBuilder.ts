@@ -104,7 +104,7 @@ class QueryBuilder<
             TInnerCols,
             TInnerTableName,
             Table<TDbType, TInnerCols, TInnerTableName>,
-            MapToQueryColumns<TDbType, TInnerCols>
+            MapToQueryColumns<TDbType, TDbType, TInnerCols>
         > :
         TInnerJoinTable,
         const TInnerJoinAccumulated extends JoinSpecsType<TDbType> = readonly [...(TJoinSpecs extends undefined ? [] : TJoinSpecs), { joinType: TJoinType, table: TInnerJoinResult }],
@@ -129,8 +129,12 @@ class QueryBuilder<
             }) as QueryColumn<TDbType, any, any, any, any, any, any>[];
 
             joinTable = new QueryTable(table.dbType, table, queryColumns) as TInnerJoinResult;
+        } else if (table instanceof QueryTable) {
+            joinTable = table as QueryTable<TDbType, any, any, any, any, any> as TInnerJoinResult;
+        } else if (table instanceof QueryBuilder) {
+            joinTable = table as IExecuteableQuery<TDbType, any, any, any, any, any, any, any> as TInnerJoinResult;
         } else {
-            joinTable = table as unknown as TInnerJoinResult;
+            throw Error('Invalid table type.');
         }
 
         const newJoinSpec = { joinType: type, table: joinTable };

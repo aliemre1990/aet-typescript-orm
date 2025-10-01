@@ -1,6 +1,6 @@
 import type { DbType } from "../../db.js";
 import type { DbValueTypes } from "../../table/column.js";
-import type { IComparable } from "../_interfaces/IComparable.js";
+import { IComparableValueDummySymbol, type IComparable } from "../_interfaces/IComparable.js";
 import between from "../comparisons/between.js";
 import eq from "../comparisons/eq.js";
 import sqlIn from "../comparisons/in.js";
@@ -71,7 +71,7 @@ class BasicColumnAggregationOperation<
     TComparableId extends string = InferAggregationId<TDbType, TAggregationOperation, TArgs, TReturnType, TAs>
 > implements IComparable<TDbType, TComparableId, InferParamsFromFnArgs<TArgs>, NonNullable<TReturnType>, TReturnType, TIsAgg, TDefaultFieldKey, TAs> {
 
-    icomparableValueDummy?: NonNullable<TReturnType>;
+    [IComparableValueDummySymbol]?: NonNullable<TReturnType>;
     icomparableFinalValueDummy?: TReturnType;
     icomparableIdDummy?: TComparableId;
     params?: InferParamsFromFnArgs<TArgs>;

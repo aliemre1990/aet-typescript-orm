@@ -1,7 +1,7 @@
 import { dbTypes, type DbType, type PgDbType } from "../../../db.js";
 import type { DbValueTypes } from "../../../table/column.js";
 import type { RecordToTupleSafe } from "../../../utility/common.js";
-import type { IComparable } from "../../_interfaces/IComparable.js";
+import { IComparableValueDummySymbol, type IComparable } from "../../_interfaces/IComparable.js";
 import between from "../../comparisons/between.js";
 import eq from "../../comparisons/eq.js";
 import sqlIn from "../../comparisons/in.js";
@@ -28,7 +28,7 @@ class JSONBuildObjectFunction<
 > implements IComparable<TDbType, TComparableId, InferParamsFromJsonBuildObjectArg<TDbType, TObj>, NonNullable<TReturnType>, TReturnType, TIsAgg, TDefaultFieldKey, TAs> {
 
     dbType: TDbType;
-    icomparableValueDummy?: NonNullable<TReturnType>;
+    [IComparableValueDummySymbol]?: NonNullable<TReturnType>;
     icomparableFinalValueDummy?: TReturnType;
     icomparableIdDummy?: TComparableId;
     params?: InferParamsFromJsonBuildObjectArg<TDbType, TObj>;

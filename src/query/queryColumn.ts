@@ -2,7 +2,7 @@ import type { DbType } from "../db.js";
 import eq from "./comparisons/eq.js";
 import between from "./comparisons/between.js";
 import sqlIn from "./comparisons/in.js";
-import type { IComparable } from "./_interfaces/IComparable.js";
+import { IComparableValueDummySymbol, type IComparable } from "./_interfaces/IComparable.js";
 import type Column from "../table/column.js";
 import type QueryTable from "./queryTable.js";
 import type { ColumnType, DbValueTypes } from "../table/column.js";
@@ -34,7 +34,7 @@ class QueryColumn<
 
     asName?: TAsName;
     params?: undefined;
-    icomparableValueDummy?: TValueType;
+    [IComparableValueDummySymbol]?: TValueType;
     icomparableFinalValueDummy?: TFinalValueType;
     icomparableIdDummy?: TComparableId;
     isAgg?: false;

@@ -6,6 +6,8 @@ import type eq from "../comparisons/eq.js";
 import type sqlIn from "../comparisons/in.js";
 import type { IDbType } from "./IDbType.js";
 
+const IComparableValueDummySymbol = Symbol();
+
 interface IComparable<
     TDbType extends DbType,
     TComparableId extends string,
@@ -17,7 +19,7 @@ interface IComparable<
     TAs extends string | undefined
 > extends IDbType<TDbType> {
     dbType: TDbType;
-    icomparableValueDummy?: TValueType;
+    [IComparableValueDummySymbol]?: TValueType;
     icomparableFinalValueDummy?: TFinalValueType;
     icomparableIdDummy?: TComparableId;
     params?: TParams;
@@ -36,4 +38,8 @@ interface IComparable<
 
 export type {
     IComparable
+}
+
+export {
+    IComparableValueDummySymbol
 }

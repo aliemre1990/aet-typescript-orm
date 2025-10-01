@@ -74,7 +74,7 @@ type InferDbTypeFromFromFirstIDbType<TFrom> =
 type ConvertTablesToQueryTables<TFrom> =
     TFrom extends readonly [infer First, ...infer Rest] ?
     First extends Table<infer TDbType, infer TColumns, infer TTableName> ?
-    [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TColumns>>, ...ConvertTablesToQueryTables<Rest>] :
+    [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TDbType, TColumns>>, ...ConvertTablesToQueryTables<Rest>] :
     First extends QueryTable<any, any, any, any, any, any> ?
     [First, ...ConvertTablesToQueryTables<Rest>] :
     First extends IExecuteableQuery<any, any, any, any, any, any, any, any> ?

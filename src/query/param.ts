@@ -1,6 +1,6 @@
 import { dbTypes, type DbType } from "../db.js";
 import type { DbValueTypes } from "../table/column.js";
-import type { IComparable } from "./_interfaces/IComparable.js";
+import { IComparableValueDummySymbol, type IComparable } from "./_interfaces/IComparable.js";
 import type { InferTypeName } from "./_types/comparableIdInference.js";
 import between from "./comparisons/between.js";
 import eq from "./comparisons/eq.js";
@@ -22,7 +22,7 @@ class QueryParam<
     dbType: TDbType;
 
     params?: [QueryParam<TDbType, TName, TValueType>];
-    icomparableValueDummy?: NonNullable<TValueType>;
+    [IComparableValueDummySymbol]?: NonNullable<TValueType>;
     icomparableFinalValueDummy?: TValueType;
     icomparableIdDummy?: TComparableId;
     isAgg?: false;

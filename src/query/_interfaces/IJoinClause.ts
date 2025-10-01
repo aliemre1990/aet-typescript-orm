@@ -16,6 +16,7 @@ import type { IExecuteableQuery } from "./IExecuteableQuery.js";
 import type { AccumulateSubQueryParams } from "../_types/subQueryUtility.js";
 import type { AccumulateComparisonParams } from "../_types/paramAccumulationComparison.js";
 import type { FromType, JoinSpecsType } from "../queryBuilder.js";
+import type { MapToQueryColumns } from "../../table/table.js";
 
 const joinTypes = {
     inner: 'INNER',
@@ -44,10 +45,10 @@ interface IJoinClause<
             TInnerCols,
             TInnerTableName,
             Table<TDbType, TInnerCols, TInnerTableName>,
-            { [K in keyof TInnerCols]: QueryColumn<TDbType, TInnerCols[K], { tableName: TInnerTableName, asTableName: undefined }> }
+            MapToQueryColumns<TDbType, TDbType, TInnerCols>
         > :
         TInnerJoinTable,
-        TInnerJoinAccumulated extends JoinSpecsType<TDbType> = [...(TJoinSpecs extends undefined ? [] : TJoinSpecs), { joinType: TJoinType, table: TInnerJoinResult }],
+        const TInnerJoinAccumulated extends JoinSpecsType<TDbType> = readonly [...(TJoinSpecs extends undefined ? [] : TJoinSpecs), { joinType: TJoinType, table: TInnerJoinResult }],
         TAccumulatedParams extends QueryParam<TDbType, any, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>,
         TAccumulatedParamsResult extends QueryParam<TDbType, any, any, any, any, any>[] | undefined = TAccumulatedParams["length"] extends 0 ? undefined : TAccumulatedParams
     >(
