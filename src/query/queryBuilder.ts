@@ -58,12 +58,12 @@ class QueryBuilder<
     colsSelection?: TResult;
 
     from: FromType<TDbType>;
-    innerJoinSpecs?: TJoinSpecs;
+    joinSpecs?: TJoinSpecs;
 
-    constructor(dbType: TDbType, from: FromType<TDbType>, data?: { asName: TAs, colsSelection?: TResult, innerJoinSpecs?: TJoinSpecs }) {
+    constructor(dbType: TDbType, from: FromType<TDbType>, data?: { asName: TAs, colsSelection?: TResult, joinSpecs?: TJoinSpecs }) {
         this.dbType = dbType;
         this.from = from;
-        this.innerJoinSpecs = data?.innerJoinSpecs;
+        this.joinSpecs = data?.joinSpecs;
 
         this.colsSelection = data?.colsSelection;
         this.asName = data?.asName;
@@ -79,7 +79,7 @@ class QueryBuilder<
             TGroupedColumns,
             TOrderBySpecs,
             TAs
-        >(this.dbType, this.from, { asName, colsSelection: this.colsSelection, innerJoinSpecs: this.innerJoinSpecs })
+        >(this.dbType, this.from, { asName, colsSelection: this.colsSelection, joinSpecs: this.joinSpecs })
     }
 
     select<
@@ -107,7 +107,7 @@ class QueryBuilder<
             MapToQueryColumns<TDbType, TInnerCols>
         > :
         TInnerJoinTable,
-        TInnerJoinAccumulated extends JoinSpecsType<TDbType> = [...(TJoinSpecs extends undefined ? [] : TJoinSpecs), { joinType: TJoinType, table: TInnerJoinResult }],
+        const TInnerJoinAccumulated extends JoinSpecsType<TDbType> = readonly [...(TJoinSpecs extends undefined ? [] : TJoinSpecs), { joinType: TJoinType, table: TInnerJoinResult }],
         TAccumulatedParams extends QueryParam<TDbType, any, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>,
         TAccumulatedParamsResult extends QueryParam<TDbType, any, any, any, any, any>[] | undefined = TAccumulatedParams["length"] extends 0 ? undefined : TAccumulatedParams
     >(
@@ -121,22 +121,26 @@ class QueryBuilder<
         IWhereClause<TDbType, TFrom, TInnerJoinAccumulated, TAccumulatedParamsResult> &
         IGroupByClause<TDbType, TFrom, TInnerJoinAccumulated, TAccumulatedParamsResult> &
         IOrderByClause<TDbType, TFrom, TInnerJoinAccumulated, TAccumulatedParamsResult> {
-        let innerJoinTable: TInnerJoinResult;
-        if ("table" in table) {
-            innerJoinTable = table as TInnerJoinResult;
-        } else if ("name" in table) {
-            const innerQueryColumns = table.columnsList.map((col: Column<TDbType, any, any, any, any, any, any>) => {
-                return new QueryColumn(this.dbType, col);
+
+        let joinTable: TInnerJoinResult;
+        if (table instanceof Table) {
+            const queryColumns = table.columnsList.map((col: Column<TDbType, any, any, any, any, any, any>) => {
+                return new QueryColumn(table.dbType, col);
             }) as QueryColumn<TDbType, any, any, any, any, any, any>[];
 
-            innerJoinTable = new QueryTable(this.dbType, table, innerQueryColumns) as TInnerJoinResult;
+            joinTable = new QueryTable(table.dbType, table, queryColumns) as TInnerJoinResult;
         } else {
-            throw Error('Invalid inner join table type.');
+            joinTable = table as unknown as TInnerJoinResult;
         }
 
-        // const newTables = [...this.tables, innerJoinTable];
+        const newJoinSpec = { joinType: type, table: joinTable };
+        const mergedJoinSpecs = [...(this.joinSpecs === undefined ? [newJoinSpec] : [...this.joinSpecs, newJoinSpec])] as TInnerJoinAccumulated;
 
-        return new QueryBuilder(this.dbType, this.from) as
+        return new QueryBuilder(this.dbType, this.from, {
+            joinSpecs: mergedJoinSpecs,
+            colsSelection: this.colsSelection,
+            asName: this.asName
+        }) as
             IJoinClause<TDbType, TFrom, TInnerJoinAccumulated, TAccumulatedParamsResult> &
             ISelectClause<TDbType, TFrom, TInnerJoinAccumulated, TAccumulatedParamsResult> &
             IWhereClause<TDbType, TFrom, TInnerJoinAccumulated, TAccumulatedParamsResult> &
