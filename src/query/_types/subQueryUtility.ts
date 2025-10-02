@@ -7,7 +7,7 @@ import type { IExecuteableQuery } from "../_interfaces/IExecuteableQuery.js";
 import type QueryParam from "../param.js";
 import type QueryColumn from "../queryColumn.js";
 import type QueryTable from "../queryTable.js";
-import type { TResultShape } from "./result.js";
+import type { ResultShape } from "./result.js";
 
 type MapSubQueryComparables<TAs extends string, TResult extends readonly any[]> =
     TResult extends readonly [infer First, ...infer Rest] ?
@@ -26,7 +26,7 @@ type ConvertComparableIdsOfSelectResult<
     T extends IExecuteableQuery<TDbType, infer TFrom, infer TJoinSpecs, infer TResult, infer TParams, infer TGroupedColumns, infer TOrderBySpecs, infer TAs extends string> ?
     TResult extends undefined ?
     never :
-    TResult extends TResultShape<TDbType> ?
+    TResult extends ResultShape<TDbType> ?
     IExecuteableQuery<
         TDbType,
         TFrom,

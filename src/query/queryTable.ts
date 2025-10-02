@@ -12,7 +12,7 @@ import type { TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.j
 import type { DbFunctions, DbOperators } from "./_types/ops.js";
 import type { AccumulateOrderByParams } from "./_types/paramAccumulationOrderBy.js";
 import type { AccumulateColumnParams } from "./_types/paramAccumulationSelect.js";
-import type { TResultShape } from "./_types/result.js";
+import type { ResultShape } from "./_types/result.js";
 import type { ConvertComparableIdsOfSelectResult } from "./_types/subQueryUtility.js";
 import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
@@ -47,7 +47,7 @@ class QueryTable<
     }
 
     select<
-        const TCbResult extends TResultShape<TDbType>
+        const TCbResult extends ResultShape<TDbType>
 
     >(
         cb: (

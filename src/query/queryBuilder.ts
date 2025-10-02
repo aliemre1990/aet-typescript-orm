@@ -1,4 +1,4 @@
-import { DbType } from "../db.js";
+import { DbType, dbTypes } from "../db.js";
 import QueryColumn from "./queryColumn.js";
 import Table, { type MapToQueryColumns } from "../table/table.js";
 import { isNullOrUndefined } from "../utility/guards.js";
@@ -6,7 +6,7 @@ import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.
 import { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
 import type { TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.js";
-import type { ColumnsToResultMap, QueryParamsToObject, TResultShape } from "./_types/result.js";
+import type { ColumnsToResultMap, QueryParamsToObject, ResultShape, ResultShapeItem } from "./_types/result.js";
 import QueryTable from "./queryTable.js";
 import type Column from "../table/column.js";
 import type IJoinClause from "./_interfaces/IJoinClause.js";
@@ -27,7 +27,10 @@ import type { AccumulateSubQueryParams, ConvertComparableIdsOfSelectResult, Conv
 import type { AccumulateComparisonParams } from "./_types/paramAccumulationComparison.js";
 import type { AccumulateOrderByParams } from "./_types/paramAccumulationOrderBy.js";
 import type { AccumulateColumnParams } from "./_types/paramAccumulationSelect.js";
-import type ColumnsSelection from "./ColumnsSelection.js";
+import type ColumnsSelection from "./columnsSelection.js";
+import { columnsSelectionFactory } from "./columnsSelection.js";
+import type { IComparable } from "./_interfaces/IComparable.js";
+import { mysqlFunctions, mysqlFunctionsWithAggregation, pgFunctions, pgFunctionsWithAggregation } from "./dbOperations.js";
 
 type JoinSpecsType<TDbType extends DbType> = readonly { joinType: JoinType, table: QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any, any> }[]
 type FromType<TDbType extends DbType> = readonly (QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any, any>)[];
@@ -38,7 +41,7 @@ class QueryBuilder<
     TDbType extends DbType,
     TFrom extends FromType<TDbType>,
     TJoinSpecs extends JoinSpecsType<TDbType> | undefined,
-    TResult extends TResultShape<TDbType> | undefined = undefined,
+    TResult extends ResultShape<TDbType> | undefined = undefined,
     TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null, any, any, any>[] | undefined = undefined,
     TGroupedColumns extends GroupBySpecs<TDbType> | undefined = undefined,
     TOrderBySpecs extends OrderBySpecs<TDbType> | undefined = undefined,
@@ -62,11 +65,18 @@ class QueryBuilder<
     joinSpecs?: TJoinSpecs;
     columnsSelectionList?: ColumnsSelectionListType<TDbType>;
     resultSelection?: TResult;
+    groupedColumns?: TGroupedColumns;
 
     constructor(
         dbType: TDbType,
         from: FromType<TDbType>,
-        data?: { asName: TAs, joinSpecs?: TJoinSpecs, resultSelection?: TResult, columnsSelectionList?: ColumnsSelectionListType<TDbType> }
+        data?: {
+            asName: TAs,
+            joinSpecs?: TJoinSpecs,
+            resultSelection?: TResult,
+            columnsSelectionList?: ColumnsSelectionListType<TDbType>
+            groupedColumns?: TGroupedColumns
+        }
     ) {
         this.dbType = dbType;
 
@@ -74,6 +84,8 @@ class QueryBuilder<
         this.joinSpecs = data?.joinSpecs;
         this.resultSelection = data?.resultSelection;
         this.columnsSelectionList = data?.columnsSelectionList;
+        this.groupedColumns = data?.groupedColumns;
+
         this.asName = data?.asName;
     }
 
@@ -91,14 +103,45 @@ class QueryBuilder<
     }
 
     select<
-        const TCbResult extends TResultShape<TDbType>
+        const TCbResult extends ResultShape<TDbType>
     >(
         cb: (
             cols: TGroupedColumns extends undefined ? TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>> : GroupedTablesToColumnsMap<TDbType, TFrom, TJoinSpecs, TGroupedColumns>,
             ops: DbFunctions<TDbType, TGroupedColumns extends undefined ? false : true>
         ) => TCbResult
     ): IExecuteableQuery<TDbType, TFrom, TJoinSpecs, TCbResult, AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns, TOrderBySpecs> {
-        return new QueryBuilder(this.dbType, this.from) as IExecuteableQuery<TDbType, TFrom, TJoinSpecs, TCbResult, AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns, TOrderBySpecs>;
+
+        const cols = this.columnsSelectionList as TGroupedColumns extends undefined ? TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>> : GroupedTablesToColumnsMap<TDbType, TFrom, TJoinSpecs, TGroupedColumns>;
+        let isAgg = false;
+        if (this.groupedColumns && this.groupedColumns.length > 0) {
+            isAgg = true
+        }
+
+        let functions;
+        if (this.dbType === dbTypes.postgresql && isAgg === true) {
+            functions = pgFunctionsWithAggregation;
+        } else if (this.dbType === dbTypes.postgresql && isAgg === false) {
+            functions = pgFunctions;
+        } else if (this.dbType === dbTypes.mysql && isAgg === true) {
+            functions = mysqlFunctionsWithAggregation;
+        } else if (this.dbType === dbTypes.mysql && isAgg === false) {
+            functions = mysqlFunctions;
+        } else {
+            throw Error('Invalid query specification.');
+        }
+
+        const selectRes = cb(cols, functions as DbFunctions<TDbType, TGroupedColumns extends undefined ? false : true>);
+
+        return new QueryBuilder(
+            this.dbType,
+            this.from,
+            {
+                asName: this.asName,
+                columnsSelectionList: this.columnsSelectionList,
+                groupedColumns: this.groupedColumns,
+                joinSpecs: this.joinSpecs,
+                resultSelection: selectRes
+            }) as IExecuteableQuery<TDbType, TFrom, TJoinSpecs, TCbResult, AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns, TOrderBySpecs>;
     };
 
 
@@ -132,17 +175,46 @@ class QueryBuilder<
         IGroupByClause<TDbType, TFrom, TInnerJoinAccumulated, TAccumulatedParamsResult> &
         IOrderByClause<TDbType, TFrom, TInnerJoinAccumulated, TAccumulatedParamsResult> {
 
+        let columnsSelectionList = this.columnsSelectionList;
+
         let joinTable: TInnerJoinResult;
         if (table instanceof Table) {
             const queryColumns = table.columnsList.map((col: Column<TDbType, any, any, any, any, any, any>) => {
                 return new QueryColumn(table.dbType, col);
             }) as QueryColumn<TDbType, any, any, any, any, any, any>[];
 
-            joinTable = new QueryTable(table.dbType, table, queryColumns) as TInnerJoinResult;
+            let res = new QueryTable(table.dbType, table, queryColumns);
+            let ownerName = res.asName ? res.asName : res.table.name;
+            let columnsSelection = columnsSelectionFactory<TDbType>(res, res.columnsList.map(c => c.setOwnerName(ownerName)));
+
+            joinTable = res as TInnerJoinResult;
+            columnsSelectionList = {
+                ...columnsSelectionList,
+                [ownerName]: columnsSelection
+            }
         } else if (table instanceof QueryTable) {
             joinTable = table as QueryTable<TDbType, any, any, any, any, any> as TInnerJoinResult;
+            let ownerName = table.asName ? table.asName : table.table.name;
+            let columnsSelection = columnsSelectionFactory<TDbType>(table, table.columnsList.map((c: QueryColumn<TDbType, any, any, any, any, any, any, any>) => c.setOwnerName(ownerName)))
+
+            columnsSelectionList = {
+                ...columnsSelectionList,
+                [ownerName]: columnsSelection
+            }
         } else if (table instanceof QueryBuilder) {
             joinTable = table as IExecuteableQuery<TDbType, any, any, any, any, any, any, any> as TInnerJoinResult;
+
+            if (typeof table.asName !== "string") {
+                throw Error("Subquery alias must be provided.");
+            }
+
+            let ownerName = table.asName;
+            let columnsSelection = columnsSelectionFactory<TDbType>(table, table.resultSelection.map((c: ResultShapeItem<TDbType>) => c.setOwnerName(ownerName)))
+
+            columnsSelectionList = {
+                ...columnsSelectionList,
+                [ownerName]: columnsSelection
+            }
         } else {
             throw Error('Invalid table type.');
         }
@@ -153,6 +225,7 @@ class QueryBuilder<
         return new QueryBuilder(this.dbType, this.from, {
             joinSpecs: mergedJoinSpecs,
             resultSelection: this.resultSelection,
+            columnsSelectionList: columnsSelectionList,
             asName: this.asName
         }) as
             IJoinClause<TDbType, TFrom, TInnerJoinAccumulated, TAccumulatedParamsResult> &
@@ -178,12 +251,33 @@ class QueryBuilder<
     }
 
     groupBy<
-        const TCbResult extends GroupBySpecs<TDbType>
+        const TCbResult extends GroupBySpecs<TDbType>,
+        TCols extends TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>
     >(cb: (
-        cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>,
+        cols: TCols,
         ops: DbFunctions<TDbType, false>
     ) => TCbResult) {
-        return new QueryBuilder(this.dbType, this.from) as
+
+        if (isNullOrUndefined(this.columnsSelectionList)) {
+            throw Error("No query object provided.");
+        }
+
+        const functions = this.dbType === dbTypes.postgresql ? pgFunctions : this.dbType === dbTypes.mysql ? mysqlFunctions : undefined;
+        if (isNullOrUndefined(functions)) {
+            throw Error('Invalid db type.');
+        }
+        const res = cb(this.columnsSelectionList as TCols, functions as DbFunctions<TDbType, false>);
+
+        return new QueryBuilder(
+            this.dbType,
+            this.from,
+            {
+                asName: this.asName,
+                columnsSelectionList: this.columnsSelectionList,
+                groupedColumns: res,
+                joinSpecs: this.joinSpecs,
+                resultSelection: this.resultSelection
+            }) as
             ISelectClause<TDbType, TFrom, TJoinSpecs, TParams, TCbResult> &
             IHavingClause<TDbType, TFrom, TJoinSpecs, TParams, TCbResult> &
             IOrderByClause<TDbType, TFrom, TJoinSpecs, TParams, TCbResult>;
@@ -210,7 +304,7 @@ class QueryBuilder<
             ? []
             : [params: QueryParamsToObject<TParams>]
     ):
-        TResult extends TResultShape<TDbType> ?
+        TResult extends ResultShape<TDbType> ?
         ColumnsToResultMap<TDbType, TResult> :
         never {
 

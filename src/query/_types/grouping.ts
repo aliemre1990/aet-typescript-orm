@@ -5,7 +5,7 @@ import type { IComparable } from "../_interfaces/IComparable.js";
 import type QueryTable from "../queryTable.js";
 import type { IExecuteableQuery } from "../_interfaces/IExecuteableQuery.js";
 import type ColumnSQLFunction from "../functions/_functions.js";
-import type ColumnsSelection from "../ColumnsSelection.js";
+import type ColumnsSelection from "../columnsSelection.js";
 import type { FromType, JoinSpecsType } from "../queryBuilder.js";
 
 //

@@ -16,9 +16,25 @@ type ColumnsSelection<
         [K in TColumns[number]as K["defaultFieldKey"]]: K;
     };
 
+function columnsSelectionFactory<TDbType extends DbType>(
+    queryObject: QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any, any>,
+    columns: readonly IComparable<TDbType, any, any, any, any, any, string, any>[]
+): ColumnsSelection<TDbType, any, any> {
+
+    let res: ColumnsSelection<TDbType, any, any> = {
+        [ColumnsSelectionQueryTableObjectSymbol]: queryObject,
+    }
+
+    for (const col of columns) {
+        res[col.defaultFieldKey] = col;
+    }
+
+    return res;
+}
 
 export default ColumnsSelection;
 
 export {
-    ColumnsSelectionQueryTableObjectSymbol
+    ColumnsSelectionQueryTableObjectSymbol,
+    columnsSelectionFactory
 }

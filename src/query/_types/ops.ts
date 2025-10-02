@@ -28,24 +28,28 @@ type MySQLCoalesceFn = ReturnType<typeof generateCoalesceFn<MySQLDbType>>;
 type PgRoundFn = ReturnType<typeof generateRoundFn<PgDbType>>;
 type MySQLRoundFn = ReturnType<typeof generateRoundFn<MySQLDbType>>;
 
+
+
+/**
+ * Comparison operations
+ */
 type PgAndFn = ReturnType<typeof generateAndFn<PgDbType>>;
 type MySQLAndFn = ReturnType<typeof generateAndFn<MySQLDbType>>;
 
-type PgSumFn = ReturnType<typeof generateSumFn<PgDbType>>;
-type MySQLSumFn = ReturnType<typeof generateSumFn<MySQLDbType>>;
-
-/**
- * 
- */
 type LogicalOperators<TDbType extends DbType> = {
     and: TDbType extends PgDbType ? PgAndFn : TDbType extends MySQLDbType ? MySQLAndFn : never
 }
 
-
+/**
+ * Aggregation
+ */
 type PgAggregationFunction = {
     jsonAgg: typeof jsonAggFn,
     jsonbAgg: typeof jsonbAggFn
 }
+
+type PgSumFn = ReturnType<typeof generateSumFn<PgDbType>>;
+type MySQLSumFn = ReturnType<typeof generateSumFn<MySQLDbType>>;
 
 type AggregationFunctions<TDbType extends DbType> = {
     sum: TDbType extends PgDbType ? PgSumFn : TDbType extends MySQLDbType ? MySQLSumFn : never
@@ -81,5 +85,8 @@ type DbOperators<TDbType extends DbType, TIsAgg extends boolean> =
 
 export {
     DbOperators,
-    DbFunctions
+    DbFunctions,
+    AggregationFunctions,
+    ArithmeticOperations,
+    LogicalOperators
 }

@@ -1,6 +1,6 @@
 import { DbType } from "../../db.js";
 import type { TablesToObject, TableToColumnsMap } from "../_types/miscellaneous.js";
-import type { TResultShape } from "../_types/result.js";
+import type { ResultShape } from "../_types/result.js";
 import { IExecuteableQuery } from "./IExecuteableQuery.js";
 import type QueryTable from "../queryTable.js";
 import type { GroupedTablesToColumnsMap } from "../_types/grouping.js";
@@ -22,7 +22,7 @@ interface ISelectClause<
     TOrderBySpecs extends OrderBySpecs<TDbType> | undefined = undefined
 > {
     select<
-        const TCbResult extends TResultShape<TDbType>
+        const TCbResult extends ResultShape<TDbType>
     >(
         cb: (
             cols: TGroupedColumns extends undefined ? TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>> : GroupedTablesToColumnsMap<TDbType, TFrom, TJoinSpecs, TGroupedColumns>,

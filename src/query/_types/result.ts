@@ -1,17 +1,15 @@
 import type { DbType } from "../../db.js";
 import type { DeepPrettify } from "../../utility/common.js";
-import type ColumnComparisonOperation from "../comparisons/_comparisonOperations.js";
-import type ColumnLogicalOperation from "../logicalOperations.js";
 import type { IComparable } from "../_interfaces/IComparable.js";
 import type QueryParam from "../param.js";
-import type { OrderBySpecs, OrderType } from "../_interfaces/IOrderByClause.js";
 
-type TResultShape<TDbType extends DbType> = readonly IComparable<TDbType, any, any, any, any, false, any, any>[]
+type ResultShapeItem<TDbType extends DbType> = IComparable<TDbType, any, any, any, any, false, any, any>;
+type ResultShape<TDbType extends DbType> = readonly ResultShapeItem<TDbType>[];
 
-type ColumnsToResultMap<TDbType extends DbType, T extends TResultShape<TDbType> | undefined> =
+type ColumnsToResultMap<TDbType extends DbType, T extends ResultShape<TDbType> | undefined> =
     DeepPrettify<
         T extends undefined ? undefined :
-        T extends TResultShape<TDbType> ?
+        T extends ResultShape<TDbType> ?
         {
             [
             R in T[number]as R extends IComparable<TDbType, any, any, any, any, any, infer TDefaultKey, infer TAs> ?
@@ -39,7 +37,8 @@ type QueryParamsToObject<T extends readonly QueryParam<any, any, any, any, any, 
     : undefined;
 
 export type {
-    TResultShape,
+    ResultShape,
+    ResultShapeItem,
     ColumnsToResultMap,
     QueryParamsToObject
 }

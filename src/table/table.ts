@@ -5,7 +5,7 @@ import type { IExecuteableQuery } from "../query/_interfaces/IExecuteableQuery.j
 import type ColumnLogicalOperation from "../query/logicalOperations.js";
 import QueryBuilder from "../query/queryBuilder.js";
 import type { TablesToObject, TableToColumnsMap } from "../query/_types/miscellaneous.js";
-import type { TResultShape } from "../query/_types/result.js";
+import type { ResultShape } from "../query/_types/result.js";
 import Column from "./column.js";
 import QueryColumn from "../query/queryColumn.js";
 import QueryTable from "../query/queryTable.js";
@@ -75,7 +75,7 @@ class Table<
     }
 
     select<
-        const TCbResult extends TResultShape<TDbType>
+        const TCbResult extends ResultShape<TDbType>
     >(
         cb: (
             cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>]>>,
