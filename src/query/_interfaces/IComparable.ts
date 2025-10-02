@@ -31,6 +31,8 @@ interface IComparable<
     asName?: TAs;
     defaultFieldKey: TDefaultFieldKey;
 
+    ownerName?: string;
+    setOwnerName(val: string): IComparable<TDbType, TComparableId, TParams, TValueType, TFinalValueType, TIsAgg, TDefaultFieldKey, TAs>;
 
 
     eq: typeof eq;

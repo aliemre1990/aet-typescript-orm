@@ -27,18 +27,26 @@ class QueryParam<
     [IComparableIdDummySymbol]?: TComparableId;
     isAgg?: false;
 
+    name: TName;
     asName?: TAs;
     defaultFieldKey: TDefaultFieldKey;
 
-    constructor(dbType: TDbType, public name: TName, asName?: TAs) {
+    constructor(dbType: TDbType, name: TName, asName?: TAs, ownerName?: string) {
         this.dbType = dbType;
+        this.name = name;
         this.asName = asName;
+        this.ownerName = ownerName;
 
         this.defaultFieldKey = `$${name}` as TDefaultFieldKey;
     }
 
     as<TAs extends string>(asName: TAs) {
-        return new QueryParam<TDbType, TName, TValueType, TAs, TDefaultFieldKey>(this.dbType, this.name, asName);
+        return new QueryParam<TDbType, TName, TValueType, TAs, TDefaultFieldKey>(this.dbType, this.name, asName, this.ownerName);
+    }
+
+    ownerName?: string;
+    setOwnerName(val: string): QueryParam<TDbType, TName, TValueType, TAs, TDefaultFieldKey, TComparableId> {
+        return new QueryParam<TDbType, TName, TValueType, TAs, TDefaultFieldKey, TComparableId>(this.dbType, this.name, this.asName, val);
     }
 
     type<TValueType extends DbValueTypes | null>() {

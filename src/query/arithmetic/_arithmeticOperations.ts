@@ -81,16 +81,24 @@ class SQLArithmeticOperation<
     between: typeof between = between;
 
     as<TAs extends string>(asName: TAs) {
-        return new SQLArithmeticOperation<TDbType, TArithmeticOperation, TArgs, TReturnType, TIsAgg, TAs, TDefaultFieldKey>(this.dbType, this.args, this.operation, asName);
+        return new SQLArithmeticOperation<TDbType, TArithmeticOperation, TArgs, TReturnType, TIsAgg, TAs, TDefaultFieldKey>(this.dbType, this.args, this.operation, asName, this.ownerName);
     }
+
+    ownerName?: string;
+    setOwnerName(val: string): SQLArithmeticOperation<TDbType, TArithmeticOperation, TArgs, TReturnType, TIsAgg, TAs, TDefaultFieldKey, TComparableId> {
+        return new SQLArithmeticOperation<TDbType, TArithmeticOperation, TArgs, TReturnType, TIsAgg, TAs, TDefaultFieldKey, TComparableId>(this.dbType, this.args, this.operation, this.asName, val);
+    }
+
 
     constructor(
         public dbType: TDbType,
         public args: TArgs,
         public operation: TArithmeticOperation,
-        asName?: TAs
+        asName?: TAs,
+        ownerName?: string
     ) {
         this.asName = asName;
+        this.ownerName = ownerName;
         this.defaultFieldKey = `${operation.name}()` as TDefaultFieldKey;
     }
 }

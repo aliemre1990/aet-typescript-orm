@@ -38,17 +38,25 @@ class JSONBuildObjectFunction<
     defaultFieldKey: TDefaultFieldKey;
 
     as<TAs extends string>(asName: TAs) {
-        return new JSONBuildObjectFunction<TDbType, TObj, TReturnType, TIsAgg, TAs, TDefaultFieldKey>(this.dbType, this.obj, this.isJsonB, asName);
+        return new JSONBuildObjectFunction<TDbType, TObj, TReturnType, TIsAgg, TAs, TDefaultFieldKey>(this.dbType, this.obj, this.isJsonB, asName, this.ownerName);
+    }
+
+
+    ownerName?: string;
+    setOwnerName(val: string): JSONBuildObjectFunction<TDbType, TObj, TReturnType, TIsAgg, TAs, TDefaultFieldKey, TComparableId> {
+        return new JSONBuildObjectFunction<TDbType, TObj, TReturnType, TIsAgg, TAs, TDefaultFieldKey, TComparableId>(this.dbType, this.obj, this.isJsonB, this.asName, val);
     }
 
     constructor(
         dbType: TDbType,
         public obj: TObj,
         public isJsonB: boolean,
-        asName?: TAs
+        asName?: TAs,
+        ownerName?: string
     ) {
         this.dbType = dbType;
         this.asName = asName;
+        this.ownerName = ownerName;
         this.defaultFieldKey = 'JSON_BUILD_OBJECT()' as TDefaultFieldKey;
     }
 

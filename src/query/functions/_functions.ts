@@ -59,16 +59,24 @@ class ColumnSQLFunction<
     between: typeof between = between;
 
     as<TAs extends string>(asName: TAs) {
-        return new ColumnSQLFunction<TDbType, TSQLFunction, TArgs, TReturnType, TIsAgg, TAs, TDefaultFieldKey>(this.dbType, this.args, this.sqlFunction, asName);
+        return new ColumnSQLFunction<TDbType, TSQLFunction, TArgs, TReturnType, TIsAgg, TAs, TDefaultFieldKey>(this.dbType, this.args, this.sqlFunction, asName, this.ownerName);
+    }
+
+
+    ownerName?: string;
+    setOwnerName(val: string): ColumnSQLFunction<TDbType, TSQLFunction, TArgs, TReturnType, TIsAgg, TAs, TDefaultFieldKey, TComparableId> {
+        return new ColumnSQLFunction<TDbType, TSQLFunction, TArgs, TReturnType, TIsAgg, TAs, TDefaultFieldKey, TComparableId>(this.dbType, this.args, this.sqlFunction, this.asName, val);
     }
 
     constructor(
         public dbType: TDbType,
         public args: TArgs,
         public sqlFunction: TSQLFunction,
-        asName?: TAs
+        asName?: TAs,
+        ownerName?: string
     ) {
         this.asName = asName;
+        this.ownerName = ownerName;
         this.defaultFieldKey = `${sqlFunction.name}()` as TDefaultFieldKey;
     }
 }

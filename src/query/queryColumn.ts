@@ -44,14 +44,20 @@ class QueryColumn<
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 
-    constructor(dbType: TDbType, public column: TColumn, asName?: TAsName) {
+    constructor(dbType: TDbType, public column: TColumn, asName?: TAsName, ownerName?: string) {
         this.asName = asName;
+        this.ownerName = ownerName;
         this.dbType = dbType;
         this.defaultFieldKey = column.name as TDefaultFieldKey;
     }
 
     as<TAsName extends string>(val: TAsName) {
-        return new QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName, TDefaultFieldKey>(this.dbType, this.column, val);
+        return new QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName, TDefaultFieldKey>(this.dbType, this.column, val, this.ownerName);
+    }
+
+    ownerName?: string;
+    setOwnerName(val: string): QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName, TDefaultFieldKey, TValueType, TFinalValueType, TComparableId> {
+        return new QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName, TDefaultFieldKey, TValueType, TFinalValueType, TComparableId>(this.dbType, this.column, this.asName, val);
     }
 
     setQTableSpecs(val: TQTableSpecs) {
