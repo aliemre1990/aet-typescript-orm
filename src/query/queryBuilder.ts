@@ -23,13 +23,15 @@ import type { OrderBySpecs } from "./_interfaces/IOrderByClause.js";
 import type { GroupBySpecs } from "./_interfaces/IGroupByClause.js";
 import type { DbValueTypes } from "../table/column.js";
 import type { IDbType } from "./_interfaces/IDbType.js";
-import type { AccumulateSubQueryParams, ConvertTablesToQueryTables, InferDbTypeFromFromFirstIDbType, SetComparableIdsOfSubQueries } from "./_types/subQueryUtility.js";
+import type { AccumulateSubQueryParams, ConvertComparableIdsOfSelectResult, ConvertTablesToQueryTables, InferDbTypeFromFromFirstIDbType, SetComparableIdsOfSubQueries } from "./_types/subQueryUtility.js";
 import type { AccumulateComparisonParams } from "./_types/paramAccumulationComparison.js";
 import type { AccumulateOrderByParams } from "./_types/paramAccumulationOrderBy.js";
 import type { AccumulateColumnParams } from "./_types/paramAccumulationSelect.js";
+import type ColumnsSelection from "./ColumnsSelection.js";
 
 type JoinSpecsType<TDbType extends DbType> = readonly { joinType: JoinType, table: QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any, any> }[]
-type FromType<TDbType extends DbType> = readonly (QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any, any>)[]
+type FromType<TDbType extends DbType> = readonly (QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any, any>)[];
+type ColumnsSelectionListType<TDbType extends DbType> = { [key: string]: ColumnsSelection<TDbType, any, any> }
 
 
 class QueryBuilder<
@@ -55,17 +57,23 @@ class QueryBuilder<
 
     asName?: TAs;
 
-    colsSelection?: TResult;
 
     from: FromType<TDbType>;
     joinSpecs?: TJoinSpecs;
+    columnsSelectionList?: ColumnsSelectionListType<TDbType>;
+    resultSelection?: TResult;
 
-    constructor(dbType: TDbType, from: FromType<TDbType>, data?: { asName: TAs, colsSelection?: TResult, joinSpecs?: TJoinSpecs }) {
+    constructor(
+        dbType: TDbType,
+        from: FromType<TDbType>,
+        data?: { asName: TAs, joinSpecs?: TJoinSpecs, resultSelection?: TResult, columnsSelectionList?: ColumnsSelectionListType<TDbType> }
+    ) {
         this.dbType = dbType;
+
         this.from = from;
         this.joinSpecs = data?.joinSpecs;
-
-        this.colsSelection = data?.colsSelection;
+        this.resultSelection = data?.resultSelection;
+        this.columnsSelectionList = data?.columnsSelectionList;
         this.asName = data?.asName;
     }
 
@@ -79,7 +87,7 @@ class QueryBuilder<
             TGroupedColumns,
             TOrderBySpecs,
             TAs
-        >(this.dbType, this.from, { asName, colsSelection: this.colsSelection, joinSpecs: this.joinSpecs })
+        >(this.dbType, this.from, { asName, resultSelection: this.resultSelection, joinSpecs: this.joinSpecs })
     }
 
     select<
@@ -98,7 +106,8 @@ class QueryBuilder<
         TJoinType extends JoinType,
         TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any, string>,
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>,
-        TInnerJoinResult extends QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any, any> = TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
+        TInnerJoinResult extends QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any, string> =
+        TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
         QueryTable<
             TDbType,
             TInnerCols,
@@ -106,6 +115,7 @@ class QueryBuilder<
             Table<TDbType, TInnerCols, TInnerTableName>,
             MapToQueryColumns<TDbType, TDbType, TInnerCols>
         > :
+        TInnerJoinTable extends IExecuteableQuery<TDbType, any, any, any, any, any, any, string> ? ConvertComparableIdsOfSelectResult<TDbType, TInnerJoinTable> :
         TInnerJoinTable,
         const TInnerJoinAccumulated extends JoinSpecsType<TDbType> = readonly [...(TJoinSpecs extends undefined ? [] : TJoinSpecs), { joinType: TJoinType, table: TInnerJoinResult }],
         TAccumulatedParams extends QueryParam<TDbType, any, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>,
@@ -142,7 +152,7 @@ class QueryBuilder<
 
         return new QueryBuilder(this.dbType, this.from, {
             joinSpecs: mergedJoinSpecs,
-            colsSelection: this.colsSelection,
+            resultSelection: this.resultSelection,
             asName: this.asName
         }) as
             IJoinClause<TDbType, TFrom, TInnerJoinAccumulated, TAccumulatedParamsResult> &
@@ -206,7 +216,7 @@ class QueryBuilder<
 
         const params = args[0];
 
-        if (isNullOrUndefined(this?.colsSelection)) {
+        if (isNullOrUndefined(this?.resultSelection)) {
             return {} as any;
         }
 

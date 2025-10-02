@@ -17,6 +17,7 @@ import type { GroupBySpecs } from "../query/_interfaces/IGroupByClause.js";
 import type { IDbType } from "../query/_interfaces/IDbType.js";
 import type { AccumulateOrderByParams } from "../query/_types/paramAccumulationOrderBy.js";
 import type { AccumulateColumnParams } from "../query/_types/paramAccumulationSelect.js";
+import type { ConvertComparableIdsOfSelectResult } from "../query/_types/subQueryUtility.js";
 
 type TableSpecsType<TTableName extends string = string> = { tableName: TTableName }
 
@@ -96,7 +97,8 @@ class Table<
         TJoinType extends JoinType,
         TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any, string>,
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>,
-        TInnerJoinResult extends QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any, any> = TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
+        TInnerJoinResult extends QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any, any> =
+        TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
         QueryTable<
             TDbType,
             TInnerCols,
@@ -104,6 +106,7 @@ class Table<
             Table<TDbType, TInnerCols, TInnerTableName>,
             { [K in keyof TInnerCols]: QueryColumn<TDbType, TInnerCols[K], { tableName: TInnerTableName, asTableName: undefined }> }
         > :
+        TInnerJoinTable extends IExecuteableQuery<TDbType, any, any, any, any, any, any, string> ? ConvertComparableIdsOfSelectResult<TDbType, TInnerJoinTable> :
         TInnerJoinTable,
 
     >(

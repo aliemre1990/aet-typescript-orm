@@ -13,7 +13,7 @@ import type QueryParam from "../param.js";
 import type IOrderByClause from "./IOrderByClause.js";
 import type { DbValueTypes } from "../../table/column.js";
 import type { IExecuteableQuery } from "./IExecuteableQuery.js";
-import type { AccumulateSubQueryParams } from "../_types/subQueryUtility.js";
+import type { AccumulateSubQueryParams, ConvertComparableIdsOfSelectResult } from "../_types/subQueryUtility.js";
 import type { AccumulateComparisonParams } from "../_types/paramAccumulationComparison.js";
 import type { FromType, JoinSpecsType } from "../queryBuilder.js";
 import type { MapToQueryColumns } from "../../table/table.js";
@@ -39,7 +39,8 @@ interface IJoinClause<
         TJoinType extends JoinType,
         TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any, string>,
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>,
-        TInnerJoinResult extends QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any, any> = TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
+        TInnerJoinResult extends QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any, string> =
+        TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
         QueryTable<
             TDbType,
             TInnerCols,
@@ -47,6 +48,7 @@ interface IJoinClause<
             Table<TDbType, TInnerCols, TInnerTableName>,
             MapToQueryColumns<TDbType, TDbType, TInnerCols>
         > :
+        TInnerJoinTable extends IExecuteableQuery<TDbType, any, any, any, any, any, any, string> ? ConvertComparableIdsOfSelectResult<TDbType, TInnerJoinTable> :
         TInnerJoinTable,
         const TInnerJoinAccumulated extends JoinSpecsType<TDbType> = readonly [...(TJoinSpecs extends undefined ? [] : TJoinSpecs), { joinType: TJoinType, table: TInnerJoinResult }],
         TAccumulatedParams extends QueryParam<TDbType, any, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>,

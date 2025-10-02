@@ -26,7 +26,7 @@ type ConvertComparableIdsOfSelectResult<
     T extends IExecuteableQuery<TDbType, infer TFrom, infer TJoinSpecs, infer TResult, infer TParams, infer TGroupedColumns, infer TOrderBySpecs, infer TAs extends string> ?
     TResult extends undefined ?
     never :
-    TResult extends TResultShape<TDbType>[] ?
+    TResult extends TResultShape<TDbType> ?
     IExecuteableQuery<
         TDbType,
         TFrom,
@@ -101,5 +101,6 @@ export type {
     InferDbTypeFromFromFirstIDbType,
     ConvertTablesToQueryTables,
     SetComparableIdsOfSubQueries,
-    AccumulateSubQueryParams
+    AccumulateSubQueryParams,
+    ConvertComparableIdsOfSelectResult
 }
