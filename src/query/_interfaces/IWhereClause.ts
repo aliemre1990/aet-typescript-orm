@@ -9,7 +9,7 @@ import type IGroupByClause from "./IGroupByClause.js";
 import type IOrderByClause from "./IOrderByClause.js";
 import type { DbValueTypes } from "../../table/column.js";
 import type { AccumulateComparisonParams } from "../_types/paramAccumulationComparison.js";
-import type { FromType, JoinSpecsType } from "../queryBuilder.js";
+import type { ComparisonType, FromType, JoinSpecsType } from "../queryBuilder.js";
 
 interface IWhereClause<
     TDbType extends DbType,
@@ -17,11 +17,11 @@ interface IWhereClause<
     TJoinSpecs extends JoinSpecsType<TDbType> | undefined,
     TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null, any, any, any>[] | undefined = undefined
 > {
-    where<TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>
-    >(cb: (
-        cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>,
-        ops: DbOperators<TDbType, false>
-    ) => TCbResult):
+    where<TCbResult extends ComparisonType<TDbType>>(
+        cb: (
+            cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>,
+            ops: DbOperators<TDbType, false>
+        ) => TCbResult):
         ISelectClause<TDbType, TFrom, TJoinSpecs, AccumulateComparisonParams<TParams, TCbResult>> &
         IGroupByClause<TDbType, TFrom, TJoinSpecs, AccumulateComparisonParams<TParams, TCbResult>> &
         IOrderByClause<TDbType, TFrom, TJoinSpecs, AccumulateComparisonParams<TParams, TCbResult>>

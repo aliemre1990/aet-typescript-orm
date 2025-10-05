@@ -19,10 +19,9 @@ interface IGroupByClause<
     TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null, any, any, any>[] | undefined = undefined
 > {
     groupBy<
-        const TCbResult extends GroupBySpecs<TDbType>,
-        TCols extends TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>
+        const TCbResult extends GroupBySpecs<TDbType>
     >(cb: (
-        cols: TCols,
+        cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>,
         ops: DbFunctions<TDbType, false>
     ) => TCbResult):
         ISelectClause<TDbType, TFrom, TJoinSpecs, TParams, TCbResult> &

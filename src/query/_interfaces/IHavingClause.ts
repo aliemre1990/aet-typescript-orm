@@ -9,7 +9,7 @@ import type IOrderByClause from "./IOrderByClause.js";
 import type { GroupBySpecs } from "./IGroupByClause.js";
 import type { DbValueTypes } from "../../table/column.js";
 import type { AccumulateComparisonParams } from "../_types/paramAccumulationComparison.js";
-import type { FromType, JoinSpecsType } from "../queryBuilder.js";
+import type { ComparisonType, FromType, JoinSpecsType } from "../queryBuilder.js";
 
 interface IHavingClause<
     TDbType extends DbType,
@@ -18,8 +18,7 @@ interface IHavingClause<
     TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null, any, any, any>[] | undefined = undefined,
     TGroupedColumns extends GroupBySpecs<TDbType> | undefined = undefined
 > {
-    having<TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>
-    >(cb: (
+    having<TCbResult extends ComparisonType<TDbType>>(cb: (
         cols: GroupedTablesToColumnsMap<TDbType, TFrom, TJoinSpecs, TGroupedColumns>,
         ops: DbOperators<TDbType, true>
     ) => TCbResult):

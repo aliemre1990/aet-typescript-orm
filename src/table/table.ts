@@ -3,7 +3,7 @@ import type { PgColumnType } from "./columnTypes.js";
 import type ColumnComparisonOperation from "../query/comparisons/_comparisonOperations.js";
 import type { IExecuteableQuery } from "../query/_interfaces/IExecuteableQuery.js";
 import type ColumnLogicalOperation from "../query/logicalOperations.js";
-import QueryBuilder from "../query/queryBuilder.js";
+import QueryBuilder, { type ComparisonType } from "../query/queryBuilder.js";
 import type { TablesToObject, TableToColumnsMap } from "../query/_types/miscellaneous.js";
 import type { ResultShape } from "../query/_types/result.js";
 import Column from "./column.js";
@@ -128,12 +128,11 @@ class Table<
             .join(type, table, cb);
     }
 
-    where<
-        TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>
-    >(cb: (
-        cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>]>>,
-        ops: DbOperators<TDbType, false>
-    ) => TCbResult) {
+    where<TCbResult extends ComparisonType<TDbType>>(
+        cb: (
+            cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>]>>,
+            ops: DbOperators<TDbType, false>
+        ) => TCbResult) {
         const queryColumns = this.columnsList.map((col) => {
             return new QueryColumn(this.dbType, col);
         }) as MapToQueryColumns<TDbType, TTableName, TColumns>;

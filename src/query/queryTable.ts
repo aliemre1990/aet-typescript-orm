@@ -16,7 +16,7 @@ import type { ResultShape } from "./_types/result.js";
 import type { ConvertComparableIdsOfSelectResult } from "./_types/subQueryUtility.js";
 import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
-import QueryBuilder from "./queryBuilder.js";
+import QueryBuilder, { type ComparisonType } from "./queryBuilder.js";
 
 type MapQueryColumnsToRecord<TColumns extends readonly QueryColumn<any, any, any, any, any, any, any>[]> = {
     [C in TColumns[number]as C["column"]["name"]]: C
@@ -88,12 +88,11 @@ class QueryTable<
             .join(type, table, cb);
     }
 
-    where<
-        TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>
-    >(cb: (
-        cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
-        ops: DbOperators<TDbType, false>
-    ) => TCbResult) {
+    where<TCbResult extends ComparisonType<TDbType>>(
+        cb: (
+            cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
+            ops: DbOperators<TDbType, false>
+        ) => TCbResult) {
         return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined>(this.dbType, [this]).where(cb);
     }
 

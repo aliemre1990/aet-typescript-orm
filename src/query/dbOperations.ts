@@ -108,22 +108,22 @@ const mysqlLogicalOperators: LogicalOperators<MySQLDbType> = {
 /**
  * All operators
  */
-const pgDbOperators = {
+const pgDbOperators: DbOperators<PgDbType, false> = {
     ...pgLogicalOperators,
     ...pgFunctions
 }
 
-const pgDbOperatorsWithAggregation = {
+const pgDbOperatorsWithAggregation: DbOperators<PgDbType, true> = {
     ...pgLogicalOperators,
     ...pgFunctionsWithAggregation
 }
 
-const mysqlDbOperators = {
+const mysqlDbOperators: DbOperators<MySQLDbType, false> = {
     ...mysqlLogicalOperators,
     ...mysqlFunctions
 }
 
-const mysqlDbOperatorsWithAggregation = {
+const mysqlDbOperatorsWithAggregation: DbOperators<MySQLDbType, true> = {
     ...mysqlLogicalOperators,
     ...mysqlFunctionsWithAggregation
 }
@@ -133,5 +133,9 @@ export {
     pgFunctions,
     pgFunctionsWithAggregation,
     mysqlFunctions,
-    mysqlFunctionsWithAggregation
+    mysqlFunctionsWithAggregation,
+    pgDbOperators,
+    pgDbOperatorsWithAggregation,
+    mysqlDbOperators,
+    mysqlDbOperatorsWithAggregation
 }
