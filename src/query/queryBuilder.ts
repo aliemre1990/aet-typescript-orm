@@ -29,7 +29,6 @@ import type { AccumulateOrderByParams } from "./_types/paramAccumulationOrderBy.
 import type { AccumulateColumnParams } from "./_types/paramAccumulationSelect.js";
 import type ColumnsSelection from "./columnsSelection.js";
 import { columnsSelectionFactory } from "./columnsSelection.js";
-import type { IComparable } from "./_interfaces/IComparable.js";
 import { mysqlDbOperatorsWithAggregation, mysqlFunctions, mysqlFunctionsWithAggregation, pgDbOperatorsWithAggregation, pgFunctions, pgFunctionsWithAggregation } from "./dbOperations.js";
 
 type JoinSpecsType<TDbType extends DbType> = readonly { joinType: JoinType, table: QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any> }[]
@@ -155,7 +154,9 @@ class QueryBuilder<
                 columnsSelectionList: this.columnsSelectionList,
                 groupedColumns: this.groupedColumns,
                 joinSpecs: this.joinSpecs,
-                resultSelection: selectRes
+                resultSelection: selectRes,
+                havingSpec: this.havingSpec,
+                orderBySpecs: this.orderBySpecs
             }) as IExecuteableQuery<TDbType, TFrom, TJoinSpecs, TCbResult, AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns>;
     };
 

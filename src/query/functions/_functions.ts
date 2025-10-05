@@ -48,6 +48,7 @@ class ColumnSQLFunction<
     [IComparableValueDummySymbol]?: NonNullable<TReturnType>;
     [IComparableFinalValueDummySymbol]?: TReturnType;
     [IComparableIdDummySymbol]?: TComparableId;
+    
     params?: InferParamsFromFnArgs<TArgs>;
     isAgg?: TIsAgg;
     defaultFieldKey: TDefaultFieldKey;
