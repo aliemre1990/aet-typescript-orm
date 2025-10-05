@@ -18,8 +18,7 @@ interface ISelectClause<
     TFrom extends FromType<TDbType>,
     TJoinSpecs extends JoinSpecsType<TDbType> | undefined,
     TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null, any, any, any>[] | undefined = undefined,
-    TGroupedColumns extends GroupBySpecs<TDbType> | undefined = undefined,
-    TOrderBySpecs extends OrderBySpecs<TDbType> | undefined = undefined
+    TGroupedColumns extends GroupBySpecs<TDbType> | undefined = undefined
 > {
     select<
         const TCbResult extends ResultShape<TDbType>
@@ -28,7 +27,7 @@ interface ISelectClause<
             cols: TGroupedColumns extends undefined ? TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>> : GroupedTablesToColumnsMap<TDbType, TFrom, TJoinSpecs, TGroupedColumns>,
             ops: DbFunctions<TDbType, TGroupedColumns extends undefined ? false : true>
         ) => TCbResult
-    ): IExecuteableQuery<TDbType, TFrom, TJoinSpecs, TCbResult, AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns, TOrderBySpecs>
+    ): IExecuteableQuery<TDbType, TFrom, TJoinSpecs, TCbResult, AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns>
 
 }
 

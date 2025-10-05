@@ -15,7 +15,6 @@ interface IExecuteableQuery<
     TResult extends ResultShape<TDbType> | undefined = undefined,
     TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null, any, any, any>[] | undefined = undefined,
     TGroupedColumns extends GroupBySpecs<TDbType> | undefined = undefined,
-    TOrderBySpecs extends OrderBySpecs<TDbType> | undefined = undefined,
     TAs extends string | undefined = undefined
 > extends IDbType<TDbType> {
 
@@ -24,7 +23,7 @@ interface IExecuteableQuery<
 
     resultSelection?: TResult;
 
-    as<TAs extends string>(asName: TAs): IExecuteableQuery<TDbType, TFrom, TJoinSpecs, TResult, TParams, TGroupedColumns, TOrderBySpecs, TAs>;
+    as<TAs extends string>(asName: TAs): IExecuteableQuery<TDbType, TFrom, TJoinSpecs, TResult, TParams, TGroupedColumns, TAs>;
 
     exec: (...args: TParams extends undefined ? [] : [params: QueryParamsToObject<TParams>]) =>
         TResult extends ResultShape<TDbType> ?

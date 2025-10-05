@@ -32,8 +32,8 @@ import { columnsSelectionFactory } from "./columnsSelection.js";
 import type { IComparable } from "./_interfaces/IComparable.js";
 import { mysqlFunctions, mysqlFunctionsWithAggregation, pgFunctions, pgFunctionsWithAggregation } from "./dbOperations.js";
 
-type JoinSpecsType<TDbType extends DbType> = readonly { joinType: JoinType, table: QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any, any> }[]
-type FromType<TDbType extends DbType> = readonly (QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any, any>)[];
+type JoinSpecsType<TDbType extends DbType> = readonly { joinType: JoinType, table: QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any> }[]
+type FromType<TDbType extends DbType> = readonly (QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any>)[];
 type ColumnsSelectionListType<TDbType extends DbType> = { [key: string]: ColumnsSelection<TDbType, any, any> }
 
 
@@ -44,12 +44,11 @@ class QueryBuilder<
     TResult extends ResultShape<TDbType> | undefined = undefined,
     TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null, any, any, any>[] | undefined = undefined,
     TGroupedColumns extends GroupBySpecs<TDbType> | undefined = undefined,
-    TOrderBySpecs extends OrderBySpecs<TDbType> | undefined = undefined,
     TAs extends string | undefined = undefined
 >
     implements
     IDbType<TDbType>,
-    ISelectClause<TDbType, TFrom, TJoinSpecs, TParams, TGroupedColumns, TOrderBySpecs>,
+    ISelectClause<TDbType, TFrom, TJoinSpecs, TParams, TGroupedColumns>,
     IJoinClause<TDbType, TFrom, TJoinSpecs, TParams>,
     IWhereClause<TDbType, TFrom, TJoinSpecs, TParams>,
     IGroupByClause<TDbType, TFrom, TJoinSpecs, TParams>,
@@ -97,7 +96,6 @@ class QueryBuilder<
             TResult,
             TParams,
             TGroupedColumns,
-            TOrderBySpecs,
             TAs
         >(this.dbType, this.from, { asName, resultSelection: this.resultSelection, joinSpecs: this.joinSpecs })
     }
@@ -109,7 +107,7 @@ class QueryBuilder<
             cols: TGroupedColumns extends undefined ? TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>> : GroupedTablesToColumnsMap<TDbType, TFrom, TJoinSpecs, TGroupedColumns>,
             ops: DbFunctions<TDbType, TGroupedColumns extends undefined ? false : true>
         ) => TCbResult
-    ): IExecuteableQuery<TDbType, TFrom, TJoinSpecs, TCbResult, AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns, TOrderBySpecs> {
+    ): IExecuteableQuery<TDbType, TFrom, TJoinSpecs, TCbResult, AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns> {
 
         const cols = this.columnsSelectionList as TGroupedColumns extends undefined ? TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>> : GroupedTablesToColumnsMap<TDbType, TFrom, TJoinSpecs, TGroupedColumns>;
         let isAgg = false;
@@ -141,15 +139,15 @@ class QueryBuilder<
                 groupedColumns: this.groupedColumns,
                 joinSpecs: this.joinSpecs,
                 resultSelection: selectRes
-            }) as IExecuteableQuery<TDbType, TFrom, TJoinSpecs, TCbResult, AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns, TOrderBySpecs>;
+            }) as IExecuteableQuery<TDbType, TFrom, TJoinSpecs, TCbResult, AccumulateColumnParams<TParams, TCbResult>, TGroupedColumns>;
     };
 
 
     join<
         TJoinType extends JoinType,
-        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any, string>,
+        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, string>,
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>,
-        TInnerJoinResult extends QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, any, string> =
+        TInnerJoinResult extends QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any, string> =
         TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
         QueryTable<
             TDbType,
@@ -158,7 +156,7 @@ class QueryBuilder<
             Table<TDbType, TInnerCols, TInnerTableName>,
             MapToQueryColumns<TDbType, TDbType, TInnerCols>
         > :
-        TInnerJoinTable extends IExecuteableQuery<TDbType, any, any, any, any, any, any, string> ? ConvertComparableIdsOfSelectResult<TDbType, TInnerJoinTable> :
+        TInnerJoinTable extends IExecuteableQuery<TDbType, any, any, any, any, any, string> ? ConvertComparableIdsOfSelectResult<TDbType, TInnerJoinTable> :
         TInnerJoinTable,
         const TInnerJoinAccumulated extends JoinSpecsType<TDbType> = readonly [...(TJoinSpecs extends undefined ? [] : TJoinSpecs), { joinType: TJoinType, table: TInnerJoinResult }],
         TAccumulatedParams extends QueryParam<TDbType, any, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>,
@@ -202,7 +200,7 @@ class QueryBuilder<
                 [ownerName]: columnsSelection
             }
         } else if (table instanceof QueryBuilder) {
-            joinTable = table as IExecuteableQuery<TDbType, any, any, any, any, any, any, any> as TInnerJoinResult;
+            joinTable = table as IExecuteableQuery<TDbType, any, any, any, any, any, any> as TInnerJoinResult;
 
             if (typeof table.asName !== "string") {
                 throw Error("Subquery alias must be provided.");
@@ -296,7 +294,7 @@ class QueryBuilder<
     orderBy<
         const TCbResult extends OrderBySpecs<TDbType>
     >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>) => TCbResult) {
-        return new QueryBuilder(this.dbType, this.from) as ISelectClause<TDbType, TFrom, TJoinSpecs, AccumulateOrderByParams<TDbType, TParams, TCbResult>, TGroupedColumns, TCbResult>
+        return new QueryBuilder(this.dbType, this.from) as ISelectClause<TDbType, TFrom, TJoinSpecs, AccumulateOrderByParams<TDbType, TParams, TCbResult>, TGroupedColumns>
     }
 
     exec(
@@ -324,7 +322,7 @@ function from<
     TFrom extends readonly (
         Table<TDbType, any, any> |
         QueryTable<TDbType, any, any, any, any, any> |
-        IExecuteableQuery<TDbType, any, any, any, any, any, any, string>
+        IExecuteableQuery<TDbType, any, any, any, any, any, string>
     )[],
     TDbType extends DbType = InferDbTypeFromFromFirstIDbType<TFrom>
 >(...from: TFrom) {

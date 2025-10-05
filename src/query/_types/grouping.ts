@@ -85,7 +85,7 @@ type GroupedTablesToColumnsMap<
         T extends QueryTable<TDbType, any, any, any, any, infer TAs> ?
         TAs extends undefined ? T["table"]["name"] :
         TAs & string :
-        T extends IExecuteableQuery<TDbType, any, any, any, any, any, any, infer TAs> ?
+        T extends IExecuteableQuery<TDbType, any, any, any, any, any, infer TAs> ?
         TAs extends undefined ? never :
         TAs & string :
         never
@@ -99,7 +99,7 @@ type GroupedTablesToColumnsMap<
                 TGroupedColumns,
                 (
                     T extends QueryTable<TDbType, any, any, any, any, any> ? T["columnsList"] :
-                    T extends IExecuteableQuery<TDbType, any, any, infer TResult, any, any, any, any> ?
+                    T extends IExecuteableQuery<TDbType, any, any, infer TResult, any, any, any> ?
                     TResult extends undefined ? never :
                     TResult :
                     never
@@ -116,7 +116,7 @@ type GroupedTablesToColumnsMap<
             T in TInnerJoinSpecs[number]as T["table"] extends QueryTable<TDbType, any, any, any, any, any> ?
             T["table"]["asName"] extends undefined ?
             T["table"]["table"]["name"] : T["table"]["asName"] & string :
-            T extends IExecuteableQuery<TDbType, any, any, any, any, any, any, infer TAs> ?
+            T extends IExecuteableQuery<TDbType, any, any, any, any, any, infer TAs> ?
             TAs extends undefined ? never : TAs & string :
             never
             ]:
@@ -130,7 +130,7 @@ type GroupedTablesToColumnsMap<
                     TGroupedColumns,
                     (
                         T["table"] extends QueryTable<TDbType, any, any, any, any, any> ? T["table"]["columnsList"] :
-                        T["table"] extends IExecuteableQuery<TDbType, any, any, infer TResult, any, any, any, any> ?
+                        T["table"] extends IExecuteableQuery<TDbType, any, any, infer TResult, any, any, any> ?
                         TResult extends undefined ? never :
                         TResult :
                         never
