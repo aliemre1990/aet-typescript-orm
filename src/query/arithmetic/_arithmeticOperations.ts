@@ -6,6 +6,7 @@ import eq from "../comparisons/eq.js";
 import sqlIn from "../comparisons/in.js";
 import type { InferParamsFromFnArgs } from "../_types/inferParamsFromArgs.js";
 import type { InferTypeName, InferTypeNamesFromArgs } from "../_types/comparableIdInference.js";
+import type QueryParam from "../param.js";
 
 
 const arithmeticOperations = {
@@ -65,13 +66,19 @@ class SQLArithmeticOperation<
     TIsAgg extends boolean = false,
     TAs extends string | undefined = undefined,
     TDefaultFieldKey extends string = `${TArithmeticOperation["name"]}()`,
+    TParams extends QueryParam<TDbType, string, any, any, any, any>[] | undefined = InferParamsFromFnArgs<TArgs>,
     TComparableId extends string = InferArithmeticOpId<TDbType, TArithmeticOperation, TArgs, TReturnType, TAs>
-> implements IComparable<TDbType, TComparableId, InferParamsFromFnArgs<TArgs>, NonNullable<TReturnType>, TReturnType, TIsAgg, TDefaultFieldKey, TAs> {
+> implements IComparable<TDbType, TComparableId, TParams, NonNullable<TReturnType>, TReturnType, TIsAgg, TDefaultFieldKey, TAs> {
+
+    dbType: TDbType;
+    args: TArgs;
+    operation: TArithmeticOperation;
 
     [IComparableValueDummySymbol]?: NonNullable<TReturnType>;
     [IComparableFinalValueDummySymbol]?: TReturnType;
     [IComparableIdDummySymbol]?: TComparableId;
-    params?: InferParamsFromFnArgs<TArgs>;
+
+    params?: TParams;
     isAgg?: TIsAgg;
     asName?: TAs;
     defaultFieldKey: TDefaultFieldKey;
@@ -81,22 +88,25 @@ class SQLArithmeticOperation<
     between: typeof between = between;
 
     as<TAs extends string>(asName: TAs) {
-        return new SQLArithmeticOperation<TDbType, TArithmeticOperation, TArgs, TReturnType, TIsAgg, TAs, TDefaultFieldKey>(this.dbType, this.args, this.operation, asName, this.ownerName);
+        return new SQLArithmeticOperation<TDbType, TArithmeticOperation, TArgs, TReturnType, TIsAgg, TAs, TDefaultFieldKey, TParams>(this.dbType, this.args, this.operation, asName, this.ownerName);
     }
 
     ownerName?: string;
-    setOwnerName(val: string): SQLArithmeticOperation<TDbType, TArithmeticOperation, TArgs, TReturnType, TIsAgg, TAs, TDefaultFieldKey, TComparableId> {
-        return new SQLArithmeticOperation<TDbType, TArithmeticOperation, TArgs, TReturnType, TIsAgg, TAs, TDefaultFieldKey, TComparableId>(this.dbType, this.args, this.operation, this.asName, val);
+    setOwnerName(val: string): SQLArithmeticOperation<TDbType, TArithmeticOperation, TArgs, TReturnType, TIsAgg, TAs, TDefaultFieldKey, TParams, TComparableId> {
+        return new SQLArithmeticOperation<TDbType, TArithmeticOperation, TArgs, TReturnType, TIsAgg, TAs, TDefaultFieldKey, TParams, TComparableId>(this.dbType, this.args, this.operation, this.asName, val);
     }
 
 
     constructor(
-        public dbType: TDbType,
-        public args: TArgs,
-        public operation: TArithmeticOperation,
+        dbType: TDbType,
+        args: TArgs,
+        operation: TArithmeticOperation,
         asName?: TAs,
         ownerName?: string
     ) {
+        this.dbType = dbType;
+        this.args = args;
+        this.operation = operation;
         this.asName = asName;
         this.ownerName = ownerName;
         this.defaultFieldKey = `${operation.name}()` as TDefaultFieldKey;

@@ -267,10 +267,9 @@ class QueryBuilder<
     }
 
     groupBy<
-        const TCbResult extends GroupBySpecs<TDbType>,
-        TCols extends TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>
+        const TCbResult extends GroupBySpecs<TDbType>
     >(cb: (
-        cols: TCols,
+        cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>,
         ops: DbFunctions<TDbType, false>
     ) => TCbResult) {
 
@@ -282,7 +281,7 @@ class QueryBuilder<
         if (isNullOrUndefined(functions)) {
             throw Error('Invalid db type.');
         }
-        const res = cb(this.columnsSelectionList as TCols, functions as DbFunctions<TDbType, false>);
+        const res = cb(this.columnsSelectionList as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>, functions as DbFunctions<TDbType, false>);
 
         return new QueryBuilder(
             this.dbType,
@@ -302,10 +301,9 @@ class QueryBuilder<
     }
 
     having<
-        TCbResult extends ComparisonType<TDbType>,
-        TCols extends GroupedTablesToColumnsMap<TDbType, TFrom, TJoinSpecs, TGroupedColumns>
+        TCbResult extends ComparisonType<TDbType>
     >(cb: (
-        cols: TCols,
+        cols: GroupedTablesToColumnsMap<TDbType, TFrom, TJoinSpecs, TGroupedColumns>,
         ops: DbOperators<TDbType, true>
     ) => TCbResult) {
         const functions = this.dbType === dbTypes.postgresql ? pgDbOperatorsWithAggregation : this.dbType === dbTypes.mysql ? mysqlDbOperatorsWithAggregation : undefined;
@@ -313,7 +311,7 @@ class QueryBuilder<
             throw Error('Invalid db type.');
         }
 
-        const res = cb(this.columnsSelectionList as TCols, functions as DbOperators<TDbType, true>)
+        const res = cb(this.columnsSelectionList as GroupedTablesToColumnsMap<TDbType, TFrom, TJoinSpecs, TGroupedColumns>, functions as DbOperators<TDbType, true>)
 
         return new QueryBuilder(
             this.dbType,
@@ -332,10 +330,9 @@ class QueryBuilder<
     }
 
     orderBy<
-        const TCbResult extends OrderBySpecs<TDbType>,
-        TCols extends TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>
-    >(cb: (cols: TCols) => TCbResult) {
-        const res = cb(this.columnsSelectionList as TCols);
+        const TCbResult extends OrderBySpecs<TDbType>
+    >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>) => TCbResult) {
+        const res = cb(this.columnsSelectionList as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>);
 
         return new QueryBuilder(
             this.dbType,

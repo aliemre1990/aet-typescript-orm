@@ -46,7 +46,7 @@ type GetFunctionsFromGroupBySpecs<TDbType extends DbType, TGroupedColumns extend
     TGroupedColumns extends undefined ? [] :
 
     TGroupedColumns extends readonly [infer First, ...infer Rest] ?
-    First extends ColumnSQLFunction<TDbType, any, any, any, any, string, any, any> ?
+    First extends ColumnSQLFunction<TDbType, any, any, any, any, any, string, any, any> ?
     Rest extends readonly any[] ?
     [First, ...GetFunctionsFromGroupBySpecs<TDbType, Rest>] :
     [First] :

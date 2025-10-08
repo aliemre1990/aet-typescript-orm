@@ -149,6 +149,8 @@ function between<
         rightValue: TValueType | null | TRParamMedian | TRApplied
     ) {
 
+    const dbType = this.dbType;
+
     if (leftValue instanceof QueryParam) {
         const lParam = new QueryParam<
             TDbType,
@@ -164,6 +166,7 @@ function between<
             >(rightValue.name, leftValue.dbType);
 
             return new ColumnComparisonOperation(
+                dbType,
                 comparisonOperations.between,
                 this,
                 [lParam, rParam]
@@ -171,6 +174,7 @@ function between<
         }
 
         return new ColumnComparisonOperation(
+            dbType,
             comparisonOperations.between,
             this,
             [lParam, rightValue]
@@ -193,6 +197,7 @@ function between<
             >(leftValue.name, leftValue.dbType);
 
             return new ColumnComparisonOperation(
+                dbType,
                 comparisonOperations.between,
                 this,
                 [lParam, rParam]
@@ -200,6 +205,7 @@ function between<
         }
 
         return new ColumnComparisonOperation(
+            dbType,
             comparisonOperations.between,
             this,
             [leftValue, rParam]
@@ -208,6 +214,7 @@ function between<
     }
 
     return new ColumnComparisonOperation(
+        dbType,
         comparisonOperations.between,
         this,
         [leftValue, rightValue]

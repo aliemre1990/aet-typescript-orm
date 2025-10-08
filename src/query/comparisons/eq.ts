@@ -49,6 +49,8 @@ function eq<
 >
     (this: TComparing, value: TValueType | TParamMedian | TApplied | null) {
 
+    const dbType = this.dbType;
+
     if (value instanceof QueryParam) {
         const param = new QueryParam<
             TDbType,
@@ -57,6 +59,7 @@ function eq<
         >(value.name, value.dbType);
 
         return new ColumnComparisonOperation(
+            dbType,
             comparisonOperations.eq,
             this,
             [param]
@@ -64,6 +67,7 @@ function eq<
     }
 
     return new ColumnComparisonOperation(
+        dbType,
         comparisonOperations.eq,
         this,
         [value]

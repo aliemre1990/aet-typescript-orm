@@ -16,6 +16,7 @@ class QueryParam<
     TDefaultFieldKey extends string = `$${TName}`,
     TComparableId extends string = InferIdFromParam<TName, TValueType>
 
+
 >
     implements IComparable<TDbType, TComparableId, [QueryParam<TDbType, TName, TValueType>], NonNullable<TValueType>, TValueType, false, TDefaultFieldKey, TAs> {
 
@@ -38,6 +39,8 @@ class QueryParam<
         this.ownerName = ownerName;
 
         this.defaultFieldKey = `$${name}` as TDefaultFieldKey;
+
+        this.params = [this] as [QueryParam<TDbType, TName, TValueType>];
     }
 
     as<TAs extends string>(asName: TAs) {

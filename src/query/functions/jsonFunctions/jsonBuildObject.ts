@@ -7,6 +7,7 @@ import eq from "../../comparisons/eq.js";
 import sqlIn from "../../comparisons/in.js";
 import type { InferIsAggFromJSONFn, InferReturnTypeFromJSONBuildObjectParam } from "../../_types/args.js";
 import type { InferTypeName } from "../../_types/comparableIdInference.js";
+import type QueryParam from "../../param.js";
 
 type InferIdFromJsonBuildObjectFunction<
     TDbType extends PgDbType,
@@ -21,43 +22,69 @@ class JSONBuildObjectFunction<
     TDbType extends PgDbType,
     TObj extends JSONBuildObjectParam<TDbType>,
     TReturnType extends DbValueTypes | null = TDbType extends PgDbType ? InferReturnTypeFromJSONBuildObjectParam<TDbType, TObj> : never,
+    TParams extends QueryParam<TDbType, string, any, any, any, any>[] | undefined = InferParamsFromJsonBuildObjectArg<TDbType, TObj>,
     TIsAgg extends boolean = InferIsAggFromJSONFn<TDbType, TObj>,
     TAs extends string | undefined = undefined,
     TDefaultFieldKey extends string = 'JSON_BUILD_OBJECT()',
     TComparableId extends string = InferIdFromJsonBuildObjectFunction<TDbType, TObj, TReturnType, TAs>
-> implements IComparable<TDbType, TComparableId, InferParamsFromJsonBuildObjectArg<TDbType, TObj>, NonNullable<TReturnType>, TReturnType, TIsAgg, TDefaultFieldKey, TAs> {
+> implements IComparable<TDbType, TComparableId, TParams, NonNullable<TReturnType>, TReturnType, TIsAgg, TDefaultFieldKey, TAs> {
 
     dbType: TDbType;
+    obj: TObj;
+    isJsonB: boolean;
+
     [IComparableValueDummySymbol]?: NonNullable<TReturnType>;
     [IComparableFinalValueDummySymbol]?: TReturnType;
     [IComparableIdDummySymbol]?: TComparableId;
-    params?: InferParamsFromJsonBuildObjectArg<TDbType, TObj>;
+    params?: TParams;
     isAgg?: TIsAgg;
 
     asName?: TAs;
     defaultFieldKey: TDefaultFieldKey;
 
     as<TAs extends string>(asName: TAs) {
-        return new JSONBuildObjectFunction<TDbType, TObj, TReturnType, TIsAgg, TAs, TDefaultFieldKey>(this.dbType, this.obj, this.isJsonB, asName, this.ownerName);
+        return new JSONBuildObjectFunction<TDbType, TObj, TReturnType, TParams, TIsAgg, TAs, TDefaultFieldKey>(this.dbType, this.obj, this.isJsonB, asName, this.ownerName);
     }
 
 
     ownerName?: string;
-    setOwnerName(val: string): JSONBuildObjectFunction<TDbType, TObj, TReturnType, TIsAgg, TAs, TDefaultFieldKey, TComparableId> {
-        return new JSONBuildObjectFunction<TDbType, TObj, TReturnType, TIsAgg, TAs, TDefaultFieldKey, TComparableId>(this.dbType, this.obj, this.isJsonB, this.asName, val);
+    setOwnerName(val: string): JSONBuildObjectFunction<TDbType, TObj, TReturnType, TParams, TIsAgg, TAs, TDefaultFieldKey, TComparableId> {
+        return new JSONBuildObjectFunction<TDbType, TObj, TReturnType, TParams, TIsAgg, TAs, TDefaultFieldKey, TComparableId>(this.dbType, this.obj, this.isJsonB, this.asName, val);
     }
 
     constructor(
         dbType: TDbType,
-        public obj: TObj,
-        public isJsonB: boolean,
+        obj: TObj,
+        isJsonB: boolean,
         asName?: TAs,
         ownerName?: string
     ) {
         this.dbType = dbType;
+        this.obj = obj;
+        this.isJsonB = isJsonB;
         this.asName = asName;
         this.ownerName = ownerName;
         this.defaultFieldKey = 'JSON_BUILD_OBJECT()' as TDefaultFieldKey;
+
+
+        const tmpParams: QueryParam<TDbType, any, any, any, any, any>[] = [];
+        let entries = Object.entries(this.obj);
+
+        for (const entry of entries) {
+            if (
+                entry[1] instanceof Object &&
+                "params" in entry[1] &&
+                entry[1].params !== undefined &&
+                entry[1].params.length > 0
+            ) {
+                tmpParams.push(...entry[1].params);
+            }
+        }
+
+
+        if (tmpParams.length > 0) {
+            this.params = tmpParams as TParams;
+        }
     }
 
     eq: typeof eq = eq;

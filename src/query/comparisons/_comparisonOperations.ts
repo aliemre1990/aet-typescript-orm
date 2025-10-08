@@ -1,6 +1,7 @@
 import type { DbType } from "../../db.js";
 import type { DbValueTypes } from "../../table/column.js";
 import type { IComparable } from "../_interfaces/IComparable.js";
+import type QueryParam from "../param.js";
 
 const comparisonOperations = {
     eq: { name: 'EQ' },
@@ -32,17 +33,48 @@ class ColumnComparisonOperation<
     TValueType extends DbValueTypes = InferValueTypeFromComparable<TDbType, TComparing>
 > {
 
-    dbType?: TDbType;
+    dbType: TDbType;
+    operation: ComparisonOperation;
+    comparing: TComparing;
+    value?: (TValueType | null | TApplied)[]
+
+    params?: QueryParam<TDbType, any, any, any, any, any>[];
 
     constructor(
-        public operation: ComparisonOperation,
-        public comparing: TComparing,
-        public value?:
-            (
-                TValueType | null |
-                TApplied
-            )[]
-    ) { }
+        dbType: TDbType,
+        operation: ComparisonOperation,
+        comparing: TComparing,
+        value?: (TValueType | null | TApplied)[]
+    ) {
+        this.dbType = dbType;
+        this.operation = operation;
+        this.comparing = comparing;
+        this.value = value;
+
+        const tmpParams: typeof this.params = [];
+        if (comparing.params !== undefined && comparing.params.length > 0) {
+            tmpParams.push(...comparing.params);
+        }
+
+        if (value !== undefined && value.length > 0) {
+            value.forEach(val => {
+                if (
+                    val instanceof Object &&
+                    "params" in val &&
+                    val.params !== undefined &&
+                    Array.isArray(val.params) &&
+                    val.params.length > 0
+                ) {
+                    tmpParams.push(...val.params);
+                }
+            })
+        }
+
+        if (tmpParams.length > 0) {
+            this.params = tmpParams;
+        }
+
+    }
 }
 
 export default ColumnComparisonOperation;

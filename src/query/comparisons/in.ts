@@ -64,6 +64,8 @@ function sqlIn<
         throw Error('In operation requires at least one value.');
     }
 
+    const dbType = this.dbType;
+
     if (param instanceof QueryParam) {
         const paramRes = new QueryParam<
             TDbType,
@@ -72,18 +74,19 @@ function sqlIn<
         >(param.name, param.dbType);
 
         return new ColumnComparisonOperation(
+            dbType,
             comparisonOperations.in,
             this,
             [paramRes]
         )
     }
 
-    return new ColumnComparisonOperation
-        (
-            comparisonOperations.in,
-            this,
-            [param, ...values]
-        );
+    return new ColumnComparisonOperation(
+        dbType,
+        comparisonOperations.in,
+        this,
+        [param, ...values]
+    );
 }
 
 export default sqlIn;
