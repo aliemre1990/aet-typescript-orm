@@ -22,13 +22,13 @@ import BasicColumnAggregationOperation, { aggregationOperations } from "../_aggr
 
 
 type InferReturnTypeFromArg<TArg> =
-    TArg extends IComparable<any, any, any, any, infer TFinalType, any, any,any> ? TFinalType[] :
+    TArg extends IComparable<any, any, any, infer TFinalType, any, any> ? TFinalType[] :
     never
     ;
 
 
 function jsonAggFn<
-    TArg extends IComparable<PgDbType, any, any, any, any, any, any,any>
+    TArg extends IComparable<PgDbType, any, any, any, any, any>
 >(
     arg: TArg
 ) {
@@ -42,7 +42,7 @@ function jsonAggFn<
 
 
 function jsonbAggFn<
-    TArg extends IComparable<PgDbType, any, any, any, any, any, any,any>
+    TArg extends IComparable<PgDbType, any, any, any, any, any>
 >(
     arg: TArg
 ) {

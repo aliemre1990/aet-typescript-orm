@@ -7,7 +7,7 @@ function generateArithmeticAddition<
     TDbType extends DbType
 >(dbType: TDbType) {
     return <
-        TArgs extends IComparable<TDbType, any, any, number, any, any, any, any>[]
+        TArgs extends IComparable<TDbType, any, number, any, any, any>[]
     >
         (...args: TArgs) => {
 

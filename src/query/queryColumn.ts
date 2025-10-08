@@ -25,9 +25,8 @@ class QueryColumn<
     TAsName extends string | undefined = undefined,
     TDefaultFieldKey extends string = TColumn["name"],
     TValueType extends DbValueTypes = TColumn extends Column<TDbType, any, any, any, any, infer TValType> ? TValType : never,
-    TFinalValueType extends TValueType | null = TColumn extends Column<TDbType, any, any, any, any, any, infer TFinalValType> ? TFinalValType : never,
-    TComparableId extends string = InferIdFromQueryColumn<TDbType, TColumn, TQTableSpecs, TAsName>
-> implements IComparable<TDbType, TComparableId, undefined, TValueType, TFinalValueType, false, TDefaultFieldKey, any> {
+    TFinalValueType extends TValueType | null = TColumn extends Column<TDbType, any, any, any, any, any, infer TFinalValType> ? TFinalValType : never
+> implements IComparable<TDbType, undefined, TValueType, TFinalValueType, TDefaultFieldKey, any> {
     qTableSpecs?: TQTableSpecs;
 
     dbType: TDbType;
@@ -36,7 +35,6 @@ class QueryColumn<
     params?: undefined;
     [IComparableValueDummySymbol]?: TValueType;
     [IComparableFinalValueDummySymbol]?: TFinalValueType;
-    [IComparableIdDummySymbol]?: TComparableId;
     isAgg?: false;
     defaultFieldKey: TDefaultFieldKey;
 
@@ -56,8 +54,8 @@ class QueryColumn<
     }
 
     ownerName?: string;
-    setOwnerName(val: string): QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName, TDefaultFieldKey, TValueType, TFinalValueType, TComparableId> {
-        return new QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName, TDefaultFieldKey, TValueType, TFinalValueType, TComparableId>(this.dbType, this.column, this.asName, val);
+    setOwnerName(val: string): QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName, TDefaultFieldKey, TValueType, TFinalValueType> {
+        return new QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName, TDefaultFieldKey, TValueType, TFinalValueType>(this.dbType, this.column, this.asName, val);
     }
 
     setQTableSpecs(val: TQTableSpecs) {

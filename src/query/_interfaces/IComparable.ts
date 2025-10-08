@@ -12,11 +12,9 @@ const IComparableIdDummySymbol = Symbol();
 
 interface IComparable<
     TDbType extends DbType,
-    TComparableId extends string,
-    TParams extends QueryParam<TDbType, string, any, any, any, any>[] | undefined,
+    TParams extends QueryParam<TDbType, string, any, any, any>[] | undefined,
     TValueType extends DbValueTypes,
     TFinalValueType extends TValueType | null,
-    TIsAgg extends boolean,
     TDefaultFieldKey extends string,
     TAs extends string | undefined
 > extends IDbType<TDbType> {
@@ -24,22 +22,20 @@ interface IComparable<
 
     [IComparableValueDummySymbol]?: TValueType;
     [IComparableFinalValueDummySymbol]?: TFinalValueType;
-    [IComparableIdDummySymbol]?: TComparableId;
 
     params?: TParams;
-    isAgg?: TIsAgg;
     asName?: TAs;
     defaultFieldKey: TDefaultFieldKey;
 
     ownerName?: string;
-    setOwnerName(val: string): IComparable<TDbType, TComparableId, TParams, TValueType, TFinalValueType, TIsAgg, TDefaultFieldKey, TAs>;
+    setOwnerName(val: string): IComparable<TDbType, TParams, TValueType, TFinalValueType, TDefaultFieldKey, TAs>;
 
 
     eq: typeof eq;
     sqlIn: typeof sqlIn;
     between: typeof between;
 
-    as<TAs extends string>(asName: TAs): IComparable<TDbType, string, TParams, TValueType, TFinalValueType, TIsAgg, TDefaultFieldKey, TAs>
+    as<TAs extends string>(asName: TAs): IComparable<TDbType, TParams, TValueType, TFinalValueType, TDefaultFieldKey, TAs>
 }
 
 export type {

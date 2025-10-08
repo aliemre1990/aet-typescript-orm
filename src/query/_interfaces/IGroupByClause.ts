@@ -10,13 +10,13 @@ import type { DbFunctions } from "../_types/ops.js";
 import type ColumnsSelection from "../columnsSelection.js";
 import type { FromType, JoinSpecsType } from "../queryBuilder.js";
 
-type GroupBySpecs<TDbType extends DbType> = readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, false, any, any>)[];
+type GroupBySpecs<TDbType extends DbType> = readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, any>)[];
 
 interface IGroupByClause<
     TDbType extends DbType,
     TFrom extends FromType<TDbType>,
     TJoinSpecs extends JoinSpecsType<TDbType> | undefined,
-    TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null, any, any, any>[] | undefined = undefined
+    TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null, any, any>[] | undefined = undefined
 > {
     groupBy<
         const TCbResult extends GroupBySpecs<TDbType>
@@ -24,9 +24,9 @@ interface IGroupByClause<
         cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>,
         ops: DbFunctions<TDbType, false>
     ) => TCbResult):
-        ISelectClause<TDbType, TFrom, TJoinSpecs, TParams, TCbResult> &
-        IHavingClause<TDbType, TFrom, TJoinSpecs, TParams, TCbResult> &
-        IOrderByClause<TDbType, TFrom, TJoinSpecs, TParams, TCbResult>
+        ISelectClause<TDbType, TFrom, TJoinSpecs, TParams> &
+        IHavingClause<TDbType, TFrom, TJoinSpecs, TParams> &
+        IOrderByClause<TDbType, TFrom, TJoinSpecs, TParams>
 }
 
 export default IGroupByClause;

@@ -5,7 +5,6 @@ import between from "../comparisons/between.js";
 import eq from "../comparisons/eq.js";
 import sqlIn from "../comparisons/in.js";
 import type { InferParamsFromFnArgs } from "../_types/inferParamsFromArgs.js";
-import type { InferTypeName, InferTypeNamesFromArgs } from "../_types/comparableIdInference.js";
 import type QueryParam from "../param.js";
 
 
@@ -42,36 +41,19 @@ const aggregationOperations = {
 
 type AggregationOperation = (typeof aggregationOperations)[keyof typeof aggregationOperations];
 
-
-type InferAggregationId<
-    TDbType extends DbType,
-    TAggregationOperation extends AggregationOperation,
-    TArgs extends (
-
-        DbValueTypes | null |
-        IComparable<TDbType, any, any, any, any, true, any, any>
-    )[],
-    TReturnType extends DbValueTypes | null,
-    TAs extends string | undefined = undefined
-> =
-    `${Lowercase<TAggregationOperation["name"]>}(${InferTypeNamesFromArgs<TArgs>}):${InferTypeName<TReturnType>} as ${TAs extends string ? TAs : "undefined"}`
-    ;
-
 class BasicColumnAggregationOperation<
     TDbType extends DbType,
     TAggregationOperation extends AggregationOperation,
     TArgs extends (
 
         DbValueTypes | null |
-        IComparable<TDbType, any, any, any, any, true, any, any>
+        IComparable<TDbType, any, any, any, any, any>
     )[],
     TReturnType extends DbValueTypes | null,
-    TParams extends QueryParam<TDbType, string, any, any, any, any>[] | undefined = InferParamsFromFnArgs<TArgs>,
-    TIsAgg extends boolean = false,
+    TParams extends QueryParam<TDbType, string, any, any, any>[] | undefined = InferParamsFromFnArgs<TArgs>,
     TAs extends string | undefined = undefined,
     TDefaultFieldKey extends string = `${TAggregationOperation["name"]}()`,
-    TComparableId extends string = InferAggregationId<TDbType, TAggregationOperation, TArgs, TReturnType, TAs>
-> implements IComparable<TDbType, TComparableId, TParams, NonNullable<TReturnType>, TReturnType, TIsAgg, TDefaultFieldKey, TAs> {
+> implements IComparable<TDbType, TParams, NonNullable<TReturnType>, TReturnType, TDefaultFieldKey, TAs> {
 
     dbType: TDbType;
     args: TArgs;
@@ -79,9 +61,7 @@ class BasicColumnAggregationOperation<
 
     [IComparableValueDummySymbol]?: NonNullable<TReturnType>;
     [IComparableFinalValueDummySymbol]?: TReturnType;
-    [IComparableIdDummySymbol]?: TComparableId;
     params?: TParams;
-    isAgg?: TIsAgg;
     asName?: TAs;
     defaultFieldKey: TDefaultFieldKey;
 
@@ -90,12 +70,12 @@ class BasicColumnAggregationOperation<
     between: typeof between = between;
 
     as<TAs extends string>(asName: TAs) {
-        return new BasicColumnAggregationOperation<TDbType, TAggregationOperation, TArgs, TReturnType, TParams, TIsAgg, TAs, TDefaultFieldKey>(this.dbType, this.args, this.operation, asName, this.ownerName);
+        return new BasicColumnAggregationOperation<TDbType, TAggregationOperation, TArgs, TReturnType, TParams, TAs, TDefaultFieldKey>(this.dbType, this.args, this.operation, asName, this.ownerName);
     }
 
     ownerName?: string;
-    setOwnerName(val: string): BasicColumnAggregationOperation<TDbType, TAggregationOperation, TArgs, TReturnType, TParams, TIsAgg, TAs, TDefaultFieldKey, TComparableId> {
-        return new BasicColumnAggregationOperation<TDbType, TAggregationOperation, TArgs, TReturnType, TParams, TIsAgg, TAs, TDefaultFieldKey, TComparableId>(this.dbType, this.args, this.operation, this.asName, val);
+    setOwnerName(val: string): BasicColumnAggregationOperation<TDbType, TAggregationOperation, TArgs, TReturnType, TParams, TAs, TDefaultFieldKey> {
+        return new BasicColumnAggregationOperation<TDbType, TAggregationOperation, TArgs, TReturnType, TParams, TAs, TDefaultFieldKey>(this.dbType, this.args, this.operation, this.asName, val);
     }
 
     constructor(
@@ -112,7 +92,7 @@ class BasicColumnAggregationOperation<
         this.ownerName = ownerName;
         this.defaultFieldKey = `${operation.name}()` as TDefaultFieldKey;
 
-        let tmpParams: QueryParam<TDbType, any, any, any, any, any>[] = [];
+        let tmpParams: QueryParam<TDbType, any, any, any, any>[] = [];
 
         for (const arg of args) {
             if (

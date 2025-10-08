@@ -5,7 +5,6 @@ import between from "../comparisons/between.js";
 import eq from "../comparisons/eq.js";
 import sqlIn from "../comparisons/in.js";
 import type { InferParamsFromFnArgs } from "../_types/inferParamsFromArgs.js";
-import type { InferTypeName, InferTypeNamesFromArgs } from "../_types/comparableIdInference.js";
 import type QueryParam from "../param.js";
 
 const sqlFunctions = {
@@ -18,34 +17,18 @@ const sqlFunctions = {
 
 type SQLFunction = (typeof sqlFunctions)[keyof typeof sqlFunctions];
 
-
-type InferIdFromFunction<
-    TDbType extends DbType,
-    TSQLFunction extends SQLFunction,
-    TArgs extends (
-        DbValueTypes | null |
-        IComparable<TDbType, any, any, any, any, any, any, any>
-    )[],
-    TReturnType extends DbValueTypes | null,
-    TAs extends string | undefined = undefined
-> =
-    `${Lowercase<TSQLFunction["name"]>}(${InferTypeNamesFromArgs<TArgs>}):${InferTypeName<TReturnType>} as ${TAs extends string ? TAs : "undefined"}`
-    ;
-
 class ColumnSQLFunction<
     TDbType extends DbType,
     TSQLFunction extends SQLFunction,
     TArgs extends (
         DbValueTypes | null |
-        IComparable<TDbType, any, any, any, any, any, any, any>
+        IComparable<TDbType, any, any, any, any, any>
     )[],
     TReturnType extends DbValueTypes | null,
-    TParams extends QueryParam<TDbType, string, any, any, any, any>[] | undefined = InferParamsFromFnArgs<TArgs>,
-    TIsAgg extends boolean = false,
+    TParams extends QueryParam<TDbType, string, any, any, any>[] | undefined = InferParamsFromFnArgs<TArgs>,
     TAs extends string | undefined = undefined,
-    TDefaultFieldKey extends string = `${TSQLFunction["name"]}()`,
-    TComparableId extends string = InferIdFromFunction<TDbType, TSQLFunction, TArgs, TReturnType, TAs>
-> implements IComparable<TDbType, TComparableId, TParams, NonNullable<TReturnType>, TReturnType, TIsAgg, TDefaultFieldKey, TAs> {
+    TDefaultFieldKey extends string = `${TSQLFunction["name"]}()`
+> implements IComparable<TDbType, TParams, NonNullable<TReturnType>, TReturnType, TDefaultFieldKey, TAs> {
 
     dbType: TDbType;
     args: TArgs;
@@ -53,10 +36,8 @@ class ColumnSQLFunction<
 
     [IComparableValueDummySymbol]?: NonNullable<TReturnType>;
     [IComparableFinalValueDummySymbol]?: TReturnType;
-    [IComparableIdDummySymbol]?: TComparableId;
 
     params?: TParams;
-    isAgg?: TIsAgg;
     defaultFieldKey: TDefaultFieldKey;
 
     asName?: TAs;
@@ -66,13 +47,13 @@ class ColumnSQLFunction<
     between: typeof between = between;
 
     as<TAs extends string>(asName: TAs) {
-        return new ColumnSQLFunction<TDbType, TSQLFunction, TArgs, TReturnType, TParams, TIsAgg, TAs, TDefaultFieldKey>(this.dbType, this.args, this.sqlFunction, asName, this.ownerName);
+        return new ColumnSQLFunction<TDbType, TSQLFunction, TArgs, TReturnType, TParams, TAs, TDefaultFieldKey>(this.dbType, this.args, this.sqlFunction, asName, this.ownerName);
     }
 
 
     ownerName?: string;
-    setOwnerName(val: string): ColumnSQLFunction<TDbType, TSQLFunction, TArgs, TReturnType, TParams, TIsAgg, TAs, TDefaultFieldKey, TComparableId> {
-        return new ColumnSQLFunction<TDbType, TSQLFunction, TArgs, TReturnType, TParams, TIsAgg, TAs, TDefaultFieldKey, TComparableId>(this.dbType, this.args, this.sqlFunction, this.asName, val);
+    setOwnerName(val: string): ColumnSQLFunction<TDbType, TSQLFunction, TArgs, TReturnType, TParams, TAs, TDefaultFieldKey> {
+        return new ColumnSQLFunction<TDbType, TSQLFunction, TArgs, TReturnType, TParams, TAs, TDefaultFieldKey>(this.dbType, this.args, this.sqlFunction, this.asName, val);
     }
 
     constructor(
@@ -89,7 +70,7 @@ class ColumnSQLFunction<
         this.ownerName = ownerName;
         this.defaultFieldKey = `${sqlFunction.name}()` as TDefaultFieldKey;
 
-        let tmpParams: QueryParam<TDbType, any, any, any, any, any>[] = [];
+        let tmpParams: QueryParam<TDbType, any, any, any, any>[] = [];
 
         for (const arg of args) {
             if (

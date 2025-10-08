@@ -1,31 +1,26 @@
 import { dbTypes, type DbType } from "../db.js";
 import type { DbValueTypes } from "../table/column.js";
 import { IComparableFinalValueDummySymbol, IComparableIdDummySymbol, IComparableValueDummySymbol, type IComparable } from "./_interfaces/IComparable.js";
-import type { InferTypeName } from "./_types/comparableIdInference.js";
 import between from "./comparisons/between.js";
 import eq from "./comparisons/eq.js";
 import sqlIn from "./comparisons/in.js";
-
-type InferIdFromParam<TName extends string, TValueType extends DbValueTypes | null> = `$${TName}::${InferTypeName<TValueType>}`;
 
 class QueryParam<
     TDbType extends DbType,
     TName extends string,
     TValueType extends DbValueTypes | null,
     TAs extends string | undefined = undefined,
-    TDefaultFieldKey extends string = `$${TName}`,
-    TComparableId extends string = InferIdFromParam<TName, TValueType>
+    TDefaultFieldKey extends string = `$${TName}`
 
 
 >
-    implements IComparable<TDbType, TComparableId, [QueryParam<TDbType, TName, TValueType>], NonNullable<TValueType>, TValueType, false, TDefaultFieldKey, TAs> {
+    implements IComparable<TDbType, [QueryParam<TDbType, TName, TValueType>], NonNullable<TValueType>, TValueType, TDefaultFieldKey, TAs> {
 
     dbType: TDbType;
 
     params?: [QueryParam<TDbType, TName, TValueType>];
     [IComparableValueDummySymbol]?: NonNullable<TValueType>;
     [IComparableFinalValueDummySymbol]?: TValueType;
-    [IComparableIdDummySymbol]?: TComparableId;
     isAgg?: false;
 
     name: TName;
@@ -48,8 +43,8 @@ class QueryParam<
     }
 
     ownerName?: string;
-    setOwnerName(val: string): QueryParam<TDbType, TName, TValueType, TAs, TDefaultFieldKey, TComparableId> {
-        return new QueryParam<TDbType, TName, TValueType, TAs, TDefaultFieldKey, TComparableId>(this.dbType, this.name, this.asName, val);
+    setOwnerName(val: string): QueryParam<TDbType, TName, TValueType, TAs, TDefaultFieldKey> {
+        return new QueryParam<TDbType, TName, TValueType, TAs, TDefaultFieldKey>(this.dbType, this.name, this.asName, val);
     }
 
     type<TValueType extends DbValueTypes | null>() {

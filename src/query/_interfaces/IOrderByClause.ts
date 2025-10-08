@@ -15,20 +15,19 @@ const orderTypes = {
 
 type OrderType = typeof orderTypes[keyof typeof orderTypes];
 
-type OrderBySpecs<TDbType extends DbType> = readonly (IComparable<TDbType, any, any, any, any, false, any, any> | [IComparable<TDbType, any, any, any, any, false, any, any>, OrderType])[];
+type OrderBySpecs<TDbType extends DbType> = readonly (IComparable<TDbType, any, any, any, any, any> | [IComparable<TDbType, any, any, any, any, any>, OrderType])[];
 
 interface IOrderByClause<
     TDbType extends DbType,
     TFrom extends FromType<TDbType>,
     TJoinSpecs extends JoinSpecsType<TDbType> | undefined,
-    TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null, any, any, any>[] | undefined = undefined,
-    TGroupedColumns extends GroupBySpecs<TDbType> | undefined = undefined,
+    TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null, any, any>[] | undefined = undefined
 > {
 
     orderBy<const  TCbResult extends OrderBySpecs<TDbType>>(
         cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>) => TCbResult
     ):
-        ISelectClause<TDbType, TFrom, TJoinSpecs, AccumulateOrderByParams<TDbType, TParams, TCbResult>, TGroupedColumns>
+        ISelectClause<TDbType, TFrom, TJoinSpecs, AccumulateOrderByParams<TDbType, TParams, TCbResult>>
 
 }
 

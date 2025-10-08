@@ -15,7 +15,7 @@ interface IWhereClause<
     TDbType extends DbType,
     TFrom extends FromType<TDbType>,
     TJoinSpecs extends JoinSpecsType<TDbType> | undefined,
-    TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null, any, any, any>[] | undefined = undefined
+    TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null, any, any>[] | undefined = undefined
 > {
     where<TCbResult extends ComparisonType<TDbType>>(
         cb: (

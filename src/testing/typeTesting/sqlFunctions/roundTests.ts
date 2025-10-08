@@ -17,7 +17,7 @@ const res1 = employeesTable.select((cols, { round, coalesce, param }) => {
     type t = typeof calculatedColumn;
     type args = t extends ColumnSQLFunction<any, any, infer args, any> ? args : never;
     type param = args[1];
-    type finalType = param extends IComparable<any, any, any, any, infer TFinalType, any, any, any> ? TFinalType : never;
+    type finalType = param extends IComparable<any, any, any, infer TFinalType, any, any> ? TFinalType : never;
 
     return [calculatedColumn];
 }).exec;

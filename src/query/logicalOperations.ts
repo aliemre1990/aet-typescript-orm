@@ -17,7 +17,7 @@ class ColumnLogicalOperation<
     operator: LogicalOperation;
     comparisons: TComparisons;
 
-    params?: QueryParam<TDbType, any, any, any, any, any>[];
+    params?: QueryParam<TDbType, any, any, any, any>[];
 
     constructor(
         dbType: TDbType,
