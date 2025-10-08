@@ -1,6 +1,5 @@
 import type { PgDbType } from "../../db.js";
 import type { IExecuteableQuery } from "../../query/_interfaces/IExecuteableQuery.js";
-import type ISelectClause from "../../query/_interfaces/ISelectClause.js";
 import type { AccumulateSubQueryParams, SetComparableIdsOfSubQueries } from "../../query/_types/subQueryUtility.js";
 import QueryBuilder, { from } from "../../query/queryBuilder.js";
 import { customersTable, employeesTable, ordersTable, shipmentsTable, usersTable } from "./_tables.js";

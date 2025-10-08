@@ -3,21 +3,17 @@ import type { PgColumnType } from "./columnTypes.js";
 import type ColumnComparisonOperation from "../query/comparisons/_comparisonOperations.js";
 import type { IExecuteableQuery } from "../query/_interfaces/IExecuteableQuery.js";
 import type ColumnLogicalOperation from "../query/logicalOperations.js";
-import QueryBuilder, { type ComparisonType } from "../query/queryBuilder.js";
+import QueryBuilder, { type ComparisonType, type GroupBySpecs, type JoinType, type OrderBySpecs } from "../query/queryBuilder.js";
 import type { TablesToObject, TableToColumnsMap } from "../query/_types/miscellaneous.js";
 import type { ResultShape } from "../query/_types/result.js";
 import Column from "./column.js";
 import QueryColumn from "../query/queryColumn.js";
 import QueryTable from "../query/queryTable.js";
-import type ISelectClause from "../query/_interfaces/ISelectClause.js";
 import type { DbFunctions, DbOperators } from "../query/_types/ops.js";
-import type { JoinType } from "../query/_interfaces/IJoinClause.js";
-import type { OrderBySpecs } from "../query/_interfaces/IOrderByClause.js";
-import type { GroupBySpecs } from "../query/_interfaces/IGroupByClause.js";
 import type { IDbType } from "../query/_interfaces/IDbType.js";
-import type { AccumulateOrderByParams } from "../query/_types/paramAccumulationOrderBy.js";
 import type { AccumulateColumnParams } from "../query/_types/paramAccumulationSelect.js";
 import type { ConvertComparableIdsOfSelectResult } from "../query/_types/subQueryUtility.js";
+import type { AccumulateOrderByParams } from "../query/_types/paramAccumulationOrderBy.js";
 
 type TableSpecsType<TTableName extends string = string> = { tableName: TTableName }
 
@@ -161,7 +157,7 @@ class Table<
     orderBy<
         const TCbResult extends OrderBySpecs<TDbType>
     >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>]>>) => TCbResult):
-        ISelectClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>], AccumulateOrderByParams<TDbType, undefined, TCbResult>> {
+        QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>], undefined, AccumulateOrderByParams<TDbType, undefined, TCbResult>> {
         const queryColumns = this.columnsList.map((col) => {
             return new QueryColumn(this.dbType, col);
         }) as MapToQueryColumns<TDbType, TTableName, TColumns>;

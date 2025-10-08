@@ -9,17 +9,8 @@ import type { TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.j
 import type { ColumnsToResultMap, QueryParamsToObject, ResultShape, ResultShapeItem } from "./_types/result.js";
 import QueryTable from "./queryTable.js";
 import type Column from "../table/column.js";
-import type IJoinClause from "./_interfaces/IJoinClause.js";
-import type ISelectClause from "./_interfaces/ISelectClause.js";
-import type IWhereClause from "./_interfaces/IWhereClause.js";
-import type IGroupByClause from "./_interfaces/IGroupByClause.js";
 import type { DbFunctions, DbOperators } from "./_types/ops.js";
 import type QueryParam from "./param.js";
-import type IHavingClause from "./_interfaces/IHavingClause.js";
-import type { JoinType } from "./_interfaces/IJoinClause.js";
-import type IOrderByClause from "./_interfaces/IOrderByClause.js";
-import type { OrderBySpecs } from "./_interfaces/IOrderByClause.js";
-import type { GroupBySpecs } from "./_interfaces/IGroupByClause.js";
 import type { DbValueTypes } from "../table/column.js";
 import type { IDbType } from "./_interfaces/IDbType.js";
 import type { AccumulateSubQueryParams, ConvertComparableIdsOfSelectResult, ConvertTablesToQueryTables, InferDbTypeFromFromFirstIDbType, SetComparableIdsOfSubQueries } from "./_types/subQueryUtility.js";
@@ -29,6 +20,24 @@ import type { AccumulateColumnParams } from "./_types/paramAccumulationSelect.js
 import type ColumnsSelection from "./columnsSelection.js";
 import { columnsSelectionFactory } from "./columnsSelection.js";
 import { mysqlDbOperatorsWithAggregation, mysqlFunctions, mysqlFunctionsWithAggregation, pgDbOperatorsWithAggregation, pgFunctions, pgFunctionsWithAggregation } from "./dbOperations.js";
+import type { IComparable } from "./_interfaces/IComparable.js";
+
+const orderTypes = {
+    asc: 'ASC',
+    desc: 'DESC'
+} as const;
+type OrderType = typeof orderTypes[keyof typeof orderTypes];
+type OrderBySpecs<TDbType extends DbType> = readonly (IComparable<TDbType, any, any, any, any, any> | [IComparable<TDbType, any, any, any, any, any>, OrderType])[];
+
+const joinTypes = {
+    inner: 'INNER',
+    left: 'LEFT',
+    right: 'RIGHT',
+    full: 'FULL'
+} as const;
+type JoinType = typeof joinTypes[keyof typeof joinTypes];
+
+type GroupBySpecs<TDbType extends DbType> = readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, any>)[];
 
 type JoinSpecsType<TDbType extends DbType> = readonly { joinType: JoinType, table: QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any> }[]
 type FromType<TDbType extends DbType> = readonly (QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any>)[];
@@ -44,13 +53,7 @@ class QueryBuilder<
     TAs extends string | undefined = undefined
 >
     implements
-    IDbType<TDbType>,
-    ISelectClause<TDbType, TFrom, TJoinSpecs, TParams>,
-    IJoinClause<TDbType, TFrom, TJoinSpecs, TParams>,
-    IWhereClause<TDbType, TFrom, TJoinSpecs, TParams>,
-    IGroupByClause<TDbType, TFrom, TJoinSpecs, TParams>,
-    IHavingClause<TDbType, TFrom, TJoinSpecs, TParams>,
-    IOrderByClause<TDbType, TFrom, TJoinSpecs, TParams> {
+    IDbType<TDbType> {
 
     dbType: TDbType;
 
@@ -69,7 +72,7 @@ class QueryBuilder<
         dbType: TDbType,
         from: FromType<TDbType>,
         data?: {
-            asName: TAs,
+            asName?: TAs,
             joinSpecs?: TJoinSpecs,
             resultSelection?: TResult,
             columnsSelectionList?: ColumnsSelectionListType<TDbType>,
@@ -180,13 +183,7 @@ class QueryBuilder<
         type: TJoinType,
         table: TInnerJoinTable,
         cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TInnerJoinAccumulated>>, ops: DbOperators<TDbType, false>) => TCbResult
-    ):
-
-        IJoinClause<TDbType, TFrom, TInnerJoinAccumulated, TAccumulatedParamsResult> &
-        ISelectClause<TDbType, TFrom, TInnerJoinAccumulated, TAccumulatedParamsResult> &
-        IWhereClause<TDbType, TFrom, TInnerJoinAccumulated, TAccumulatedParamsResult> &
-        IGroupByClause<TDbType, TFrom, TInnerJoinAccumulated, TAccumulatedParamsResult> &
-        IOrderByClause<TDbType, TFrom, TInnerJoinAccumulated, TAccumulatedParamsResult> {
+    ) {
 
         let columnsSelectionList = this.columnsSelectionList;
 
@@ -235,32 +232,28 @@ class QueryBuilder<
         const newJoinSpec = { joinType: type, table: joinTable };
         const mergedJoinSpecs = [...(this.joinSpecs === undefined ? [newJoinSpec] : [...this.joinSpecs, newJoinSpec])] as TInnerJoinAccumulated;
 
-        return new QueryBuilder(this.dbType, this.from, {
+        return new QueryBuilder<TDbType, TFrom, TInnerJoinAccumulated, TResult, TAccumulatedParamsResult, TAs>(this.dbType, this.from, {
             joinSpecs: mergedJoinSpecs,
             resultSelection: this.resultSelection,
             columnsSelectionList: columnsSelectionList,
             asName: this.asName,
             havingSpec: this.havingSpec,
             orderBySpecs: this.orderBySpecs
-        }) as
-            IJoinClause<TDbType, TFrom, TInnerJoinAccumulated, TAccumulatedParamsResult> &
-            ISelectClause<TDbType, TFrom, TInnerJoinAccumulated, TAccumulatedParamsResult> &
-            IWhereClause<TDbType, TFrom, TInnerJoinAccumulated, TAccumulatedParamsResult> &
-            IGroupByClause<TDbType, TFrom, TInnerJoinAccumulated, TAccumulatedParamsResult> &
-            IOrderByClause<TDbType, TFrom, TInnerJoinAccumulated, TAccumulatedParamsResult>
+        })
     }
 
     where<TCbResult extends ComparisonType<TDbType>>(cb: (
         cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>,
         ops: DbOperators<TDbType, true>
-    ) => TCbResult):
-        ISelectClause<TDbType, TFrom, TJoinSpecs, AccumulateComparisonParams<TParams, TCbResult>> &
-        IGroupByClause<TDbType, TFrom, TJoinSpecs, AccumulateComparisonParams<TParams, TCbResult>> &
-        IOrderByClause<TDbType, TFrom, TJoinSpecs, AccumulateComparisonParams<TParams, TCbResult>> {
-        return new QueryBuilder(this.dbType, this.from) as
-            ISelectClause<TDbType, TFrom, TJoinSpecs, AccumulateComparisonParams<TParams, TCbResult>> &
-            IGroupByClause<TDbType, TFrom, TJoinSpecs, AccumulateComparisonParams<TParams, TCbResult>> &
-            IOrderByClause<TDbType, TFrom, TJoinSpecs, AccumulateComparisonParams<TParams, TCbResult>>;
+    ) => TCbResult) {
+        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TResult, AccumulateComparisonParams<TParams, TCbResult>, TAs>(this.dbType, this.from, {
+            joinSpecs: this.joinSpecs,
+            resultSelection: this.resultSelection,
+            columnsSelectionList: this.columnsSelectionList,
+            asName: this.asName,
+            havingSpec: this.havingSpec,
+            orderBySpecs: this.orderBySpecs
+        });
     }
 
     groupBy<
@@ -280,7 +273,7 @@ class QueryBuilder<
         }
         const res = cb(this.columnsSelectionList as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>, functions as DbFunctions<TDbType, false>);
 
-        return new QueryBuilder(
+        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TResult, TParams, TAs>(
             this.dbType,
             this.from,
             {
@@ -291,10 +284,7 @@ class QueryBuilder<
                 resultSelection: this.resultSelection,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs
-            }) as
-            ISelectClause<TDbType, TFrom, TJoinSpecs, TParams> &
-            IHavingClause<TDbType, TFrom, TJoinSpecs, TParams> &
-            IOrderByClause<TDbType, TFrom, TJoinSpecs, TParams>;
+            });
     }
 
     having<
@@ -310,7 +300,7 @@ class QueryBuilder<
 
         const res = cb(this.columnsSelectionList as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>, functions as DbOperators<TDbType, true>)
 
-        return new QueryBuilder(
+        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TResult, TParams, TAs>(
             this.dbType,
             this.from,
             {
@@ -321,9 +311,7 @@ class QueryBuilder<
                 resultSelection: this.resultSelection,
                 havingSpec: res,
                 orderBySpecs: this.orderBySpecs
-            }) as
-            ISelectClause<TDbType, TFrom, TJoinSpecs, AccumulateComparisonParams<TParams, TCbResult>> &
-            IOrderByClause<TDbType, TFrom, TJoinSpecs, AccumulateComparisonParams<TParams, TCbResult>>
+            });
     }
 
     orderBy<
@@ -331,7 +319,7 @@ class QueryBuilder<
     >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>) => TCbResult) {
         const res = cb(this.columnsSelectionList as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>);
 
-        return new QueryBuilder(
+        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TResult, AccumulateOrderByParams<TDbType, TParams, TCbResult>, TAs>(
             this.dbType,
             this.from,
             {
@@ -342,8 +330,7 @@ class QueryBuilder<
                 resultSelection: this.resultSelection,
                 havingSpec: this.havingSpec,
                 orderBySpecs: res
-            }) as
-            ISelectClause<TDbType, TFrom, TJoinSpecs, AccumulateOrderByParams<TDbType, TParams, TCbResult>>
+            });
     }
 
     exec(
@@ -411,5 +398,9 @@ export {
 export type {
     JoinSpecsType,
     FromType,
-    ComparisonType
+    ComparisonType,
+    GroupBySpecs,
+    JoinType,
+    OrderBySpecs,
+    OrderType
 }

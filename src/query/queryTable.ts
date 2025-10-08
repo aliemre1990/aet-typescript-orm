@@ -4,10 +4,6 @@ import type Column from "../table/column.js";
 import type Table from "../table/table.js";
 import type { IDbType } from "./_interfaces/IDbType.js";
 import type { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
-import type { GroupBySpecs } from "./_interfaces/IGroupByClause.js";
-import type { JoinType } from "./_interfaces/IJoinClause.js";
-import type { OrderBySpecs } from "./_interfaces/IOrderByClause.js";
-import type ISelectClause from "./_interfaces/ISelectClause.js";
 import type { TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.js";
 import type { DbFunctions, DbOperators } from "./_types/ops.js";
 import type { AccumulateOrderByParams } from "./_types/paramAccumulationOrderBy.js";
@@ -16,7 +12,7 @@ import type { ResultShape } from "./_types/result.js";
 import type { ConvertComparableIdsOfSelectResult } from "./_types/subQueryUtility.js";
 import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
-import QueryBuilder, { type ComparisonType } from "./queryBuilder.js";
+import QueryBuilder, { type ComparisonType, type GroupBySpecs, type JoinType, type OrderBySpecs } from "./queryBuilder.js";
 
 type MapQueryColumnsToRecord<TColumns extends readonly QueryColumn<any, any, any, any, any, any, any>[]> = {
     [C in TColumns[number]as C["column"]["name"]]: C
@@ -109,7 +105,7 @@ class QueryTable<
     orderBy<
         const  TCbResult extends OrderBySpecs<TDbType>
     >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>) => TCbResult):
-        ISelectClause<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], AccumulateOrderByParams<TDbType, undefined, TCbResult>> {
+        QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined, undefined, AccumulateOrderByParams<TDbType, undefined, TCbResult>> {
         return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined>(this.dbType, [this]).orderBy(cb);
     }
 

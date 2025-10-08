@@ -1,7 +1,7 @@
 import type { DbType } from "../../db.js";
 import type { IComparable } from "../_interfaces/IComparable.js";
-import type { OrderBySpecs, OrderType } from "../_interfaces/IOrderByClause.js";
 import type QueryParam from "../param.js";
+import type { OrderBySpecs, OrderType } from "../queryBuilder.js";
 
 type AccumulateOrderByParams<
     TDbType extends DbType,

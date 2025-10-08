@@ -8,7 +8,6 @@ import type { IDbType } from "./IDbType.js";
 
 const IComparableValueDummySymbol = Symbol();
 const IComparableFinalValueDummySymbol = Symbol();
-const IComparableIdDummySymbol = Symbol();
 
 interface IComparable<
     TDbType extends DbType,
@@ -44,6 +43,5 @@ export type {
 
 export {
     IComparableValueDummySymbol,
-    IComparableFinalValueDummySymbol,
-    IComparableIdDummySymbol
+    IComparableFinalValueDummySymbol
 }

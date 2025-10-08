@@ -2,7 +2,7 @@ import type { DbType } from "../db.js";
 import eq from "./comparisons/eq.js";
 import between from "./comparisons/between.js";
 import sqlIn from "./comparisons/in.js";
-import { IComparableFinalValueDummySymbol, IComparableIdDummySymbol, IComparableValueDummySymbol, type IComparable } from "./_interfaces/IComparable.js";
+import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable } from "./_interfaces/IComparable.js";
 import type Column from "../table/column.js";
 import type QueryTable from "./queryTable.js";
 import type { ColumnType, DbValueTypes } from "../table/column.js";
@@ -26,7 +26,7 @@ class QueryColumn<
     TDefaultFieldKey extends string = TColumn["name"],
     TValueType extends DbValueTypes = TColumn extends Column<TDbType, any, any, any, any, infer TValType> ? TValType : never,
     TFinalValueType extends TValueType | null = TColumn extends Column<TDbType, any, any, any, any, any, infer TFinalValType> ? TFinalValType : never
-> implements IComparable<TDbType, undefined, TValueType, TFinalValueType, TDefaultFieldKey, any> {
+> implements IComparable<TDbType, undefined, TValueType, TFinalValueType, TDefaultFieldKey, TAsName> {
     qTableSpecs?: TQTableSpecs;
 
     dbType: TDbType;
