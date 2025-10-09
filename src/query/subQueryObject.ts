@@ -5,6 +5,7 @@ import type { ResultShape } from "./_types/result.js";
 import between from "./comparisons/between.js";
 import eq from "./comparisons/eq.js";
 import sqlIn from "./comparisons/in.js";
+import type QueryParam from "./param.js";
 import type QueryBuilder from "./queryBuilder.js";
 
 type MapResultToSubQueryEntry<TDbType extends DbType, TComparables extends ResultShape<TDbType>> =
@@ -100,4 +101,8 @@ export default SubQueryObject;
 
 export {
     SubQueryEntry
+}
+
+export type {
+    MapResultToSubQueryEntry
 }

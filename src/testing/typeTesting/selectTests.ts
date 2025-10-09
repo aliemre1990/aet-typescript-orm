@@ -1,17 +1,18 @@
 import type { PgDbType } from "../../db.js";
-import type { IExecuteableQuery } from "../../query/_interfaces/IExecuteableQuery.js";
-import type { AccumulateSubQueryParams, SetComparableIdsOfSubQueries } from "../../query/_types/subQueryUtility.js";
+import type { AccumulateSubQueryParams } from "../../query/_types/subQueryUtility.js";
 import QueryBuilder, { from } from "../../query/queryBuilder.js";
 import { customersTable, employeesTable, ordersTable, shipmentsTable, usersTable } from "./_tables.js";
 import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
 
 const selectQuery = customersTable
     .where((cols, { param }) => cols.customers.id.eq(param("whereparam")))
-    .select((cols, { round, param }) => ([cols.customers.id, round(cols.customers.createdBy, param("ali"))]))
+    .select((cols, { round, param }) => ([cols.customers.id, round(cols.customers.createdBy, param("ali")).as("roundResult")]))
     .as("ali");
 
+// type tp1 = typeof selectQuery extends QueryBuilder<any, any, any, any, infer TParams, any> ? TParams : never;
 
-// const res = from(employeesTable.as("zartZurt"), selectQuery).groupBy((cols, { round }) => [cols.ali.roundResult, round(cols.ali.id, 2).as("roundFn")]).select(cols => ({ zart: cols.__grouping_functions__.roundFn })).exec;
+
+const res = from(employeesTable.as("zartZurt"), selectQuery).groupBy((cols, { round }) => [cols.ali.roundResult, round(cols.ali.id, 2).as("roundFn")]).exec;
 
 // const fromRes = from(employeesTable.as("zartZurt"), selectQuery);
 // type tp1 = typeof fromRes;
@@ -43,7 +44,7 @@ type SingleTableAutoSelectWhereWithParamQueryTest = AssertTrue<AssertEqual<Singl
  */
 const SingleQueryTableAutoSelectQuery = customersTable.as("cst").select(cols => [cols.cst.id, cols.cst.name, cols.cst.createdBy]).exec;
 
-type tp = (ReturnType<typeof SingleQueryTableAutoSelectQuery>) extends IExecuteableQuery<any, any, infer TResult> ? TResult : never;
+type tp = ReturnType<typeof SingleQueryTableAutoSelectQuery>
 
 type SingleQueryTableAutoSelectQueryResult = { id: number, name: string, createdBy: number }[];
 type SingleQueryTableAutoSelectQueryReturnType = ReturnType<typeof SingleQueryTableAutoSelectQuery>

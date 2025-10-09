@@ -1,7 +1,6 @@
 import { DbType, dbTypes, PgDbType } from "../db.js";
 import type { PgColumnType } from "./columnTypes.js";
 import type ColumnComparisonOperation from "../query/comparisons/_comparisonOperations.js";
-import type { IExecuteableQuery } from "../query/_interfaces/IExecuteableQuery.js";
 import type ColumnLogicalOperation from "../query/logicalOperations.js";
 import QueryBuilder, { type ComparisonType, type GroupBySpecs, type JoinType, type OrderBySpecs } from "../query/queryBuilder.js";
 import type { TablesToObject, TableToColumnsMap } from "../query/_types/miscellaneous.js";
@@ -12,8 +11,9 @@ import QueryTable from "../query/queryTable.js";
 import type { DbFunctions, DbOperators } from "../query/_types/ops.js";
 import type { IDbType } from "../query/_interfaces/IDbType.js";
 import type { AccumulateColumnParams } from "../query/_types/paramAccumulationSelect.js";
-import type { ConvertComparableIdsOfSelectResult } from "../query/_types/subQueryUtility.js";
+import type { MapToSubQueryObject } from "../query/_types/subQueryUtility.js";
 import type { AccumulateOrderByParams } from "../query/_types/paramAccumulationOrderBy.js";
+import type SubQueryObject from "../query/subQueryObject.js";
 
 type TableSpecsType<TTableName extends string = string> = { tableName: TTableName }
 
@@ -77,7 +77,7 @@ class Table<
             cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>]>>,
             ops: DbFunctions<TDbType, false>
         ) => TCbResult
-    ): IExecuteableQuery<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>], undefined, TCbResult, AccumulateColumnParams<undefined, TCbResult>> {
+    ): QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>], undefined, TCbResult, AccumulateColumnParams<undefined, TCbResult>> {
 
         const queryColumns = this.columnsList.map((col) => {
             return new QueryColumn(this.dbType, col);
@@ -91,9 +91,9 @@ class Table<
 
     join<
         TJoinType extends JoinType,
-        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, string>,
+        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, string>,
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>,
-        TInnerJoinResult extends QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any> =
+        TInnerJoinResult extends QueryTable<TDbType, any, any, any, any, any> | SubQueryObject<TDbType, any, any, string> =
         TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
         QueryTable<
             TDbType,
@@ -102,7 +102,7 @@ class Table<
             Table<TDbType, TInnerCols, TInnerTableName>,
             { [K in keyof TInnerCols]: QueryColumn<TDbType, TInnerCols[K], { tableName: TInnerTableName, asTableName: undefined }> }
         > :
-        TInnerJoinTable extends IExecuteableQuery<TDbType, any, any, any, any, string> ? ConvertComparableIdsOfSelectResult<TDbType, TInnerJoinTable> :
+        TInnerJoinTable extends QueryBuilder<TDbType, any, any, any, any, string> ? MapToSubQueryObject<TDbType, TInnerJoinTable> :
         TInnerJoinTable,
 
     >(

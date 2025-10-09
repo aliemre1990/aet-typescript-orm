@@ -1,24 +1,24 @@
 import type { DbType } from "../../db.js";
-import type { IExecuteableQuery } from "../_interfaces/IExecuteableQuery.js";
 import type ColumnsSelection from "../columnsSelection.js";
 import type { JoinSpecsType } from "../queryBuilder.js";
 import type QueryTable from "../queryTable.js";
+import type SubQueryObject from "../subQueryObject.js";
 
-type TableToColumnsMap<TDbType extends DbType, T extends { [key: string]: QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any> }> = {
+type TableToColumnsMap<TDbType extends DbType, T extends { [key: string]: QueryTable<TDbType, any, any, any, any, any> | SubQueryObject<TDbType, any, any, string> }> = {
     [K in keyof T]: ColumnsSelection<
         TDbType,
         T[K],
         T[K] extends QueryTable<TDbType, any, any, any, any, any> ? T[K]["columnsList"] :
-        T[K] extends IExecuteableQuery<TDbType, any, any, infer TResult, any, any> ?
-        TResult extends undefined ? never :
-        TResult :
+        T[K] extends SubQueryObject<TDbType, any, infer TSubQueryEntries, string> ?
+        TSubQueryEntries extends undefined ? never :
+        TSubQueryEntries :
         never
     >
 };
 
 type TablesToObject<
     TDbType extends DbType,
-    TFrom extends readonly (QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any>)[],
+    TFrom extends readonly (QueryTable<TDbType, any, any, any, any, any> | SubQueryObject<TDbType, any, any, string>)[],
     TInnerJoinSpecs extends JoinSpecsType<TDbType> | undefined = undefined
 
 > = {
@@ -27,7 +27,7 @@ type TablesToObject<
     T extends QueryTable<TDbType, any, any, any, any, any> ?
     T["asName"] extends undefined ?
     T["table"]["name"] : T["asName"] & string :
-    T extends IExecuteableQuery<TDbType, any, any, any, any, infer TAs> ?
+    T extends SubQueryObject<TDbType, any, any, infer TAs> ?
     TAs extends undefined ? never : TAs & string :
     never
     ]: T
@@ -40,7 +40,7 @@ type TablesToObject<
             T in TInnerJoinSpecs[number]as T["table"] extends QueryTable<TDbType, any, any, any, any, any> ?
             T["table"]["asName"] extends undefined ?
             T["table"]["table"]["name"] : T["table"]["asName"] & string :
-            T["table"] extends IExecuteableQuery<TDbType, any, any, any, any, infer TAs> ?
+            T["table"] extends SubQueryObject<TDbType, any, any, infer TAs> ?
             TAs extends undefined ? never : TAs & string :
             never
             ]: T["table"]

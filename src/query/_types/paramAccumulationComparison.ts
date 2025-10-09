@@ -46,5 +46,5 @@ type InferParamsFromComparables<T> =
 
 export type {
     InferParamsFromOps,
-    AccumulateComparisonParams,
+    AccumulateComparisonParams
 }

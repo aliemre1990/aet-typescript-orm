@@ -1,12 +1,12 @@
 import type { DbType } from "../db.js";
 import type { IComparable } from "./_interfaces/IComparable.js";
-import type { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
 import type QueryTable from "./queryTable.js";
+import type SubQueryObject from "./subQueryObject.js";
 
 const ColumnsSelectionQueryTableObjectSymbol = Symbol();
 type ColumnsSelection<
     TDbType extends DbType,
-    TQItem extends QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any>,
+    TQItem extends QueryTable<TDbType, any, any, any, any, any> | SubQueryObject<TDbType, any, any, string>,
     TColumns extends readonly IComparable<TDbType, any, any, any, any, any>[]
 > =
     {
@@ -17,7 +17,7 @@ type ColumnsSelection<
     };
 
 function columnsSelectionFactory<TDbType extends DbType>(
-    queryObject: QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any>,
+    queryObject: QueryTable<TDbType, any, any, any, any, any> | SubQueryObject<TDbType, any, any, string>,
     columns: readonly IComparable<TDbType, any, any, any, string, any>[]
 ): ColumnsSelection<TDbType, any, any> {
 

@@ -3,7 +3,6 @@ import QueryColumn from "./queryColumn.js";
 import Table, { type MapToQueryColumns } from "../table/table.js";
 import { isNullOrUndefined } from "../utility/guards.js";
 import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
-import { IExecuteableQuery } from "./_interfaces/IExecuteableQuery.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
 import type { TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.js";
 import type { ColumnsToResultMap, QueryParamsToObject, ResultShape, ResultShapeItem } from "./_types/result.js";
@@ -13,7 +12,7 @@ import type { DbFunctions, DbOperators } from "./_types/ops.js";
 import type QueryParam from "./param.js";
 import type { DbValueTypes } from "../table/column.js";
 import type { IDbType } from "./_interfaces/IDbType.js";
-import type { AccumulateSubQueryParams, ConvertComparableIdsOfSelectResult, ConvertTablesToQueryTables, InferDbTypeFromFromFirstIDbType, SetComparableIdsOfSubQueries } from "./_types/subQueryUtility.js";
+import type { AccumulateSubQueryParams, ConvertElementsToSubQueryCompliant, InferDbTypeFromFromFirstIDbType, MapToSubQueryObject } from "./_types/subQueryUtility.js";
 import type { AccumulateComparisonParams } from "./_types/paramAccumulationComparison.js";
 import type { AccumulateOrderByParams } from "./_types/paramAccumulationOrderBy.js";
 import type { AccumulateColumnParams } from "./_types/paramAccumulationSelect.js";
@@ -21,6 +20,7 @@ import type ColumnsSelection from "./columnsSelection.js";
 import { columnsSelectionFactory } from "./columnsSelection.js";
 import { mysqlDbOperatorsWithAggregation, mysqlFunctions, mysqlFunctionsWithAggregation, pgDbOperatorsWithAggregation, pgFunctions, pgFunctionsWithAggregation } from "./dbOperations.js";
 import type { IComparable } from "./_interfaces/IComparable.js";
+import SubQueryObject from "./subQueryObject.js";
 
 const orderTypes = {
     asc: 'ASC',
@@ -39,8 +39,8 @@ type JoinType = typeof joinTypes[keyof typeof joinTypes];
 
 type GroupBySpecs<TDbType extends DbType> = readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, any>)[];
 
-type JoinSpecsType<TDbType extends DbType> = readonly { joinType: JoinType, table: QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any> }[]
-type FromType<TDbType extends DbType> = readonly (QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, any>)[];
+type JoinSpecsType<TDbType extends DbType> = readonly { joinType: JoinType, table: QueryTable<TDbType, any, any, any, any, any> | SubQueryObject<TDbType, any, any, string> }[]
+type FromType<TDbType extends DbType> = readonly (QueryTable<TDbType, any, any, any, any, any> | SubQueryObject<TDbType, any, any, string>)[];
 type ColumnsSelectionListType<TDbType extends DbType> = { [key: string]: ColumnsSelection<TDbType, any, any> }
 type ComparisonType<TDbType extends DbType> = ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>;
 
@@ -123,7 +123,7 @@ class QueryBuilder<
             cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>,
             ops: DbFunctions<TDbType, true>
         ) => TCbResult
-    ): IExecuteableQuery<TDbType, TFrom, TJoinSpecs, TCbResult, AccumulateColumnParams<TParams, TCbResult>> {
+    ) {
 
         const cols = this.columnsSelectionList as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>;
         let isAgg = false;
@@ -146,7 +146,14 @@ class QueryBuilder<
 
         const selectRes = cb(cols, functions as DbFunctions<TDbType, true>);
 
-        return new QueryBuilder(
+        return new QueryBuilder<
+            TDbType,
+            TFrom,
+            TJoinSpecs,
+            TCbResult,
+            AccumulateColumnParams<TParams, TCbResult>,
+            TAs
+        >(
             this.dbType,
             this.from,
             {
@@ -157,15 +164,15 @@ class QueryBuilder<
                 resultSelection: selectRes,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs
-            }) as IExecuteableQuery<TDbType, TFrom, TJoinSpecs, TCbResult, AccumulateColumnParams<TParams, TCbResult>>;
+            });
     };
 
 
     join<
         TJoinType extends JoinType,
-        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, string>,
+        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, string>,
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>,
-        TInnerJoinResult extends QueryTable<TDbType, any, any, any, any, any> | IExecuteableQuery<TDbType, any, any, any, any, string> =
+        TInnerJoinResult extends QueryTable<TDbType, any, any, any, any, any> | SubQueryObject<TDbType, any, any, string> =
         TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
         QueryTable<
             TDbType,
@@ -174,7 +181,7 @@ class QueryBuilder<
             Table<TDbType, TInnerCols, TInnerTableName>,
             MapToQueryColumns<TDbType, TDbType, TInnerCols>
         > :
-        TInnerJoinTable extends IExecuteableQuery<TDbType, any, any, any, any, string> ? ConvertComparableIdsOfSelectResult<TDbType, TInnerJoinTable> :
+        TInnerJoinTable extends QueryBuilder<TDbType, any, any, any, any, string> ? MapToSubQueryObject<TDbType, TInnerJoinTable> :
         TInnerJoinTable,
         const TInnerJoinAccumulated extends JoinSpecsType<TDbType> = readonly [...(TJoinSpecs extends undefined ? [] : TJoinSpecs), { joinType: TJoinType, table: TInnerJoinResult }],
         TAccumulatedParams extends QueryParam<TDbType, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>,
@@ -212,19 +219,21 @@ class QueryBuilder<
                 [ownerName]: columnsSelection
             }
         } else if (table instanceof QueryBuilder) {
-            joinTable = table as IExecuteableQuery<TDbType, any, any, any, any, any> as TInnerJoinResult;
+            let tmpTable: SubQueryObject<TDbType, any, any, any> = new SubQueryObject(this.dbType, table);
 
             if (typeof table.asName !== "string") {
                 throw Error("Subquery alias must be provided.");
             }
 
             let ownerName = table.asName;
-            let columnsSelection = columnsSelectionFactory<TDbType>(table, table.resultSelection.map((c: ResultShapeItem<TDbType>) => c.setOwnerName(ownerName)))
+            let columnsSelection = columnsSelectionFactory<TDbType>(tmpTable, tmpTable.subQueryEntries);
 
             columnsSelectionList = {
                 ...columnsSelectionList,
                 [ownerName]: columnsSelection
             }
+
+            joinTable = tmpTable as TInnerJoinResult;
         } else {
             throw Error('Invalid table type.');
         }
@@ -358,12 +367,12 @@ function from<
     TFrom extends readonly (
         Table<TDbType, any, any> |
         QueryTable<TDbType, any, any, any, any, any> |
-        IExecuteableQuery<TDbType, any, any, any, any, string>
+        QueryBuilder<TDbType, any, any, any, any, string>
     )[],
     TDbType extends DbType = InferDbTypeFromFromFirstIDbType<TFrom>
 >(...from: TFrom) {
 
-    type TFromRes = ConvertTablesToQueryTables<TFrom>;
+    type TFromRes = ConvertElementsToSubQueryCompliant<TDbType, TFrom>;
 
     let dbType = from[0].dbType as TDbType;
 
@@ -376,7 +385,10 @@ function from<
             }) as QueryColumn<TDbType, any, any, any, any, any, any>[];
 
             return new QueryTable(item.dbType, item, queryColumns);
-        } else {
+        } if (item instanceof QueryBuilder) {
+            return new SubQueryObject(dbType, item);
+        }
+        else {
             return item;
         }
     }) as TFromRes;
@@ -384,7 +396,7 @@ function from<
     type AccumulatedParams = AccumulateSubQueryParams<TDbType, TFromRes>;
     type AccumulatedParamsResult = AccumulatedParams["length"] extends 0 ? undefined : AccumulatedParams;
 
-    return new QueryBuilder<TDbType, SetComparableIdsOfSubQueries<TDbType, TFromRes>, undefined, AccumulatedParamsResult>(dbType, fromResult);
+    return new QueryBuilder<TDbType, TFromRes, undefined, undefined, AccumulatedParamsResult>(dbType, fromResult);
 }
 
 

@@ -3,64 +3,18 @@ import type { MapToQueryColumns } from "../../table/table.js";
 import type Table from "../../table/table.js";
 import type { IComparable } from "../_interfaces/IComparable.js";
 import type { IDbType } from "../_interfaces/IDbType.js";
-import type { IExecuteableQuery } from "../_interfaces/IExecuteableQuery.js";
 import type QueryParam from "../param.js";
+import type QueryBuilder from "../queryBuilder.js";
 import type QueryColumn from "../queryColumn.js";
 import type QueryTable from "../queryTable.js";
+import type { MapResultToSubQueryEntry, SubQueryEntry } from "../subQueryObject.js";
+import type SubQueryObject from "../subQueryObject.js";
 import type { ResultShape } from "./result.js";
 
-type MapSubQueryComparables<TAs extends string, TResult extends readonly any[]> =
-    TResult extends readonly [infer First, ...infer Rest] ?
-    First extends IComparable<infer TDbType, infer TParams, infer TValueType, infer TFinalValueType, infer TDefaultFieldKey, infer TColAs> ?
-    Rest extends readonly any[] ?
-    [IComparable<TDbType, TParams, TValueType, TFinalValueType, TColAs extends undefined ? TDefaultFieldKey : TColAs, undefined>, ...MapSubQueryComparables<TAs, Rest>] :
-    [IComparable<TDbType, TParams, TValueType, TFinalValueType, TColAs extends undefined ? TDefaultFieldKey : TColAs, undefined>] :
-    never :
-    []
+type MapToSubQueryObject<TDbType extends DbType, T> =
+    T extends QueryBuilder<TDbType, any, any, infer TRes extends ResultShape<TDbType>, infer TParams extends QueryParam<TDbType, string, any, any>[] | undefined, infer TAs extends string> ?
+    SubQueryObject<TDbType, T, MapResultToSubQueryEntry<TDbType, TRes>, TAs> : never
     ;
-
-type ConvertComparableIdsOfSelectResult<
-    TDbType extends DbType,
-    T extends IExecuteableQuery<TDbType, any, any, any, any, any>
-> =
-    T extends IExecuteableQuery<TDbType, infer TFrom, infer TJoinSpecs, infer TResult, infer TParams, infer TAs extends string> ?
-    TResult extends undefined ?
-    never :
-    TResult extends ResultShape<TDbType> ?
-    IExecuteableQuery<
-        TDbType,
-        TFrom,
-        TJoinSpecs,
-        MapSubQueryComparables<TAs, TResult>,
-        TParams,
-        TAs
-    > :
-    never :
-    never;
-
-type SetComparableIdsOfSubQueries<
-    TDbType extends DbType,
-    TFrom extends readonly (
-        QueryTable<TDbType, any, any, any, any, any> |
-        IExecuteableQuery<TDbType, any, any, any, any, any>
-    )[]
-> = TFrom extends readonly [infer First, ...infer Rest] ?
-    First extends IExecuteableQuery<TDbType, any, any, any, any, any> ?
-    Rest extends readonly (
-        QueryTable<TDbType, any, any, any, any> |
-        IExecuteableQuery<TDbType, any, any, any, any, any>
-    )[] ?
-    [ConvertComparableIdsOfSelectResult<TDbType, First>, ...SetComparableIdsOfSubQueries<TDbType, Rest>] :
-    [ConvertComparableIdsOfSelectResult<TDbType, First>] :
-    Rest extends readonly (
-        QueryTable<TDbType, any, any, any, any, any> |
-        IExecuteableQuery<TDbType, any, any, any, any, any>
-    )[] ?
-    [First, ...SetComparableIdsOfSubQueries<TDbType, Rest>] :
-    [First] :
-    []
-    ;
-
 
 type InferDbTypeFromFromFirstIDbType<TFrom> =
     TFrom extends IDbType<infer TDbType> ? TDbType :
@@ -69,15 +23,15 @@ type InferDbTypeFromFromFirstIDbType<TFrom> =
     never :
     never;
 
-type ConvertTablesToQueryTables<TFrom> =
+type ConvertElementsToSubQueryCompliant<TDbType extends DbType, TFrom> =
     TFrom extends readonly [infer First, ...infer Rest] ?
     First extends Table<infer TDbType, infer TColumns, infer TTableName> ?
-    [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TDbType, TColumns>>, ...ConvertTablesToQueryTables<Rest>] :
+    [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TDbType, TColumns>>, ...ConvertElementsToSubQueryCompliant<TDbType, Rest>] :
     First extends QueryTable<any, any, any, any, any, any> ?
-    [First, ...ConvertTablesToQueryTables<Rest>] :
-    First extends IExecuteableQuery<any, any, any, any, any, any> ?
-    [First, ...ConvertTablesToQueryTables<Rest>] :
-    ConvertTablesToQueryTables<Rest> :
+    [First, ...ConvertElementsToSubQueryCompliant<TDbType, Rest>] :
+    First extends QueryBuilder<any, any, any, any, any, any> ?
+    [MapToSubQueryObject<TDbType, First>, ...ConvertElementsToSubQueryCompliant<TDbType, Rest>] :
+    ConvertElementsToSubQueryCompliant<TDbType, Rest> :
     [];
 
 type AccumulateSubQueryParams<
@@ -86,19 +40,22 @@ type AccumulateSubQueryParams<
     TParams extends QueryParam<TDbType, any, any, any, any>[] | undefined = undefined
 > =
     TFrom extends readonly [infer First, ...infer Rest] ?
-    First extends IExecuteableQuery<TDbType, any, any, any, infer TInnerParams, any> ?
+    First extends SubQueryObject<TDbType, infer TQb, any, any> ?
+    TQb extends QueryBuilder<TDbType, any, any, any, infer TInnerParams, any> ?
     Rest extends any[] ?
     [...(TParams extends undefined ? [] : TParams), ...(TInnerParams extends undefined ? [] : TInnerParams), ...AccumulateSubQueryParams<TDbType, Rest>] :
     [...(TParams extends undefined ? [] : TParams), ...(TInnerParams extends undefined ? [] : TInnerParams)] :
     Rest extends any[] ?
     [...(TParams extends undefined ? [] : TParams), ...AccumulateSubQueryParams<TDbType, Rest>] :
-    [] :
-    []
+    [...(TParams extends undefined ? [] : TParams)] :
+    [...(TParams extends undefined ? [] : TParams)] :
+    [...(TParams extends undefined ? [] : TParams)];
+
+
 
 export type {
     InferDbTypeFromFromFirstIDbType,
-    ConvertTablesToQueryTables,
-    SetComparableIdsOfSubQueries,
+    ConvertElementsToSubQueryCompliant,
     AccumulateSubQueryParams,
-    ConvertComparableIdsOfSelectResult
+    MapToSubQueryObject
 }
