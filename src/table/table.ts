@@ -75,7 +75,7 @@ class Table<
     >(
         cb: (
             tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>]>>,
-            ops: DbFunctions<TDbType, false>
+            ops: DbFunctions<TDbType, true>
         ) => TCbResult
     ): QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>], undefined, TCbResult, AccumulateColumnParams<undefined, TCbResult>> {
 

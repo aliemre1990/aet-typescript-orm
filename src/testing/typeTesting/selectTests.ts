@@ -4,28 +4,6 @@ import QueryBuilder, { from } from "../../query/queryBuilder.js";
 import { customersTable, employeesTable, ordersTable, shipmentsTable, usersTable } from "./_tables.js";
 import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
 
-const selectQuery = customersTable
-    .where((cols, { param }) => cols.customers.id.eq(param("whereparam")))
-    .select((cols, { round, param }) => ([cols.customers.id, round(cols.customers.createdBy, param("ali")).as("roundResult")]))
-    .as("ali");
-
-// type tp1 = typeof selectQuery extends QueryBuilder<any, any, any, any, infer TParams, any> ? TParams : never;
-
-
-const res = from(employeesTable.as("zartZurt"), selectQuery).groupBy((cols, { round }) => [cols.ali.roundResult, round(cols.ali.id, 2).as("roundFn")]).exec;
-
-// const fromRes = from(employeesTable.as("zartZurt"), selectQuery);
-// type tp1 = typeof fromRes;
-// type tp2 = tp1 extends QueryBuilder<any, infer tit, any, any, any, any, any> ? tit : never;
-
-
-
-const joinQuery = customersTable
-    .join('INNER', employeesTable, cols => cols.employees.id.eq(cols.customers.id))
-    .join('LEFT', selectQuery, cols => cols.ali.id.eq(cols.customers.id))
-    .select(cols => [cols.ali.id])
-    .exec;
-
 
 /**
  * 

@@ -151,7 +151,7 @@ class QueryBuilder<
             });
     }
 
-    as<TAs extends string>(asName: TAs) {
+    as<TAs extends string>(asName: TAs): QueryBuilder<TDbType, TFrom, TJoinSpecs, TResult, TParams, TAs> {
         return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TResult, TParams, TAs>(
             this.dbType,
             this.from,

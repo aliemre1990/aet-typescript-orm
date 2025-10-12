@@ -52,7 +52,7 @@ class BasicColumnAggregationOperation<
     TReturnType extends DbValueTypes | null,
     TParams extends QueryParam<TDbType, string, any, any, any>[] | undefined = InferParamsFromFnArgs<TArgs>,
     TAs extends string | undefined = undefined,
-    TDefaultFieldKey extends string = `${TAggregationOperation["name"]}()`,
+    TDefaultFieldKey extends string = `${Lowercase<TAggregationOperation["name"]>}`,
 > implements IComparable<TDbType, TParams, NonNullable<TReturnType>, TReturnType, TDefaultFieldKey, TAs> {
 
     dbType: TDbType;
@@ -90,7 +90,7 @@ class BasicColumnAggregationOperation<
         this.operation = operation;
         this.asName = asName;
         this.ownerName = ownerName;
-        this.defaultFieldKey = `${operation.name}()` as TDefaultFieldKey;
+        this.defaultFieldKey = `${operation.name.toLowerCase()}` as TDefaultFieldKey;
 
         let tmpParams: QueryParam<TDbType, any, any, any, any>[] = [];
 
