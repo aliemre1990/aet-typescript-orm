@@ -11,7 +11,7 @@ const IComparableFinalValueDummySymbol = Symbol();
 
 interface IComparable<
     TDbType extends DbType,
-    TParams extends QueryParam<TDbType, string, any, any, any>[] | undefined,
+    TParams extends readonly QueryParam<TDbType, string, any, any, any>[] | undefined,
     TValueType extends DbValueTypes,
     TFinalValueType extends TValueType | null,
     TDefaultFieldKey extends string,

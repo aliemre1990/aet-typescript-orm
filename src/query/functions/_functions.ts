@@ -27,7 +27,7 @@ class ColumnSQLFunction<
     TReturnType extends DbValueTypes | null,
     TParams extends QueryParam<TDbType, string, any, any, any>[] | undefined = InferParamsFromFnArgs<TArgs>,
     TAs extends string | undefined = undefined,
-    TDefaultFieldKey extends string = `${TSQLFunction["name"]}()`
+    TDefaultFieldKey extends string = `${Lowercase<TSQLFunction["name"]>}`
 > implements IComparable<TDbType, TParams, NonNullable<TReturnType>, TReturnType, TDefaultFieldKey, TAs> {
 
     dbType: TDbType;
@@ -68,7 +68,7 @@ class ColumnSQLFunction<
         this.sqlFunction = sqlFunction;
         this.asName = asName;
         this.ownerName = ownerName;
-        this.defaultFieldKey = `${sqlFunction.name}()` as TDefaultFieldKey;
+        this.defaultFieldKey = `${sqlFunction.name.toLowerCase()}` as TDefaultFieldKey;
 
         let tmpParams: QueryParam<TDbType, any, any, any, any>[] = [];
 

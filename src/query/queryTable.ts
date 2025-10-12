@@ -47,7 +47,7 @@ class QueryTable<
 
     >(
         cb: (
-            cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
+            tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
             ops: DbFunctions<TDbType, false>
         ) => TCbResult
     ): QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined, TCbResult, AccumulateColumnParams<undefined, TCbResult>> {
@@ -75,7 +75,7 @@ class QueryTable<
         type: TJoinType,
         table: TInnerJoinTable,
         cb: (
-            cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], [{ joinType: TJoinType, table: TInnerJoinResult }]>>,
+            tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], [{ joinType: TJoinType, table: TInnerJoinResult }]>>,
             ops: DbOperators<TDbType, false>
         ) => TCbResult
     ) {
@@ -86,7 +86,7 @@ class QueryTable<
 
     where<TCbResult extends ComparisonType<TDbType>>(
         cb: (
-            cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
+            tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
             ops: DbOperators<TDbType, false>
         ) => TCbResult) {
         return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined>(this.dbType, [this]).where(cb);
@@ -96,7 +96,7 @@ class QueryTable<
     groupBy<
         const TCbResult extends GroupBySpecs<TDbType>
     >(cb: (
-        cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
+        tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
         ops: DbFunctions<TDbType, false>
     ) => TCbResult) {
         return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined>(this.dbType, [this]).groupBy(cb);
@@ -104,7 +104,7 @@ class QueryTable<
 
     orderBy<
         const  TCbResult extends OrderBySpecs<TDbType>
-    >(cb: (cols: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>) => TCbResult):
+    >(cb: (tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>) => TCbResult):
         QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined, undefined, AccumulateOrderByParams<TDbType, undefined, TCbResult>> {
         return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined>(this.dbType, [this]).orderBy(cb);
     }

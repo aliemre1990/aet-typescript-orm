@@ -15,7 +15,7 @@ class JSONBuildObjectFunction<
     TReturnType extends DbValueTypes | null = TDbType extends PgDbType ? InferReturnTypeFromJSONBuildObjectParam<TDbType, TObj> : never,
     TParams extends QueryParam<TDbType, string, any, any, any>[] | undefined = InferParamsFromJsonBuildObjectArg<TDbType, TObj>,
     TAs extends string | undefined = undefined,
-    TDefaultFieldKey extends string = 'JSON_BUILD_OBJECT()'
+    TDefaultFieldKey extends string = 'json_build_object'
 > implements IComparable<TDbType, TParams, NonNullable<TReturnType>, TReturnType, TDefaultFieldKey, TAs> {
 
     dbType: TDbType;
@@ -51,7 +51,7 @@ class JSONBuildObjectFunction<
         this.isJsonB = isJsonB;
         this.asName = asName;
         this.ownerName = ownerName;
-        this.defaultFieldKey = 'JSON_BUILD_OBJECT()' as TDefaultFieldKey;
+        this.defaultFieldKey = 'json_build_object' as TDefaultFieldKey;
 
 
         const tmpParams: QueryParam<TDbType, any, any, any, any>[] = [];
