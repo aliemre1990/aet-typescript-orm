@@ -4,7 +4,7 @@ import Table, { type MapToQueryColumns } from "../table/table.js";
 import { isNullOrUndefined } from "../utility/guards.js";
 import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
-import type { TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.js";
+import type { MapCtesToSelectionType, TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.js";
 import type { ColumnsToResultMap, QueryParamsToObject, ResultShape, ResultShapeItem } from "./_types/result.js";
 import QueryTable from "./queryTable.js";
 import type Column from "../table/column.js";
@@ -24,6 +24,9 @@ import SubQueryObject from "./subQueryObject.js";
 import eq from "./comparisons/eq.js";
 import sqlIn from "./comparisons/in.js";
 import between from "./comparisons/between.js";
+import CTEObject from "./cteObject.js";
+import type { MapToCTEObject } from "./_types/cteUtility.js";
+import { mapCTESpecsToSelection } from "./utility.js";
 
 const orderTypes = {
     asc: 'ASC',
@@ -43,9 +46,21 @@ type JoinType = typeof joinTypes[keyof typeof joinTypes];
 type GroupBySpecs<TDbType extends DbType> = readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, any>)[];
 
 type JoinSpecsType<TDbType extends DbType> = readonly { joinType: JoinType, table: QueryTable<TDbType, any, any, any, any, any> | SubQueryObject<TDbType, any, any, string> }[]
-type FromType<TDbType extends DbType> = readonly (QueryTable<TDbType, any, any, any, any, any> | SubQueryObject<TDbType, any, any, string>)[];
+type FromType<TDbType extends DbType> = readonly (QueryTable<TDbType, any, any, any, any, any> | SubQueryObject<TDbType, any, any, string> | CTEObject<TDbType, any, any, any, any>)[];
 type ColumnsSelectionListType<TDbType extends DbType> = { [key: string]: ColumnsSelection<TDbType, any, any> }
 type ComparisonType<TDbType extends DbType> = ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>;
+
+
+const cteTypes = {
+    NON_RECURSIVE: {
+        name: 'NON_RECURSIVE'
+    },
+    RECURSIVE: {
+        name: 'RECURSIVE'
+    }
+} as const;
+type CTEType = (typeof cteTypes)[keyof typeof cteTypes];
+type CTESpecs<TDbType extends DbType> = readonly CTEObject<TDbType, any, any, any, any>[];
 
 type GetFirstTypeFromResult<TDbType extends DbType, TResult extends ResultShape<TDbType> | undefined> =
     TResult extends undefined ? never :
@@ -73,8 +88,9 @@ type GetFirstDefaultKeyFromResult<TDbType extends DbType, TResult extends Result
 
 class QueryBuilder<
     TDbType extends DbType,
-    TFrom extends FromType<TDbType>,
+    TFrom extends FromType<TDbType> | undefined,
     TJoinSpecs extends JoinSpecsType<TDbType> | undefined,
+    TCTESpecs extends CTESpecs<TDbType> | undefined,
     TResult extends ResultShape<TDbType> | undefined = undefined,
     TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null, any, any>[] | undefined = undefined,
     TAs extends string | undefined = undefined
@@ -96,8 +112,9 @@ class QueryBuilder<
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 
-    from: FromType<TDbType>;
+    fromSpecs: TFrom;
     joinSpecs?: TJoinSpecs;
+    cteSpecs?: TCTESpecs;
     columnsSelectionList?: ColumnsSelectionListType<TDbType>;
     resultSelection?: TResult;
     groupedColumns?: GroupBySpecs<TDbType>;
@@ -106,7 +123,7 @@ class QueryBuilder<
 
     constructor(
         dbType: TDbType,
-        from: FromType<TDbType>,
+        fromSpecs: TFrom,
         data?: {
             asName?: TAs,
             ownerName?: string,
@@ -115,18 +132,20 @@ class QueryBuilder<
             columnsSelectionList?: ColumnsSelectionListType<TDbType>,
             groupedColumns?: GroupBySpecs<TDbType>,
             havingSpec?: ComparisonType<TDbType>,
-            orderBySpecs?: OrderBySpecs<TDbType>
+            orderBySpecs?: OrderBySpecs<TDbType>,
+            cteSpecs?: TCTESpecs;
         }
     ) {
         this.dbType = dbType;
 
-        this.from = from;
+        this.fromSpecs = fromSpecs;
         this.joinSpecs = data?.joinSpecs;
         this.resultSelection = data?.resultSelection;
         this.columnsSelectionList = data?.columnsSelectionList;
         this.groupedColumns = data?.groupedColumns;
         this.havingSpec = data?.havingSpec;
         this.orderBySpecs = data?.orderBySpecs;
+        this.cteSpecs = data?.cteSpecs;
 
         this.asName = data?.asName;
 
@@ -135,10 +154,10 @@ class QueryBuilder<
 
 
     ownerName?: string;
-    setOwnerName(val: string): QueryBuilder<TDbType, TFrom, TJoinSpecs, TResult, TParams, TAs> {
-        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TResult, TParams, TAs>(
+    setOwnerName(val: string): QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, TParams, TAs> {
+        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, TParams, TAs>(
             this.dbType,
-            this.from,
+            this.fromSpecs,
             {
                 asName: this.asName,
                 ownerName: val,
@@ -151,10 +170,10 @@ class QueryBuilder<
             });
     }
 
-    as<TAs extends string>(asName: TAs): QueryBuilder<TDbType, TFrom, TJoinSpecs, TResult, TParams, TAs> {
-        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TResult, TParams, TAs>(
+    as<TAs extends string>(asName: TAs): QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, TParams, TAs> {
+        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, TParams, TAs>(
             this.dbType,
-            this.from,
+            this.fromSpecs,
             {
                 asName,
                 ownerName: this.ownerName,
@@ -171,12 +190,12 @@ class QueryBuilder<
         const TCbResult extends ResultShape<TDbType>
     >(
         cb: (
-            tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>,
+            tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs, TCTESpecs>>,
             ops: DbFunctions<TDbType, true>
         ) => TCbResult
     ) {
 
-        const cols = this.columnsSelectionList as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>;
+        const cols = this.columnsSelectionList as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs, TCTESpecs>>;
         let isAgg = false;
         if (this.groupedColumns && this.groupedColumns.length > 0) {
             isAgg = true
@@ -201,12 +220,13 @@ class QueryBuilder<
             TDbType,
             TFrom,
             TJoinSpecs,
+            TCTESpecs,
             TCbResult,
             AccumulateColumnParams<TParams, TCbResult>,
             TAs
         >(
             this.dbType,
-            this.from,
+            this.fromSpecs,
             {
                 asName: this.asName,
                 ownerName: this.ownerName,
@@ -222,7 +242,7 @@ class QueryBuilder<
 
     join<
         TJoinType extends JoinType,
-        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, string>,
+        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, string>,
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>,
         TInnerJoinResult extends QueryTable<TDbType, any, any, any, any, any> | SubQueryObject<TDbType, any, any, string> =
         TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
@@ -233,7 +253,7 @@ class QueryBuilder<
             Table<TDbType, TInnerCols, TInnerTableName>,
             MapToQueryColumns<TDbType, TDbType, TInnerCols>
         > :
-        TInnerJoinTable extends QueryBuilder<TDbType, any, any, any, any, string> ? MapToSubQueryObject<TDbType, TInnerJoinTable> :
+        TInnerJoinTable extends QueryBuilder<TDbType, any, any, any, any, any, string> ? MapToSubQueryObject<TDbType, TInnerJoinTable> :
         TInnerJoinTable,
         const TInnerJoinAccumulated extends JoinSpecsType<TDbType> = readonly [...(TJoinSpecs extends undefined ? [] : TJoinSpecs), { joinType: TJoinType, table: TInnerJoinResult }],
         TAccumulatedParams extends QueryParam<TDbType, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<TParams, TCbResult>>,
@@ -293,9 +313,9 @@ class QueryBuilder<
         const newJoinSpec = { joinType: type, table: joinTable };
         const mergedJoinSpecs = [...(this.joinSpecs === undefined ? [newJoinSpec] : [...this.joinSpecs, newJoinSpec])] as TInnerJoinAccumulated;
 
-        return new QueryBuilder<TDbType, TFrom, TInnerJoinAccumulated, TResult, TAccumulatedParamsResult, TAs>(
+        return new QueryBuilder<TDbType, TFrom, TInnerJoinAccumulated, TCTESpecs, TResult, TAccumulatedParamsResult, TAs>(
             this.dbType,
-            this.from,
+            this.fromSpecs,
             {
                 asName: this.asName,
                 ownerName: this.ownerName,
@@ -311,9 +331,9 @@ class QueryBuilder<
         tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>,
         ops: DbOperators<TDbType, true>
     ) => TCbResult) {
-        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TResult, AccumulateComparisonParams<TParams, TCbResult>, TAs>(
+        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, AccumulateComparisonParams<TParams, TCbResult>, TAs>(
             this.dbType,
-            this.from,
+            this.fromSpecs,
             {
                 asName: this.asName,
                 ownerName: this.ownerName,
@@ -342,9 +362,9 @@ class QueryBuilder<
         }
         const res = cb(this.columnsSelectionList as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>, functions as DbFunctions<TDbType, false>);
 
-        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TResult, TParams, TAs>(
+        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, TParams, TAs>(
             this.dbType,
-            this.from,
+            this.fromSpecs,
             {
                 asName: this.asName,
                 ownerName: this.ownerName,
@@ -370,9 +390,9 @@ class QueryBuilder<
 
         const res = cb(this.columnsSelectionList as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>, functions as DbOperators<TDbType, true>)
 
-        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TResult, TParams, TAs>(
+        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, TParams, TAs>(
             this.dbType,
-            this.from,
+            this.fromSpecs,
             {
                 asName: this.asName,
                 ownerName: this.ownerName,
@@ -390,9 +410,9 @@ class QueryBuilder<
     >(cb: (tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>) => TCbResult) {
         const res = cb(this.columnsSelectionList as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>);
 
-        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TResult, AccumulateOrderByParams<TDbType, TParams, TCbResult>, TAs>(
+        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, AccumulateOrderByParams<TDbType, TParams, TCbResult>, TAs>(
             this.dbType,
-            this.from,
+            this.fromSpecs,
             {
                 asName: this.asName,
                 ownerName: this.ownerName,
@@ -403,6 +423,33 @@ class QueryBuilder<
                 havingSpec: this.havingSpec,
                 orderBySpecs: res
             });
+    }
+
+    from<
+        TSelectedCTE extends CTEObject<TDbType, any, any, any, any>
+    >(
+        cb: (ctes: MapCtesToSelectionType<TDbType, TCTESpecs>) => TSelectedCTE
+    ) {
+        if (this.cteSpecs === undefined) {
+            throw Error('No cte exists.');
+        }
+
+        const cteSpecs = mapCTESpecsToSelection(this.cteSpecs) as MapCtesToSelectionType<TDbType, TCTESpecs>;
+        const res = cb(cteSpecs);
+
+        return new QueryBuilder<TDbType, [typeof res], TJoinSpecs, TCTESpecs, TResult, TParams, TAs>(
+            this.dbType,
+            [res],
+            {
+                asName: this.asName,
+                ownerName: this.ownerName,
+                columnsSelectionList: this.columnsSelectionList,
+                groupedColumns: this.groupedColumns,
+                joinSpecs: this.joinSpecs,
+                resultSelection: this.resultSelection,
+                havingSpec: this.havingSpec,
+                orderBySpecs: this.orderBySpecs
+            })
     }
 
     exec(
@@ -430,7 +477,7 @@ function from<
     TFrom extends readonly (
         Table<TDbType, any, any> |
         QueryTable<TDbType, any, any, any, any, any> |
-        QueryBuilder<TDbType, any, any, any, any, string>
+        QueryBuilder<TDbType, any, any, any, any, any, string>
     )[],
     TDbType extends DbType = InferDbTypeFromFromFirstIDbType<TFrom>
 >(...from: TFrom) {
@@ -462,12 +509,26 @@ function from<
     return new QueryBuilder<TDbType, TFromRes, undefined, undefined, AccumulatedParamsResult>(dbType, fromResult);
 }
 
+function withAs<
+    TAs extends string,
+    TQb extends QueryBuilder<TDbType, any, any, any, any, any, any>,
+    TDbType extends DbType = TQb extends IDbType<infer TDbTypeInner> ? TDbTypeInner : never
+>(as: TAs, qb: TQb) {
+    type TCTEObject = MapToCTEObject<TDbType, TAs, typeof cteTypes.NON_RECURSIVE, TQb>;
+    type TParams = TQb extends QueryBuilder<TDbType, any, any, any, any, infer TParams, any> ? TParams : never;
 
+    const cteObject = new CTEObject(qb.dbType, qb, as, cteTypes.NON_RECURSIVE) as TCTEObject;
+    const cteSpecs = [cteObject] as const;
+
+    return new QueryBuilder<TDbType, undefined, undefined, typeof cteSpecs, undefined, TParams>(qb.dbType, undefined, { cteSpecs });
+}
 
 export default QueryBuilder;
 
 export {
-    from
+    from,
+    withAs,
+    cteTypes
 }
 
 export type {
@@ -477,5 +538,7 @@ export type {
     GroupBySpecs,
     JoinType,
     OrderBySpecs,
-    OrderType
+    OrderType,
+    CTEType,
+    CTESpecs
 }

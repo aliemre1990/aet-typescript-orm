@@ -77,7 +77,7 @@ class Table<
             tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>]>>,
             ops: DbFunctions<TDbType, true>
         ) => TCbResult
-    ): QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>], undefined, TCbResult, AccumulateColumnParams<undefined, TCbResult>> {
+    ): QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>], undefined, undefined, TCbResult, AccumulateColumnParams<undefined, TCbResult>> {
 
         const queryColumns = this.columnsList.map((col) => {
             return new QueryColumn(this.dbType, col);
@@ -86,12 +86,12 @@ class Table<
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>(this.dbType, this, queryColumns);
 
 
-        return new QueryBuilder<TDbType, [typeof queryTable], undefined>(this.dbType, [queryTable]).select(cb);
+        return new QueryBuilder<TDbType, [typeof queryTable], undefined, undefined>(this.dbType, [queryTable]).select(cb);
     }
 
     join<
         TJoinType extends JoinType,
-        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, string>,
+        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, string>,
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>,
         TInnerJoinResult extends QueryTable<TDbType, any, any, any, any, any> | SubQueryObject<TDbType, any, any, string> =
         TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
@@ -102,7 +102,7 @@ class Table<
             Table<TDbType, TInnerCols, TInnerTableName>,
             { [K in keyof TInnerCols]: QueryColumn<TDbType, TInnerCols[K], { tableName: TInnerTableName, asTableName: undefined }> }
         > :
-        TInnerJoinTable extends QueryBuilder<TDbType, any, any, any, any, string> ? MapToSubQueryObject<TDbType, TInnerJoinTable> :
+        TInnerJoinTable extends QueryBuilder<TDbType, any, any, any, any, any, string> ? MapToSubQueryObject<TDbType, TInnerJoinTable> :
         TInnerJoinTable,
 
     >(
@@ -120,7 +120,7 @@ class Table<
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>>(this.dbType, this, queryColumns);
 
 
-        return new QueryBuilder<TDbType, [typeof queryTable], undefined>(this.dbType, [queryTable])
+        return new QueryBuilder<TDbType, [typeof queryTable], undefined, undefined>(this.dbType, [queryTable])
             .join(type, table, cb);
     }
 
@@ -135,7 +135,7 @@ class Table<
 
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>(this.dbType, this, queryColumns);
 
-        return new QueryBuilder<TDbType, [typeof queryTable], undefined>(this.dbType, [queryTable]).where(cb);
+        return new QueryBuilder<TDbType, [typeof queryTable], undefined, undefined>(this.dbType, [queryTable]).where(cb);
     }
 
     groupBy<
@@ -151,20 +151,20 @@ class Table<
 
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>(this.dbType, this, queryColumns);
 
-        return new QueryBuilder<TDbType, [typeof queryTable], undefined>(this.dbType, [queryTable]).groupBy(cb);
+        return new QueryBuilder<TDbType, [typeof queryTable], undefined, undefined>(this.dbType, [queryTable]).groupBy(cb);
     }
 
     orderBy<
         const TCbResult extends OrderBySpecs<TDbType>
     >(cb: (tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>]>>) => TCbResult):
-        QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>], undefined, undefined, AccumulateOrderByParams<TDbType, undefined, TCbResult>> {
+        QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>], undefined, undefined, undefined, AccumulateOrderByParams<TDbType, undefined, TCbResult>> {
         const queryColumns = this.columnsList.map((col) => {
             return new QueryColumn(this.dbType, col);
         }) as MapToQueryColumns<TDbType, TTableName, TColumns>;
 
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>(this.dbType, this, queryColumns);
 
-        return new QueryBuilder<TDbType, [typeof queryTable], undefined>(this.dbType, [queryTable]).orderBy(cb);
+        return new QueryBuilder<TDbType, [typeof queryTable], undefined, undefined>(this.dbType, [queryTable]).orderBy(cb);
     }
 }
 

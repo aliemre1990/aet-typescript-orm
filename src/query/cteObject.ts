@@ -6,19 +6,20 @@ import between from "./comparisons/between.js";
 import eq from "./comparisons/eq.js";
 import sqlIn from "./comparisons/in.js";
 import type QueryParam from "./param.js";
+import type { CTEType } from "./queryBuilder.js";
 import type QueryBuilder from "./queryBuilder.js";
 
-type MapResultToSubQueryEntry<TDbType extends DbType, TComparables extends ResultShape<TDbType>> =
+type MapResultToCTEObjectEntry<TDbType extends DbType, TComparables extends ResultShape<TDbType>> =
     TComparables extends readonly [infer First, ...infer Rest] ?
     First extends IComparable<TDbType, any, any, any, any, any> ?
     Rest extends ResultShape<TDbType> ?
-    [SubQueryEntry<TDbType, First>, ...MapResultToSubQueryEntry<TDbType, Rest>] :
-    [SubQueryEntry<TDbType, First>] :
+    [CTEObjectEntry<TDbType, First>, ...MapResultToCTEObjectEntry<TDbType, Rest>] :
+    [CTEObjectEntry<TDbType, First>] :
     [] :
     []
     ;
 
-class SubQueryEntry<
+class CTEObjectEntry<
     TDbType extends DbType,
     TComparable extends IComparable<TDbType, any, any, any, any, any>,
     TValueType extends DbValueTypes = TComparable extends IComparable<TDbType, any, infer TValType, any, any, any> ? TValType : never,
@@ -42,12 +43,12 @@ class SubQueryEntry<
     between: typeof between = between;
 
     as<TAsName extends string>(val: TAsName) {
-        return new SubQueryEntry<TDbType, TComparable, TValueType, TFinalValueType, TDefaultFieldKey, TAsName>(this.dbType, this.comparable, val, this.ownerName);
+        return new CTEObjectEntry<TDbType, TComparable, TValueType, TFinalValueType, TDefaultFieldKey, TAsName>(this.dbType, this.comparable, val, this.ownerName);
     }
 
     ownerName?: string;
-    setOwnerName(val: string): SubQueryEntry<TDbType, TComparable, TValueType, TFinalValueType, TDefaultFieldKey, TAsName> {
-        return new SubQueryEntry<TDbType, TComparable, TValueType, TFinalValueType, TDefaultFieldKey, TAsName>(this.dbType, this.comparable, this.asName, val);
+    setOwnerName(val: string): CTEObjectEntry<TDbType, TComparable, TValueType, TFinalValueType, TDefaultFieldKey, TAsName> {
+        return new CTEObjectEntry<TDbType, TComparable, TValueType, TFinalValueType, TDefaultFieldKey, TAsName>(this.dbType, this.comparable, this.asName, val);
     }
 
 
@@ -66,30 +67,34 @@ class SubQueryEntry<
     }
 }
 
-class SubQueryObject<
+class CTEObject<
     TDbType extends DbType,
-    TQb extends QueryBuilder<TDbType, any, any, any, ResultShape<TDbType>, any, string>,
-    TEntries extends readonly SubQueryEntry<TDbType, any, any, any, any, any>[] = TQb extends QueryBuilder<TDbType, any, any, any, infer TRes extends ResultShape<TDbType>, any, string> ? MapResultToSubQueryEntry<TDbType, TRes> : never,
-    TName extends string = TQb extends QueryBuilder<TDbType, any, any, any, any, any, infer TAsName> ? TAsName : never,
-
+    TCTEName extends string,
+    TCTEType extends CTEType,
+    TQb extends QueryBuilder<TDbType, any, any, any, ResultShape<TDbType>, any, any>,
+    TEntries extends readonly CTEObjectEntry<TDbType, any, any, any, any, any>[] = TQb extends QueryBuilder<TDbType, any, any, any, infer TRes extends ResultShape<TDbType>, any, string> ? MapResultToCTEObjectEntry<TDbType, TRes> : never,
 > {
     dbType: TDbType;
     qb: TQb;
-    name: TName;
+    cteName: TCTEName;
+    cteType: TCTEType;
     subQueryEntries: TEntries;
 
     constructor(
         dbType: TDbType,
-        qb: TQb
+        qb: TQb,
+        cteName: TCTEName,
+        cteType: TCTEType
     ) {
         this.dbType = dbType;
         this.qb = qb;
-        this.name = qb.asName as TName;
+        this.cteName = cteName;
+        this.cteType = cteType;
 
-        let tmpEntries: readonly SubQueryEntry<TDbType, any, any, any, any, any>[] = [];
+        let tmpEntries: readonly CTEObjectEntry<TDbType, any, any, any, any, any>[] = [];
         if (qb.resultSelection !== undefined) {
             qb.resultSelection.forEach(res => {
-                tmpEntries = [...tmpEntries, (new SubQueryEntry(dbType, res, undefined, qb.asName))];
+                tmpEntries = [...tmpEntries, (new CTEObjectEntry(dbType, res, undefined, cteName))];
             })
         }
 
@@ -97,12 +102,12 @@ class SubQueryObject<
     }
 }
 
-export default SubQueryObject;
+export default CTEObject;
 
 export {
-    SubQueryEntry
+    CTEObjectEntry
 }
 
 export type {
-    MapResultToSubQueryEntry
+    MapResultToCTEObjectEntry
 }
