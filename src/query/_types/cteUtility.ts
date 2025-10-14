@@ -15,7 +15,7 @@ import type SubQueryObject from "../subQueryObject.js";
 import type { ResultShape } from "./result.js";
 
 type MapToCTEObject<TDbType extends DbType, TCTEName extends string, TCTEType extends CTEType, T> =
-    T extends QueryBuilder<TDbType, any, any, any, infer TRes extends ResultShape<TDbType>, any, any, infer TAs extends string> ?
+    T extends QueryBuilder<TDbType, any, any, any, infer TRes extends ResultShape<TDbType>, any, infer TAs extends string> ?
     CTEObject<TDbType, TCTEName, TCTEType, T, MapResultToCTEObjectEntry<TDbType, TRes>> : never
     ;
 

@@ -68,9 +68,9 @@ class SubQueryEntry<
 
 class SubQueryObject<
     TDbType extends DbType,
-    TQb extends QueryBuilder<TDbType, any, any, any, ResultShape<TDbType>, any, any, string>,
-    TEntries extends readonly SubQueryEntry<TDbType, any, any, any, any, any>[] = TQb extends QueryBuilder<TDbType, any, any, any, infer TRes extends ResultShape<TDbType>, any, any, string> ? MapResultToSubQueryEntry<TDbType, TRes> : never,
-    TName extends string = TQb extends QueryBuilder<TDbType, any, any, any, any, any, any, infer TAsName> ? TAsName : never,
+    TQb extends QueryBuilder<TDbType, any, any, any, ResultShape<TDbType>, any, string>,
+    TEntries extends readonly SubQueryEntry<TDbType, any, any, any, any, any>[] = TQb extends QueryBuilder<TDbType, any, any, any, infer TRes extends ResultShape<TDbType>, any, string> ? MapResultToSubQueryEntry<TDbType, TRes> : never,
+    TName extends string = TQb extends QueryBuilder<TDbType, any, any, any, any, any, infer TAsName> ? TAsName : never,
 
 > {
     dbType: TDbType;
