@@ -71,8 +71,8 @@ class CTEObject<
     TDbType extends DbType,
     TCTEName extends string,
     TCTEType extends CTEType,
-    TQb extends QueryBuilder<TDbType, any, any, any, ResultShape<TDbType>, any, any>,
-    TEntries extends readonly CTEObjectEntry<TDbType, any, any, any, any, any>[] = TQb extends QueryBuilder<TDbType, any, any, any, infer TRes extends ResultShape<TDbType>, any, string> ? MapResultToCTEObjectEntry<TDbType, TRes> : never,
+    TQb extends QueryBuilder<TDbType, any, any, any, ResultShape<TDbType>, any, any, any>,
+    TEntries extends readonly CTEObjectEntry<TDbType, any, any, any, any, any>[] = TQb extends QueryBuilder<TDbType, any, any, any, infer TRes extends ResultShape<TDbType>, any, any, string> ? MapResultToCTEObjectEntry<TDbType, TRes> : never,
 > {
     dbType: TDbType;
     qb: TQb;
