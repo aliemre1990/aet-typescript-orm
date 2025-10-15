@@ -78,7 +78,7 @@ class CTEObject<
     qb: TQb;
     cteName: TCTEName;
     cteType: TCTEType;
-    subQueryEntries: TEntries;
+    cteObjectEntries: TEntries;
 
     constructor(
         dbType: TDbType,
@@ -98,7 +98,7 @@ class CTEObject<
             })
         }
 
-        this.subQueryEntries = tmpEntries as TEntries;
+        this.cteObjectEntries = tmpEntries as TEntries;
     }
 }
 

@@ -33,8 +33,8 @@ type MultipleFromQueryWithSubQueryParamsTest = AssertTrue<AssertEqual<MultipleFr
  * 
  */
 const SubQueryJoin = customersTable
-    .join('INNER', employeesTable, cols => cols.employees.id.eq(cols.customers.id))
-    .join('LEFT', subQuery, cols => cols.sq1.id.eq(cols.customers.id))
+    .join('INNER', () => employeesTable, cols => cols.employees.id.eq(cols.customers.id))
+    .join('LEFT', () => subQuery, cols => cols.sq1.id.eq(cols.customers.id))
     .select(cols => [cols.sq1.id])
     .exec;
 

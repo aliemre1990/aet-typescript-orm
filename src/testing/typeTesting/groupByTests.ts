@@ -22,9 +22,9 @@ type typeofcol = typeof res.columns.salary;
  * 
  */
 const MultiTableGroupByQuery = customersTable
-    .join('INNER', usersTable, cols => cols.users.id.eq(cols.customers.createdBy))
-    .join('INNER', shipmentsTable, cols => cols.shipments.id.eq(1))
-    .join('INNER', employeesTable, cols => cols.shipments.id.eq(1))
+    .join('INNER', () => usersTable, cols => cols.users.id.eq(cols.customers.createdBy))
+    .join('INNER', () => shipmentsTable, cols => cols.shipments.id.eq(1))
+    .join('INNER', () => employeesTable, cols => cols.shipments.id.eq(1))
     .groupBy(cols => [cols.customers, cols.users.id, cols.shipments, cols.employees.id])
     .select((cols, { sum, jsonAgg, jsonBuildObject }) => {
 
@@ -68,8 +68,8 @@ type MultiTableGroupByQueryTest = AssertTrue<AssertEqual<MultiTableGroupByQueryR
  * 
  */
 const GroupByWithMultilevelSelectQuery = customersTable
-    .join('INNER', usersTable, cols => cols.users.id.eq(cols.customers.createdBy))
-    .join('INNER', shipmentsTable, cols => cols.shipments.id.eq(1))
+    .join('INNER', () => usersTable, cols => cols.users.id.eq(cols.customers.createdBy))
+    .join('INNER', () => shipmentsTable, cols => cols.shipments.id.eq(1))
     .groupBy((cols) => {
         return [cols.customers, cols.users.id, cols.shipments]
     })
@@ -92,8 +92,8 @@ type GroupByWithMultilevelSelectQueryTest = AssertTrue<AssertEqual<GroupByWithMu
 
 
 const GroupByHaving = customersTable
-    .join('INNER', usersTable, cols => cols.users.id.eq(cols.customers.createdBy))
-    .join('INNER', shipmentsTable, cols => cols.shipments.id.eq(1))
+    .join('INNER', () => usersTable, cols => cols.users.id.eq(cols.customers.createdBy))
+    .join('INNER', () => shipmentsTable, cols => cols.shipments.id.eq(1))
     .groupBy((cols) => {
         return [cols.customers, cols.users.id]
     })

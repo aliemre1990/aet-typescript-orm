@@ -6,7 +6,7 @@ import type QueryTable from "../queryTable.js";
 import type SubQueryObject from "../subQueryObject.js";
 
 type MapCtesToSelectionType<TDbType extends DbType, TCTESpecs extends CTESpecs<TDbType> | undefined> =
-    TCTESpecs extends undefined ? never :
+    TCTESpecs extends undefined ? [] :
     TCTESpecs extends CTESpecs<TDbType> ?
     {
         [C in TCTESpecs[number]as C["cteName"]]: C
@@ -62,6 +62,8 @@ type TablesToObject<
             T["table"]["table"]["name"] : T["table"]["asName"] & string :
             T["table"] extends SubQueryObject<TDbType, any, any, infer TAs> ?
             TAs extends undefined ? never : TAs & string :
+            T["table"] extends CTEObject<TDbType, infer TName, any, any, any> ?
+            TName :
             never
             ]: T["table"]
         }

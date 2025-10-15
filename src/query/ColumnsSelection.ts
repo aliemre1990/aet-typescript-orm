@@ -1,13 +1,14 @@
 import type { DbType } from "../db.js";
 import type { IComparable } from "./_interfaces/IComparable.js";
 import type CTEObject from "./cteObject.js";
+import type { FromItemType } from "./queryBuilder.js";
 import type QueryTable from "./queryTable.js";
 import type SubQueryObject from "./subQueryObject.js";
 
 const ColumnsSelectionQueryTableObjectSymbol = Symbol();
 type ColumnsSelection<
     TDbType extends DbType,
-    TQItem extends QueryTable<TDbType, any, any, any, any, any> | SubQueryObject<TDbType, any, any, string> | CTEObject<TDbType, any, any, any, any>,
+    TQItem extends FromItemType<TDbType>,
     TColumns extends readonly IComparable<TDbType, any, any, any, any, any>[]
 > =
     {
@@ -18,7 +19,7 @@ type ColumnsSelection<
     };
 
 function columnsSelectionFactory<TDbType extends DbType>(
-    queryObject: QueryTable<TDbType, any, any, any, any, any> | SubQueryObject<TDbType, any, any, string>,
+    queryObject: FromItemType<TDbType>,
     columns: readonly IComparable<TDbType, any, any, any, string, any>[]
 ): ColumnsSelection<TDbType, any, any> {
 

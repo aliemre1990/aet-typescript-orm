@@ -32,7 +32,7 @@ type SingleQueryTableAutoSelectQueryTest = AssertTrue<AssertEqual<SingleQueryTab
  * 
  */
 const QueryTableJoinQuery = customersTable.as("cst")
-    .join("INNER", usersTable, (cols) => cols.users.id.eq(cols.cst.createdBy))
+    .join("INNER", () => usersTable, (cols) => cols.users.id.eq(cols.cst.createdBy))
     .select(cols => ([
         cols.users.id.as("userId"),
         cols.users.userName,
@@ -60,7 +60,7 @@ type SingleTableAutoSelectQueryTest = AssertTrue<AssertEqual<SingleTableAutoSele
  * 
  */
 const SingleTableJoinWithAutoSelectQuery = customersTable
-    .join('INNER', usersTable, (cols, { param }) => cols.users.id.eq(param("param1")))
+    .join('INNER', () => usersTable, (cols, { param }) => cols.users.id.eq(param("param1")))
     .select(cols => [
         cols.customers.id.as("customerId"),
         cols.customers.name.as("customerName"),
@@ -86,7 +86,7 @@ type SingleTableJoinWithAutoSelectQueryTest = AssertTrue<AssertEqual<SingleTable
  * 
  */
 const AutoSelectMultiJoins = customersTable
-    .join('INNER', usersTable, (cols, { and, param }) => {
+    .join('INNER', () => usersTable, (cols, { and, param }) => {
 
         const res1 = and(
             cols.users.id.eq(param("userParam1").type<number>()),
@@ -107,7 +107,7 @@ const AutoSelectMultiJoins = customersTable
         // type inrest = typeof inres extends ColumnComparisonOperation<any, any, any, infer TCols, any> ? TCols : never;
         // type prm = inrest[1];
     })
-    .join('INNER', usersTable.as('parentUsers'), (cols, { and, coalesce, param }) => {
+    .join('INNER', () => usersTable.as('parentUsers'), (cols, { and, coalesce, param }) => {
 
         const comp = and(
             cols.parentUsers.id.eq(cols.customers.id),
@@ -121,7 +121,7 @@ const AutoSelectMultiJoins = customersTable
 
         return comp;
     })
-    .join('INNER', ordersTable, (cols) => cols.users.userName.eq(cols.customers.name))
+    .join('INNER', () => ordersTable, (cols) => cols.users.userName.eq(cols.customers.name))
     .select(cols => [
         cols.customers.id.as("customerId"),
         cols.customers.name.as("customerName"),
@@ -180,18 +180,18 @@ type AutoSelectMultiJoinsParamsText = AssertTrue<AssertEqual<AutoSelectMultiJoin
  * 
  */
 const SingleLevelSelectWithJoins = customersTable
-    .join('INNER', usersTable, (cols) => {
+    .join('INNER', () => usersTable, (cols) => {
         type t = typeof cols;
 
         return cols.users.id.eq(1);
     })
-    .join('INNER', ordersTable, (cols) => {
+    .join('INNER', () => ordersTable, (cols) => {
         type t = typeof cols;
 
         return cols.orders.id.eq(1);
 
     })
-    .join('INNER', shipmentsTable, (cols) => {
+    .join('INNER', () => shipmentsTable, (cols) => {
         type t = typeof cols;
 
         return cols.shipments.orderId.eq(1);
@@ -211,8 +211,8 @@ type SingleLevelSelectWithJoinsParamsTest = AssertTrue<AssertEqual<unknown, Sing
  * 
  */
 const MultiLevelSelectWithJoins = customersTable
-    .join('INNER', usersTable, (cols) => cols.users.id.eq(1))
-    .join('INNER', usersTable.as("parentUsers"), (cols) => cols.parentUsers.id.eq(1))
+    .join('INNER', () => usersTable, (cols) => cols.users.id.eq(1))
+    .join('INNER', () => usersTable.as("parentUsers"), (cols) => cols.parentUsers.id.eq(1))
     .select((cols, { jsonBuildObject, round, param }) => [
         cols.customers.id.as("customerId"),
         round(cols.customers.id, param("roundParam")).as("roundResult"),

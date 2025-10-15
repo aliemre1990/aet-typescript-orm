@@ -3,7 +3,9 @@ import type { MapToQueryColumns } from "../../table/table.js";
 import type Table from "../../table/table.js";
 import type { IComparable } from "../_interfaces/IComparable.js";
 import type { IDbType } from "../_interfaces/IDbType.js";
+import type CTEObject from "../cteObject.js";
 import type QueryParam from "../param.js";
+import type { FromType } from "../queryBuilder.js";
 import type QueryBuilder from "../queryBuilder.js";
 import type QueryColumn from "../queryColumn.js";
 import type QueryTable from "../queryTable.js";
@@ -31,24 +33,28 @@ type ConvertElementsToSubQueryCompliant<TDbType extends DbType, TFrom> =
     [First, ...ConvertElementsToSubQueryCompliant<TDbType, Rest>] :
     First extends QueryBuilder<TDbType, any, any, any, any, any, any> ?
     [MapToSubQueryObject<TDbType, First>, ...ConvertElementsToSubQueryCompliant<TDbType, Rest>] :
+    First extends CTEObject<TDbType, any, any, any, any> ?
+    [First, ...ConvertElementsToSubQueryCompliant<TDbType, Rest>] :
     ConvertElementsToSubQueryCompliant<TDbType, Rest> :
     [];
 
 type AccumulateSubQueryParams<
     TDbType extends DbType,
-    TFrom extends readonly any[],
+    TFrom extends FromType<TDbType>,
     TParams extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = undefined
 > =
     TFrom extends readonly [infer First, ...infer Rest] ?
     First extends SubQueryObject<TDbType, infer TQb, any, any> ?
     TQb extends QueryBuilder<TDbType, any, any, any, any, infer TInnerParams, any> ?
-    Rest extends any[] ?
+    Rest extends FromType<TDbType> ?
     [...(TParams extends undefined ? [] : TParams), ...(TInnerParams extends undefined ? [] : TInnerParams), ...AccumulateSubQueryParams<TDbType, Rest>] :
     [...(TParams extends undefined ? [] : TParams), ...(TInnerParams extends undefined ? [] : TInnerParams)] :
-    Rest extends any[] ?
+    Rest extends FromType<TDbType> ?
     [...(TParams extends undefined ? [] : TParams), ...AccumulateSubQueryParams<TDbType, Rest>] :
     [...(TParams extends undefined ? [] : TParams)] :
+    Rest extends FromType<TDbType> ?
     [...(TParams extends undefined ? [] : TParams), ...AccumulateSubQueryParams<TDbType, Rest>] :
+    [...(TParams extends undefined ? [] : TParams)] :
     [...(TParams extends undefined ? [] : TParams)];
 
 

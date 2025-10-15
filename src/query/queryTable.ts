@@ -5,13 +5,16 @@ import type Table from "../table/table.js";
 import type { IDbType } from "./_interfaces/IDbType.js";
 import type { TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.js";
 import type { DbFunctions, DbOperators } from "./_types/ops.js";
+import type { AccumulateComparisonParams } from "./_types/paramAccumulationComparison.js";
 import type { AccumulateOrderByParams } from "./_types/paramAccumulationOrderBy.js";
 import type { AccumulateColumnParams } from "./_types/paramAccumulationSelect.js";
 import type { ResultShape } from "./_types/result.js";
-import type { MapToSubQueryObject } from "./_types/subQueryUtility.js";
+import type { AccumulateSubQueryParams, MapToSubQueryObject } from "./_types/subQueryUtility.js";
 import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
+import type CTEObject from "./cteObject.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
-import QueryBuilder, { type ComparisonType, type GroupBySpecs, type JoinType, type OrderBySpecs } from "./queryBuilder.js";
+import type QueryParam from "./param.js";
+import QueryBuilder, { type ComparisonType, type GroupBySpecs, type JoinSpecsTableType, type JoinSpecsType, type JoinType, type OrderBySpecs } from "./queryBuilder.js";
 import type SubQueryObject from "./subQueryObject.js";
 
 type MapQueryColumnsToRecord<TColumns extends readonly QueryColumn<any, any, any, any, any, any, any>[]> = {
@@ -57,9 +60,9 @@ class QueryTable<
 
     join<
         TJoinType extends JoinType,
-        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, string>,
+        TInnerJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, string> | CTEObject<TDbType, any, any, any, any>,
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>,
-        TInnerJoinResult extends QueryTable<TDbType, any, any, any, any, any> | SubQueryObject<TDbType, any, any, string> =
+        TInnerJoinResult extends JoinSpecsTableType<TDbType> =
         TInnerJoinTable extends Table<TDbType, infer TInnerCols, infer TInnerTableName> ?
         QueryTable<
             TDbType,
@@ -69,19 +72,21 @@ class QueryTable<
             { [K in keyof TInnerCols]: QueryColumn<TDbType, TInnerCols[K], { tableName: TInnerTableName, asTableName: undefined }> }
         > :
         TInnerJoinTable extends QueryBuilder<TDbType, any, any, any, any, any, string> ? MapToSubQueryObject<TDbType, TInnerJoinTable> :
+        TInnerJoinTable extends CTEObject<TDbType, any, any, any, any> ? TInnerJoinTable :
         TInnerJoinTable,
-
+        TAccumulatedParams extends QueryParam<TDbType, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, [TInnerJoinResult], AccumulateComparisonParams<[], TCbResult>>,
+        TAccumulatedParamsResult extends QueryParam<TDbType, any, any, any, any>[] | undefined = TAccumulatedParams["length"] extends 0 ? undefined : TAccumulatedParams
     >(
         type: TJoinType,
-        table: TInnerJoinTable,
+        tableSelectionCb: () => TInnerJoinTable,
         cb: (
             tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], [{ joinType: TJoinType, table: TInnerJoinResult }]>>,
             ops: DbOperators<TDbType, false>
         ) => TCbResult
-    ) {
+    ): QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], [{ joinType: TJoinType, table: TInnerJoinResult }], undefined, undefined, TAccumulatedParamsResult> {
 
         return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined, undefined>(this.dbType, [this])
-            .join(type, table, cb);
+            .join(type, tableSelectionCb, cb);
     }
 
     where<TCbResult extends ComparisonType<TDbType>>(

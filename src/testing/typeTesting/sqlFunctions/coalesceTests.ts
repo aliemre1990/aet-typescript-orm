@@ -91,7 +91,7 @@ coalesce(customerIdQC).eq(createdByQC);
  * 
  */
 const InferParamsFromCoalesce = customersTable
-    .join('INNER', usersTable, (cols, { coalesce }) => {
+    .join('INNER', () => usersTable, (cols, { coalesce }) => {
 
         const res1 = coalesce(
             1, 2, param("param1"), coalesce(1, 2, 3, param("param2"), coalesce(1, 2, 3, 4, param("param3")))
@@ -102,7 +102,7 @@ const InferParamsFromCoalesce = customersTable
 
         return res1;
     })
-    .join('INNER', usersTable.as('parentUsers'), (cols, { and, coalesce }) => {
+    .join('INNER', () => usersTable.as('parentUsers'), (cols, { and, coalesce }) => {
         const res = and(
             coalesce("asdf", param("coalesceAnd1")).eq("sadf"),
             coalesce(new Date(), param("coalesceAnd2")).eq(new Date())
@@ -110,7 +110,7 @@ const InferParamsFromCoalesce = customersTable
 
         return res;
     })
-    .join('INNER', ordersTable, (cols) => cols.users.userName.eq(cols.customers.name))
+    .join('INNER', () => ordersTable, (cols) => cols.users.userName.eq(cols.customers.name))
     .select(cols => [cols.customers.id])
     .exec;
 
