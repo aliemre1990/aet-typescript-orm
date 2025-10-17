@@ -72,8 +72,7 @@ class QueryTable<
         undefined,
         undefined,
         TCbResult,
-        OverrideSelectParams<TDbType, DefaultCategorizedParamsType, AccumulateColumnParams<undefined, TCbResult>>,
-        AccumulateColumnParams<undefined, TCbResult>
+        OverrideSelectParams<TDbType, DefaultCategorizedParamsType, AccumulateColumnParams<undefined, TCbResult>>
     > {
 
         return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined, undefined>(this.dbType, [this]).select(cb);
@@ -81,7 +80,7 @@ class QueryTable<
 
     join<
         TJoinType extends JoinType,
-        TJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, any, string> | CTEObject<TDbType, any, any, any, any>,
+        TJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, string, any> | CTEObject<TDbType, any, any, any, any>,
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>,
         TJoinResult extends JoinSpecsTableType<TDbType> =
         TJoinTable extends Table<TDbType, infer TJoinCols, infer TJoinTableName> ?
@@ -92,7 +91,7 @@ class QueryTable<
             Table<TDbType, TJoinCols, TJoinTableName>,
             { [K in keyof TJoinCols]: QueryColumn<TDbType, TJoinCols[K], { tableName: TJoinTableName, asTableName: undefined }> }
         > :
-        TJoinTable extends QueryBuilder<TDbType, any, any, any, any, any, any, string> ? MapToSubQueryObject<TDbType, TJoinTable> :
+        TJoinTable extends QueryBuilder<TDbType, any, any, any, any, any, string, any> ? MapToSubQueryObject<TDbType, TJoinTable> :
         TJoinTable extends CTEObject<TDbType, any, any, any, any> ? TJoinTable :
         TJoinTable,
         TAccumulatedParams extends QueryParam<TDbType, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, [TJoinResult], AccumulateComparisonParams<[], TCbResult>>,
@@ -109,7 +108,15 @@ class QueryTable<
             tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], TJoinAccumulated>>,
             ops: DbOperators<TDbType, false>
         ) => TCbResult
-    ): QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], TJoinAccumulated, undefined, undefined, TNewCategorizedParams, TAccumulatedParamsResult> {
+    ):
+        QueryBuilder<
+            TDbType,
+            [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>],
+            TJoinAccumulated,
+            undefined,
+            undefined,
+            TNewCategorizedParams
+        > {
 
         return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined, undefined>(this.dbType, [this])
             .join(type, tableSelectionCb, cb);
@@ -136,8 +143,7 @@ class QueryTable<
         undefined,
         undefined,
         undefined,
-        OverrideGroupByParams<TDbType, DefaultCategorizedParamsType, AccumulateColumnParams<undefined, TCbResult>>,
-        AccumulateColumnParams<undefined, TCbResult>
+        OverrideGroupByParams<TDbType, DefaultCategorizedParamsType, AccumulateColumnParams<undefined, TCbResult>>
     > {
         return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined, undefined>(this.dbType, [this]).groupBy(cb);
     }
@@ -155,8 +161,7 @@ class QueryTable<
             undefined,
             undefined,
             undefined,
-            OverrideOrderByParams<TDbType, DefaultCategorizedParamsType, AccumulateOrderByParams<TDbType, undefined, TCbResult>>,
-            AccumulateOrderByParams<TDbType, undefined, TCbResult>
+            OverrideOrderByParams<TDbType, DefaultCategorizedParamsType, AccumulateOrderByParams<TDbType, undefined, TCbResult>>
         > {
         return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined, undefined>(this.dbType, [this]).orderBy(cb);
     }

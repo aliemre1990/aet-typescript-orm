@@ -12,7 +12,7 @@ import type SubQueryObject from "../subQueryObject.js";
 import type { ResultShape } from "./result.js";
 
 type MapToSubQueryObject<TDbType extends DbType, T> =
-    T extends QueryBuilder<TDbType, any, any, any, infer TRes extends ResultShape<TDbType>, any, any, infer TAs extends string> ?
+    T extends QueryBuilder<TDbType, any, any, any, infer TRes extends ResultShape<TDbType>, any, infer TAs extends string, any> ?
     SubQueryObject<TDbType, T, MapResultToSubQueryEntry<TDbType, TRes>, TAs> : never
     ;
 
@@ -43,7 +43,7 @@ type AccumulateSubQueryParams<
 > =
     TFrom extends readonly [infer First, ...infer Rest] ?
     First extends SubQueryObject<TDbType, infer TQb, any, any> ?
-    TQb extends QueryBuilder<TDbType, any, any, any, any, any, infer TInnerParams, any> ?
+    TQb extends QueryBuilder<TDbType, any, any, any, any, any, any, infer TInnerParams> ?
     Rest extends FromType<TDbType> ?
     [...(TParams extends undefined ? [] : TParams), ...(TInnerParams extends undefined ? [] : TInnerParams), ...AccumulateSubQueryParams<TDbType, Rest>] :
     [...(TParams extends undefined ? [] : TParams), ...(TInnerParams extends undefined ? [] : TInnerParams)] :

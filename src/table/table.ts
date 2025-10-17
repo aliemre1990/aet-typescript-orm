@@ -91,8 +91,7 @@ class Table<
         undefined,
         undefined,
         TCbResult,
-        OverrideSelectParams<TDbType, DefaultCategorizedParamsType, AccumulateColumnParams<undefined, TCbResult>>,
-        AccumulateColumnParams<undefined, TCbResult>
+        OverrideSelectParams<TDbType, DefaultCategorizedParamsType, AccumulateColumnParams<undefined, TCbResult>>
     > {
 
         const queryColumns = this.columnsList.map((col) => {
@@ -107,7 +106,7 @@ class Table<
 
     join<
         TJoinType extends JoinType,
-        TJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, any, string> | CTEObject<TDbType, any, any, any, any>,
+        TJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, string, any> | CTEObject<TDbType, any, any, any, any>,
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>,
         TJoinResult extends JoinSpecsTableType<TDbType> =
         TJoinTable extends Table<TDbType, infer TJoinCols, infer TJoinTableName> ?
@@ -118,7 +117,7 @@ class Table<
             Table<TDbType, TJoinCols, TJoinTableName>,
             { [K in keyof TJoinCols]: QueryColumn<TDbType, TJoinCols[K], { tableName: TJoinTableName, asTableName: undefined }> }
         > :
-        TJoinTable extends QueryBuilder<TDbType, any, any, any, any, any, any, string> ? MapToSubQueryObject<TDbType, TJoinTable> :
+        TJoinTable extends QueryBuilder<TDbType, any, any, any, any, any, string, any> ? MapToSubQueryObject<TDbType, TJoinTable> :
         TJoinTable extends CTEObject<TDbType, any, any, any, any> ? TJoinTable :
         TJoinTable,
         TAccumulatedParams extends QueryParam<TDbType, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, [TJoinResult], AccumulateComparisonParams<[], TCbResult>>,
@@ -135,7 +134,15 @@ class Table<
             tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>>], TJoinAccumulated>>,
             ops: DbOperators<TDbType, false>
         ) => TCbResult
-    ): QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>], TJoinAccumulated, undefined, undefined, TNewCategorizedParams, TAccumulatedParamsResult> {
+    ):
+        QueryBuilder<
+            TDbType,
+            [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>],
+            TJoinAccumulated,
+            undefined,
+            undefined,
+            TNewCategorizedParams
+        > {
         const queryColumns = this.columnsList.map((col) => {
             return new QueryColumn(this.dbType, col);
         }) as MapToQueryColumns<TDbType, TTableName, TColumns>;
@@ -174,8 +181,7 @@ class Table<
         undefined,
         undefined,
         undefined,
-        OverrideGroupByParams<TDbType, DefaultCategorizedParamsType, AccumulateColumnParams<undefined, TCbResult>>,
-        AccumulateColumnParams<undefined, TCbResult>
+        OverrideGroupByParams<TDbType, DefaultCategorizedParamsType, AccumulateColumnParams<undefined, TCbResult>>
     > {
         const queryColumns = this.columnsList.map((col) => {
             return new QueryColumn(this.dbType, col);
@@ -195,8 +201,7 @@ class Table<
             undefined,
             undefined,
             undefined,
-            OverrideOrderByParams<TDbType, DefaultCategorizedParamsType, AccumulateOrderByParams<TDbType, undefined, TCbResult>>,
-            AccumulateOrderByParams<TDbType, undefined, TCbResult>
+            OverrideOrderByParams<TDbType, DefaultCategorizedParamsType, AccumulateOrderByParams<TDbType, undefined, TCbResult>>
         > {
         const queryColumns = this.columnsList.map((col) => {
             return new QueryColumn(this.dbType, col);

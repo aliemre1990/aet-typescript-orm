@@ -27,7 +27,7 @@ import between from "./comparisons/between.js";
 import CTEObject from "./cteObject.js";
 import type { MapToCTEObject } from "./_types/cteUtility.js";
 import { mapCTESpecsToSelection } from "./utility.js";
-import { OverrideOrderByParams, OverrideWhereParams, type OverrideGroupByParams, type OverrideHavingParams, type OverrideJoinParams, type OverrideSelectParams } from "./_types/categorizedParams.js";
+import { OverrideFromParams, OverrideOrderByParams, OverrideWhereParams, type AccumulateCategorizedParams, type OverrideCTEParams, type OverrideGroupByParams, type OverrideHavingParams, type OverrideJoinParams, type OverrideSelectParams } from "./_types/categorizedParams.js";
 import type { OverrideDuplicateJoinSpec } from "./_types/join.js";
 
 type FromItemType<TDbType extends DbType> = QueryTable<TDbType, any, any, any, any, any> | SubQueryObject<TDbType, any, any, string> | CTEObject<TDbType, any, any, any, any>;
@@ -120,19 +120,20 @@ class QueryBuilder<
     TCTESpecs extends CTESpecs<TDbType> | undefined,
     TResult extends ResultShape<TDbType> | undefined = undefined,
     TCategorizedParams extends CategorizedParamsType<TDbType> = DefaultCategorizedParamsType,
-    TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null, any, any>[] | undefined = undefined,
-    TAs extends string | undefined = undefined
+    TAs extends string | undefined = undefined,
+    TParamsAccumulated extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined =
+    AccumulateCategorizedParams<TDbType, TCategorizedParams>["length"] extends 0 ? undefined : AccumulateCategorizedParams<TDbType, TCategorizedParams>
 >
     implements
     IDbType<TDbType>,
-    IComparable<TDbType, TParams, GetFirstTypeFromResult<TDbType, TResult>, GetFirstFinalTypeFromResult<TDbType, TResult>, GetFirstDefaultKeyFromResult<TDbType, TResult>, TAs> {
+    IComparable<TDbType, TParamsAccumulated, GetFirstTypeFromResult<TDbType, TResult>, GetFirstFinalTypeFromResult<TDbType, TResult>, GetFirstDefaultKeyFromResult<TDbType, TResult>, TAs> {
 
     dbType: TDbType;
 
     [IComparableValueDummySymbol]?: GetFirstTypeFromResult<TDbType, TResult>;
     [IComparableFinalValueDummySymbol]?: GetFirstFinalTypeFromResult<TDbType, TResult>;
 
-    params?: TParams;
+    params?: TParamsAccumulated;
     asName?: TAs;
     defaultFieldKey: GetFirstDefaultKeyFromResult<TDbType, TResult>;
 
@@ -182,8 +183,8 @@ class QueryBuilder<
 
 
     ownerName?: string;
-    setOwnerName(val: string): QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, TCategorizedParams, TParams, TAs> {
-        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, TCategorizedParams, TParams, TAs>(
+    setOwnerName(val: string): QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, TCategorizedParams, TAs, TParamsAccumulated> {
+        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, TCategorizedParams, TAs, TParamsAccumulated>(
             this.dbType,
             this.fromSpecs,
             {
@@ -198,8 +199,8 @@ class QueryBuilder<
             });
     }
 
-    as<TAs extends string>(asName: TAs): QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, TCategorizedParams, TParams, TAs> {
-        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, TCategorizedParams, TParams, TAs>(
+    as<TAs extends string>(asName: TAs): QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, TCategorizedParams, TAs, TParamsAccumulated> {
+        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, TCategorizedParams, TAs, TParamsAccumulated>(
             this.dbType,
             this.fromSpecs,
             {
@@ -228,7 +229,6 @@ class QueryBuilder<
         TCTESpecs,
         TCbResult,
         OverrideSelectParams<TDbType, TCategorizedParams, AccumulateColumnParams<undefined, TCbResult>>,
-        AccumulateColumnParams<TParams, TCbResult>,
         TAs
     > {
 
@@ -260,7 +260,6 @@ class QueryBuilder<
             TCTESpecs,
             TCbResult,
             OverrideSelectParams<TDbType, TCategorizedParams, AccumulateColumnParams<undefined, TCbResult>>,
-            AccumulateColumnParams<TParams, TCbResult>,
             TAs
         >(
             this.dbType,
@@ -280,7 +279,7 @@ class QueryBuilder<
 
     join<
         TJoinType extends JoinType,
-        TJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, any, string> | CTEObject<TDbType, any, any, any, any>,
+        TJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, string, any> | CTEObject<TDbType, any, any, any, any>,
         TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>,
         TJoinResult extends JoinSpecsTableType<TDbType> =
         TJoinTable extends Table<TDbType, infer TJoinCols, infer TJoinTableName> ?
@@ -291,11 +290,9 @@ class QueryBuilder<
             Table<TDbType, TJoinCols, TJoinTableName>,
             MapToQueryColumns<TDbType, TDbType, TJoinCols>
         > :
-        TJoinTable extends QueryBuilder<TDbType, any, any, any, any, any, any, string> ? MapToSubQueryObject<TDbType, TJoinTable> :
+        TJoinTable extends QueryBuilder<TDbType, any, any, any, any, any, string, any> ? MapToSubQueryObject<TDbType, TJoinTable> :
         TJoinTable extends CTEObject<TDbType, any, any, any, any> ? TJoinTable :
         TJoinTable,
-        TAccumulatedParams extends QueryParam<TDbType, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, [TJoinResult], AccumulateComparisonParams<TParams, TCbResult>>,
-        TAccumulatedParamsResult extends QueryParam<TDbType, any, any, any, any>[] | undefined = TAccumulatedParams["length"] extends 0 ? undefined : TAccumulatedParams,
         TJoinParams extends readonly QueryParam<TDbType, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, [TJoinResult], AccumulateComparisonParams<[], TCbResult>>,
         TJoinParamsResult extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = TJoinParams["length"] extends 0 ? undefined : TJoinParams,
         TNewCategorizedParams extends CategorizedParamsType<TDbType> = OverrideJoinParams<TDbType, TCategorizedParams, TJoinResult, TJoinParamsResult>,
@@ -308,7 +305,7 @@ class QueryBuilder<
             tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinAccumulated, TCTESpecs>>,
             ops: DbOperators<TDbType, false>
         ) => TCbResult
-    ) {
+    ): QueryBuilder<TDbType, TFrom, TJoinAccumulated, TCTESpecs, TResult, TNewCategorizedParams, TAs> {
 
         let cteSpecs = [] as MapCtesToSelectionType<TDbType, TCTESpecs>;
         if (this.cteSpecs !== undefined) {
@@ -378,7 +375,7 @@ class QueryBuilder<
             mergedJoinSpecs = existingIndex >= 0 ? [...this.joinSpecs.toSpliced(existingIndex, 1), newJoinSpec] : [...this.joinSpecs, newJoinSpec];
         }
 
-        return new QueryBuilder<TDbType, TFrom, TJoinAccumulated, TCTESpecs, TResult, TNewCategorizedParams, TAccumulatedParamsResult, TAs>(
+        return new QueryBuilder<TDbType, TFrom, TJoinAccumulated, TCTESpecs, TResult, TNewCategorizedParams, TAs>(
             this.dbType,
             this.fromSpecs,
             {
@@ -392,10 +389,22 @@ class QueryBuilder<
             })
     }
 
-    where<TCbResult extends ComparisonType<TDbType>>(cb: (
-        tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>,
-        ops: DbOperators<TDbType, true>
-    ) => TCbResult) {
+    where<TCbResult extends ComparisonType<TDbType>>
+        (
+            cb: (
+                tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>,
+                ops: DbOperators<TDbType, true>
+            ) => TCbResult
+        ):
+        QueryBuilder<
+            TDbType,
+            TFrom,
+            TJoinSpecs,
+            TCTESpecs,
+            TResult,
+            OverrideWhereParams<TDbType, TCategorizedParams, AccumulateComparisonParams<undefined, TCbResult>>,
+            TAs
+        > {
         return new QueryBuilder<
             TDbType,
             TFrom,
@@ -403,7 +412,6 @@ class QueryBuilder<
             TCTESpecs,
             TResult,
             OverrideWhereParams<TDbType, TCategorizedParams, AccumulateComparisonParams<undefined, TCbResult>>,
-            AccumulateComparisonParams<TParams, TCbResult>,
             TAs
         >(
             this.dbType,
@@ -432,7 +440,6 @@ class QueryBuilder<
             TCTESpecs,
             TResult,
             OverrideGroupByParams<TDbType, TCategorizedParams, AccumulateColumnParams<undefined, TCbResult>>,
-            AccumulateColumnParams<TParams, TCbResult>,
             TAs
         > {
 
@@ -453,7 +460,6 @@ class QueryBuilder<
             TCTESpecs,
             TResult,
             OverrideGroupByParams<TDbType, TCategorizedParams, AccumulateColumnParams<undefined, TCbResult>>,
-            AccumulateColumnParams<TParams, TCbResult>,
             TAs
         >(
             this.dbType,
@@ -472,10 +478,20 @@ class QueryBuilder<
 
     having<
         TCbResult extends ComparisonType<TDbType>
-    >(cb: (
-        tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>,
-        ops: DbOperators<TDbType, true>
-    ) => TCbResult) {
+    >(
+        cb: (
+            tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>,
+            ops: DbOperators<TDbType, true>
+        ) => TCbResult
+    ): QueryBuilder<
+        TDbType,
+        TFrom,
+        TJoinSpecs,
+        TCTESpecs,
+        TResult,
+        OverrideHavingParams<TDbType, TCategorizedParams, AccumulateComparisonParams<undefined, TCbResult>>,
+        TAs
+    > {
         const functions = this.dbType === dbTypes.postgresql ? pgDbOperatorsWithAggregation : this.dbType === dbTypes.mysql ? mysqlDbOperatorsWithAggregation : undefined;
         if (isNullOrUndefined(functions)) {
             throw Error('Invalid db type.');
@@ -490,7 +506,6 @@ class QueryBuilder<
             TCTESpecs,
             TResult,
             OverrideHavingParams<TDbType, TCategorizedParams, AccumulateComparisonParams<undefined, TCbResult>>,
-            AccumulateComparisonParams<TParams, TCbResult>,
             TAs
         >(
             this.dbType,
@@ -517,7 +532,6 @@ class QueryBuilder<
             TCTESpecs,
             TResult,
             OverrideOrderByParams<TDbType, TCategorizedParams, AccumulateOrderByParams<TDbType, undefined, TCbResult>>,
-            AccumulateOrderByParams<TDbType, TParams, TCbResult>,
             TAs
         > {
         const res = cb(this.columnsSelectionList as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>);
@@ -529,7 +543,6 @@ class QueryBuilder<
             TCTESpecs,
             TResult,
             OverrideOrderByParams<TDbType, TCategorizedParams, AccumulateOrderByParams<TDbType, undefined, TCbResult>>,
-            AccumulateOrderByParams<TDbType, TParams, TCbResult>,
             TAs
         >(
             this.dbType,
@@ -550,14 +563,26 @@ class QueryBuilder<
         const  TSelected extends readonly (
             Table<TDbType, any, any> |
             QueryTable<TDbType, any, any, any, any, any> |
-            QueryBuilder<TDbType, any, any, any, any, any, any, string> |
+            QueryBuilder<TDbType, any, any, any, any, any, string, any> |
             CTEObject<TDbType, any, any, any, any>
-        )[]
+        )[],
+        TFromRes extends FromType<TDbType> = ConvertElementsToSubQueryCompliant<TDbType, TSelected>,
+        AccumulatedParams extends readonly QueryParam<TDbType, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, TFromRes>,
+        AccumulatedParamsResult extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = AccumulatedParams["length"] extends 0 ? undefined : AccumulatedParams
+
     >(
         cb: (ctes: MapCtesToSelectionType<TDbType, TCTESpecs>) => TSelected
-    ) {
+    ):
+        QueryBuilder<
+            TDbType,
+            TFromRes,
+            TJoinSpecs,
+            TCTESpecs,
+            TResult,
+            OverrideFromParams<TDbType, TCategorizedParams, AccumulatedParamsResult>,
+            TAs
+        > {
 
-        type TFromRes = ConvertElementsToSubQueryCompliant<TDbType, TSelected>;
 
         if (this.cteSpecs === undefined) {
             throw Error('No cte exists.');
@@ -580,7 +605,8 @@ class QueryBuilder<
             else {
                 return item;
             }
-        }) as TFromRes;
+        }) as FromType<TDbType> as TFromRes;
+
 
         return new QueryBuilder<
             TDbType,
@@ -588,8 +614,7 @@ class QueryBuilder<
             TJoinSpecs,
             TCTESpecs,
             TResult,
-            TCategorizedParams,
-            TParams,
+            OverrideFromParams<TDbType, TCategorizedParams, AccumulatedParamsResult>,
             TAs
         >(
             this.dbType,
@@ -607,9 +632,9 @@ class QueryBuilder<
     }
 
     exec(
-        ...args: TParams extends undefined
+        ...args: TParamsAccumulated extends undefined
             ? []
-            : [params: QueryParamsToObject<TParams>]
+            : [params: QueryParamsToObject<TParamsAccumulated>]
     ):
         TResult extends ResultShape<TDbType> ?
         ColumnsToResultMap<TDbType, TResult> :
@@ -631,7 +656,7 @@ function from<
     TFrom extends readonly (
         Table<TDbType, any, any> |
         QueryTable<TDbType, any, any, any, any, any> |
-        QueryBuilder<TDbType, any, any, any, any, any, any, string>
+        QueryBuilder<TDbType, any, any, any, any, any, string, any>
     )[],
     TDbType extends DbType = InferDbTypeFromFromFirstIDbType<TFrom>
 >(...from: TFrom) {
@@ -660,7 +685,14 @@ function from<
     type AccumulatedParams = AccumulateSubQueryParams<TDbType, TFromRes>;
     type AccumulatedParamsResult = AccumulatedParams["length"] extends 0 ? undefined : AccumulatedParams;
 
-    return new QueryBuilder<TDbType, TFromRes, undefined, undefined, undefined, DefaultCategorizedParamsType, AccumulatedParamsResult>(dbType, fromResult);
+    return new QueryBuilder<
+        TDbType,
+        TFromRes,
+        undefined,
+        undefined,
+        undefined,
+        OverrideFromParams<TDbType, DefaultCategorizedParamsType, AccumulatedParamsResult>
+    >(dbType, fromResult);
 }
 
 function withAs<
@@ -674,7 +706,14 @@ function withAs<
     const cteObject = new CTEObject(qb.dbType, qb, as, cteTypes.NON_RECURSIVE) as TCTEObject;
     const cteSpecs = [cteObject] as const;
 
-    return new QueryBuilder<TDbType, undefined, undefined, typeof cteSpecs, undefined, TParams>(qb.dbType, undefined, { cteSpecs });
+    return new QueryBuilder<
+        TDbType,
+        undefined,
+        undefined,
+        typeof cteSpecs,
+        undefined,
+        OverrideCTEParams<TDbType, DefaultCategorizedParamsType, TCTEObject, TParams>
+    >(qb.dbType, undefined, { cteSpecs });
 }
 
 export default QueryBuilder;
