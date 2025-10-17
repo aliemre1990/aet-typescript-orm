@@ -62,30 +62,24 @@ function generateCommonFunctions<TDbType extends DbType>(dbType: TDbType) {
 }
 
 
-const pgFunctions: DbFunctions<PgDbType, false> = {
+const pgFunctions: DbFunctions<PgDbType> = {
     ...generateCommonFunctions(dbTypes.postgresql),
 
     jsonBuildObject: jsonBuildObjectFn,
     jsonbBuildObject: jsonbBuildObjectFn,
 
-    ...pgArithmeticOperations
-}
-
-const pgFunctionsWithAggregation: DbFunctions<PgDbType, true> = {
-    ...pgFunctions,
+    ...pgArithmeticOperations,
     ...pgAggregationFunctions
 }
 
-const mysqlFunctions: DbFunctions<MySQLDbType, false> = {
+
+const mysqlFunctions: DbFunctions<MySQLDbType> = {
     ...generateCommonFunctions(dbTypes.mysql),
 
-    ...mysqlArithmeticOperations
-}
-
-const mysqlFunctionsWithAggregation: DbFunctions<MySQLDbType, true> = {
-    ...mysqlFunctions,
+    ...mysqlArithmeticOperations,
     ...mysqlAggregationFunctions
 }
+
 
 
 /**
@@ -108,34 +102,21 @@ const mysqlLogicalOperators: LogicalOperators<MySQLDbType> = {
 /**
  * All operators
  */
-const pgDbOperators: DbOperators<PgDbType, false> = {
+const pgDbOperators: DbOperators<PgDbType> = {
     ...pgLogicalOperators,
     ...pgFunctions
 }
 
-const pgDbOperatorsWithAggregation: DbOperators<PgDbType, true> = {
-    ...pgLogicalOperators,
-    ...pgFunctionsWithAggregation
-}
 
-const mysqlDbOperators: DbOperators<MySQLDbType, false> = {
+const mysqlDbOperators: DbOperators<MySQLDbType> = {
     ...mysqlLogicalOperators,
     ...mysqlFunctions
-}
-
-const mysqlDbOperatorsWithAggregation: DbOperators<MySQLDbType, true> = {
-    ...mysqlLogicalOperators,
-    ...mysqlFunctionsWithAggregation
 }
 
 
 export {
     pgFunctions,
-    pgFunctionsWithAggregation,
     mysqlFunctions,
-    mysqlFunctionsWithAggregation,
     pgDbOperators,
-    pgDbOperatorsWithAggregation,
-    mysqlDbOperators,
-    mysqlDbOperatorsWithAggregation
+    mysqlDbOperators
 }

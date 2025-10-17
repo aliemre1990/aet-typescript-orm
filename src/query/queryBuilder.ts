@@ -18,7 +18,7 @@ import type { AccumulateOrderByParams } from "./_types/paramAccumulationOrderBy.
 import type { AccumulateColumnParams } from "./_types/paramAccumulationSelect.js";
 import type ColumnsSelection from "./columnsSelection.js";
 import { columnsSelectionFactory } from "./columnsSelection.js";
-import { mysqlDbOperatorsWithAggregation, mysqlFunctions, mysqlFunctionsWithAggregation, pgDbOperatorsWithAggregation, pgFunctions, pgFunctionsWithAggregation } from "./dbOperations.js";
+import { mysqlDbOperators, mysqlFunctions, pgDbOperators, pgFunctions } from "./dbOperations.js";
 import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable } from "./_interfaces/IComparable.js";
 import SubQueryObject from "./subQueryObject.js";
 import eq from "./comparisons/eq.js";
@@ -220,7 +220,7 @@ class QueryBuilder<
     >(
         cb: (
             tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs, TCTESpecs>>,
-            ops: DbFunctions<TDbType, true>
+            ops: DbFunctions<TDbType>
         ) => TCbResult
     ): QueryBuilder<
         TDbType,
@@ -233,25 +233,18 @@ class QueryBuilder<
     > {
 
         const cols = this.columnsSelectionList as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs, TCTESpecs>>;
-        let isAgg = false;
-        if (this.groupedColumns && this.groupedColumns.length > 0) {
-            isAgg = true
-        }
+
 
         let functions;
-        if (this.dbType === dbTypes.postgresql && isAgg === true) {
-            functions = pgFunctionsWithAggregation;
-        } else if (this.dbType === dbTypes.postgresql && isAgg === false) {
+        if (this.dbType === dbTypes.postgresql) {
             functions = pgFunctions;
-        } else if (this.dbType === dbTypes.mysql && isAgg === true) {
-            functions = mysqlFunctionsWithAggregation;
-        } else if (this.dbType === dbTypes.mysql && isAgg === false) {
+        } else if (this.dbType === dbTypes.mysql) {
             functions = mysqlFunctions;
         } else {
             throw Error('Invalid query specification.');
         }
 
-        const selectRes = cb(cols, functions as DbFunctions<TDbType, true>);
+        const selectRes = cb(cols, functions as DbFunctions<TDbType>);
 
         return new QueryBuilder<
             TDbType,
@@ -303,7 +296,7 @@ class QueryBuilder<
         tableSelectionCb: (ctes: MapCtesToSelectionType<TDbType, TCTESpecs>) => TJoinTable,
         cb: (
             tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinAccumulated, TCTESpecs>>,
-            ops: DbOperators<TDbType, false>
+            ops: DbOperators<TDbType>
         ) => TCbResult
     ): QueryBuilder<TDbType, TFrom, TJoinAccumulated, TCTESpecs, TResult, TNewCategorizedParams, TAs> {
 
@@ -393,7 +386,7 @@ class QueryBuilder<
         (
             cb: (
                 tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>,
-                ops: DbOperators<TDbType, true>
+                ops: DbOperators<TDbType>
             ) => TCbResult
         ):
         QueryBuilder<
@@ -431,7 +424,7 @@ class QueryBuilder<
         const TCbResult extends GroupBySpecs<TDbType>
     >(cb: (
         tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>,
-        ops: DbFunctions<TDbType, false>
+        ops: DbFunctions<TDbType>
     ) => TCbResult):
         QueryBuilder<
             TDbType,
@@ -451,7 +444,7 @@ class QueryBuilder<
         if (isNullOrUndefined(functions)) {
             throw Error('Invalid db type.');
         }
-        const res = cb(this.columnsSelectionList as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>, functions as DbFunctions<TDbType, false>);
+        const res = cb(this.columnsSelectionList as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>, functions as DbFunctions<TDbType>);
 
         return new QueryBuilder<
             TDbType,
@@ -481,7 +474,7 @@ class QueryBuilder<
     >(
         cb: (
             tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>,
-            ops: DbOperators<TDbType, true>
+            ops: DbOperators<TDbType>
         ) => TCbResult
     ): QueryBuilder<
         TDbType,
@@ -492,12 +485,12 @@ class QueryBuilder<
         OverrideHavingParams<TDbType, TCategorizedParams, AccumulateComparisonParams<undefined, TCbResult>>,
         TAs
     > {
-        const functions = this.dbType === dbTypes.postgresql ? pgDbOperatorsWithAggregation : this.dbType === dbTypes.mysql ? mysqlDbOperatorsWithAggregation : undefined;
+        const functions = this.dbType === dbTypes.postgresql ? pgDbOperators : this.dbType === dbTypes.mysql ? mysqlDbOperators : undefined;
         if (isNullOrUndefined(functions)) {
             throw Error('Invalid db type.');
         }
 
-        const res = cb(this.columnsSelectionList as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>, functions as DbOperators<TDbType, true>)
+        const res = cb(this.columnsSelectionList as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>, functions as DbOperators<TDbType>)
 
         return new QueryBuilder<
             TDbType,

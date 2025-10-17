@@ -64,7 +64,7 @@ class QueryTable<
     >(
         cb: (
             tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
-            ops: DbFunctions<TDbType, false>
+            ops: DbFunctions<TDbType>
         ) => TCbResult
     ): QueryBuilder<
         TDbType,
@@ -106,7 +106,7 @@ class QueryTable<
         tableSelectionCb: () => TJoinTable,
         cb: (
             tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], TJoinAccumulated>>,
-            ops: DbOperators<TDbType, false>
+            ops: DbOperators<TDbType>
         ) => TCbResult
     ):
         QueryBuilder<
@@ -125,7 +125,7 @@ class QueryTable<
     where<TCbResult extends ComparisonType<TDbType>>(
         cb: (
             tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
-            ops: DbOperators<TDbType, false>
+            ops: DbOperators<TDbType>
         ) => TCbResult) {
         return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined, undefined>(this.dbType, [this]).where(cb);
     }
@@ -135,7 +135,7 @@ class QueryTable<
         const TCbResult extends GroupBySpecs<TDbType>
     >(cb: (
         tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
-        ops: DbFunctions<TDbType, false>
+        ops: DbFunctions<TDbType>
     ) => TCbResult
     ): QueryBuilder<
         TDbType,
