@@ -1,9 +1,6 @@
 import type { DbType } from "../db.js";
 import type { IComparable } from "./_interfaces/IComparable.js";
-import type CTEObject from "./cteObject.js";
 import type { FromItemType } from "./queryBuilder.js";
-import type QueryTable from "./queryTable.js";
-import type SubQueryObject from "./subQueryObject.js";
 
 const ColumnsSelectionQueryTableObjectSymbol = Symbol();
 type ColumnsSelection<

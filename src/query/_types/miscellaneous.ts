@@ -1,7 +1,7 @@
 import type { DbType } from "../../db.js";
 import type ColumnsSelection from "../columnsSelection.js";
 import type CTEObject from "../cteObject.js";
-import type { CTESpecs, FromType, JoinSpecsType } from "../queryBuilder.js";
+import type { CTESpecs, FromItemType, FromType, JoinSpecsType } from "../queryBuilder.js";
 import type QueryTable from "../queryTable.js";
 import type SubQueryObject from "../subQueryObject.js";
 
@@ -9,13 +9,13 @@ type MapCtesToSelectionType<TDbType extends DbType, TCTESpecs extends CTESpecs<T
     TCTESpecs extends undefined ? [] :
     TCTESpecs extends CTESpecs<TDbType> ?
     {
-        [C in TCTESpecs[number]as C["cteName"]]: C
+        [C in TCTESpecs[number]as C["name"]]: C
     } :
     never;
 
 type TableToColumnsMap<
     TDbType extends DbType,
-    T extends { [key: string]: QueryTable<TDbType, any, any, any, any, any> | SubQueryObject<TDbType, any, any, string> | CTEObject<TDbType, any, any, any, any> }
+    T extends { [key: string]: FromItemType<TDbType> }
 > = {
         [K in keyof T]: ColumnsSelection<
             TDbType,
@@ -74,7 +74,7 @@ type TablesToObject<
         TCTESpecs extends CTESpecs<TDbType> ?
         {
             [
-            T in TCTESpecs[number]as T["cteName"]
+            T in TCTESpecs[number]as T["name"]
             ]: T
         }
         : never

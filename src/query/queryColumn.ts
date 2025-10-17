@@ -4,7 +4,6 @@ import between from "./comparisons/between.js";
 import sqlIn from "./comparisons/in.js";
 import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable } from "./_interfaces/IComparable.js";
 import type Column from "../table/column.js";
-import type QueryTable from "./queryTable.js";
 import type { ColumnType, DbValueTypes } from "../table/column.js";
 
 type QueryColumnsObjectType<TDbType extends DbType> = { [key: string]: QueryColumn<TDbType, any, any, any> }

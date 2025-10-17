@@ -5,7 +5,7 @@ import type { CTESpecs } from "./queryBuilder.js";
 
 function mapCTESpecsToSelection<TDbType extends DbType, TCTESpecs extends CTESpecs<TDbType>>(cteSpecs: TCTESpecs) {
     const res = cteSpecs.reduce((prev, curr) => {
-        prev[curr.cteName] = curr;
+        prev[curr.name] = curr;
         return prev;
     }, {} as { [key: string]: CTEObject<any, any, any, any, any> }) as MapCtesToSelectionType<TDbType, TCTESpecs>;
 

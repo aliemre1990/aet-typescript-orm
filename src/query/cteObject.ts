@@ -1,6 +1,7 @@
 import type { DbType } from "../db.js";
 import type { DbValueTypes } from "../table/column.js";
 import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable } from "./_interfaces/IComparable.js";
+import type { IName } from "./_interfaces/IName.js";
 import type { ResultShape } from "./_types/result.js";
 import between from "./comparisons/between.js";
 import eq from "./comparisons/eq.js";
@@ -71,30 +72,30 @@ class CTEObject<
     TDbType extends DbType,
     TCTEName extends string,
     TCTEType extends CTEType,
-    TQb extends QueryBuilder<TDbType, any, any, any, ResultShape<TDbType>, any, any>,
-    TEntries extends readonly CTEObjectEntry<TDbType, any, any, any, any, any>[] = TQb extends QueryBuilder<TDbType, any, any, any, infer TRes extends ResultShape<TDbType>, any, string> ? MapResultToCTEObjectEntry<TDbType, TRes> : never,
-> {
+    TQb extends QueryBuilder<TDbType, any, any, any, ResultShape<TDbType>, any, any, any>,
+    TEntries extends readonly CTEObjectEntry<TDbType, any, any, any, any, any>[] = TQb extends QueryBuilder<TDbType, any, any, any, infer TRes extends ResultShape<TDbType>, any, any, string> ? MapResultToCTEObjectEntry<TDbType, TRes> : never,
+> implements IName<TCTEName> {
     dbType: TDbType;
     qb: TQb;
-    cteName: TCTEName;
+    name: TCTEName;
     cteType: TCTEType;
     cteObjectEntries: TEntries;
 
     constructor(
         dbType: TDbType,
         qb: TQb,
-        cteName: TCTEName,
+        name: TCTEName,
         cteType: TCTEType
     ) {
         this.dbType = dbType;
         this.qb = qb;
-        this.cteName = cteName;
+        this.name = name;
         this.cteType = cteType;
 
         let tmpEntries: readonly CTEObjectEntry<TDbType, any, any, any, any, any>[] = [];
         if (qb.resultSelection !== undefined) {
             qb.resultSelection.forEach(res => {
-                tmpEntries = [...tmpEntries, (new CTEObjectEntry(dbType, res, undefined, cteName))];
+                tmpEntries = [...tmpEntries, (new CTEObjectEntry(dbType, res, undefined, name))];
             })
         }
 
