@@ -1,8 +1,6 @@
 import type { DbType } from "../../db.js";
 import type { IName } from "../_interfaces/IName.js";
 import type { JoinSpecsItemType, JoinSpecsTableType, JoinSpecsType } from "../queryBuilder.js";
-import type QueryTable from "../queryTable.js";
-import type SubQueryObject from "../subQueryObject.js";
 
 type OverrideDuplicateJoinSpec<
     TDbType extends DbType,
@@ -32,7 +30,7 @@ type ExtractDuplicateJoinSpecRecursively<
     never :
     never :
     never :
-    [TNew];
+    [];
 
 export type {
     OverrideDuplicateJoinSpec

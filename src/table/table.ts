@@ -4,7 +4,7 @@ import type ColumnComparisonOperation from "../query/comparisons/_comparisonOper
 import type ColumnLogicalOperation from "../query/logicalOperations.js";
 import QueryBuilder, { type CategorizedParamsType, type ComparisonType, type DefaultCategorizedParamsType, type GroupBySpecs, type JoinSpecsTableType, type JoinSpecsType, type JoinType, type OrderBySpecs } from "../query/queryBuilder.js";
 import type { TablesToObject, TableToColumnsMap } from "../query/_types/miscellaneous.js";
-import type { ResultShape } from "../query/_types/result.js";
+import type { ResultShape, SelectToResultMapRecursively } from "../query/_types/result.js";
 import Column from "./column.js";
 import QueryColumn from "../query/queryColumn.js";
 import QueryTable from "../query/queryTable.js";
@@ -19,6 +19,8 @@ import type { AccumulateComparisonParams } from "../query/_types/paramAccumulati
 import type { IName } from "../query/_interfaces/IName.js";
 import type { OverrideGroupByParams, OverrideJoinParams, OverrideOrderByParams, OverrideSelectParams } from "../query/_types/categorizedParams.js";
 import type { OverrideDuplicateJoinSpec } from "../query/_types/join.js";
+import type ColumnsSelection from "../query/columnsSelection.js";
+import type { IComparable } from "../query/_interfaces/IComparable.js";
 
 type TableSpecsType<TTableName extends string = string> = { tableName: TTableName }
 
@@ -79,7 +81,8 @@ class Table<
     }
 
     select<
-        const TCbResult extends ResultShape<TDbType>
+        const TCbResult extends readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, any>)[],
+        TFinalResult extends ResultShape<TDbType> = SelectToResultMapRecursively<TDbType, TCbResult>
     >(
         cb: (
             tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>]>>,
@@ -90,8 +93,8 @@ class Table<
         [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>],
         undefined,
         undefined,
-        TCbResult,
-        OverrideSelectParams<TDbType, DefaultCategorizedParamsType, AccumulateColumnParams<undefined, TCbResult>>
+        TFinalResult,
+        OverrideSelectParams<TDbType, DefaultCategorizedParamsType, AccumulateColumnParams<undefined, TFinalResult>>
     > {
 
         const queryColumns = this.columnsList.map((col) => {
@@ -99,7 +102,6 @@ class Table<
         }) as MapToQueryColumns<TDbType, TTableName, TColumns>;
 
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>(this.dbType, this, queryColumns);
-
 
         return new QueryBuilder<TDbType, [typeof queryTable], undefined, undefined>(this.dbType, [queryTable]).select(cb);
     }

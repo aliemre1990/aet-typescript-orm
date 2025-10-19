@@ -2,6 +2,7 @@ import type { DbType } from "../db.js";
 import QueryColumn from "../query/queryColumn.js";
 import type Column from "../table/column.js";
 import type Table from "../table/table.js";
+import type { IComparable } from "./_interfaces/IComparable.js";
 import type { IDbType } from "./_interfaces/IDbType.js";
 import type { IName } from "./_interfaces/IName.js";
 import type { OverrideGroupByParams, OverrideJoinParams, OverrideOrderByParams, OverrideSelectParams } from "./_types/categorizedParams.js";
@@ -10,8 +11,9 @@ import type { DbFunctions, DbOperators } from "./_types/ops.js";
 import type { AccumulateComparisonParams } from "./_types/paramAccumulationComparison.js";
 import type { AccumulateOrderByParams } from "./_types/paramAccumulationOrderBy.js";
 import type { AccumulateColumnParams } from "./_types/paramAccumulationSelect.js";
-import type { ResultShape } from "./_types/result.js";
+import type { ResultShape, SelectToResultMapRecursively } from "./_types/result.js";
 import type { AccumulateSubQueryParams, MapToSubQueryObject } from "./_types/subQueryUtility.js";
+import type ColumnsSelection from "./columnsSelection.js";
 import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
 import type CTEObject from "./cteObject.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
@@ -59,7 +61,8 @@ class QueryTable<
     }
 
     select<
-        const TCbResult extends ResultShape<TDbType>
+        const TCbResult extends readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, any>)[],
+        TFinalResult extends ResultShape<TDbType> = SelectToResultMapRecursively<TDbType, TCbResult>
 
     >(
         cb: (
@@ -71,8 +74,8 @@ class QueryTable<
         [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>],
         undefined,
         undefined,
-        TCbResult,
-        OverrideSelectParams<TDbType, DefaultCategorizedParamsType, AccumulateColumnParams<undefined, TCbResult>>
+        TFinalResult,
+        OverrideSelectParams<TDbType, DefaultCategorizedParamsType, AccumulateColumnParams<undefined, TFinalResult>>
     > {
 
         return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined, undefined>(this.dbType, [this]).select(cb);

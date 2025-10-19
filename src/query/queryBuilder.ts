@@ -5,7 +5,7 @@ import { isNullOrUndefined } from "../utility/guards.js";
 import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
 import type { MapCtesToSelectionType, TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.js";
-import type { ColumnsToResultMap, QueryParamsToObject, ResultShape, ResultShapeItem } from "./_types/result.js";
+import type { ColumnsToResultMap, QueryParamsToObject, ResultShape, ResultShapeItem, SelectToResultMapRecursively } from "./_types/result.js";
 import QueryTable from "./queryTable.js";
 import type Column from "../table/column.js";
 import type { DbFunctions, DbOperators } from "./_types/ops.js";
@@ -17,7 +17,7 @@ import type { AccumulateComparisonParams } from "./_types/paramAccumulationCompa
 import type { AccumulateOrderByParams } from "./_types/paramAccumulationOrderBy.js";
 import type { AccumulateColumnParams } from "./_types/paramAccumulationSelect.js";
 import type ColumnsSelection from "./columnsSelection.js";
-import { columnsSelectionFactory } from "./columnsSelection.js";
+import { columnsSelectionFactory, ColumnsSelectionQueryTableObjectSymbol } from "./columnsSelection.js";
 import { mysqlDbOperators, mysqlFunctions, pgDbOperators, pgFunctions } from "./dbOperations.js";
 import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable } from "./_interfaces/IComparable.js";
 import SubQueryObject from "./subQueryObject.js";
@@ -29,6 +29,7 @@ import type { MapToCTEObject } from "./_types/cteUtility.js";
 import { mapCTESpecsToSelection } from "./utility.js";
 import { OverrideFromParams, OverrideOrderByParams, OverrideWhereParams, type AccumulateCategorizedParams, type OverrideCTEParams, type OverrideGroupByParams, type OverrideHavingParams, type OverrideJoinParams, type OverrideSelectParams } from "./_types/categorizedParams.js";
 import type { OverrideDuplicateJoinSpec } from "./_types/join.js";
+import type { OverrideDuplicateCTESpec } from "./_types/cte.js";
 
 type FromItemType<TDbType extends DbType> = QueryTable<TDbType, any, any, any, any, any> | SubQueryObject<TDbType, any, any, string> | CTEObject<TDbType, any, any, any, any>;
 type FromType<TDbType extends DbType> = readonly FromItemType<TDbType>[];
@@ -66,7 +67,7 @@ const cteTypes = {
     }
 } as const;
 type CTEType = (typeof cteTypes)[keyof typeof cteTypes];
-type CTESpecs<TDbType extends DbType> = readonly CTEObject<TDbType, any, any, any, any>[];
+type CTESpecsType<TDbType extends DbType> = readonly CTEObject<TDbType, any, any, any, any>[];
 
 type GetFirstTypeFromResult<TDbType extends DbType, TResult extends ResultShape<TDbType> | undefined> =
     TResult extends undefined ? never :
@@ -117,7 +118,7 @@ class QueryBuilder<
     TDbType extends DbType,
     TFrom extends FromType<TDbType> | undefined,
     TJoinSpecs extends JoinSpecsType<TDbType> | undefined,
-    TCTESpecs extends CTESpecs<TDbType> | undefined,
+    TCTESpecs extends CTESpecsType<TDbType> | undefined,
     TResult extends ResultShape<TDbType> | undefined = undefined,
     TCategorizedParams extends CategorizedParamsType<TDbType> = DefaultCategorizedParamsType,
     TAs extends string | undefined = undefined,
@@ -216,7 +217,8 @@ class QueryBuilder<
     }
 
     select<
-        const TCbResult extends ResultShape<TDbType>
+        const TCbResult extends readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, any>)[],
+        TFinalResult extends ResultShape<TDbType> = SelectToResultMapRecursively<TDbType, TCbResult>
     >(
         cb: (
             tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs, TCTESpecs>>,
@@ -227,8 +229,8 @@ class QueryBuilder<
         TFrom,
         TJoinSpecs,
         TCTESpecs,
-        TCbResult,
-        OverrideSelectParams<TDbType, TCategorizedParams, AccumulateColumnParams<undefined, TCbResult>>,
+        TFinalResult,
+        OverrideSelectParams<TDbType, TCategorizedParams, AccumulateColumnParams<undefined, TFinalResult>>,
         TAs
     > {
 
@@ -246,13 +248,25 @@ class QueryBuilder<
 
         const selectRes = cb(cols, functions as DbFunctions<TDbType>);
 
+        let finalSelectRes: ResultShapeItem<TDbType>[] = [];
+        for (const it of selectRes) {
+            if (ColumnsSelectionQueryTableObjectSymbol in it) {
+                for (const k in it) {
+                    let comparable = it[k] as IComparable<TDbType, any, any, any, any, any>;
+                    finalSelectRes.push(comparable);
+                }
+            } else {
+                finalSelectRes.push(it);
+            }
+        }
+
         return new QueryBuilder<
             TDbType,
             TFrom,
             TJoinSpecs,
             TCTESpecs,
-            TCbResult,
-            OverrideSelectParams<TDbType, TCategorizedParams, AccumulateColumnParams<undefined, TCbResult>>,
+            TFinalResult,
+            OverrideSelectParams<TDbType, TCategorizedParams, AccumulateColumnParams<undefined, TFinalResult>>,
             TAs
         >(
             this.dbType,
@@ -263,7 +277,7 @@ class QueryBuilder<
                 columnsSelectionList: this.columnsSelectionList,
                 groupedColumns: this.groupedColumns,
                 joinSpecs: this.joinSpecs,
-                resultSelection: selectRes,
+                resultSelection: finalSelectRes as ResultShape<TDbType> as TFinalResult,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs
             });
@@ -300,12 +314,11 @@ class QueryBuilder<
         ) => TCbResult
     ): QueryBuilder<TDbType, TFrom, TJoinAccumulated, TCTESpecs, TResult, TNewCategorizedParams, TAs> {
 
-        let cteSpecs = [] as MapCtesToSelectionType<TDbType, TCTESpecs>;
+        let cteSpecs = {} as MapCtesToSelectionType<TDbType, TCTESpecs>;
         if (this.cteSpecs !== undefined) {
             cteSpecs = mapCTESpecsToSelection(this.cteSpecs) as MapCtesToSelectionType<TDbType, TCTESpecs>;
         }
         const table = tableSelectionCb(cteSpecs);
-
 
         let columnsSelectionList = this.columnsSelectionList;
 
@@ -506,6 +519,7 @@ class QueryBuilder<
             {
                 asName: this.asName,
                 ownerName: this.ownerName,
+                cteSpecs: this.cteSpecs,
                 columnsSelectionList: this.columnsSelectionList,
                 groupedColumns: this.groupedColumns,
                 joinSpecs: this.joinSpecs,
@@ -543,6 +557,7 @@ class QueryBuilder<
             {
                 asName: this.asName,
                 ownerName: this.ownerName,
+                cteSpecs: this.cteSpecs,
                 columnsSelectionList: this.columnsSelectionList,
                 groupedColumns: this.groupedColumns,
                 joinSpecs: this.joinSpecs,
@@ -564,7 +579,7 @@ class QueryBuilder<
         AccumulatedParamsResult extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = AccumulatedParams["length"] extends 0 ? undefined : AccumulatedParams
 
     >(
-        cb: (ctes: MapCtesToSelectionType<TDbType, TCTESpecs>) => TSelected
+        cteSelectionCb: (ctes: MapCtesToSelectionType<TDbType, TCTESpecs>) => TSelected
     ):
         QueryBuilder<
             TDbType,
@@ -577,12 +592,13 @@ class QueryBuilder<
         > {
 
 
+        let cteSpecs: MapCtesToSelectionType<TDbType, TCTESpecs>;
         if (this.cteSpecs === undefined) {
-            throw Error('No cte exists.');
+            cteSpecs = {} as MapCtesToSelectionType<TDbType, TCTESpecs>;
+        } else {
+            cteSpecs = mapCTESpecsToSelection(this.cteSpecs);
         }
-
-        const cteSpecs = mapCTESpecsToSelection(this.cteSpecs) as MapCtesToSelectionType<TDbType, TCTESpecs>;
-        const res = cb(cteSpecs);
+        const res = cteSelectionCb(cteSpecs);
 
 
         const fromResult = res.map(item => {
@@ -615,6 +631,70 @@ class QueryBuilder<
             {
                 asName: this.asName,
                 ownerName: this.ownerName,
+                cteSpecs: this.cteSpecs,
+                columnsSelectionList: this.columnsSelectionList,
+                groupedColumns: this.groupedColumns,
+                joinSpecs: this.joinSpecs,
+                resultSelection: this.resultSelection,
+                havingSpec: this.havingSpec,
+                orderBySpecs: this.orderBySpecs
+            })
+    }
+
+    withAs<
+        TCTEName extends string,
+        TQbResult extends QueryBuilder<TDbType, any, any, any, any, any, any, any>,
+        TCTEObject extends CTEObject<TDbType, any, any, any, any> = CTEObject<TDbType, TCTEName, typeof cteTypes.NON_RECURSIVE, TQbResult>,
+        TFinalCTESpec extends CTESpecsType<TDbType> = OverrideDuplicateCTESpec<TDbType, TCTESpecs, TCTEObject>,
+        TParams extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = TQbResult extends QueryBuilder<TDbType, any, any, any, any, any, any, infer TParams> ? TParams : never,
+        TCategorizedParamsResult extends CategorizedParamsType<TDbType> = OverrideCTEParams<TDbType, TCategorizedParams, TCTEObject, TParams>
+    >(
+        as: TCTEName,
+        cteSelectionCb: (ctes: MapCtesToSelectionType<TDbType, TCTESpecs>) => TQbResult
+    ):
+        QueryBuilder<
+            TDbType,
+            TFrom,
+            TJoinSpecs,
+            TFinalCTESpec,
+            TResult,
+            TCategorizedParamsResult,
+            TAs
+        > {
+
+        let cteSpecs: MapCtesToSelectionType<TDbType, TCTESpecs>;
+        if (this.cteSpecs === undefined) {
+            cteSpecs = {} as MapCtesToSelectionType<TDbType, TCTESpecs>;
+        } else {
+            cteSpecs = mapCTESpecsToSelection(this.cteSpecs);
+        }
+        const res = cteSelectionCb(cteSpecs);
+
+        let newCteSpecs = [...(this.cteSpecs || [] as CTESpecsType<TDbType>)];
+        const newSpec = new CTEObject(this.dbType, res, as, cteTypes.NON_RECURSIVE);
+
+        let foundIndex = newCteSpecs.findIndex(spec => spec.name === newSpec.name) || -1;
+        if (foundIndex >= 0) {
+            newCteSpecs.toSpliced(foundIndex, 1);
+        }
+        newCteSpecs.push(newSpec);
+
+
+        return new QueryBuilder<
+            TDbType,
+            TFrom,
+            TJoinSpecs,
+            TFinalCTESpec,
+            TResult,
+            TCategorizedParamsResult,
+            TAs
+        >(
+            this.dbType,
+            this.fromSpecs,
+            {
+                asName: this.asName,
+                ownerName: this.ownerName,
+                cteSpecs: newCteSpecs as CTESpecsType<TDbType> as TFinalCTESpec,
                 columnsSelectionList: this.columnsSelectionList,
                 groupedColumns: this.groupedColumns,
                 joinSpecs: this.joinSpecs,
@@ -694,7 +774,7 @@ function withAs<
     TDbType extends DbType = TQb extends IDbType<infer TDbTypeInner> ? TDbTypeInner : never
 >(as: TAs, qb: TQb) {
     type TCTEObject = MapToCTEObject<TDbType, TAs, typeof cteTypes.NON_RECURSIVE, TQb>;
-    type TParams = TQb extends QueryBuilder<TDbType, any, any, any, any, any, infer TParams, any> ? TParams : never;
+    type TParams = TQb extends QueryBuilder<TDbType, any, any, any, any, any, any, infer TParams> ? TParams : never;
 
     const cteObject = new CTEObject(qb.dbType, qb, as, cteTypes.NON_RECURSIVE) as TCTEObject;
     const cteSpecs = [cteObject] as const;
@@ -729,7 +809,7 @@ export type {
     OrderBySpecs,
     OrderType,
     CTEType,
-    CTESpecs,
+    CTESpecsType,
     CategorizedParamsType,
     DefaultCategorizedParamsType
 }

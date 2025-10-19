@@ -1,9 +1,9 @@
 import type { DbType } from "../db.js";
 import type { MapCtesToSelectionType } from "./_types/miscellaneous.js";
 import type CTEObject from "./cteObject.js";
-import type { CTESpecs } from "./queryBuilder.js";
+import type { CTESpecsType } from "./queryBuilder.js";
 
-function mapCTESpecsToSelection<TDbType extends DbType, TCTESpecs extends CTESpecs<TDbType>>(cteSpecs: TCTESpecs) {
+function mapCTESpecsToSelection<TDbType extends DbType, TCTESpecs extends CTESpecsType<TDbType>>(cteSpecs: TCTESpecs) {
     const res = cteSpecs.reduce((prev, curr) => {
         prev[curr.name] = curr;
         return prev;

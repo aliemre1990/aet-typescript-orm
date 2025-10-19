@@ -1,13 +1,13 @@
 import type { DbType } from "../../db.js";
 import type ColumnsSelection from "../columnsSelection.js";
 import type CTEObject from "../cteObject.js";
-import type { CTESpecs, FromItemType, FromType, JoinSpecsType } from "../queryBuilder.js";
+import type { CTESpecsType, FromItemType, FromType, JoinSpecsType } from "../queryBuilder.js";
 import type QueryTable from "../queryTable.js";
 import type SubQueryObject from "../subQueryObject.js";
 
-type MapCtesToSelectionType<TDbType extends DbType, TCTESpecs extends CTESpecs<TDbType> | undefined> =
-    TCTESpecs extends undefined ? [] :
-    TCTESpecs extends CTESpecs<TDbType> ?
+type MapCtesToSelectionType<TDbType extends DbType, TCTESpecs extends CTESpecsType<TDbType> | undefined> =
+    TCTESpecs extends undefined ? {} :
+    TCTESpecs extends CTESpecsType<TDbType> ?
     {
         [C in TCTESpecs[number]as C["name"]]: C
     } :
@@ -35,7 +35,7 @@ type TablesToObject<
     TDbType extends DbType,
     TFrom extends FromType<TDbType> | undefined,
     TInnerJoinSpecs extends JoinSpecsType<TDbType> | undefined = undefined,
-    TCTESpecs extends CTESpecs<TDbType> | undefined = undefined
+    TCTESpecs extends CTESpecsType<TDbType> | undefined = undefined
 > =
     (
         TFrom extends undefined ? {} :
@@ -71,7 +71,7 @@ type TablesToObject<
     ) &
     (
         TCTESpecs extends undefined ? {} :
-        TCTESpecs extends CTESpecs<TDbType> ?
+        TCTESpecs extends CTESpecsType<TDbType> ?
         {
             [
             T in TCTESpecs[number]as T["name"]
