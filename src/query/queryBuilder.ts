@@ -25,9 +25,8 @@ import eq from "./comparisons/eq.js";
 import sqlIn from "./comparisons/in.js";
 import between from "./comparisons/between.js";
 import CTEObject from "./cteObject.js";
-import type { MapToCTEObject } from "./_types/cteUtility.js";
 import { mapCTESpecsToSelection } from "./utility.js";
-import { OverrideFromParams, OverrideOrderByParams, OverrideWhereParams, type AccumulateCategorizedParams, type OverrideCTEParams, type OverrideGroupByParams, type OverrideHavingParams, type OverrideJoinParams, type OverrideSelectParams } from "./_types/categorizedParams.js";
+import { OverrideFromParams, OverrideOrderByParams, OverrideWhereParams, type AccumulateCategorizedParams, type AccumulateCombineParams, type OverrideCTEParams, type OverrideGroupByParams, type OverrideHavingParams, type OverrideJoinParams, type OverrideSelectParams } from "./_types/categorizedParams.js";
 import type { OverrideDuplicateJoinSpec } from "./_types/join.js";
 import type { OverrideDuplicateCTESpec } from "./_types/cte.js";
 
@@ -102,6 +101,7 @@ type CategorizedParamsType<TDbType extends DbType> = {
     groupByParams: readonly QueryParam<TDbType, string, DbValueTypes | null, any, any>[] | undefined,
     havingParams: readonly QueryParam<TDbType, string, DbValueTypes | null, any, any>[] | undefined,
     orderByParams: readonly QueryParam<TDbType, string, DbValueTypes | null, any, any>[] | undefined,
+    combineParams: readonly QueryParam<TDbType, string, DbValueTypes | null, any, any>[] | undefined,
 }
 type DefaultCategorizedParamsType = {
     cteParams: [],
@@ -111,8 +111,25 @@ type DefaultCategorizedParamsType = {
     whereParams: undefined,
     groupByParams: undefined,
     havingParams: undefined,
-    orderByParams: undefined
+    orderByParams: undefined,
+    combineParams: undefined
 }
+
+const unionTypes = {
+    UNION: { name: 'UNION' },
+    UNION_ALL: { name: 'UNION_ALL' },
+} as const;
+type UNION_TYPE = typeof unionTypes[keyof typeof unionTypes]["name"];
+
+const combineTypes = {
+    ...unionTypes,
+    INTERSECT: { name: 'INTERSECT' },
+    INTERSECT_ALL: { name: 'INTERSECT_ALL' },
+    EXCEPT: { name: 'EXCEPT' },
+    EXCEPT_ALL: { name: 'EXCEPT_ALL' }
+} as const;
+type COMBINE_TYPE = typeof combineTypes[keyof typeof combineTypes]["name"];
+type CombineSpecsType<TDbType extends DbType> = readonly { type: COMBINE_TYPE, qb: QueryBuilder<TDbType, any, any, any, any, any, any, any> }[];
 
 class QueryBuilder<
     TDbType extends DbType,
@@ -145,6 +162,7 @@ class QueryBuilder<
     fromSpecs: TFrom;
     joinSpecs?: TJoinSpecs;
     cteSpecs?: TCTESpecs;
+    combineSpecs?: CombineSpecsType<TDbType>;
     columnsSelectionList?: ColumnsSelectionListType<TDbType>;
     resultSelection?: TResult;
     groupedColumns?: GroupBySpecs<TDbType>;
@@ -163,7 +181,8 @@ class QueryBuilder<
             groupedColumns?: GroupBySpecs<TDbType>,
             havingSpec?: ComparisonType<TDbType>,
             orderBySpecs?: OrderBySpecs<TDbType>,
-            cteSpecs?: TCTESpecs;
+            cteSpecs?: TCTESpecs,
+            combineSpecs?: CombineSpecsType<TDbType>
         }
     ) {
         this.dbType = dbType;
@@ -176,6 +195,7 @@ class QueryBuilder<
         this.havingSpec = data?.havingSpec;
         this.orderBySpecs = data?.orderBySpecs;
         this.cteSpecs = data?.cteSpecs;
+        this.combineSpecs = data?.combineSpecs;
 
         this.asName = data?.asName;
 
@@ -196,7 +216,9 @@ class QueryBuilder<
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
                 columnsSelectionList: this.columnsSelectionList,
-                groupedColumns: this.groupedColumns
+                groupedColumns: this.groupedColumns,
+                cteSpecs: this.cteSpecs,
+                combineSpecs: this.combineSpecs
             });
     }
 
@@ -212,7 +234,9 @@ class QueryBuilder<
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
                 columnsSelectionList: this.columnsSelectionList,
-                groupedColumns: this.groupedColumns
+                groupedColumns: this.groupedColumns,
+                cteSpecs: this.cteSpecs,
+                combineSpecs: this.combineSpecs
             });
     }
 
@@ -279,7 +303,9 @@ class QueryBuilder<
                 joinSpecs: this.joinSpecs,
                 resultSelection: finalSelectRes as ResultShape<TDbType> as TFinalResult,
                 havingSpec: this.havingSpec,
-                orderBySpecs: this.orderBySpecs
+                orderBySpecs: this.orderBySpecs,
+                cteSpecs: this.cteSpecs,
+                combineSpecs: this.combineSpecs
             });
     };
 
@@ -391,7 +417,9 @@ class QueryBuilder<
                 resultSelection: this.resultSelection,
                 columnsSelectionList: columnsSelectionList,
                 havingSpec: this.havingSpec,
-                orderBySpecs: this.orderBySpecs
+                orderBySpecs: this.orderBySpecs,
+                cteSpecs: this.cteSpecs,
+                combineSpecs: this.combineSpecs
             })
     }
 
@@ -429,7 +457,9 @@ class QueryBuilder<
                 resultSelection: this.resultSelection,
                 columnsSelectionList: this.columnsSelectionList,
                 havingSpec: this.havingSpec,
-                orderBySpecs: this.orderBySpecs
+                orderBySpecs: this.orderBySpecs,
+                cteSpecs: this.cteSpecs,
+                combineSpecs: this.combineSpecs
             });
     }
 
@@ -478,7 +508,9 @@ class QueryBuilder<
                 joinSpecs: this.joinSpecs,
                 resultSelection: this.resultSelection,
                 havingSpec: this.havingSpec,
-                orderBySpecs: this.orderBySpecs
+                orderBySpecs: this.orderBySpecs,
+                cteSpecs: this.cteSpecs,
+                combineSpecs: this.combineSpecs
             });
     }
 
@@ -519,13 +551,14 @@ class QueryBuilder<
             {
                 asName: this.asName,
                 ownerName: this.ownerName,
-                cteSpecs: this.cteSpecs,
                 columnsSelectionList: this.columnsSelectionList,
                 groupedColumns: this.groupedColumns,
                 joinSpecs: this.joinSpecs,
                 resultSelection: this.resultSelection,
                 havingSpec: res,
-                orderBySpecs: this.orderBySpecs
+                orderBySpecs: this.orderBySpecs,
+                cteSpecs: this.cteSpecs,
+                combineSpecs: this.combineSpecs
             });
     }
 
@@ -557,13 +590,14 @@ class QueryBuilder<
             {
                 asName: this.asName,
                 ownerName: this.ownerName,
-                cteSpecs: this.cteSpecs,
                 columnsSelectionList: this.columnsSelectionList,
                 groupedColumns: this.groupedColumns,
                 joinSpecs: this.joinSpecs,
                 resultSelection: this.resultSelection,
                 havingSpec: this.havingSpec,
-                orderBySpecs: res
+                orderBySpecs: res,
+                cteSpecs: this.cteSpecs,
+                combineSpecs: this.combineSpecs
             });
     }
 
@@ -631,13 +665,14 @@ class QueryBuilder<
             {
                 asName: this.asName,
                 ownerName: this.ownerName,
-                cteSpecs: this.cteSpecs,
                 columnsSelectionList: this.columnsSelectionList,
                 groupedColumns: this.groupedColumns,
                 joinSpecs: this.joinSpecs,
                 resultSelection: this.resultSelection,
                 havingSpec: this.havingSpec,
-                orderBySpecs: this.orderBySpecs
+                orderBySpecs: this.orderBySpecs,
+                cteSpecs: this.cteSpecs,
+                combineSpecs: this.combineSpecs
             })
     }
 
@@ -694,15 +729,112 @@ class QueryBuilder<
             {
                 asName: this.asName,
                 ownerName: this.ownerName,
-                cteSpecs: newCteSpecs as CTESpecsType<TDbType> as TFinalCTESpec,
                 columnsSelectionList: this.columnsSelectionList,
                 groupedColumns: this.groupedColumns,
                 joinSpecs: this.joinSpecs,
                 resultSelection: this.resultSelection,
                 havingSpec: this.havingSpec,
-                orderBySpecs: this.orderBySpecs
-            })
+                orderBySpecs: this.orderBySpecs,
+                cteSpecs: newCteSpecs as CTESpecsType<TDbType> as TFinalCTESpec,
+                combineSpecs: this.combineSpecs
+            });
     }
+
+    #combine<
+        TCombineType extends COMBINE_TYPE,
+        TQbResult extends QueryBuilder<TDbType, any, any, any, any, any, any, any>,
+        TParams extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = TQbResult extends QueryBuilder<TDbType, any, any, any, any, any, any, infer TParams> ? TParams : never,
+        TCategorizedParamsResult extends CategorizedParamsType<TDbType> = AccumulateCombineParams<TDbType, TCategorizedParams, TParams>
+    >(
+        combineType: TCombineType,
+        cteSelectionCb: (ctes: MapCtesToSelectionType<TDbType, TCTESpecs>) => TQbResult
+    ): QueryBuilder<
+        TDbType,
+        TFrom,
+        TJoinSpecs,
+        TCTESpecs,
+        TResult,
+        TCategorizedParamsResult,
+        TAs
+    > {
+        let cteSpecs: MapCtesToSelectionType<TDbType, TCTESpecs>;
+        if (this.cteSpecs === undefined) {
+            cteSpecs = {} as MapCtesToSelectionType<TDbType, TCTESpecs>;
+        } else {
+            cteSpecs = mapCTESpecsToSelection(this.cteSpecs);
+        }
+        const res = cteSelectionCb(cteSpecs);
+
+        let newCombine = { type: combineType, qb: res };
+
+        let newCombineSpecs: CombineSpecsType<TDbType> = [newCombine];
+        if (this.combineSpecs !== undefined) {
+            newCombineSpecs = [...this.combineSpecs, ...newCombineSpecs];
+        }
+
+        return new QueryBuilder<
+            TDbType,
+            TFrom,
+            TJoinSpecs,
+            TCTESpecs,
+            TResult,
+            TCategorizedParamsResult,
+            TAs
+        >(
+            this.dbType,
+            this.fromSpecs,
+            {
+                asName: this.asName,
+                ownerName: this.ownerName,
+                columnsSelectionList: this.columnsSelectionList,
+                groupedColumns: this.groupedColumns,
+                joinSpecs: this.joinSpecs,
+                resultSelection: this.resultSelection,
+                havingSpec: this.havingSpec,
+                orderBySpecs: this.orderBySpecs,
+                cteSpecs: this.cteSpecs,
+                combineSpecs: newCombineSpecs
+            });
+    }
+
+
+    union<
+        TQbResult extends QueryBuilder<TDbType, any, any, any, any, any, any, any>,
+        TParams extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = TQbResult extends QueryBuilder<TDbType, any, any, any, any, any, any, infer TParams> ? TParams : never,
+        TCategorizedParamsResult extends CategorizedParamsType<TDbType> = AccumulateCombineParams<TDbType, TCategorizedParams, TParams>
+    >(
+        cb: (ctes: MapCtesToSelectionType<TDbType, TCTESpecs>) => TQbResult
+    ): QueryBuilder<
+        TDbType,
+        TFrom,
+        TJoinSpecs,
+        TCTESpecs,
+        TResult,
+        TCategorizedParamsResult,
+        TAs
+    > {
+        return this.#combine(combineTypes.UNION.name, cb);
+    }
+
+
+    unionAll<
+        TQbResult extends QueryBuilder<TDbType, any, any, any, any, any, any, any>,
+        TParams extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = TQbResult extends QueryBuilder<TDbType, any, any, any, any, any, any, infer TParams> ? TParams : never,
+        TCategorizedParamsResult extends CategorizedParamsType<TDbType> = AccumulateCombineParams<TDbType, TCategorizedParams, TParams>
+    >(
+        cb: (ctes: MapCtesToSelectionType<TDbType, TCTESpecs>) => TQbResult
+    ): QueryBuilder<
+        TDbType,
+        TFrom,
+        TJoinSpecs,
+        TCTESpecs,
+        TResult,
+        TCategorizedParamsResult,
+        TAs
+    > {
+        return this.#combine(combineTypes.UNION_ALL.name, cb);
+    }
+
 
     exec(
         ...args: TParamsAccumulated extends undefined
@@ -768,13 +900,13 @@ function from<
     >(dbType, fromResult);
 }
 
-
-
 export default QueryBuilder;
 
 export {
     from,
-    cteTypes
+    cteTypes,
+    unionTypes,
+    combineTypes
 }
 
 export type {
@@ -791,5 +923,7 @@ export type {
     CTEType,
     CTESpecsType,
     CategorizedParamsType,
-    DefaultCategorizedParamsType
+    DefaultCategorizedParamsType,
+    COMBINE_TYPE,
+    UNION_TYPE
 }

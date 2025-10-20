@@ -24,9 +24,9 @@ type TableToColumnsMap<
             T[K] extends SubQueryObject<TDbType, any, infer TSubQueryEntries, string> ?
             TSubQueryEntries extends undefined ? never :
             TSubQueryEntries :
-            T[K] extends CTEObject<TDbType, any, any, any, infer TCTEObjectEntries> ?
-            TCTEObjectEntries extends undefined ? never :
-            TCTEObjectEntries :
+            T[K] extends CTEObject<TDbType, any, any, any, any> ?
+            T[K]["cteObjectEntries"] extends undefined ? never :
+            T[K]["cteObjectEntries"] :
             never
         >
     };

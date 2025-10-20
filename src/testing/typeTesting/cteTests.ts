@@ -1,4 +1,5 @@
-import { withAs } from "../../query/cte.js";
+import { withAs, withRecursiveAs } from "../../query/cte.js";
+import type CTEObject from "../../query/cteObject.js";
 import QueryBuilder from "../../query/queryBuilder.js";
 import { customersTable, employeesTable, ordersTable } from "./_tables.js";
 
@@ -28,3 +29,15 @@ const res1 = employeesTable
     .join("LEFT", () => customersTable, (tbles) => tbles.customers.id.eq(tbles.employees.id))
     .join("LEFT", () => ordersTable, (tbls) => tbls.orders.customerId.eq(tbls.customers.id))
     .select((tables) => [tables.employees, tables.customers, tables.orders]).exec;
+
+
+const res3 = withRecursiveAs(
+    "rec",
+    ["id", "name"],
+    customersTable.where((tbl, { param }) => tbl.customers.id.eq(param("id"))).select((tbl) => [tbl.customers.id, tbl.customers.name, tbl.customers.createdBy]),
+    "UNION", (self) => {
+
+        return employeesTable.select(() => []);
+    }).from((tbls) => [tbls.rec])
+    .select((tbls) => [tbls.rec.id, tbls.rec.name]);
+

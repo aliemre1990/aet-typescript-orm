@@ -57,14 +57,15 @@ class CTEObjectEntry<
         dbType: TDbType,
         comparable: TComparable,
         asName?: TAsName,
-        ownerName?: string
+        ownerName?: string,
+        defaultFieldKey?: TDefaultFieldKey
     ) {
         this.dbType = dbType;
         this.comparable = comparable;
         this.asName = asName;
         this.ownerName = ownerName;
 
-        this.defaultFieldKey = comparable.asName === undefined ? comparable.defaultFieldKey : comparable.asName;
+        this.defaultFieldKey = defaultFieldKey || (comparable.asName === undefined ? comparable.defaultFieldKey : comparable.asName);
     }
 }
 
@@ -85,7 +86,8 @@ class CTEObject<
         dbType: TDbType,
         qb: TQb,
         name: TCTEName,
-        cteType: TCTEType
+        cteType: TCTEType,
+        entries?: TEntries
     ) {
         this.dbType = dbType;
         this.qb = qb;

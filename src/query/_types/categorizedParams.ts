@@ -15,6 +15,7 @@ type AccumulateCategorizedParams<
         ...(TCategorizedParams["orderByParams"] extends readonly QueryParam<TDbType, any, any, any, any>[] ? TCategorizedParams["orderByParams"] : []),
         ...(TCategorizedParams["groupByParams"] extends readonly QueryParam<TDbType, any, any, any, any>[] ? TCategorizedParams["groupByParams"] : []),
         ...(TCategorizedParams["havingParams"] extends readonly QueryParam<TDbType, any, any, any, any>[] ? TCategorizedParams["havingParams"] : []),
+        ...(TCategorizedParams["combineParams"] extends readonly QueryParam<TDbType, any, any, any, any>[] ? TCategorizedParams["combineParams"] : []),
         ...(AccumulateParamsCollection<TDbType, TCategorizedParams["joinParams"]>),
         ...(AccumulateParamsCollection<TDbType, TCategorizedParams["cteParams"]>)
     ]
@@ -37,6 +38,25 @@ type AccumulateParamsCollection<
     [] :
     [];
 
+type AccumulateCombineParams<
+    TDbType extends DbType,
+    TCategorizedParams extends CategorizedParamsType<TDbType>,
+    TParams extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined
+> =
+    {
+        cteParams: TCategorizedParams["cteParams"],
+        joinParams: TCategorizedParams["joinParams"],
+        fromParams: TCategorizedParams["fromParams"],
+        selectParams: TCategorizedParams["selectParams"],
+        whereParams: TCategorizedParams["whereParams"],
+        orderByParams: TCategorizedParams["orderByParams"],
+        groupByParams: TCategorizedParams["groupByParams"],
+        havingParams: TCategorizedParams["havingParams"],
+        combineParams: [
+            ...(TCategorizedParams["combineParams"] extends readonly QueryParam<TDbType, any, any, any, any>[] ? TCategorizedParams["combineParams"] : []),
+            ...(TParams extends readonly QueryParam<TDbType, any, any, any, any>[] ? TParams : [])
+        ]
+    }
 
 type OverrideFromParams<
     TDbType extends DbType,
@@ -51,7 +71,8 @@ type OverrideFromParams<
         whereParams: TCategorizedParams["whereParams"],
         orderByParams: TCategorizedParams["orderByParams"],
         groupByParams: TCategorizedParams["groupByParams"],
-        havingParams: TCategorizedParams["havingParams"]
+        havingParams: TCategorizedParams["havingParams"],
+        combineParams: TCategorizedParams["combineParams"]
     }
 
 type OverrideOrderByParams<
@@ -67,7 +88,8 @@ type OverrideOrderByParams<
         whereParams: TCategorizedParams["whereParams"],
         orderByParams: TParams,
         groupByParams: TCategorizedParams["groupByParams"],
-        havingParams: TCategorizedParams["havingParams"]
+        havingParams: TCategorizedParams["havingParams"],
+        combineParams: TCategorizedParams["combineParams"]
     }
 
 type OverrideHavingParams<
@@ -83,7 +105,8 @@ type OverrideHavingParams<
         whereParams: TCategorizedParams["whereParams"],
         orderByParams: TCategorizedParams["orderByParams"],
         groupByParams: TCategorizedParams["groupByParams"],
-        havingParams: TParams
+        havingParams: TParams,
+        combineParams: TCategorizedParams["combineParams"]
     }
 
 type OverrideGroupByParams<
@@ -99,7 +122,8 @@ type OverrideGroupByParams<
         whereParams: TCategorizedParams["whereParams"],
         orderByParams: TCategorizedParams["orderByParams"],
         groupByParams: TParams,
-        havingParams: TCategorizedParams["havingParams"]
+        havingParams: TCategorizedParams["havingParams"],
+        combineParams: TCategorizedParams["combineParams"]
     }
 
 type OverrideWhereParams<
@@ -115,7 +139,8 @@ type OverrideWhereParams<
         whereParams: TParams,
         orderByParams: TCategorizedParams["orderByParams"],
         groupByParams: TCategorizedParams["groupByParams"],
-        havingParams: TCategorizedParams["havingParams"]
+        havingParams: TCategorizedParams["havingParams"],
+        combineParams: TCategorizedParams["combineParams"]
     }
 
 type OverrideSelectParams<
@@ -131,7 +156,8 @@ type OverrideSelectParams<
         whereParams: TCategorizedParams["whereParams"],
         orderByParams: TCategorizedParams["orderByParams"],
         groupByParams: TCategorizedParams["groupByParams"],
-        havingParams: TCategorizedParams["havingParams"]
+        havingParams: TCategorizedParams["havingParams"],
+        combineParams: TCategorizedParams["combineParams"]
     }
 
 type OverrideJoinParams<
@@ -148,7 +174,8 @@ type OverrideJoinParams<
         whereParams: TCategorizedParams["whereParams"],
         orderByParams: TCategorizedParams["orderByParams"],
         groupByParams: TCategorizedParams["groupByParams"],
-        havingParams: TCategorizedParams["havingParams"]
+        havingParams: TCategorizedParams["havingParams"],
+        combineParams: TCategorizedParams["combineParams"]
     }
 
 
@@ -166,7 +193,8 @@ type OverrideCTEParams<
         whereParams: TCategorizedParams["whereParams"],
         orderByParams: TCategorizedParams["orderByParams"],
         groupByParams: TCategorizedParams["groupByParams"],
-        havingParams: TCategorizedParams["havingParams"]
+        havingParams: TCategorizedParams["havingParams"],
+        combineParams: TCategorizedParams["combineParams"]
     }
 
 type ExcludeExistingParams<
@@ -198,5 +226,6 @@ export type {
     OverrideHavingParams,
     OverrideOrderByParams,
     OverrideFromParams,
+    AccumulateCombineParams,
     AccumulateCategorizedParams
 }
