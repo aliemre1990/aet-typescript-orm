@@ -1,4 +1,5 @@
-import QueryBuilder, { withAs } from "../../query/queryBuilder.js";
+import { withAs } from "../../query/cte.js";
+import QueryBuilder from "../../query/queryBuilder.js";
 import { customersTable, employeesTable, ordersTable } from "./_tables.js";
 
 const res = withAs("customerCte", customersTable.select((tables) => [tables.customers.id]))

@@ -768,32 +768,12 @@ function from<
     >(dbType, fromResult);
 }
 
-function withAs<
-    TAs extends string,
-    TQb extends QueryBuilder<TDbType, any, any, any, any, any, any, any>,
-    TDbType extends DbType = TQb extends IDbType<infer TDbTypeInner> ? TDbTypeInner : never
->(as: TAs, qb: TQb) {
-    type TCTEObject = MapToCTEObject<TDbType, TAs, typeof cteTypes.NON_RECURSIVE, TQb>;
-    type TParams = TQb extends QueryBuilder<TDbType, any, any, any, any, any, any, infer TParams> ? TParams : never;
 
-    const cteObject = new CTEObject(qb.dbType, qb, as, cteTypes.NON_RECURSIVE) as TCTEObject;
-    const cteSpecs = [cteObject] as const;
-
-    return new QueryBuilder<
-        TDbType,
-        undefined,
-        undefined,
-        typeof cteSpecs,
-        undefined,
-        OverrideCTEParams<TDbType, DefaultCategorizedParamsType, TCTEObject, TParams>
-    >(qb.dbType, undefined, { cteSpecs });
-}
 
 export default QueryBuilder;
 
 export {
     from,
-    withAs,
     cteTypes
 }
 
