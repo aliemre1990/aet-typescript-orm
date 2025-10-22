@@ -54,7 +54,7 @@ type JoinSpecsType<TDbType extends DbType> = readonly JoinSpecsItemType<TDbType>
 type GroupBySpecs<TDbType extends DbType> = readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, any>)[];
 
 type ColumnsSelectionListType<TDbType extends DbType> = { [key: string]: ColumnsSelection<TDbType, any, any> }
-type ComparisonType<TDbType extends DbType> = ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>;
+type ComparisonType<TDbType extends DbType> = ColumnComparisonOperation<TDbType, any, any, any, any> | ColumnLogicalOperation<TDbType, any, any>;
 
 
 const cteTypes = {
@@ -313,7 +313,7 @@ class QueryBuilder<
     join<
         TJoinType extends JoinType,
         TJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, string, any> | CTEObject<TDbType, any, any, any, any>,
-        TCbResult extends ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>,
+        TCbResult extends ComparisonType<TDbType>,
         TJoinResult extends JoinSpecsTableType<TDbType> =
         TJoinTable extends Table<TDbType, infer TJoinCols, infer TJoinTableName> ?
         QueryTable<
@@ -837,15 +837,14 @@ class QueryBuilder<
 
 
     exec(
-        ...args: TParamsAccumulated extends undefined
-            ? []
-            : [params: QueryParamsToObject<TParamsAccumulated>]
+        params: TParamsAccumulated extends undefined ?
+            ({ [key: string]: any }) :
+            ({ [key: string]: any } & QueryParamsToObject<TParamsAccumulated>)
     ):
         TResult extends ResultShape<TDbType> ?
         ColumnsToResultMap<TDbType, TResult> :
         never {
 
-        const params = args[0];
 
         if (isNullOrUndefined(this?.resultSelection)) {
             return {} as any;

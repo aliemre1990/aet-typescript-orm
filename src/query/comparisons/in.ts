@@ -5,6 +5,8 @@ import ColumnComparisonOperation, { comparisonOperations, type InferValueTypeFro
 import type { IComparable } from "../_interfaces/IComparable.js";
 import type { IsAny, NullableArray } from "../../utility/common.js";
 import QueryParam from "../param.js";
+import type QueryBuilder from "../queryBuilder.js";
+import type { DbValueTypes } from "../../table/column.js";
 
 // Helper type to extract only QueryColumns from the mixed tuple
 type ExtractComparables<T extends readonly unknown[]> =
@@ -14,78 +16,84 @@ type ExtractComparables<T extends readonly unknown[]> =
     ExtractComparables<Rest> :
     [];
 
+type MapParamsToTypeRecursively<
+    TValueType extends DbValueTypes,
+    T extends readonly (TValueType | IComparable<any, any, TValueType, any, any, any>)[]
+> =
+    T extends readonly [infer First, ...infer Rest] ?
+    First extends QueryParam<infer DbType, infer Name, infer ValueType, infer As, infer DefaultFieldKey> ?
+    IsAny<ValueType> extends true ?
+    Rest extends readonly [any, ...any[]] ?
+    [QueryParam<DbType, Name, TValueType | null, As, DefaultFieldKey>, ...MapParamsToTypeRecursively<TValueType, Rest>] :
+    [QueryParam<DbType, Name, TValueType | null, As, DefaultFieldKey>] :
+    Rest extends readonly [any, ...any[]] ?
+    [First, ...MapParamsToTypeRecursively<TValueType, Rest>] :
+    [First] :
+    Rest extends readonly [any, ...any[]] ?
+    [First, ...MapParamsToTypeRecursively<TValueType, Rest>] :
+    [First] :
+    []
+    ;
+
 
 function sqlIn<
     TComparing extends IComparable<TDbType, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
-    TParamMedian extends QueryParam<TDbType, string, any, any, any>,
-    TParamName extends TParamMedian extends QueryParam<any, infer U, any, any, any> ? U : never,
-    TParamValue extends TParamMedian extends QueryParam<any, any, infer TVal, any, any> ? TVal : never,
-    // Find a way to make array nullable
-    TParam extends QueryParam<TDbType, TParamName, (IsAny<TParamValue> extends true ? NullableArray<GetArrayEquivalentPgValueType<TValueType>> | null : TParamValue), any, any>,
-    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any> ? DbType : never
->(this: TComparing, param: TParamMedian
-): ColumnComparisonOperation<
-    TDbType,
-    TComparing,
-    [TParam]
->
-function sqlIn<
-    TComparing extends IComparable<TDbType, any, any, any, any, any>,
-    TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
-    TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any, any, any>)[],
+    TQb extends QueryBuilder<TDbType, any, any, any, any, any, any, any>,
     TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any> ? DbType : never
 >(
     this: TComparing,
-    ...values: TValues
+    val: TQb
 ): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    ExtractComparables<TValues>["length"] extends 0 ? undefined : ExtractComparables<TValues> // Helper type to extract only the columns as tuple
+    [TQb]
+>
+function sqlIn<
+    TComparing extends IComparable<TDbType, any, any, any, any, any>,
+    TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
+    const TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any, any, any>)[],
+    const TFinalValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any, any, any>)[] = MapParamsToTypeRecursively<TValueType, TValues>,
+    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any> ? DbType : never
+>(
+    this: TComparing,
+    val: TValues
+): ColumnComparisonOperation<
+    TDbType,
+    TComparing,
+    [...TFinalValues] // Helper type to extract only the columns as tuple
 >
 
 
 function sqlIn<
     TComparing extends IComparable<TDbType, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
-    TParamMedian extends QueryParam<TDbType, string, any, any, any> | undefined,
-    TParamName extends TParamMedian extends QueryParam<any, infer U, any, any, any> ? U : never,
-    TParamValue extends TParamMedian extends QueryParam<any, any, infer TVal, any, any> ? TVal : never,
+    TQb extends QueryBuilder<TDbType, any, any, any, any, any, any, any>,
     TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any, any, any>)[],
     TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any> ? DbType : never
 >
     (
         this: TComparing,
-        param: TParamMedian | TValues[number],
-        ...values: TValues
+        val: TQb | TValues
     ) {
-
-    if (isNullOrUndefined(param)) {
-        throw Error('In operation requires at least one value.');
-    }
 
     const dbType = this.dbType;
 
-    if (param instanceof QueryParam) {
-        const paramRes = new QueryParam<
-            TDbType,
-            TParamName,
-            IsAny<TParamValue> extends true ? NullableArray<GetArrayEquivalentPgValueType<TValueType>> : TParamValue
-        >(param.name, param.dbType);
-
+    if (val instanceof Array) {
         return new ColumnComparisonOperation(
             dbType,
             comparisonOperations.in,
             this,
-            [paramRes]
+            [...val]
         )
     }
 
+    // value is querybuilder
     return new ColumnComparisonOperation(
         dbType,
         comparisonOperations.in,
         this,
-        [param, ...values]
+        [val]
     );
 }
 

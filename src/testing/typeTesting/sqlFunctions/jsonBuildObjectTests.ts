@@ -4,7 +4,7 @@ import { customersTable } from "../_tables.js";
 const simpleJsonBuildObj = customersTable.select((cols, { jsonBuildObject }) => [
     cols.customers.id,
     jsonBuildObject({ id: cols.customers.id, bd: jsonBuildObject({ sd: cols.customers.name }) }).as("obj")
-]).exec();
+]).exec;
 
 
 const groupedJsonBuildObj = customersTable

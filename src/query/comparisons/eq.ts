@@ -36,7 +36,7 @@ function eq<
 >(this: TComparing, value: TValueType | null): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    undefined
+    [TValueType | null]
 >
 function eq<
     TComparing extends IComparable<TDbType, any, any, any, any, any>,
@@ -64,6 +64,10 @@ function eq<
             this,
             [param]
         )
+    }
+
+    if (value === undefined) {
+        throw Error('Invalid argument.');
     }
 
     return new ColumnComparisonOperation(

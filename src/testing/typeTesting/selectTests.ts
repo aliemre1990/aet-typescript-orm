@@ -97,7 +97,7 @@ const AutoSelectMultiJoins = customersTable
                 cols.users.id.eq(cols.customers.createdBy),
                 cols.customers.name.eq(param("userGteParam4")),
                 and(cols.users.id.eq(param("userEqParam1"))),
-                cols.users.id.sqlIn(param("inParam").type<number[]>())
+                cols.users.id.sqlIn([param("inParam")])
             )
         );
 
@@ -165,7 +165,7 @@ type AutoSelectMultiJoinsParamsResult = {
     userBetweenRight: number | null;
     userGteParam4: string | null;
     userEqParam1: number | null;
-    inParam: number[];
+    inParam: number | null;
     parentUserEq1: number | null;
     parentUserBetLeft: number | null;
     parentUserGt2: number | null; //
@@ -206,7 +206,7 @@ type SingleLevelSelectWithJoinsResult = { id: number, orderCustomerId: number, c
 type SingleLevelSelectWithJoinsTest = AssertTrue<AssertEqual<SingleLevelSelectWithJoinsResult, ReturnType<typeof SingleLevelSelectWithJoins>>>;
 
 type SingleLevelSelectWithJoinsParams = typeof SingleLevelSelectWithJoins extends (params: infer TParams) => any ? TParams : never;
-type SingleLevelSelectWithJoinsParamsTest = AssertTrue<AssertEqual<unknown, SingleLevelSelectWithJoinsParams>>;
+type SingleLevelSelectWithJoinsParamsTest = AssertTrue<AssertEqual<{ [key: string]: any }, SingleLevelSelectWithJoinsParams>>;
 /**
  * 
  */

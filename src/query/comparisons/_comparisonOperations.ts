@@ -1,6 +1,7 @@
 import type { DbType } from "../../db.js";
 import type { DbValueTypes } from "../../table/column.js";
 import type { IComparable } from "../_interfaces/IComparable.js";
+import type { InferParamsFromComparables } from "../_types/paramAccumulationComparison.js";
 import type QueryParam from "../param.js";
 
 const comparisonOperations = {
@@ -29,29 +30,32 @@ type InferValueTypeFromComparable<TDbType extends DbType, T> =
 class ColumnComparisonOperation<
     TDbType extends DbType,
     TComparing extends IComparable<TDbType, any, any, any, any, any>,
-    TApplied extends IComparable<TDbType, any, any, any, any, any>[] | undefined,
-    TValueType extends DbValueTypes = InferValueTypeFromComparable<TDbType, TComparing>
+    TApplied extends (TValueType | null | IComparable<TDbType, any, any, any, any, any>)[] | undefined,
+    TValueType extends DbValueTypes = InferValueTypeFromComparable<TDbType, TComparing>,
+    TParams extends readonly QueryParam<TDbType, any, any, any, any>[] =
+    TApplied extends (TValueType | null | IComparable<TDbType, any, any, any, any, any>)[] ? InferParamsFromComparables<[TComparing, ...TApplied]> :
+    InferParamsFromComparables<[TComparing]>
 > {
 
     dbType: TDbType;
     operation: ComparisonOperation;
     comparing: TComparing;
-    value?: (TValueType | null | TApplied)[]
+    value?: TApplied
 
-    params?: QueryParam<TDbType, any, any, any, any>[];
+    params?: TParams;
 
     constructor(
         dbType: TDbType,
         operation: ComparisonOperation,
         comparing: TComparing,
-        value?: (TValueType | null | TApplied)[]
+        value?: TApplied
     ) {
         this.dbType = dbType;
         this.operation = operation;
         this.comparing = comparing;
         this.value = value;
 
-        const tmpParams: typeof this.params = [];
+        const tmpParams: QueryParam<TDbType, any, any, any, any>[] = [];
         if (comparing.params !== undefined && comparing.params.length > 0) {
             tmpParams.push(...comparing.params);
         }
@@ -71,7 +75,7 @@ class ColumnComparisonOperation<
         }
 
         if (tmpParams.length > 0) {
-            this.params = tmpParams;
+            this.params = tmpParams as readonly QueryParam<TDbType, any, any, any, any>[] as TParams;
         }
 
     }

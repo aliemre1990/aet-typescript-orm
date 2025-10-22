@@ -37,7 +37,7 @@ function between<
 >(this: TComparing, leftValue: TLParamMedian, rightValue: TValueType | null): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    [TLParam]
+    [TLParam, TValueType | null]
 >
 function between<
     TComparing extends IComparable<TDbType, any, any, any, any, any>,
@@ -50,7 +50,7 @@ function between<
 >(this: TComparing, leftValue: TValueType | null, rightValue: TRParamMedian): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    [TRParam]
+    [TValueType | null, TRParam]
 >
 function between<
     TComparing extends IComparable<TDbType, any, any, any, any, any>,
@@ -90,7 +90,7 @@ function between<
 >(this: TComparing, leftValue: TValueType | null, rightValue: TValueType | null): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    undefined
+    [TValueType | null, TValueType | null]
 >
 function between<
     TComparing extends IComparable<TDbType, any, any, any, any, any>,
@@ -115,7 +115,7 @@ function between<
 >(this: TComparing, leftValue: TLApplied, rightValue: TValueType | null): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    [TLApplied]
+    [TLApplied, TValueType | null]
 >
 function between<
     TComparing extends IComparable<TDbType, any, any, any, any, any>,
@@ -125,7 +125,7 @@ function between<
 >(this: TComparing, leftValue: TValueType | null, rightValue: TRApplied): ColumnComparisonOperation<
     TDbType,
     TComparing,
-    [TRApplied]
+    [TValueType | null, TRApplied]
 >
 
 
@@ -173,6 +173,10 @@ function between<
             )
         }
 
+        if (rightValue === undefined) {
+            throw Error('Invalid argument.');
+        }
+
         return new ColumnComparisonOperation(
             dbType,
             comparisonOperations.between,
@@ -204,6 +208,10 @@ function between<
             );
         }
 
+        if (leftValue === undefined) {
+            throw Error('Invalid argument.');
+        }
+
         return new ColumnComparisonOperation(
             dbType,
             comparisonOperations.between,
@@ -211,6 +219,10 @@ function between<
             [leftValue, rParam]
         );
 
+    }
+
+    if (rightValue === undefined || leftValue === undefined) {
+        throw Error('Invalid argument.');
     }
 
     return new ColumnComparisonOperation(
