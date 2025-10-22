@@ -31,10 +31,7 @@ class ColumnComparisonOperation<
     TDbType extends DbType,
     TComparing extends IComparable<TDbType, any, any, any, any, any>,
     TApplied extends (TValueType | null | IComparable<TDbType, any, any, any, any, any>)[] | undefined,
-    TValueType extends DbValueTypes = InferValueTypeFromComparable<TDbType, TComparing>,
-    TParams extends readonly QueryParam<TDbType, any, any, any, any>[] =
-    TApplied extends (TValueType | null | IComparable<TDbType, any, any, any, any, any>)[] ? InferParamsFromComparables<[TComparing, ...TApplied]> :
-    InferParamsFromComparables<[TComparing]>
+    TValueType extends DbValueTypes = InferValueTypeFromComparable<TDbType, TComparing>
 > {
 
     dbType: TDbType;
@@ -42,7 +39,7 @@ class ColumnComparisonOperation<
     comparing: TComparing;
     value?: TApplied
 
-    params?: TParams;
+    params?: QueryParam<TDbType, any, any, any, any>[];
 
     constructor(
         dbType: TDbType,
@@ -75,7 +72,7 @@ class ColumnComparisonOperation<
         }
 
         if (tmpParams.length > 0) {
-            this.params = tmpParams as readonly QueryParam<TDbType, any, any, any, any>[] as TParams;
+            this.params = tmpParams;
         }
 
     }

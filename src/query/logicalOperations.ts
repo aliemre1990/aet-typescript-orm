@@ -12,15 +12,13 @@ type LogicalOperation = (typeof logicalOperations[keyof typeof logicalOperations
 
 class ColumnLogicalOperation<
     TDbType extends DbType,
-    TComparisons extends readonly (ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any, any>)[],
-    TParams extends readonly QueryParam<TDbType, any, any, any, any>[] =
-    InferParamsFromOpsArray<TComparisons>
+    TComparisons extends readonly (ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>)[]
 > {
     dbType: TDbType;
     operator: LogicalOperation;
     comparisons: TComparisons;
 
-    params?: TParams;
+    params?: QueryParam<TDbType, any, any, any, any>[];
 
     constructor(
         dbType: TDbType,
@@ -46,7 +44,7 @@ class ColumnLogicalOperation<
         })
 
         if (tmpParams.length > 0) {
-            this.params = tmpParams as readonly QueryParam<TDbType, any, any, any, any>[] as TParams;
+            this.params = tmpParams;
         }
     }
 
@@ -58,7 +56,7 @@ function generateAndFn<TDbType extends DbType>(
     dbType: TDbType
 ) {
     return function <
-        TComparisons extends (ColumnComparisonOperation<TDbType, any, any, any, any> | ColumnLogicalOperation<TDbType, any, any>)[]
+        TComparisons extends (ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>)[]
     >(...ops: TComparisons) {
         return new ColumnLogicalOperation<TDbType, TComparisons>(dbType, logicalOperations.and, ops);
     }
