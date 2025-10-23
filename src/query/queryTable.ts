@@ -106,7 +106,7 @@ class QueryTable<
 
     >(
         type: TJoinType,
-        tableSelectionCb: () => TJoinTable,
+        tableSelection: TJoinTable | (() => TJoinTable),
         cb: (
             tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], TJoinAccumulated>>,
             ops: DbOperators<TDbType>
@@ -122,7 +122,7 @@ class QueryTable<
         > {
 
         return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined, undefined>(this.dbType, [this])
-            .join(type, tableSelectionCb, cb);
+            .join(type, tableSelection, cb);
     }
 
     where<TCbResult extends ComparisonType<TDbType>>(

@@ -131,7 +131,7 @@ class Table<
 
     >(
         type: TJoinType,
-        tableSelectionCb: () => TJoinTable,
+        tableSelection: TJoinTable | (() => TJoinTable),
         cb: (
             tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>>], TJoinAccumulated>>,
             ops: DbOperators<TDbType>
@@ -153,7 +153,7 @@ class Table<
 
 
         return new QueryBuilder<TDbType, [typeof queryTable], undefined, undefined>(this.dbType, [queryTable])
-            .join(type, tableSelectionCb, cb);
+            .join(type, tableSelection, cb);
     }
 
     where<TCbResult extends ComparisonType<TDbType>>(

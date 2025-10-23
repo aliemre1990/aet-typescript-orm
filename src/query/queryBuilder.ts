@@ -333,18 +333,24 @@ class QueryBuilder<
 
     >(
         type: TJoinType,
-        tableSelectionCb: (ctes: MapCtesToSelectionType<TDbType, TCTESpecs>) => TJoinTable,
+        tableSelection: TJoinTable | ((ctes: MapCtesToSelectionType<TDbType, TCTESpecs>) => TJoinTable),
         cb: (
             tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinAccumulated, TCTESpecs>>,
             ops: DbOperators<TDbType>
         ) => TCbResult
     ): QueryBuilder<TDbType, TFrom, TJoinAccumulated, TCTESpecs, TResult, TNewCategorizedParams, TAs> {
 
-        let cteSpecs = {} as MapCtesToSelectionType<TDbType, TCTESpecs>;
-        if (this.cteSpecs !== undefined) {
-            cteSpecs = mapCTESpecsToSelection(this.cteSpecs) as MapCtesToSelectionType<TDbType, TCTESpecs>;
+        let table;
+
+        if (typeof tableSelection === "function") {
+            let cteSpecs = {} as MapCtesToSelectionType<TDbType, TCTESpecs>;
+            if (this.cteSpecs !== undefined) {
+                cteSpecs = mapCTESpecsToSelection(this.cteSpecs) as MapCtesToSelectionType<TDbType, TCTESpecs>;
+            }
+            table = tableSelection(cteSpecs);
+        } else {
+            table = tableSelection;
         }
-        const table = tableSelectionCb(cteSpecs);
 
         let columnsSelectionList = this.columnsSelectionList;
 
@@ -613,7 +619,7 @@ class QueryBuilder<
         AccumulatedParamsResult extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = AccumulatedParams["length"] extends 0 ? undefined : AccumulatedParams
 
     >(
-        cteSelectionCb: (ctes: MapCtesToSelectionType<TDbType, TCTESpecs>) => TSelected
+        cteSelection: TSelected | ((ctes: MapCtesToSelectionType<TDbType, TCTESpecs>) => TSelected)
     ):
         QueryBuilder<
             TDbType,
@@ -625,14 +631,19 @@ class QueryBuilder<
             TAs
         > {
 
+        let res;
 
-        let cteSpecs: MapCtesToSelectionType<TDbType, TCTESpecs>;
-        if (this.cteSpecs === undefined) {
-            cteSpecs = {} as MapCtesToSelectionType<TDbType, TCTESpecs>;
+        if (typeof cteSelection === "function") {
+            let cteSpecs: MapCtesToSelectionType<TDbType, TCTESpecs>;
+            if (this.cteSpecs === undefined) {
+                cteSpecs = {} as MapCtesToSelectionType<TDbType, TCTESpecs>;
+            } else {
+                cteSpecs = mapCTESpecsToSelection(this.cteSpecs);
+            }
+            res = cteSelection(cteSpecs);
         } else {
-            cteSpecs = mapCTESpecsToSelection(this.cteSpecs);
+            res = cteSelection;
         }
-        const res = cteSelectionCb(cteSpecs);
 
 
         const fromResult = res.map(item => {
@@ -837,9 +848,9 @@ class QueryBuilder<
 
 
     exec(
-        params: TParamsAccumulated extends undefined ?
-            ({ [key: string]: any }) :
-            ({ [key: string]: any } & QueryParamsToObject<TParamsAccumulated>)
+        ...args: TParamsAccumulated extends undefined
+            ? [] | [{ [key: string]: any }]
+            : [{ [key: string]: any } & QueryParamsToObject<TParamsAccumulated>]
     ):
         TResult extends ResultShape<TDbType> ?
         ColumnsToResultMap<TDbType, TResult> :

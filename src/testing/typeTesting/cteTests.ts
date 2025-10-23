@@ -19,8 +19,9 @@ const chain = withAs(
     () =>
         employeesTable
             .select((tables, { round, param }) => [round(tables.employees.id, param("roundParam2"))])
-).from((ctes) => [ctes.employeesCTE])
-    .select((tbls) => [tbls.employeesCTE])
+).from([customersTable])
+    .join("LEFT", (ctes) => ctes.employeesCTE, (tbls) => tbls.customers.id.eq(tbls.employeesCTE.round))
+    .select((tbls) => [tbls.customers, tbls.employeesCTE])
     .exec;
 
 const res2 = employeesTable.select((tbls) => [tbls.employees]).exec;

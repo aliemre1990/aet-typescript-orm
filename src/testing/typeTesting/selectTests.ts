@@ -86,7 +86,7 @@ type SingleTableJoinWithAutoSelectQueryTest = AssertTrue<AssertEqual<SingleTable
  * 
  */
 const AutoSelectMultiJoins = customersTable
-    .join('INNER', () => usersTable, (cols, { and, param }) => {
+    .join('INNER', usersTable, (cols, { and, param }) => {
 
         const res1 = and(
             cols.users.id.eq(param("userParam1").type<number>()),
@@ -107,7 +107,7 @@ const AutoSelectMultiJoins = customersTable
         // type inrest = typeof inres extends ColumnComparisonOperation<any, any, any, infer TCols, any> ? TCols : never;
         // type prm = inrest[1];
     })
-    .join('INNER', () => usersTable.as('parentUsers'), (cols, { and, coalesce, param }) => {
+    .join('INNER', usersTable.as('parentUsers'), (cols, { and, coalesce, param }) => {
 
         const comp = and(
             cols.parentUsers.id.eq(cols.customers.id),
@@ -121,7 +121,7 @@ const AutoSelectMultiJoins = customersTable
 
         return comp;
     })
-    .join('INNER', () => ordersTable, (cols) => cols.users.userName.eq(cols.customers.name))
+    .join('INNER', ordersTable, (cols) => cols.users.userName.eq(cols.customers.name))
     .select(cols => [
         cols.customers.id.as("customerId"),
         cols.customers.name.as("customerName"),
@@ -205,8 +205,8 @@ const SingleLevelSelectWithJoins = customersTable
 type SingleLevelSelectWithJoinsResult = { id: number, orderCustomerId: number, customerName: string }[];
 type SingleLevelSelectWithJoinsTest = AssertTrue<AssertEqual<SingleLevelSelectWithJoinsResult, ReturnType<typeof SingleLevelSelectWithJoins>>>;
 
-type SingleLevelSelectWithJoinsParams = typeof SingleLevelSelectWithJoins extends (params: infer TParams) => any ? TParams : never;
-type SingleLevelSelectWithJoinsParamsTest = AssertTrue<AssertEqual<{ [key: string]: any }, SingleLevelSelectWithJoinsParams>>;
+type SingleLevelSelectWithJoinsParams = typeof SingleLevelSelectWithJoins extends (...params: infer TParams) => any ? TParams : never;
+type SingleLevelSelectWithJoinsParamsTest = AssertTrue<AssertEqual<[] | [{ [key: string]: any }], SingleLevelSelectWithJoinsParams>>;
 /**
  * 
  */
