@@ -619,7 +619,7 @@ class QueryBuilder<
         AccumulatedParamsResult extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = AccumulatedParams["length"] extends 0 ? undefined : AccumulatedParams
 
     >(
-        cteSelection: TSelected | ((ctes: MapCtesToSelectionType<TDbType, TCTESpecs>) => TSelected)
+        ...tables: TSelected
     ):
         QueryBuilder<
             TDbType,
@@ -629,22 +629,52 @@ class QueryBuilder<
             TResult,
             OverrideFromParams<TDbType, TCategorizedParams, AccumulatedParamsResult>,
             TAs
-        > {
+        >
+    from<
+        const  TSelected extends readonly (
+            Table<TDbType, any, any> |
+            QueryTable<TDbType, any, any, any, any, any> |
+            QueryBuilder<TDbType, any, any, any, any, any, string, any> |
+            CTEObject<TDbType, any, any, any, any>
+        )[],
+        TFromRes extends FromType<TDbType> = ConvertElementsToSubQueryCompliant<TDbType, TSelected>,
+        AccumulatedParams extends readonly QueryParam<TDbType, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, TFromRes>,
+        AccumulatedParamsResult extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = AccumulatedParams["length"] extends 0 ? undefined : AccumulatedParams
 
-        let res;
+    >(
+        cteSelection: ((ctes: MapCtesToSelectionType<TDbType, TCTESpecs>) => TSelected)
+    ):
+        QueryBuilder<
+            TDbType,
+            TFromRes,
+            TJoinSpecs,
+            TCTESpecs,
+            TResult,
+            OverrideFromParams<TDbType, TCategorizedParams, AccumulatedParamsResult>,
+            TAs
+        >
+    from(
+        ...args: any
+    ) {
 
-        if (typeof cteSelection === "function") {
+        let res: (
+            Table<TDbType, any, any> |
+            QueryTable<TDbType, any, any, any, any, any> |
+            QueryBuilder<TDbType, any, any, any, any, any, string, any> |
+            CTEObject<TDbType, any, any, any, any>
+        )[];
+
+        if (typeof args[0] === "function") {
             let cteSpecs: MapCtesToSelectionType<TDbType, TCTESpecs>;
             if (this.cteSpecs === undefined) {
                 cteSpecs = {} as MapCtesToSelectionType<TDbType, TCTESpecs>;
             } else {
                 cteSpecs = mapCTESpecsToSelection(this.cteSpecs);
             }
-            res = cteSelection(cteSpecs);
+            res = args[0](cteSpecs);
         } else {
-            res = cteSelection;
+            res = args;
         }
-
 
         const fromResult = res.map(item => {
             if (item instanceof Table) {
@@ -659,18 +689,10 @@ class QueryBuilder<
             else {
                 return item;
             }
-        }) as FromType<TDbType> as TFromRes;
+        });
 
 
-        return new QueryBuilder<
-            TDbType,
-            TFromRes,
-            TJoinSpecs,
-            TCTESpecs,
-            TResult,
-            OverrideFromParams<TDbType, TCategorizedParams, AccumulatedParamsResult>,
-            TAs
-        >(
+        return new QueryBuilder<TDbType, any, any, any, any, any, any, any>(
             this.dbType,
             fromResult,
             {
@@ -751,7 +773,7 @@ class QueryBuilder<
             });
     }
 
-    #combine<
+    #combine <
         TCombineType extends COMBINE_TYPE,
         TQbResult extends QueryBuilder<TDbType, any, any, any, any, any, any, any>,
         TParams extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = TQbResult extends QueryBuilder<TDbType, any, any, any, any, any, any, infer TParams> ? TParams : never,
