@@ -5,7 +5,6 @@ import type Table from "../table/table.js";
 import type { IComparable } from "./_interfaces/IComparable.js";
 import type { IDbType } from "./_interfaces/IDbType.js";
 import type { IName } from "./_interfaces/IName.js";
-import type { OverrideGroupByParams, OverrideJoinParams, OverrideOrderByParams, OverrideSelectParams } from "./_types/categorizedParams.js";
 import type { TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.js";
 import type { DbFunctions, DbOperators } from "./_types/ops.js";
 import type { AccumulateComparisonParams } from "./_types/paramAccumulationComparison.js";
@@ -18,7 +17,16 @@ import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.
 import type CTEObject from "./cteObject.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
 import type QueryParam from "./param.js";
-import QueryBuilder, { type CategorizedParamsType, type ComparisonType, type DefaultCategorizedParamsType, type GroupBySpecs, type JoinSpecsTableType, type JoinSpecsType, type JoinType, type OrderBySpecs } from "./queryBuilder.js";
+import
+QueryBuilder,
+{
+    type ComparisonType,
+    type GroupBySpecs,
+    type JoinSpecsTableType,
+    type JoinSpecsType,
+    type JoinType,
+    type OrderBySpecs
+} from "./queryBuilder.js";
 
 type MapQueryColumnsToRecord<TColumns extends readonly QueryColumn<any, any, any, any, any, any, any>[]> = {
     [C in TColumns[number]as C["column"]["name"]]: C
@@ -75,7 +83,7 @@ class QueryTable<
         undefined,
         undefined,
         TFinalResult,
-        OverrideSelectParams<TDbType, DefaultCategorizedParamsType, AccumulateColumnParams<undefined, TFinalResult>>
+        AccumulateColumnParams<undefined, TFinalResult>
     > {
 
         return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined, undefined>(this.dbType, [this]).select(cb);
@@ -83,7 +91,7 @@ class QueryTable<
 
     join<
         TJoinType extends JoinType,
-        TJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, string, any> | CTEObject<TDbType, any, any, any, any>,
+        TJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, string> | CTEObject<TDbType, any, any, any, any>,
         TCbResult extends ComparisonType<TDbType>,
         TJoinResult extends JoinSpecsTableType<TDbType> =
         TJoinTable extends Table<TDbType, infer TJoinCols, infer TJoinTableName> ?
@@ -94,16 +102,12 @@ class QueryTable<
             Table<TDbType, TJoinCols, TJoinTableName>,
             { [K in keyof TJoinCols]: QueryColumn<TDbType, TJoinCols[K], { tableName: TJoinTableName, asTableName: undefined }> }
         > :
-        TJoinTable extends QueryBuilder<TDbType, any, any, any, any, any, string, any> ? MapToSubQueryObject<TDbType, TJoinTable> :
+        TJoinTable extends QueryBuilder<TDbType, any, any, any, any, any, string> ? MapToSubQueryObject<TDbType, TJoinTable> :
         TJoinTable extends CTEObject<TDbType, any, any, any, any> ? TJoinTable :
         TJoinTable,
-        TAccumulatedParams extends QueryParam<TDbType, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, [TJoinResult], AccumulateComparisonParams<[], TCbResult>>,
-        TAccumulatedParamsResult extends QueryParam<TDbType, any, any, any, any>[] | undefined = TAccumulatedParams["length"] extends 0 ? undefined : TAccumulatedParams,
-        TJoinParams extends readonly QueryParam<TDbType, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, [TJoinResult], AccumulateComparisonParams<[], TCbResult>>,
-        TJoinParamsResult extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = TJoinParams["length"] extends 0 ? undefined : TJoinParams,
-        TNewCategorizedParams extends CategorizedParamsType<TDbType> = OverrideJoinParams<TDbType, DefaultCategorizedParamsType, TJoinResult, TJoinParamsResult>,
+        TJoinParams extends QueryParam<TDbType, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, [TJoinResult], AccumulateComparisonParams<[], TCbResult>>,
+        TJoinParamsResult extends QueryParam<TDbType, any, any, any, any>[] | undefined = TJoinParams["length"] extends 0 ? undefined : TJoinParams,
         const TJoinAccumulated extends JoinSpecsType<TDbType> = [{ joinType: TJoinType, table: TJoinResult }]
-
     >(
         type: TJoinType,
         tableSelection: TJoinTable | (() => TJoinTable),
@@ -118,7 +122,7 @@ class QueryTable<
             TJoinAccumulated,
             undefined,
             undefined,
-            TNewCategorizedParams
+            TJoinParamsResult
         > {
 
         return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined, undefined>(this.dbType, [this])
@@ -146,7 +150,7 @@ class QueryTable<
         undefined,
         undefined,
         undefined,
-        OverrideGroupByParams<TDbType, DefaultCategorizedParamsType, AccumulateColumnParams<undefined, TCbResult>>
+        AccumulateColumnParams<undefined, TCbResult>
     > {
         return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined, undefined>(this.dbType, [this]).groupBy(cb);
     }
@@ -164,7 +168,7 @@ class QueryTable<
             undefined,
             undefined,
             undefined,
-            OverrideOrderByParams<TDbType, DefaultCategorizedParamsType, AccumulateOrderByParams<TDbType, undefined, TCbResult>>
+            AccumulateOrderByParams<TDbType, undefined, TCbResult>
         > {
         return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined, undefined>(this.dbType, [this]).orderBy(cb);
     }

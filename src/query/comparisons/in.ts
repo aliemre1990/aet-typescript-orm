@@ -39,7 +39,7 @@ type MapParamsToTypeRecursively<
 function sqlIn<
     TComparing extends IComparable<TDbType, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
-    TQb extends QueryBuilder<TDbType, any, any, any, any, any, any, any>,
+    TQb extends QueryBuilder<TDbType, any, any, any, any, any, any>,
     TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any> ? DbType : never
 >(
     this: TComparing,
@@ -68,7 +68,7 @@ function sqlIn<
 function sqlIn<
     TComparing extends IComparable<TDbType, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
-    TQb extends QueryBuilder<TDbType, any, any, any, any, any, any, any>,
+    TQb extends QueryBuilder<TDbType, any, any, any, any, any, any>,
     TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any, any, any>)[],
     TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any> ? DbType : never
 >

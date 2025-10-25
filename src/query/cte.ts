@@ -1,6 +1,5 @@
 import type { DbType } from "../db.js";
 import type { IDbType } from "./_interfaces/IDbType.js";
-import type { OverrideCTEParams } from "./_types/categorizedParams.js";
 import type { MapToCTEObject, MapToCTEObjectForRecursive } from "./_types/cteUtility.js";
 import type { TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.js";
 import type { ResultShape } from "./_types/result.js";
@@ -8,16 +7,16 @@ import type ColumnsSelection from "./columnsSelection.js";
 import { columnsSelectionFactory } from "./columnsSelection.js";
 import CTEObject, { CTEObjectEntry } from "./cteObject.js";
 import type QueryParam from "./param.js";
-import { cteTypes, type DefaultCategorizedParamsType, type UNION_TYPE } from "./queryBuilder.js";
+import { cteTypes, type UNION_TYPE } from "./queryBuilder.js";
 import QueryBuilder from "./queryBuilder.js";
 
 function withAs<
     TCTEName extends string,
-    TQb extends QueryBuilder<TDbType, any, any, any, any, any, any, any>,
+    TQb extends QueryBuilder<TDbType, any, any, any, any, any, any>,
     TDbType extends DbType = TQb extends IDbType<infer TDbTypeInner> ? TDbTypeInner : never
 >(as: TCTEName, qb: TQb) {
     type TCTEObject = MapToCTEObject<TDbType, TCTEName, typeof cteTypes.NON_RECURSIVE, TQb>;
-    type TParams = TQb extends QueryBuilder<TDbType, any, any, any, any, any, any, infer TParams> ? TParams : never;
+    type TParams = TQb extends QueryBuilder<TDbType, any, any, any, any, infer TParams, any> ? TParams : never;
 
     const cteObject = new CTEObject(qb.dbType, qb, as, cteTypes.NON_RECURSIVE) as TCTEObject;
     const cteSpecs = [cteObject] as const;
@@ -28,15 +27,15 @@ function withAs<
         undefined,
         typeof cteSpecs,
         undefined,
-        OverrideCTEParams<TDbType, DefaultCategorizedParamsType, TCTEObject, TParams>
+        TParams
     >(qb.dbType, undefined, { cteSpecs });
 }
 
 function withRecursiveAs<
     TCTEName extends string,
     const TColumnNames extends readonly string[],
-    TAnchorQb extends QueryBuilder<TDbType, any, any, any, ResultShape<TDbType> | undefined, any, any, any>,
-    TRecursivePartResult extends QueryBuilder<TDbType, any, any, any, any, any, any, any>,
+    TAnchorQb extends QueryBuilder<TDbType, any, any, any, ResultShape<TDbType> | undefined, any, any>,
+    TRecursivePartResult extends QueryBuilder<TDbType, any, any, any, any, any, any>,
     TDbType extends DbType = TAnchorQb extends IDbType<infer TDbTypeInner> ? TDbTypeInner : never,
     TFinalCTE extends CTEObject<TDbType, any, any, any, any> = MapToCTEObjectForRecursive<TDbType, TCTEName, typeof cteTypes.RECURSIVE, TColumnNames, TAnchorQb>
 >(
@@ -76,15 +75,15 @@ function withRecursiveAs<
     let self = columnsSelectionFactory(cte, cte.cteObjectEntries);
     let recursiveQb = recursivePart(self);
 
-    let finalQb: QueryBuilder<TDbType, any, any, any, any, any, any, any>;
+    let finalQb: QueryBuilder<TDbType, any, any, any, any, any, any>;
     if (unionType === "UNION") {
         finalQb = anchorQb.union(() => recursiveQb);
     } else {
         finalQb = anchorQb.unionAll(() => recursiveQb);
     }
 
-    type TAnchorParams = TAnchorQb extends QueryBuilder<TDbType, any, any, any, any, any, any, infer TParams> ? TParams : never;
-    type TRecursiveParams = TRecursivePartResult extends QueryBuilder<TDbType, any, any, any, any, any, any, infer TParams> ? TParams : never;
+    type TAnchorParams = TAnchorQb extends QueryBuilder<TDbType, any, any, any, any, infer TParams, any> ? TParams : never;
+    type TRecursiveParams = TRecursivePartResult extends QueryBuilder<TDbType, any, any, any, any, infer TParams, any> ? TParams : never;
     type TParams = [...(TAnchorParams extends undefined ? [] : TAnchorParams), ...(TRecursiveParams extends undefined ? [] : TRecursiveParams)];
     type TParamsResult = TParams["length"] extends 0 ? undefined : TParams;
 
@@ -104,7 +103,7 @@ function withRecursiveAs<
         undefined,
         typeof cteSpecs,
         undefined,
-        OverrideCTEParams<TDbType, DefaultCategorizedParamsType, TFinalCTE, TParamsResult>
+        TParamsResult
     >(anchorQb.dbType, undefined, { cteSpecs });
 }
 
