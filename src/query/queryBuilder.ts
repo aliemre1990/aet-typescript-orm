@@ -272,7 +272,10 @@ class QueryBuilder<
 
             let selectList = this.resultSelection.map(sl => sl.buildSQL()).join(' ,');
             let fromClause = this.fromSpecs.map(frm => {
-                if (frm instanceof QueryTable || frm instanceof CTEObject) {
+                if (frm instanceof QueryTable) {
+                    return `${frm.name}${frm.asName === undefined ? '' : `AS ${frm.asName}`}`;
+                }
+                else if (frm instanceof CTEObject) {
                     return frm.name;
                 } else {
                     return frm.buildSQL();

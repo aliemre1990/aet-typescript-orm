@@ -106,14 +106,18 @@ class CTEObject<
         this.name = name;
         this.cteType = cteType;
 
-        let tmpEntries: readonly CTEObjectEntry<TDbType, any, any, any, any, any>[] = [];
-        if (qb.resultSelection !== undefined) {
-            qb.resultSelection.forEach(res => {
-                tmpEntries = [...tmpEntries, (new CTEObjectEntry(dbType, res, undefined, name))];
-            })
-        }
+        if (entries !== undefined) {
+            this.cteObjectEntries = entries;
+        } else {
+            let tmpEntries: readonly CTEObjectEntry<TDbType, any, any, any, any, any>[] = [];
+            if (qb.resultSelection !== undefined) {
+                qb.resultSelection.forEach(res => {
+                    tmpEntries = [...tmpEntries, (new CTEObjectEntry(dbType, res, undefined, name))];
+                })
+            }
 
-        this.cteObjectEntries = tmpEntries as TEntries;
+            this.cteObjectEntries = tmpEntries as TEntries;
+        }
     }
 }
 
