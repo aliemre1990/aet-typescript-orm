@@ -108,7 +108,7 @@ class Table<
 
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>(this.dbType, this, queryColumns);
 
-        return new QueryBuilder<TDbType, [typeof queryTable], undefined, undefined>(this.dbType, [queryTable]).select(cb);
+        return queryTable.select(cb);
     }
 
     join<
@@ -153,9 +153,7 @@ class Table<
 
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>>(this.dbType, this, queryColumns);
 
-
-        return new QueryBuilder<TDbType, [typeof queryTable], undefined, undefined>(this.dbType, [queryTable])
-            .join(type, tableSelection, cb);
+        return queryTable.join(type, tableSelection, cb);
     }
 
     where<TCbResult extends ComparisonType<TDbType>>(
@@ -170,7 +168,7 @@ class Table<
 
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>(this.dbType, this, queryColumns);
 
-        return new QueryBuilder<TDbType, [typeof queryTable], undefined, undefined>(this.dbType, [queryTable]).where(cb);
+        return queryTable.where(cb);
     }
 
     groupBy<
@@ -193,7 +191,7 @@ class Table<
 
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>(this.dbType, this, queryColumns);
 
-        return new QueryBuilder<TDbType, [typeof queryTable], undefined, undefined>(this.dbType, [queryTable]).groupBy(cb);
+        return queryTable.groupBy(cb);
     }
 
     orderBy<
@@ -213,7 +211,7 @@ class Table<
 
         const queryTable = new QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>(this.dbType, this, queryColumns);
 
-        return new QueryBuilder<TDbType, [typeof queryTable], undefined, undefined>(this.dbType, [queryTable]).orderBy(cb);
+        return queryTable.orderBy(cb);
     }
 }
 
