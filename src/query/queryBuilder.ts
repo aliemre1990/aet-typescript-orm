@@ -136,7 +136,6 @@ class QueryBuilder<
     joinSpecs?: TJoinSpecs;
     cteSpecs?: TCTESpecs;
     combineSpecs?: CombineSpecsType<TDbType>;
-    columnsSelectionList?: ColumnsSelectionListType<TDbType>;
     resultSelection?: TResult;
     groupedColumns?: GroupBySpecs<TDbType>;
     havingSpec?: ComparisonType<TDbType>;
@@ -148,13 +147,12 @@ class QueryBuilder<
         data?: {
             asName?: TAs,
             ownerName?: string,
+            cteSpecs?: TCTESpecs,
             joinSpecs?: TJoinSpecs,
             resultSelection?: TResult,
-            columnsSelectionList?: ColumnsSelectionListType<TDbType>,
             groupedColumns?: GroupBySpecs<TDbType>,
             havingSpec?: ComparisonType<TDbType>,
             orderBySpecs?: OrderBySpecs<TDbType>,
-            cteSpecs?: TCTESpecs,
             combineSpecs?: CombineSpecsType<TDbType>
         }
     ) {
@@ -163,7 +161,6 @@ class QueryBuilder<
         this.fromSpecs = fromSpecs;
         this.joinSpecs = data?.joinSpecs;
         this.resultSelection = data?.resultSelection;
-        this.columnsSelectionList = data?.columnsSelectionList;
         this.groupedColumns = data?.groupedColumns;
         this.havingSpec = data?.havingSpec;
         this.orderBySpecs = data?.orderBySpecs;
@@ -173,6 +170,63 @@ class QueryBuilder<
         this.asName = data?.asName;
 
         this.defaultFieldKey = data?.resultSelection !== undefined && data.resultSelection.length > 0 ? data.resultSelection[0].defaultFieldKey : "";
+    }
+
+    #getColumnsSelection() {
+        let columnsSelection: ColumnsSelectionListType<TDbType> = {};
+        if (this.fromSpecs !== undefined) {
+            for (const spec of this.fromSpecs) {
+                if (spec instanceof QueryTable) {
+                    let ownerName = spec.name;
+                    let selection = columnsSelectionFactory<TDbType>(
+                        spec,
+                        spec.
+                            columnsList.
+                            map((c: QueryColumn<TDbType, any, any, any, any, any, any>) => c.setOwnerName(ownerName))
+                    )
+                    columnsSelection[ownerName] = selection;
+                } else if (spec instanceof SubQueryObject) {
+                    let ownerName = spec.name;
+                    let selection = columnsSelectionFactory<TDbType>(spec, spec.subQueryEntries);
+                    columnsSelection[ownerName] = selection;
+                } else if (spec instanceof CTEObject) {
+                    let ownerName = spec.name;
+                    let selection = columnsSelectionFactory(spec, spec.cteObjectEntries);
+                    columnsSelection[ownerName] = selection;
+                } else {
+                    throw Error('Invalid from element type.')
+                }
+            }
+        }
+
+        if (this.joinSpecs !== undefined) {
+            for (let spec of this.joinSpecs) {
+                const { table } = spec;
+
+                if (table instanceof QueryTable) {
+                    let ownerName = table.name;
+                    let selection = columnsSelectionFactory<TDbType>(
+                        table,
+                        table.
+                            columnsList.
+                            map((c: QueryColumn<TDbType, any, any, any, any, any, any>) => c.setOwnerName(ownerName))
+                    )
+                    columnsSelection[ownerName] = selection;
+                } else if (table instanceof SubQueryObject) {
+                    let ownerName = table.name;
+                    let selection = columnsSelectionFactory<TDbType>(table, table.subQueryEntries);
+                    columnsSelection[ownerName] = selection;
+                } else if (table instanceof CTEObject) {
+                    let ownerName = table.name;
+                    let selection = columnsSelectionFactory(table, table.cteObjectEntries);
+                    columnsSelection[ownerName] = selection;
+                } else {
+                    throw Error('Invalid from element type.')
+                }
+            }
+        }
+
+        return columnsSelection;
     }
 
 
@@ -188,7 +242,6 @@ class QueryBuilder<
                 joinSpecs: this.joinSpecs,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
-                columnsSelectionList: this.columnsSelectionList,
                 groupedColumns: this.groupedColumns,
                 cteSpecs: this.cteSpecs,
                 combineSpecs: this.combineSpecs
@@ -206,7 +259,6 @@ class QueryBuilder<
                 joinSpecs: this.joinSpecs,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
-                columnsSelectionList: this.columnsSelectionList,
                 groupedColumns: this.groupedColumns,
                 cteSpecs: this.cteSpecs,
                 combineSpecs: this.combineSpecs
@@ -230,9 +282,8 @@ class QueryBuilder<
         AccumulateColumnParams<TParams, TFinalResult>,
         TAs
     > {
-
-        const cols = this.columnsSelectionList as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs, TCTESpecs>>;
-
+        const columnsSelection = this.#getColumnsSelection();
+        const cols = columnsSelection as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs, TCTESpecs>>;
 
         let functions;
         if (this.dbType === dbTypes.postgresql) {
@@ -271,7 +322,6 @@ class QueryBuilder<
             {
                 asName: this.asName,
                 ownerName: this.ownerName,
-                columnsSelectionList: this.columnsSelectionList,
                 groupedColumns: this.groupedColumns,
                 joinSpecs: this.joinSpecs,
                 resultSelection: finalSelectRes as ResultShape<TDbType> as TFinalResult,
@@ -324,7 +374,7 @@ class QueryBuilder<
             table = tableSelection;
         }
 
-        let columnsSelectionList = this.columnsSelectionList;
+        let columnsSelection = this.#getColumnsSelection();
 
         let joinTable: TJoinResult;
         if (table instanceof Table) {
@@ -334,43 +384,43 @@ class QueryBuilder<
 
             let res = new QueryTable(table.dbType, table, queryColumns);
             let ownerName = res.name;
-            let columnsSelection = columnsSelectionFactory<TDbType>(res, res.columnsList.map(c => c.setOwnerName(ownerName)));
+            let selection = columnsSelectionFactory<TDbType>(res, res.columnsList.map(c => c.setOwnerName(ownerName)));
 
             joinTable = res as TJoinResult;
-            columnsSelectionList = {
-                ...columnsSelectionList,
-                [ownerName]: columnsSelection
+            columnsSelection = {
+                ...columnsSelection,
+                [ownerName]: selection
             }
         } else if (table instanceof QueryTable) {
             joinTable = table as QueryTable<TDbType, any, any, any, any, any> as TJoinResult;
             let ownerName = joinTable.name;
-            let columnsSelection = columnsSelectionFactory<TDbType>(table, table.columnsList.map((c: QueryColumn<TDbType, any, any, any, any, any, any>) => c.setOwnerName(ownerName)))
+            let selection = columnsSelectionFactory<TDbType>(table, table.columnsList.map((c: QueryColumn<TDbType, any, any, any, any, any, any>) => c.setOwnerName(ownerName)))
 
-            columnsSelectionList = {
-                ...columnsSelectionList,
-                [ownerName]: columnsSelection
+            columnsSelection = {
+                ...columnsSelection,
+                [ownerName]: selection
             }
         } else if (table instanceof QueryBuilder) {
             let tmpTable: SubQueryObject<TDbType, any, any, any> = new SubQueryObject(this.dbType, table);
 
             let ownerName = tmpTable.name;
-            let columnsSelection = columnsSelectionFactory<TDbType>(tmpTable, tmpTable.subQueryEntries);
+            let selection = columnsSelectionFactory<TDbType>(tmpTable, tmpTable.subQueryEntries);
 
-            columnsSelectionList = {
-                ...columnsSelectionList,
-                [ownerName]: columnsSelection
+            columnsSelection = {
+                ...columnsSelection,
+                [ownerName]: selection
             }
 
             joinTable = tmpTable as TJoinResult;
         } else if (table instanceof CTEObject) {
             let ownerName = table.name;
-            let columnsSelection = columnsSelectionFactory<TDbType>(table, table.cteObjectEntries);
+            let selection = columnsSelectionFactory<TDbType>(table, table.cteObjectEntries);
 
             joinTable = table as CTEObject<TDbType, any, any, any, any> as TJoinResult;
 
-            columnsSelectionList = {
+            columnsSelection = {
                 ...columnsSelection,
-                [ownerName]: columnsSelection
+                [ownerName]: selection
             }
         } else {
             throw Error('Invalid table type.');
@@ -393,7 +443,6 @@ class QueryBuilder<
                 ownerName: this.ownerName,
                 joinSpecs: mergedJoinSpecs as TJoinAccumulated,
                 resultSelection: this.resultSelection,
-                columnsSelectionList: columnsSelectionList,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
                 cteSpecs: this.cteSpecs,
@@ -404,7 +453,7 @@ class QueryBuilder<
     where<TCbResult extends ComparisonType<TDbType>>
         (
             cb: (
-                tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>,
+                tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs, TCTESpecs>>,
                 ops: DbOperators<TDbType>
             ) => TCbResult
         ):
@@ -433,7 +482,6 @@ class QueryBuilder<
                 ownerName: this.ownerName,
                 joinSpecs: this.joinSpecs,
                 resultSelection: this.resultSelection,
-                columnsSelectionList: this.columnsSelectionList,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
                 cteSpecs: this.cteSpecs,
@@ -444,7 +492,7 @@ class QueryBuilder<
     groupBy<
         const TCbResult extends GroupBySpecs<TDbType>
     >(cb: (
-        tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>,
+        tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs, TCTESpecs>>,
         ops: DbFunctions<TDbType>
     ) => TCbResult):
         QueryBuilder<
@@ -457,7 +505,9 @@ class QueryBuilder<
             TAs
         > {
 
-        if (isNullOrUndefined(this.columnsSelectionList)) {
+        let columnsSelection = this.#getColumnsSelection();
+
+        if (isNullOrUndefined(columnsSelection)) {
             throw Error("No query object provided.");
         }
 
@@ -465,7 +515,10 @@ class QueryBuilder<
         if (isNullOrUndefined(functions)) {
             throw Error('Invalid db type.');
         }
-        const res = cb(this.columnsSelectionList as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>, functions as DbFunctions<TDbType>);
+        const res = cb(
+            columnsSelection as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs, TCTESpecs>>,
+            functions as DbFunctions<TDbType>
+        );
 
         return new QueryBuilder<
             TDbType,
@@ -481,7 +534,6 @@ class QueryBuilder<
             {
                 asName: this.asName,
                 ownerName: this.ownerName,
-                columnsSelectionList: this.columnsSelectionList,
                 groupedColumns: res,
                 joinSpecs: this.joinSpecs,
                 resultSelection: this.resultSelection,
@@ -496,7 +548,7 @@ class QueryBuilder<
         TCbResult extends ComparisonType<TDbType>
     >(
         cb: (
-            tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>,
+            tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs, TCTESpecs>>,
             ops: DbOperators<TDbType>
         ) => TCbResult
     ): QueryBuilder<
@@ -513,7 +565,11 @@ class QueryBuilder<
             throw Error('Invalid db type.');
         }
 
-        const res = cb(this.columnsSelectionList as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>, functions as DbOperators<TDbType>)
+        let columnsSelection = this.#getColumnsSelection();
+        const res = cb(
+            columnsSelection as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs, TCTESpecs>>,
+            functions as DbOperators<TDbType>
+        )
 
         return new QueryBuilder<
             TDbType,
@@ -529,7 +585,6 @@ class QueryBuilder<
             {
                 asName: this.asName,
                 ownerName: this.ownerName,
-                columnsSelectionList: this.columnsSelectionList,
                 groupedColumns: this.groupedColumns,
                 joinSpecs: this.joinSpecs,
                 resultSelection: this.resultSelection,
@@ -542,7 +597,7 @@ class QueryBuilder<
 
     orderBy<
         const TCbResult extends OrderBySpecs<TDbType>
-    >(cb: (tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>) => TCbResult):
+    >(cb: (tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs, TCTESpecs>>) => TCbResult):
         QueryBuilder<
             TDbType,
             TFrom,
@@ -552,7 +607,8 @@ class QueryBuilder<
             AccumulateOrderByParams<TDbType, TParams, TCbResult>,
             TAs
         > {
-        const res = cb(this.columnsSelectionList as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>);
+        const columnsSelection = this.#getColumnsSelection();
+        const res = cb(columnsSelection as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs, TCTESpecs>>);
 
         return new QueryBuilder<
             TDbType,
@@ -568,7 +624,6 @@ class QueryBuilder<
             {
                 asName: this.asName,
                 ownerName: this.ownerName,
-                columnsSelectionList: this.columnsSelectionList,
                 groupedColumns: this.groupedColumns,
                 joinSpecs: this.joinSpecs,
                 resultSelection: this.resultSelection,
@@ -670,7 +725,6 @@ class QueryBuilder<
             {
                 asName: this.asName,
                 ownerName: this.ownerName,
-                columnsSelectionList: this.columnsSelectionList,
                 groupedColumns: this.groupedColumns,
                 joinSpecs: this.joinSpecs,
                 resultSelection: this.resultSelection,
@@ -739,7 +793,6 @@ class QueryBuilder<
             {
                 asName: this.asName,
                 ownerName: this.ownerName,
-                columnsSelectionList: this.columnsSelectionList,
                 groupedColumns: this.groupedColumns,
                 joinSpecs: this.joinSpecs,
                 resultSelection: this.resultSelection,
@@ -802,7 +855,6 @@ class QueryBuilder<
             {
                 asName: this.asName,
                 ownerName: this.ownerName,
-                columnsSelectionList: this.columnsSelectionList,
                 groupedColumns: this.groupedColumns,
                 joinSpecs: this.joinSpecs,
                 resultSelection: this.resultSelection,
