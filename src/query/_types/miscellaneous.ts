@@ -47,6 +47,8 @@ type TablesToObject<
             T["name"] :
             T extends SubQueryObject<TDbType, any, any, any> ?
             T["name"] :
+            T extends CTEObject<TDbType, any, any, any, any> ?
+            T["name"] :
             never
             ]: T
         } : {}
@@ -60,6 +62,8 @@ type TablesToObject<
             QueryTable<TDbType, any, any, any, any, any> ?
             T["table"]["name"] :
             T["table"] extends SubQueryObject<TDbType, any, any, any> ?
+            T["table"]["name"] :
+            T["table"] extends CTEObject<TDbType, any, any, any, any> ?
             T["table"]["name"] :
             never
             ]: T["table"]

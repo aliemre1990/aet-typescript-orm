@@ -293,7 +293,7 @@ class QueryBuilder<
         TFinalResult extends ResultShape<TDbType> = SelectToResultMapRecursively<TDbType, TCbResult>
     >(
         cb: (
-            tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs, TCTESpecs>>,
+            tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>,
             ops: DbFunctions<TDbType>
         ) => TCbResult
     ): QueryBuilder<
@@ -306,7 +306,7 @@ class QueryBuilder<
         TAs
     > {
         const columnsSelection = this.#getColumnsSelection();
-        const cols = columnsSelection as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs, TCTESpecs>>;
+        const cols = columnsSelection as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>;
 
         let functions;
         if (this.dbType === dbTypes.postgresql) {
@@ -380,7 +380,7 @@ class QueryBuilder<
         type: TJoinType,
         tableSelection: TJoinTable | ((ctes: MapCtesToSelectionType<TDbType, TCTESpecs>) => TJoinTable),
         cb: (
-            tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinAccumulated, TCTESpecs>>,
+            tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinAccumulated>>,
             ops: DbOperators<TDbType>
         ) => TCbResult
     ): QueryBuilder<TDbType, TFrom, TJoinAccumulated, TCTESpecs, TResult, TJoinParamsResult, TAs> {
@@ -477,7 +477,7 @@ class QueryBuilder<
     where<TCbResult extends ComparisonType<TDbType>>
         (
             cb: (
-                tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs, TCTESpecs>>,
+                tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>,
                 ops: DbOperators<TDbType>
             ) => TCbResult
         ):
@@ -517,7 +517,7 @@ class QueryBuilder<
     groupBy<
         const TCbResult extends GroupBySpecs<TDbType>
     >(cb: (
-        tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs, TCTESpecs>>,
+        tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>,
         ops: DbFunctions<TDbType>
     ) => TCbResult):
         QueryBuilder<
@@ -573,7 +573,7 @@ class QueryBuilder<
         TCbResult extends ComparisonType<TDbType>
     >(
         cb: (
-            tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs, TCTESpecs>>,
+            tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>,
             ops: DbOperators<TDbType>
         ) => TCbResult
     ): QueryBuilder<
@@ -622,7 +622,7 @@ class QueryBuilder<
 
     orderBy<
         const TCbResult extends OrderBySpecs<TDbType>
-    >(cb: (tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs, TCTESpecs>>) => TCbResult):
+    >(cb: (tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>) => TCbResult):
         QueryBuilder<
             TDbType,
             TFrom,
