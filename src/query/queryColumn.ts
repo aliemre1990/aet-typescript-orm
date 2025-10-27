@@ -17,7 +17,7 @@ class QueryColumn<
     TValueType extends DbValueTypes = TColumn extends Column<TDbType, any, any, any, any, infer TValType> ? TValType : never,
     TFinalValueType extends TValueType | null = TColumn extends Column<TDbType, any, any, any, any, any, infer TFinalValType> ? TFinalValType : never
 > implements IComparable<TDbType, undefined, TValueType, TFinalValueType, TDefaultFieldKey, TAsName> {
-    qTableSpecs?: TQTableSpecs;
+    qTableSpecs: TQTableSpecs;
 
     dbType: TDbType;
 
@@ -32,24 +32,19 @@ class QueryColumn<
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 
-    constructor(dbType: TDbType, public column: TColumn, asName?: TAsName, ownerName?: string) {
+    constructor(dbType: TDbType, public column: TColumn, qTableSpecs: TQTableSpecs, asName?: TAsName) {
         this.asName = asName;
-        this.ownerName = ownerName;
         this.dbType = dbType;
+        this.qTableSpecs = qTableSpecs;
         this.defaultFieldKey = column.name as TDefaultFieldKey;
     }
 
     as<TAsName extends string>(val: TAsName) {
-        return new QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName, TDefaultFieldKey>(this.dbType, this.column, val, this.ownerName);
-    }
-
-    ownerName?: string;
-    setOwnerName(val: string): QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName, TDefaultFieldKey, TValueType, TFinalValueType> {
-        return new QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName, TDefaultFieldKey, TValueType, TFinalValueType>(this.dbType, this.column, this.asName, val);
+        return new QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName, TDefaultFieldKey>(this.dbType, this.column, this.qTableSpecs, val);
     }
 
     buildSQL(context?: QueryBuilderContext) {
-        return { query: `${this.ownerName}.${this.asName || this.defaultFieldKey}`, params: [...(context?.params || [])] };
+        return { query: `${this.qTableSpecs.asTableName || this.qTableSpecs.tableName}.${this.asName || this.defaultFieldKey}`, params: [...(context?.params || [])] };
     }
 }
 

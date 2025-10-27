@@ -207,12 +207,7 @@ class QueryBuilder<
             for (const spec of this.fromSpecs) {
                 if (spec instanceof QueryTable) {
                     let ownerName = spec.name;
-                    let selection = columnsSelectionFactory<TDbType>(
-                        spec,
-                        spec.
-                            columnsList.
-                            map((c: QueryColumn<TDbType, any, any, any, any, any, any>) => c.setOwnerName(ownerName))
-                    )
+                    let selection = columnsSelectionFactory<TDbType>(spec, spec.columnsList)
                     columnsSelection[ownerName] = selection;
                 } else if (spec instanceof SubQueryObject) {
                     let ownerName = spec.name;
@@ -234,12 +229,7 @@ class QueryBuilder<
 
                 if (table instanceof QueryTable) {
                     let ownerName = table.name;
-                    let selection = columnsSelectionFactory<TDbType>(
-                        table,
-                        table.
-                            columnsList.
-                            map((c: QueryColumn<TDbType, any, any, any, any, any, any>) => c.setOwnerName(ownerName))
-                    )
+                    let selection = columnsSelectionFactory<TDbType>(table, table.columnsList)
                     columnsSelection[ownerName] = selection;
                 } else if (table instanceof SubQueryObject) {
                     let ownerName = table.name;
@@ -409,12 +399,12 @@ class QueryBuilder<
         let joinTable: TJoinResult;
         if (table instanceof Table) {
             const queryColumns = table.columnsList.map((col: Column<TDbType, any, any, any, any, any, any>) => {
-                return new QueryColumn(table.dbType, col);
+                return new QueryColumn(table.dbType, col, { tableName: res.name });
             }) as QueryColumn<TDbType, any, any, any, any, any, any>[];
 
             let res = new QueryTable(table.dbType, table, queryColumns);
             let ownerName = res.name;
-            let selection = columnsSelectionFactory<TDbType>(res, res.columnsList.map(c => c.setOwnerName(ownerName)));
+            let selection = columnsSelectionFactory<TDbType>(res, res.columnsList);
 
             joinTable = res as TJoinResult;
             columnsSelection = {
@@ -424,7 +414,7 @@ class QueryBuilder<
         } else if (table instanceof QueryTable) {
             joinTable = table as QueryTable<TDbType, any, any, any, any, any> as TJoinResult;
             let ownerName = joinTable.name;
-            let selection = columnsSelectionFactory<TDbType>(table, table.columnsList.map((c: QueryColumn<TDbType, any, any, any, any, any, any>) => c.setOwnerName(ownerName)))
+            let selection = columnsSelectionFactory<TDbType>(table, table.columnsList)
 
             columnsSelection = {
                 ...columnsSelection,
@@ -738,7 +728,7 @@ class QueryBuilder<
         const fromResult = res.map(item => {
             if (item instanceof Table) {
                 const queryColumns = item.columnsList.map((col: Column<TDbType, any, any, any, any, any, any>) => {
-                    return new QueryColumn(item.dbType, col);
+                    return new QueryColumn(item.dbType, col, { tableName: item.name });
                 }) as QueryColumn<TDbType, any, any, any, any, any, any>[];
 
                 return new QueryTable(item.dbType, item, queryColumns);
@@ -982,9 +972,8 @@ function from<
     const fromResult = from.map(item => {
         if (item instanceof Table) {
 
-
             const queryColumns = item.columnsList.map((col: Column<TDbType, any, any, any, any, any, any>) => {
-                return new QueryColumn(item.dbType, col);
+                return new QueryColumn(item.dbType, col, { tableName: item.name });
             }) as QueryColumn<TDbType, any, any, any, any, any, any>[];
 
             return new QueryTable(item.dbType, item, queryColumns);

@@ -62,8 +62,6 @@ type TablesToObject<
             T["table"]["table"]["name"] : T["table"]["asName"] & string :
             T["table"] extends SubQueryObject<TDbType, any, any, infer TAs> ?
             TAs extends undefined ? never : TAs & string :
-            T["table"] extends CTEObject<TDbType, infer TName, any, any, any> ?
-            TName :
             never
             ]: T["table"]
         }
