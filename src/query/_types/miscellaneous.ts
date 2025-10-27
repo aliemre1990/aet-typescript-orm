@@ -44,10 +44,9 @@ type TablesToObject<
             [
             T in TFrom[number]as
             T extends QueryTable<TDbType, any, any, any, any, any> ?
-            T["asName"] extends undefined ?
-            T["table"]["name"] : T["asName"] & string :
-            T extends SubQueryObject<TDbType, any, any, infer TAs> ?
-            TAs extends undefined ? never : TAs & string :
+            T["name"] :
+            T extends SubQueryObject<TDbType, any, any, any> ?
+            T["name"] :
             never
             ]: T
         } : {}
@@ -57,11 +56,11 @@ type TablesToObject<
         TInnerJoinSpecs extends JoinSpecsType<TDbType> ?
         {
             [
-            T in TInnerJoinSpecs[number]as T["table"] extends QueryTable<TDbType, any, any, any, any, any> ?
-            T["table"]["asName"] extends undefined ?
-            T["table"]["table"]["name"] : T["table"]["asName"] & string :
-            T["table"] extends SubQueryObject<TDbType, any, any, infer TAs> ?
-            TAs extends undefined ? never : TAs & string :
+            T in TInnerJoinSpecs[number]as T["table"] extends
+            QueryTable<TDbType, any, any, any, any, any> ?
+            T["table"]["name"] :
+            T["table"] extends SubQueryObject<TDbType, any, any, any> ?
+            T["table"]["name"] :
             never
             ]: T["table"]
         }
