@@ -2,20 +2,11 @@ import type { DbType } from "../db.js";
 import eq from "./comparisons/eq.js";
 import between from "./comparisons/between.js";
 import sqlIn from "./comparisons/in.js";
-import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable } from "./_interfaces/IComparable.js";
+import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
 import type Column from "../table/column.js";
 import type { ColumnType, DbValueTypes } from "../table/column.js";
 
 type QueryColumnsObjectType<TDbType extends DbType> = { [key: string]: QueryColumn<TDbType, any, any, any> }
-
-type InferIdFromQueryColumn<
-    TDbType extends DbType,
-    TColumn extends ColumnType<TDbType>,
-    TQTableSpecs extends { tableName: string, asTableName?: string },
-    TAsName extends string | undefined,
-> =
-    `${TQTableSpecs extends { asTableName?: infer TAsTable } ? TAsTable extends undefined ? "undefined" : TAsTable : never}-${TQTableSpecs extends { tableName: infer TTableName } ? TTableName : never}-${TAsName extends string ? TAsName : "undefined"}-${TColumn extends Column<TDbType, any, infer TColName, any, any, any, any> ? TColName : never}`
-    ;
 
 class QueryColumn<
     TDbType extends DbType,
@@ -57,8 +48,8 @@ class QueryColumn<
         return new QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName, TDefaultFieldKey, TValueType, TFinalValueType>(this.dbType, this.column, this.asName, val);
     }
 
-    setQTableSpecs(val: TQTableSpecs) {
-        this.qTableSpecs = val;
+    buildSQL(context?: QueryBuilderContext) {
+        return { query: `${this.ownerName}.${this.asName || this.defaultFieldKey}`, params: [...(context?.params || [])] };
     }
 }
 

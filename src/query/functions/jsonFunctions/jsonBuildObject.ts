@@ -1,7 +1,7 @@
 import { dbTypes, type DbType, type PgDbType } from "../../../db.js";
 import type { DbValueTypes } from "../../../table/column.js";
 import type { RecordToTupleSafe } from "../../../utility/common.js";
-import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable } from "../../_interfaces/IComparable.js";
+import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable, type QueryBuilderContext } from "../../_interfaces/IComparable.js";
 import between from "../../comparisons/between.js";
 import eq from "../../comparisons/eq.js";
 import sqlIn from "../../comparisons/in.js";
@@ -30,13 +30,11 @@ class JSONBuildObjectFunction<
     defaultFieldKey: TDefaultFieldKey;
 
     as<TAs extends string>(asName: TAs) {
-        return new JSONBuildObjectFunction<TDbType, TObj, TReturnType, TParams, TAs, TDefaultFieldKey>(this.dbType, this.obj, this.isJsonB, asName, this.ownerName);
+        return new JSONBuildObjectFunction<TDbType, TObj, TReturnType, TParams, TAs, TDefaultFieldKey>(this.dbType, this.obj, this.isJsonB, asName);
     }
 
-
-    ownerName?: string;
-    setOwnerName(val: string): JSONBuildObjectFunction<TDbType, TObj, TReturnType, TParams, TAs, TDefaultFieldKey> {
-        return new JSONBuildObjectFunction<TDbType, TObj, TReturnType, TParams, TAs, TDefaultFieldKey>(this.dbType, this.obj, this.isJsonB, this.asName, val);
+    buildSQL(context?: QueryBuilderContext) {
+        return { query: ``, params: [...(context?.params || [])] };
     }
 
     constructor(
@@ -44,13 +42,11 @@ class JSONBuildObjectFunction<
         obj: TObj,
         isJsonB: boolean,
         asName?: TAs,
-        ownerName?: string
     ) {
         this.dbType = dbType;
         this.obj = obj;
         this.isJsonB = isJsonB;
         this.asName = asName;
-        this.ownerName = ownerName;
         this.defaultFieldKey = 'json_build_object' as TDefaultFieldKey;
 
 

@@ -19,7 +19,7 @@ import type { AccumulateColumnParams } from "./_types/paramAccumulationSelect.js
 import type ColumnsSelection from "./columnsSelection.js";
 import { columnsSelectionFactory, ColumnsSelectionQueryTableObjectSymbol } from "./columnsSelection.js";
 import { mysqlDbOperators, mysqlFunctions, pgDbOperators, pgFunctions } from "./dbOperations.js";
-import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable } from "./_interfaces/IComparable.js";
+import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
 import SubQueryObject from "./subQueryObject.js";
 import eq from "./comparisons/eq.js";
 import sqlIn from "./comparisons/in.js";
@@ -106,6 +106,14 @@ const combineTypes = {
 type COMBINE_TYPE = typeof combineTypes[keyof typeof combineTypes]["name"];
 type CombineSpecsType<TDbType extends DbType> = readonly { type: COMBINE_TYPE, qb: QueryBuilder<TDbType, any, any, any, any, any, any> }[];
 
+const queryTypes = {
+    SELECT: 'SELECT',
+    UPDATE: 'UPDATE',
+    INSERT: 'INSERT'
+}
+type QUERY_TYPE = typeof queryTypes[keyof typeof queryTypes];
+
+
 class QueryBuilder<
     TDbType extends DbType,
     TFrom extends FromType<TDbType> | undefined,
@@ -141,12 +149,14 @@ class QueryBuilder<
     havingSpec?: ComparisonType<TDbType>;
     orderBySpecs?: OrderBySpecs<TDbType>;
 
+    queryType?: QUERY_TYPE;
+
     constructor(
         dbType: TDbType,
         fromSpecs: TFrom,
         data?: {
             asName?: TAs,
-            ownerName?: string,
+            queryType?: QUERY_TYPE,
             cteSpecs?: TCTESpecs,
             joinSpecs?: TJoinSpecs,
             resultSelection?: TResult,
@@ -169,7 +179,26 @@ class QueryBuilder<
 
         this.asName = data?.asName;
 
+        this.queryType = data?.queryType;
+
         this.defaultFieldKey = data?.resultSelection !== undefined && data.resultSelection.length > 0 ? data.resultSelection[0].defaultFieldKey : "";
+    }
+
+    as<TAs extends string>(asName: TAs): QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, TParams, TAs> {
+        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, TParams, TAs>(
+            this.dbType,
+            this.fromSpecs,
+            {
+                asName,
+                queryType: this.queryType,
+                cteSpecs: this.cteSpecs,
+                joinSpecs: this.joinSpecs,
+                resultSelection: this.resultSelection,
+                groupedColumns: this.groupedColumns,
+                havingSpec: this.havingSpec,
+                orderBySpecs: this.orderBySpecs,
+                combineSpecs: this.combineSpecs
+            });
     }
 
     #getColumnsSelection() {
@@ -229,40 +258,41 @@ class QueryBuilder<
         return columnsSelection;
     }
 
+    buildSQL(context?: QueryBuilderContext) {
+        let result = '';
 
-    ownerName?: string;
-    setOwnerName(val: string): QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, TParams, TAs> {
-        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, TParams, TAs>(
-            this.dbType,
-            this.fromSpecs,
-            {
-                asName: this.asName,
-                ownerName: val,
-                resultSelection: this.resultSelection,
-                joinSpecs: this.joinSpecs,
-                havingSpec: this.havingSpec,
-                orderBySpecs: this.orderBySpecs,
-                groupedColumns: this.groupedColumns,
-                cteSpecs: this.cteSpecs,
-                combineSpecs: this.combineSpecs
-            });
-    }
+        if (this.queryType === queryTypes.SELECT) {
 
-    as<TAs extends string>(asName: TAs): QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, TParams, TAs> {
-        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, TParams, TAs>(
-            this.dbType,
-            this.fromSpecs,
-            {
-                asName,
-                ownerName: this.ownerName,
-                resultSelection: this.resultSelection,
-                joinSpecs: this.joinSpecs,
-                havingSpec: this.havingSpec,
-                orderBySpecs: this.orderBySpecs,
-                groupedColumns: this.groupedColumns,
-                cteSpecs: this.cteSpecs,
-                combineSpecs: this.combineSpecs
-            });
+            if (this.resultSelection === undefined) {
+                throw Error('Result not specified.');
+            }
+
+            if (this.fromSpecs === undefined) {
+                throw Error('From clause not specified.');
+            }
+
+            let cteQueries: { name: string, query: { query: string, params: string[] } }[] = [];
+            if (this.cteSpecs !== undefined) {
+                cteQueries = this.cteSpecs.map(spec => ({ name: spec.name, query: spec.buildSQL() }));
+            }
+            let cteClause = '';
+            if (cteQueries.length > 0) {
+                cteClause = `WITH ${cteQueries.map(qry => `${qry.name} AS ${qry.query.query}`).join(', ')}`
+            }
+
+            let selectList = this.resultSelection.map(sl => sl.buildSQL()).join(' ,');
+            let fromClause = this.fromSpecs.map(frm => {
+                if (frm instanceof QueryTable || frm instanceof CTEObject) {
+                    return frm.name;
+                } else {
+                    return frm.buildSQL();
+                }
+            }).join(' ,');
+
+            result = `${cteClause} ${selectList} ${fromClause}`
+        }
+
+        return { query: result, params: [...(context?.params || [])] };
     }
 
     select<
@@ -321,13 +351,13 @@ class QueryBuilder<
             this.fromSpecs,
             {
                 asName: this.asName,
-                ownerName: this.ownerName,
-                groupedColumns: this.groupedColumns,
+                queryType: queryTypes.SELECT,
+                cteSpecs: this.cteSpecs,
                 joinSpecs: this.joinSpecs,
                 resultSelection: finalSelectRes as ResultShape<TDbType> as TFinalResult,
+                groupedColumns: this.groupedColumns,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
-                cteSpecs: this.cteSpecs,
                 combineSpecs: this.combineSpecs
             });
     };
@@ -440,12 +470,13 @@ class QueryBuilder<
             this.fromSpecs,
             {
                 asName: this.asName,
-                ownerName: this.ownerName,
+                queryType: this.queryType,
+                cteSpecs: this.cteSpecs,
                 joinSpecs: mergedJoinSpecs as TJoinAccumulated,
                 resultSelection: this.resultSelection,
+                groupedColumns: this.groupedColumns,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
-                cteSpecs: this.cteSpecs,
                 combineSpecs: this.combineSpecs
             })
     }
@@ -479,12 +510,13 @@ class QueryBuilder<
             this.fromSpecs,
             {
                 asName: this.asName,
-                ownerName: this.ownerName,
+                queryType: this.queryType,
+                cteSpecs: this.cteSpecs,
                 joinSpecs: this.joinSpecs,
                 resultSelection: this.resultSelection,
+                groupedColumns: this.groupedColumns,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
-                cteSpecs: this.cteSpecs,
                 combineSpecs: this.combineSpecs
             });
     }
@@ -533,13 +565,13 @@ class QueryBuilder<
             this.fromSpecs,
             {
                 asName: this.asName,
-                ownerName: this.ownerName,
-                groupedColumns: res,
+                queryType: this.queryType,
+                cteSpecs: this.cteSpecs,
                 joinSpecs: this.joinSpecs,
                 resultSelection: this.resultSelection,
+                groupedColumns: res,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
-                cteSpecs: this.cteSpecs,
                 combineSpecs: this.combineSpecs
             });
     }
@@ -584,13 +616,13 @@ class QueryBuilder<
             this.fromSpecs,
             {
                 asName: this.asName,
-                ownerName: this.ownerName,
-                groupedColumns: this.groupedColumns,
+                queryType: this.queryType,
+                cteSpecs: this.cteSpecs,
                 joinSpecs: this.joinSpecs,
                 resultSelection: this.resultSelection,
+                groupedColumns: this.groupedColumns,
                 havingSpec: res,
                 orderBySpecs: this.orderBySpecs,
-                cteSpecs: this.cteSpecs,
                 combineSpecs: this.combineSpecs
             });
     }
@@ -623,13 +655,13 @@ class QueryBuilder<
             this.fromSpecs,
             {
                 asName: this.asName,
-                ownerName: this.ownerName,
-                groupedColumns: this.groupedColumns,
+                queryType: this.queryType,
+                cteSpecs: this.cteSpecs,
                 joinSpecs: this.joinSpecs,
                 resultSelection: this.resultSelection,
+                groupedColumns: this.groupedColumns,
                 havingSpec: this.havingSpec,
                 orderBySpecs: res,
-                cteSpecs: this.cteSpecs,
                 combineSpecs: this.combineSpecs
             });
     }
@@ -724,13 +756,13 @@ class QueryBuilder<
             fromResult,
             {
                 asName: this.asName,
-                ownerName: this.ownerName,
-                groupedColumns: this.groupedColumns,
+                queryType: this.queryType,
+                cteSpecs: this.cteSpecs,
                 joinSpecs: this.joinSpecs,
                 resultSelection: this.resultSelection,
+                groupedColumns: this.groupedColumns,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
-                cteSpecs: this.cteSpecs,
                 combineSpecs: this.combineSpecs
             })
     }
@@ -792,13 +824,13 @@ class QueryBuilder<
             this.fromSpecs,
             {
                 asName: this.asName,
-                ownerName: this.ownerName,
-                groupedColumns: this.groupedColumns,
+                queryType: this.queryType,
+                cteSpecs: newCteSpecs as CTESpecsType<TDbType> as TFinalCTESpec,
                 joinSpecs: this.joinSpecs,
                 resultSelection: this.resultSelection,
+                groupedColumns: this.groupedColumns,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
-                cteSpecs: newCteSpecs as CTESpecsType<TDbType> as TFinalCTESpec,
                 combineSpecs: this.combineSpecs
             });
     }
@@ -854,13 +886,13 @@ class QueryBuilder<
             this.fromSpecs,
             {
                 asName: this.asName,
-                ownerName: this.ownerName,
-                groupedColumns: this.groupedColumns,
+                queryType: this.queryType,
+                cteSpecs: this.cteSpecs,
                 joinSpecs: this.joinSpecs,
                 resultSelection: this.resultSelection,
+                groupedColumns: this.groupedColumns,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
-                cteSpecs: this.cteSpecs,
                 combineSpecs: newCombineSpecs
             });
     }

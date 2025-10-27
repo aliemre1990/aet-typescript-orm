@@ -6,6 +6,8 @@ import type eq from "../comparisons/eq.js";
 import type sqlIn from "../comparisons/in.js";
 import type { IDbType } from "./IDbType.js";
 
+type QueryBuilderContext = { params: string[] }
+
 const IComparableValueDummySymbol = Symbol();
 const IComparableFinalValueDummySymbol = Symbol();
 
@@ -26,19 +28,18 @@ interface IComparable<
     asName?: TAs;
     defaultFieldKey: TDefaultFieldKey;
 
-    ownerName?: string;
-    setOwnerName(val: string): IComparable<TDbType, TParams, TValueType, TFinalValueType, TDefaultFieldKey, TAs>;
-
-
     eq: typeof eq;
     sqlIn: typeof sqlIn;
     between: typeof between;
 
     as<TAs extends string>(asName: TAs): IComparable<TDbType, TParams, TValueType, TFinalValueType, TDefaultFieldKey, TAs>
+
+    buildSQL(context?: QueryBuilderContext): { query: string, params: string[] };
 }
 
 export type {
-    IComparable
+    IComparable,
+    QueryBuilderContext
 }
 
 export {

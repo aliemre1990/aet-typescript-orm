@@ -1,6 +1,6 @@
 import { dbTypes, type DbType } from "../db.js";
 import type { DbValueTypes } from "../table/column.js";
-import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable } from "./_interfaces/IComparable.js";
+import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
 import between from "./comparisons/between.js";
 import eq from "./comparisons/eq.js";
 import sqlIn from "./comparisons/in.js";
@@ -11,8 +11,6 @@ class QueryParam<
     TValueType extends DbValueTypes | null,
     TAs extends string | undefined = undefined,
     TDefaultFieldKey extends string = `$${TName}`
-
-
 >
     implements IComparable<TDbType, [QueryParam<TDbType, TName, TValueType>], NonNullable<TValueType>, TValueType, TDefaultFieldKey, TAs> {
 
@@ -45,6 +43,28 @@ class QueryParam<
     ownerName?: string;
     setOwnerName(val: string): QueryParam<TDbType, TName, TValueType, TAs, TDefaultFieldKey> {
         return new QueryParam<TDbType, TName, TValueType, TAs, TDefaultFieldKey>(this.dbType, this.name, this.asName, val);
+    }
+
+    buildSQL(context?: QueryBuilderContext) {
+
+        let paramIndex;
+        if (context?.params === undefined) {
+            paramIndex = 0;
+            if (context === undefined) {
+                context = { params: [] };
+            } else {
+                context.params = [];
+            }
+            context.params.push(this.name)
+        } else {
+            paramIndex = context.params.indexOf(this.name);
+            if (paramIndex < 0) {
+                paramIndex = 0;
+            }
+            context.params.push(this.name);
+        }
+
+        return { query: `$${paramIndex + 1}`, params: context.params };
     }
 
     type<TValueType extends DbValueTypes | null>() {

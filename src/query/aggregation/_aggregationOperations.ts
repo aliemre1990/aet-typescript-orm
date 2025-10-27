@@ -1,6 +1,6 @@
 import type { DbType } from "../../db.js";
 import type { DbValueTypes } from "../../table/column.js";
-import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable } from "../_interfaces/IComparable.js";
+import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable, type QueryBuilderContext } from "../_interfaces/IComparable.js";
 import between from "../comparisons/between.js";
 import eq from "../comparisons/eq.js";
 import sqlIn from "../comparisons/in.js";
@@ -70,12 +70,11 @@ class BasicColumnAggregationOperation<
     between: typeof between = between;
 
     as<TAs extends string>(asName: TAs) {
-        return new BasicColumnAggregationOperation<TDbType, TAggregationOperation, TArgs, TReturnType, TParams, TAs, TDefaultFieldKey>(this.dbType, this.args, this.operation, asName, this.ownerName);
+        return new BasicColumnAggregationOperation<TDbType, TAggregationOperation, TArgs, TReturnType, TParams, TAs, TDefaultFieldKey>(this.dbType, this.args, this.operation, asName);
     }
 
-    ownerName?: string;
-    setOwnerName(val: string): BasicColumnAggregationOperation<TDbType, TAggregationOperation, TArgs, TReturnType, TParams, TAs, TDefaultFieldKey> {
-        return new BasicColumnAggregationOperation<TDbType, TAggregationOperation, TArgs, TReturnType, TParams, TAs, TDefaultFieldKey>(this.dbType, this.args, this.operation, this.asName, val);
+    buildSQL(context?: QueryBuilderContext) {
+        return { query: ``, params: [...(context?.params || [])] };
     }
 
     constructor(
@@ -83,13 +82,11 @@ class BasicColumnAggregationOperation<
         args: TArgs,
         operation: TAggregationOperation,
         asName?: TAs,
-        ownerName?: string
     ) {
         this.dbType = dbType;
         this.args = args;
         this.operation = operation;
         this.asName = asName;
-        this.ownerName = ownerName;
         this.defaultFieldKey = `${operation.name.toLowerCase()}` as TDefaultFieldKey;
 
         let tmpParams: QueryParam<TDbType, any, any, any, any>[] = [];

@@ -1,6 +1,6 @@
 import type { DbType } from "../db.js";
 import type { DbValueTypes } from "../table/column.js";
-import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable } from "./_interfaces/IComparable.js";
+import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
 import type { IName } from "./_interfaces/IName.js";
 import type { ResultShape } from "./_types/result.js";
 import between from "./comparisons/between.js";
@@ -51,6 +51,9 @@ class SubQueryEntry<
         return new SubQueryEntry<TDbType, TComparable, TValueType, TFinalValueType, TDefaultFieldKey, TAsName>(this.dbType, this.comparable, this.asName, val);
     }
 
+    buildSQL(context?: QueryBuilderContext) {
+        return { query: `${this.ownerName}.${this.asName || this.defaultFieldKey}`, params: [...(context?.params || [])] };
+    }
 
     constructor(
         dbType: TDbType,
@@ -77,6 +80,16 @@ class SubQueryObject<
     qb: TQb;
     name: TName;
     subQueryEntries: TEntries;
+
+    buildSQL(context?: QueryBuilderContext) {
+        if (context === undefined) {
+            context = { params: [] };
+        }
+
+        let query = this.qb.buildSQL(context);
+        return { query: query.query, params: [...(query.params)] };
+    }
+
 
     constructor(
         dbType: TDbType,

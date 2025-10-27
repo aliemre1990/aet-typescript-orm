@@ -1,6 +1,6 @@
 import type { DbType } from "../../db.js";
 import type { DbValueTypes } from "../../table/column.js";
-import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable } from "../_interfaces/IComparable.js";
+import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable, type QueryBuilderContext } from "../_interfaces/IComparable.js";
 import between from "../comparisons/between.js";
 import eq from "../comparisons/eq.js";
 import sqlIn from "../comparisons/in.js";
@@ -47,27 +47,23 @@ class ColumnSQLFunction<
     between: typeof between = between;
 
     as<TAs extends string>(asName: TAs) {
-        return new ColumnSQLFunction<TDbType, TSQLFunction, TArgs, TReturnType, TParams, TAs, TDefaultFieldKey>(this.dbType, this.args, this.sqlFunction, asName, this.ownerName);
+        return new ColumnSQLFunction<TDbType, TSQLFunction, TArgs, TReturnType, TParams, TAs, TDefaultFieldKey>(this.dbType, this.args, this.sqlFunction, asName);
     }
 
-
-    ownerName?: string;
-    setOwnerName(val: string): ColumnSQLFunction<TDbType, TSQLFunction, TArgs, TReturnType, TParams, TAs, TDefaultFieldKey> {
-        return new ColumnSQLFunction<TDbType, TSQLFunction, TArgs, TReturnType, TParams, TAs, TDefaultFieldKey>(this.dbType, this.args, this.sqlFunction, this.asName, val);
+    buildSQL(context?: QueryBuilderContext) {
+        return { query: ``, params: [...(context?.params || [])] };
     }
 
     constructor(
         dbType: TDbType,
         args: TArgs,
         sqlFunction: TSQLFunction,
-        asName?: TAs,
-        ownerName?: string
+        asName?: TAs
     ) {
         this.dbType = dbType;
         this.args = args;
         this.sqlFunction = sqlFunction;
         this.asName = asName;
-        this.ownerName = ownerName;
         this.defaultFieldKey = `${sqlFunction.name.toLowerCase()}` as TDefaultFieldKey;
 
         let tmpParams: QueryParam<TDbType, any, any, any, any>[] = [];

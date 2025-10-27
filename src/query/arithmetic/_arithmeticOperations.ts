@@ -1,6 +1,6 @@
 import { dbTypes, type DbType, type MySQLDbType, type PgDbType } from "../../db.js";
 import type { DbValueTypes } from "../../table/column.js";
-import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable } from "../_interfaces/IComparable.js";
+import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable, type QueryBuilderContext } from "../_interfaces/IComparable.js";
 import between from "../comparisons/between.js";
 import eq from "../comparisons/eq.js";
 import sqlIn from "../comparisons/in.js";
@@ -69,27 +69,23 @@ class SQLArithmeticOperation<
     between: typeof between = between;
 
     as<TAs extends string>(asName: TAs) {
-        return new SQLArithmeticOperation<TDbType, TArithmeticOperation, TArgs, TReturnType, TAs, TDefaultFieldKey, TParams>(this.dbType, this.args, this.operation, asName, this.ownerName);
+        return new SQLArithmeticOperation<TDbType, TArithmeticOperation, TArgs, TReturnType, TAs, TDefaultFieldKey, TParams>(this.dbType, this.args, this.operation, asName);
     }
 
-    ownerName?: string;
-    setOwnerName(val: string): SQLArithmeticOperation<TDbType, TArithmeticOperation, TArgs, TReturnType, TAs, TDefaultFieldKey, TParams> {
-        return new SQLArithmeticOperation<TDbType, TArithmeticOperation, TArgs, TReturnType, TAs, TDefaultFieldKey, TParams>(this.dbType, this.args, this.operation, this.asName, val);
+    buildSQL(context?: QueryBuilderContext) {
+        return { query: ``, params: [...(context?.params || [])] };
     }
-
 
     constructor(
         dbType: TDbType,
         args: TArgs,
         operation: TArithmeticOperation,
-        asName?: TAs,
-        ownerName?: string
+        asName?: TAs
     ) {
         this.dbType = dbType;
         this.args = args;
         this.operation = operation;
         this.asName = asName;
-        this.ownerName = ownerName;
         this.defaultFieldKey = `${operation.name}()` as TDefaultFieldKey;
     }
 }
