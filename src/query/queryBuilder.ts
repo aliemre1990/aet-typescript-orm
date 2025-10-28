@@ -28,7 +28,7 @@ import CTEObject from "./cteObject.js";
 import { mapCTESpecsToSelection } from "./utility.js";
 import type { OverrideDuplicateCTESpec } from "./_types/cte.js";
 
-type FromItemType<TDbType extends DbType> = QueryTable<TDbType, any, any, any, any, any> | SubQueryObject<TDbType, any, any, string> | CTEObject<TDbType, any, any, any, any>;
+type FromItemType<TDbType extends DbType> = QueryTable<TDbType, any, any, any, any, any> | SubQueryObject<TDbType, any, any, string> | CTEObject<TDbType, any, any, any, any, any>;
 type FromType<TDbType extends DbType> = readonly FromItemType<TDbType>[];
 
 const orderTypes = {
@@ -64,7 +64,7 @@ const cteTypes = {
     }
 } as const;
 type CTEType = (typeof cteTypes)[keyof typeof cteTypes];
-type CTESpecsType<TDbType extends DbType> = readonly CTEObject<TDbType, any, any, any, any>[];
+type CTESpecsType<TDbType extends DbType> = readonly CTEObject<TDbType, any, any, any, any, any>[];
 
 type GetFirstTypeFromResult<TDbType extends DbType, TResult extends ResultShape<TDbType> | undefined> =
     TResult extends undefined ? never :
@@ -358,7 +358,7 @@ class QueryBuilder<
 
     join<
         TJoinType extends JoinType,
-        TJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, string> | CTEObject<TDbType, any, any, any, any>,
+        TJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, string> | CTEObject<TDbType, any, any, any, any, any>,
         TCbResult extends ComparisonType<TDbType>,
         TJoinResult extends JoinSpecsTableType<TDbType> =
         TJoinTable extends Table<TDbType, infer TJoinCols, infer TJoinTableName> ?
@@ -370,7 +370,7 @@ class QueryBuilder<
             MapToQueryColumns<TDbType, TDbType, TJoinCols>
         > :
         TJoinTable extends QueryBuilder<TDbType, any, any, any, any, any, string> ? MapToSubQueryObject<TDbType, TJoinTable> :
-        TJoinTable extends CTEObject<TDbType, any, any, any, any> ? TJoinTable :
+        TJoinTable extends CTEObject<TDbType, any, any, any, any, any> ? TJoinTable :
         TJoinTable,
         TJoinParams extends readonly QueryParam<TDbType, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, [TJoinResult], AccumulateComparisonParams<TParams, TCbResult>>,
         TJoinParamsResult extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = TJoinParams["length"] extends 0 ? undefined : TJoinParams,
@@ -439,7 +439,7 @@ class QueryBuilder<
             let ownerName = table.name;
             let selection = columnsSelectionFactory<TDbType>(table, table.cteObjectEntries);
 
-            joinTable = table as CTEObject<TDbType, any, any, any, any> as TJoinResult;
+            joinTable = table as CTEObject<TDbType, any, any, any, any, any> as TJoinResult;
 
             columnsSelection = {
                 ...columnsSelection,
@@ -664,7 +664,7 @@ class QueryBuilder<
             Table<TDbType, any, any> |
             QueryTable<TDbType, any, any, any, any, any> |
             QueryBuilder<TDbType, any, any, any, any, any, string> |
-            CTEObject<TDbType, any, any, any, any>
+            CTEObject<TDbType, any, any, any, any, any>
         )[],
         TFromRes extends FromType<TDbType> = ConvertElementsToSubQueryCompliant<TDbType, TSelected>,
         AccumulatedParams extends readonly QueryParam<TDbType, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, TFromRes, TParams>,
@@ -687,7 +687,7 @@ class QueryBuilder<
             Table<TDbType, any, any> |
             QueryTable<TDbType, any, any, any, any, any> |
             QueryBuilder<TDbType, any, any, any, any, any, string> |
-            CTEObject<TDbType, any, any, any, any>
+            CTEObject<TDbType, any, any, any, any, any>
         )[],
         TFromRes extends FromType<TDbType> = ConvertElementsToSubQueryCompliant<TDbType, TSelected>,
         AccumulatedParams extends readonly QueryParam<TDbType, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, TFromRes, TParams>,
@@ -713,7 +713,7 @@ class QueryBuilder<
             Table<TDbType, any, any> |
             QueryTable<TDbType, any, any, any, any, any> |
             QueryBuilder<TDbType, any, any, any, any, any, string> |
-            CTEObject<TDbType, any, any, any, any>
+            CTEObject<TDbType, any, any, any, any, any>
         )[];
 
         if (typeof args[0] === "function") {
@@ -763,7 +763,7 @@ class QueryBuilder<
     withAs<
         TCTEName extends string,
         TQbResult extends QueryBuilder<TDbType, any, any, any, any, any, any>,
-        TCTEObject extends CTEObject<TDbType, any, any, any, any> = CTEObject<TDbType, TCTEName, typeof cteTypes.NON_RECURSIVE, TQbResult>,
+        TCTEObject extends CTEObject<TDbType, any, any, any, any, any> = CTEObject<TDbType, TCTEName, typeof cteTypes.NON_RECURSIVE, TQbResult>,
         TFinalCTESpec extends CTESpecsType<TDbType> = OverrideDuplicateCTESpec<TDbType, TCTESpecs, TCTEObject>,
         TCTEParams extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = TQbResult extends QueryBuilder<TDbType, any, any, any, any, infer TParams, any> ? TParams : never,
         TParamsAccumulated extends readonly QueryParam<TDbType, any, any, any, any>[] =

@@ -78,10 +78,16 @@ class CTEObject<
     TCTEType extends CTEType,
     TQb extends QueryBuilder<TDbType, any, any, any, ResultShape<TDbType>, any, any>,
     TEntries extends readonly CTEObjectEntry<TDbType, any, any, any, any, any>[] = TQb extends QueryBuilder<TDbType, any, any, any, infer TRes extends ResultShape<TDbType>, any, string> ? MapResultToCTEObjectEntry<TDbType, TRes> : never,
-> implements IName<TCTEName> {
+    TAs extends string | undefined = undefined
+> implements IName<TAs extends undefined ? TCTEName : TAs> {
     dbType: TDbType;
+
     qb: TQb;
-    name: TCTEName;
+
+    asName?: TAs;
+    name: TAs extends undefined ? TCTEName : TAs;
+    cteName: TCTEName;
+
     cteType: TCTEType;
     cteObjectEntries: TEntries;
 
@@ -97,13 +103,16 @@ class CTEObject<
     constructor(
         dbType: TDbType,
         qb: TQb,
-        name: TCTEName,
+        cteName: TCTEName,
         cteType: TCTEType,
-        entries?: TEntries
+        entries?: TEntries,
+        asName?: TAs
     ) {
         this.dbType = dbType;
         this.qb = qb;
-        this.name = name;
+        this.cteName = cteName;
+        this.name = (asName || cteName) as TAs extends undefined ? TCTEName : TAs;
+        this.asName = asName;
         this.cteType = cteType;
 
         if (entries !== undefined) {
@@ -112,12 +121,19 @@ class CTEObject<
             let tmpEntries: readonly CTEObjectEntry<TDbType, any, any, any, any, any>[] = [];
             if (qb.resultSelection !== undefined) {
                 qb.resultSelection.forEach(res => {
-                    tmpEntries = [...tmpEntries, (new CTEObjectEntry(dbType, res, undefined, name))];
+                    tmpEntries = [...tmpEntries, (new CTEObjectEntry(dbType, res, undefined, this.cteName))];
                 })
             }
 
             this.cteObjectEntries = tmpEntries as TEntries;
         }
+    }
+
+    as<TAs extends string>(val: TAs) {
+        const newEntries = this.cteObjectEntries
+            .map(ent => new CTEObjectEntry(ent.dbType, ent.comparable, ent.asName, val, ent.defaultFieldKey)) as readonly CTEObjectEntry<TDbType, any, any, any, any, any>[] as TEntries;
+
+        return new CTEObject<TDbType, TCTEName, TCTEType, TQb, TEntries, TAs>(this.dbType, this.qb, this.cteName, this.cteType, newEntries, val);
     }
 }
 

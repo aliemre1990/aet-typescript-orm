@@ -20,7 +20,7 @@ type MapToCTEObjectForRecursive<
     MapToCTEObject<TDbType, TCTEName, TCTEType, T> :
     T extends QueryBuilder<TDbType, any, any, any, infer TRes, any, any> ?
     TRes extends readonly IComparable<TDbType, any, any, any, any, any>[] ?
-    CTEObject<TDbType, TCTEName, TCTEType, T, MapToColumnMatch<TDbType, TRes, TColumnNames>> :
+    CTEObject<TDbType, TCTEName, TCTEType, T, MapToColumnMatch<TDbType, TRes, TColumnNames>, undefined> :
     never :
     never :
     never;
@@ -49,7 +49,7 @@ type MapToColumnMatch<
 
 type MapToCTEObject<TDbType extends DbType, TCTEName extends string, TCTEType extends CTEType, T> =
     T extends QueryBuilder<TDbType, any, any, any, infer TRes extends ResultShape<TDbType>, any, any> ?
-    CTEObject<TDbType, TCTEName, TCTEType, T, MapResultToCTEObjectEntry<TDbType, TRes>> : never
+    CTEObject<TDbType, TCTEName, TCTEType, T, MapResultToCTEObjectEntry<TDbType, TRes>, undefined> : never
     ;
 
 

@@ -6,7 +6,7 @@ import type { CTESpecsType, JoinSpecsItemType, JoinSpecsTableType, JoinSpecsType
 type OverrideDuplicateCTESpec<
     TDbType extends DbType,
     TCTESpecs extends CTESpecsType<TDbType> | undefined,
-    TNew extends CTEObject<TDbType, any, any, any, any>
+    TNew extends CTEObject<TDbType, any, any, any, any, any>
 > = TCTESpecs extends undefined ? [TNew] :
     TCTESpecs extends CTESpecsType<TDbType> ? [...ExtractDuplicateCTESpecRecursively<TDbType, TCTESpecs, TNew>, TNew] :
     never;
@@ -14,7 +14,7 @@ type OverrideDuplicateCTESpec<
 type ExtractDuplicateCTESpecRecursively<
     TDbType extends DbType,
     TCTESpecs extends CTESpecsType<TDbType>,
-    TNew extends CTEObject<TDbType, any, any, any, any>
+    TNew extends CTEObject<TDbType, any, any, any, any, any>
 > = TCTESpecs extends [...infer Rest, infer Last] ?
     Last extends IName<infer TCurName> ?
     TNew extends IName<infer TCheckName> ?

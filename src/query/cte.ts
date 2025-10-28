@@ -37,7 +37,7 @@ function withRecursiveAs<
     TAnchorQb extends QueryBuilder<TDbType, any, any, any, ResultShape<TDbType> | undefined, any, any>,
     TRecursivePartResult extends QueryBuilder<TDbType, any, any, any, any, any, any>,
     TDbType extends DbType = TAnchorQb extends IDbType<infer TDbTypeInner> ? TDbTypeInner : never,
-    TFinalCTE extends CTEObject<TDbType, any, any, any, any> = MapToCTEObjectForRecursive<TDbType, TCTEName, typeof cteTypes.RECURSIVE, TColumnNames, TAnchorQb>
+    TFinalCTE extends CTEObject<TDbType, any, any, any, any, any> = MapToCTEObjectForRecursive<TDbType, TCTEName, typeof cteTypes.RECURSIVE, TColumnNames, TAnchorQb>
 >(
     cteName: TCTEName,
     columnNames: TColumnNames,

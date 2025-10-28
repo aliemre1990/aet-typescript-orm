@@ -31,7 +31,7 @@ type ConvertElementsToSubQueryCompliant<TDbType extends DbType, TFrom> =
     [First, ...ConvertElementsToSubQueryCompliant<TDbType, Rest>] :
     First extends QueryBuilder<TDbType, any, any, any, any, any, any> ?
     [MapToSubQueryObject<TDbType, First>, ...ConvertElementsToSubQueryCompliant<TDbType, Rest>] :
-    First extends CTEObject<TDbType, any, any, any, any> ?
+    First extends CTEObject<TDbType, any, any, any, any, any> ?
     [First, ...ConvertElementsToSubQueryCompliant<TDbType, Rest>] :
     ConvertElementsToSubQueryCompliant<TDbType, Rest> :
     [];

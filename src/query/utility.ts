@@ -7,7 +7,7 @@ function mapCTESpecsToSelection<TDbType extends DbType, TCTESpecs extends CTESpe
     const res = cteSpecs.reduce((prev, curr) => {
         prev[curr.name] = curr;
         return prev;
-    }, {} as { [key: string]: CTEObject<any, any, any, any, any> }) as MapCtesToSelectionType<TDbType, TCTESpecs>;
+    }, {} as { [key: string]: CTEObject<any, any, any, any, any, any> }) as MapCtesToSelectionType<TDbType, TCTESpecs>;
 
     return res;
 }
