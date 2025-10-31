@@ -1,6 +1,7 @@
+import type ColumnsSelection from "../../query/columnsSelection.js";
 import { withAs, withRecursiveAs } from "../../query/cte.js";
 import type CTEObject from "../../query/cteObject.js";
-import QueryBuilder from "../../query/queryBuilder.js";
+import QueryBuilder, { cteTypes } from "../../query/queryBuilder.js";
 import { customersTable, employeesTable, ordersTable } from "./_tables.js";
 
 const res = withAs("customerCte", customersTable.select((tables) => [tables.customers.id]))
@@ -15,14 +16,19 @@ const chain = withAs(
     employeesTable
         .select((tables, { round, param }) => [round(tables.employees.id, param("roundParam"))])
 ).withAs(
-    "employeesCTE",
-    () =>
-        employeesTable
-            .select((tables, { round, param }) => [round(tables.employees.id, param("roundParam2"))])
+    "customersCTE",
+    customersTable
+        .select((tables, { round, param }) => [round(tables.customers.id, param("roundParam2"))])
 ).from(customersTable, employeesTable)
     .join("LEFT", (ctes) => ctes.employeesCTE, (tbls) => tbls.customers.id.eq(tbls.employeesCTE.round))
+    .join("LEFT", (ctes) => ctes.customersCTE, (tbls) => tbls.customers.id.eq(tbls.customersCTE.round))
     .select((tbls) => [tbls.customers, tbls.employeesCTE, tbls.employees])
     .exec;
+
+// type tp1 = typeof chain extends QueryBuilder<any, any, any, infer cte, any, any, any> ? cte : never;
+// type cst = tp1[1];
+// type entries = cst["cteObjectEntries"];
+
 
 const res2 = employeesTable.select((tbls) => [tbls.employees]).exec;
 

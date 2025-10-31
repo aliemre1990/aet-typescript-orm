@@ -235,3 +235,10 @@ type multiLevelSelectWithJoinsExpectedResult = {
 }[];
 type multiLevelSelectWithJoinsResult = ReturnType<typeof MultiLevelSelectWithJoins>
 type MultiLevelSelectWithJoinsTest = AssertTrue<AssertEqual<multiLevelSelectWithJoinsExpectedResult, multiLevelSelectWithJoinsResult>>
+
+
+const autoSelectQuery = customersTable.select().exec;
+
+const autoSelectQueryTable = customersTable.as("cst").select().exec;
+
+const autoSelectWithJoins = customersTable.join("LEFT", employeesTable, (tbls) => tbls.customers.id.eq(tbls.employees.id)).select().exec;

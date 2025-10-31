@@ -2,7 +2,11 @@ import type { DbType } from "../../db.js";
 import type { DeepPrettify } from "../../utility/common.js";
 import type { IComparable } from "../_interfaces/IComparable.js";
 import type ColumnsSelection from "../columnsSelection.js";
+import type CTEObject from "../cteObject.js";
 import type QueryParam from "../param.js";
+import type { ComparisonType, FromType, JoinSpecsType, JoinType } from "../queryBuilder.js";
+import type QueryTable from "../queryTable.js";
+import type SubQueryObject from "../subQueryObject.js";
 
 type ResultShapeItem<TDbType extends DbType> = IComparable<TDbType, any, any, any, any, any>;
 type ResultShape<TDbType extends DbType> = readonly ResultShapeItem<TDbType>[];
@@ -10,7 +14,7 @@ type ResultShape<TDbType extends DbType> = readonly ResultShapeItem<TDbType>[];
 type ColumnsToResultMap<TDbType extends DbType, T extends ResultShape<TDbType> | undefined> =
     T extends undefined ? undefined :
     T extends ResultShape<TDbType> ?
-    DeepPrettify<ColumnsToResultMapRecursively<TDbType,T>>[] :
+    DeepPrettify<ColumnsToResultMapRecursively<TDbType, T>>[] :
     never;
 
 type ColumnsToResultMapRecursively<
@@ -58,6 +62,63 @@ type SelectToResultMapRecursively<
     []
     ;
 
+/**
+ * Convert empty select callback to columns list
+ */
+type SelectToAllColumnsMapRecursively<
+    TDbType extends DbType,
+    TFrom extends FromType<TDbType> | undefined,
+    TJoin extends JoinSpecsType<TDbType> | undefined
+> =
+    [
+        ...(TFrom extends FromType<TDbType> ? FromToAllColumnsMapRecursively<TDbType, TFrom> : []),
+        ...(TJoin extends JoinSpecsType<TDbType> ? JoinToAllColumnsMapRecursively<TDbType, TJoin> : [])
+    ]
+    ;
+
+type JoinToAllColumnsMapRecursively<
+    TDbType extends DbType,
+    TJoin extends JoinSpecsType<TDbType>
+> =
+    TJoin extends readonly [infer FFirst, ...infer FRest] ?
+    FFirst extends { joinType: JoinType, table: infer TTable, comparison: ComparisonType<TDbType> } ?
+
+    TTable extends QueryTable<TDbType, any, any, any, infer TQCols, any> ?
+    FRest extends readonly [any, ...any[]] ?
+    [...TQCols, FromToAllColumnsMapRecursively<TDbType, FRest>] :
+    [...TQCols] :
+    TTable extends SubQueryObject<TDbType, any, infer TEntries, any> ?
+    FRest extends readonly [any, ...any[]] ?
+    [...TEntries, FromToAllColumnsMapRecursively<TDbType, FRest>] :
+    [...TEntries] :
+    TTable extends CTEObject<TDbType, any, any, any, any, any> ?
+    FRest extends readonly [any, ...any[]] ?
+    [...TTable["cteObjectEntries"], FromToAllColumnsMapRecursively<TDbType, FRest>] :
+    [...TTable["cteObjectEntries"]] :
+    never :
+    never :
+    [];
+type FromToAllColumnsMapRecursively<
+    TDbType extends DbType,
+    TFrom extends FromType<TDbType>
+> =
+    TFrom extends readonly [infer FFirst, ...infer FRest] ?
+    FFirst extends QueryTable<TDbType, any, any, any, infer TQCols, any> ?
+    FRest extends readonly [any, ...any[]] ?
+    [...TQCols, FromToAllColumnsMapRecursively<TDbType, FRest>] :
+    [...TQCols] :
+    FFirst extends SubQueryObject<TDbType, any, infer TEntries, any> ?
+    FRest extends readonly [any, ...any[]] ?
+    [...TEntries, FromToAllColumnsMapRecursively<TDbType, FRest>] :
+    [...TEntries] :
+    FFirst extends CTEObject<TDbType, any, any, any, any, any> ?
+    FRest extends readonly [any, ...any[]] ?
+    [...FFirst["cteObjectEntries"], FromToAllColumnsMapRecursively<TDbType, FRest>] :
+    [...FFirst["cteObjectEntries"]] :
+    never :
+    []
+    ;
+
 // Convert array of QueryParam to object type
 type QueryParamsToObject<T extends readonly QueryParam<any, any, any, any, any>[] | undefined> =
     T extends undefined ? undefined :
@@ -75,5 +136,6 @@ export type {
     ResultShapeItem,
     ColumnsToResultMap,
     QueryParamsToObject,
-    SelectToResultMapRecursively
+    SelectToResultMapRecursively,
+    SelectToAllColumnsMapRecursively
 }

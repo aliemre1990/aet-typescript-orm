@@ -10,7 +10,7 @@ import type { DbFunctions, DbOperators } from "./_types/ops.js";
 import type { AccumulateComparisonParams } from "./_types/paramAccumulationComparison.js";
 import type { AccumulateOrderByParams } from "./_types/paramAccumulationOrderBy.js";
 import type { AccumulateColumnParams } from "./_types/paramAccumulationSelect.js";
-import type { ResultShape, SelectToResultMapRecursively } from "./_types/result.js";
+import type { ResultShape, SelectToAllColumnsMapRecursively, SelectToResultMapRecursively } from "./_types/result.js";
 import type { AccumulateSubQueryParams, MapToSubQueryObject } from "./_types/subQueryUtility.js";
 import type ColumnsSelection from "./columnsSelection.js";
 import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
@@ -72,10 +72,18 @@ class QueryTable<
         return { query: this.name, params: [...(context?.params || [])] };
     }
 
+    select(): QueryBuilder<
+        TDbType,
+        [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>],
+        undefined,
+        undefined,
+        SelectToAllColumnsMapRecursively<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined>,
+        undefined,
+        undefined
+    >
     select<
         const TCbResult extends readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, any>)[],
         TFinalResult extends ResultShape<TDbType> = SelectToResultMapRecursively<TDbType, TCbResult>
-
     >(
         cb: (
             tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
@@ -88,9 +96,31 @@ class QueryTable<
         undefined,
         TFinalResult,
         AccumulateColumnParams<undefined, TFinalResult>
+    >
+    select<
+        const TCbResult extends readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, any>)[],
+        TFinalResult extends ResultShape<TDbType> = SelectToResultMapRecursively<TDbType, TCbResult>
+    >(
+        cb?: (
+            tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>,
+            ops: DbFunctions<TDbType>
+        ) => TCbResult
+    ): QueryBuilder<
+        TDbType,
+        [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>],
+        undefined,
+        undefined,
+        TCbResult["length"] extends 0 ? SelectToAllColumnsMapRecursively<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined> : TFinalResult,
+        TCbResult["length"] extends 0 ? undefined : AccumulateColumnParams<undefined, TFinalResult>
     > {
-
-        return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined, undefined>(this.dbType, [this]).select(cb);
+        return new QueryBuilder<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined, undefined>(this.dbType, [this]).select(cb) as QueryBuilder<
+            TDbType,
+            [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>],
+            undefined,
+            undefined,
+            TCbResult["length"] extends 0 ? SelectToAllColumnsMapRecursively<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined> : TFinalResult,
+            TCbResult["length"] extends 0 ? undefined : AccumulateColumnParams<undefined, TFinalResult>
+        >;
     }
 
     join<
@@ -111,7 +141,7 @@ class QueryTable<
         TJoinTable,
         TJoinParams extends QueryParam<TDbType, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, [TJoinResult], AccumulateComparisonParams<[], TCbResult>>,
         TJoinParamsResult extends QueryParam<TDbType, any, any, any, any>[] | undefined = TJoinParams["length"] extends 0 ? undefined : TJoinParams,
-        const TJoinAccumulated extends JoinSpecsType<TDbType> = [{ joinType: TJoinType, table: TJoinResult }]
+        const TJoinAccumulated extends JoinSpecsType<TDbType> = [{ joinType: TJoinType, table: TJoinResult, comparison: ComparisonType<TDbType> }]
     >(
         type: TJoinType,
         tableSelection: TJoinTable | (() => TJoinTable),
