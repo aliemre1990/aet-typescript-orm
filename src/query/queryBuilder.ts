@@ -857,10 +857,10 @@ class QueryBuilder<
 
     withAs<
         TCTEName extends string,
-        TQbResult extends QueryBuilder<TDbType, any, any, any, any, any, any>,
-        TCTEObject extends CTEObject<TDbType, any, any, any, any, any> = MapToCTEObject<TDbType, TCTEName, typeof cteTypes.NON_RECURSIVE, TQbResult>,
+        TQb extends QueryBuilder<TDbType, any, any, any, any, any, any>,
+        TCTEObject extends CTEObject<TDbType, any, any, any, any, any> = MapToCTEObject<TDbType, TCTEName, typeof cteTypes.NON_RECURSIVE, TQb>,
         TFinalCTESpec extends CTESpecsType<TDbType> = readonly [...(TCTESpecs extends CTESpecsType<TDbType> ? TCTESpecs : []), TCTEObject],
-        TCTEParams extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = TQbResult extends QueryBuilder<TDbType, any, any, any, any, infer TParams, any> ? TParams : never,
+        TCTEParams extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = TQb extends QueryBuilder<TDbType, any, any, any, any, infer TParams, any> ? TParams : never,
         TParamsAccumulated extends readonly QueryParam<TDbType, any, any, any, any>[] =
         [
             ...(TParams extends readonly QueryParam<TDbType, any, any, any, any>[] ? TParams : []),
@@ -869,7 +869,7 @@ class QueryBuilder<
         TFinalParamsAccumulated extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = TParamsAccumulated["length"] extends 0 ? undefined : TParamsAccumulated
     >(
         as: TCTEName,
-        cteSelectionCb: TQbResult | ((ctes: MapCtesToSelectionType<TDbType, TCTESpecs>) => TQbResult)
+        pick: TQb | ((ctes: MapCtesToSelectionType<TDbType, TCTESpecs>) => TQb)
     ):
         QueryBuilder<
             TDbType,
@@ -882,7 +882,7 @@ class QueryBuilder<
         > {
 
         let res;
-        if (typeof cteSelectionCb === "function") {
+        if (typeof pick === "function") {
 
             let cteSpecs: MapCtesToSelectionType<TDbType, TCTESpecs>;
             if (this.cteSpecs === undefined) {
@@ -890,9 +890,9 @@ class QueryBuilder<
             } else {
                 cteSpecs = mapCTESpecsToSelection(this.cteSpecs);
             }
-            res = cteSelectionCb(cteSpecs);
+            res = pick(cteSpecs);
         } else {
-            res = cteSelectionCb;
+            res = pick;
         }
 
         let newCteSpecs = [...(this.cteSpecs || [] as CTESpecsType<TDbType>)];
