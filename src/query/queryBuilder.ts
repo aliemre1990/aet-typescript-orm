@@ -858,7 +858,8 @@ class QueryBuilder<
     withAs<
         TCTEName extends string,
         TQb extends QueryBuilder<TDbType, any, any, any, any, any, any>,
-        TCTEObject extends CTEObject<TDbType, any, any, any, any, any> = MapToCTEObject<TDbType, TCTEName, typeof cteTypes.NON_RECURSIVE, TQb>,
+        // TCTEObject extends CTEObject<TDbType, any, any, any, any, any> = MapToCTEObject<TDbType, TCTEName, typeof cteTypes.NON_RECURSIVE, TQb>,
+        TCTEObject extends CTEObject<TDbType, any, any, any, any, any> = CTEObject<TDbType, TCTEName, typeof cteTypes.NON_RECURSIVE, TQb>,
         TFinalCTESpec extends CTESpecsType<TDbType> = readonly [...(TCTESpecs extends CTESpecsType<TDbType> ? TCTESpecs : []), TCTEObject],
         TCTEParams extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = TQb extends QueryBuilder<TDbType, any, any, any, any, infer TParams, any> ? TParams : never,
         TParamsAccumulated extends readonly QueryParam<TDbType, any, any, any, any>[] =
