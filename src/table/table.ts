@@ -142,16 +142,16 @@ class Table<
                 TCbResult["length"] extends 0 ? SelectToAllColumnsMapRecursively<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>], undefined> : TFinalResult,
                 TCbResult["length"] extends 0 ? undefined : AccumulateColumnParams<undefined, TFinalResult>
             >;
+        } else {
+            return queryTable.select(cb) as QueryBuilder<
+                TDbType,
+                [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>],
+                undefined,
+                undefined,
+                TCbResult["length"] extends 0 ? SelectToAllColumnsMapRecursively<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>], undefined> : TFinalResult,
+                TCbResult["length"] extends 0 ? undefined : AccumulateColumnParams<undefined, TFinalResult>
+            >;
         }
-
-        return queryTable.select(cb) as QueryBuilder<
-            TDbType,
-            [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>],
-            undefined,
-            undefined,
-            TCbResult["length"] extends 0 ? SelectToAllColumnsMapRecursively<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>], undefined> : TFinalResult,
-            TCbResult["length"] extends 0 ? undefined : AccumulateColumnParams<undefined, TFinalResult>
-        >;
     }
 
     join<
