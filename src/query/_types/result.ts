@@ -85,15 +85,15 @@ type JoinToAllColumnsMapRecursively<
 
     TTable extends QueryTable<TDbType, any, any, any, infer TQCols, any> ?
     FRest extends readonly [any, ...any[]] ?
-    [...TQCols, FromToAllColumnsMapRecursively<TDbType, FRest>] :
+    [...TQCols, ...JoinToAllColumnsMapRecursively<TDbType, FRest>] :
     [...TQCols] :
     TTable extends SubQueryObject<TDbType, any, infer TEntries, any> ?
     FRest extends readonly [any, ...any[]] ?
-    [...TEntries, FromToAllColumnsMapRecursively<TDbType, FRest>] :
+    [...TEntries, ...JoinToAllColumnsMapRecursively<TDbType, FRest>] :
     [...TEntries] :
     TTable extends CTEObject<TDbType, any, any, any, any, any> ?
     FRest extends readonly [any, ...any[]] ?
-    [...TTable["cteObjectEntries"], FromToAllColumnsMapRecursively<TDbType, FRest>] :
+    [...TTable["cteObjectEntries"], ...JoinToAllColumnsMapRecursively<TDbType, FRest>] :
     [...TTable["cteObjectEntries"]] :
     never :
     never :
@@ -105,15 +105,15 @@ type FromToAllColumnsMapRecursively<
     TFrom extends readonly [infer FFirst, ...infer FRest] ?
     FFirst extends QueryTable<TDbType, any, any, any, infer TQCols, any> ?
     FRest extends readonly [any, ...any[]] ?
-    [...TQCols, FromToAllColumnsMapRecursively<TDbType, FRest>] :
+    [...TQCols, ...FromToAllColumnsMapRecursively<TDbType, FRest>] :
     [...TQCols] :
     FFirst extends SubQueryObject<TDbType, any, infer TEntries, any> ?
     FRest extends readonly [any, ...any[]] ?
-    [...TEntries, FromToAllColumnsMapRecursively<TDbType, FRest>] :
+    [...TEntries, ...FromToAllColumnsMapRecursively<TDbType, FRest>] :
     [...TEntries] :
     FFirst extends CTEObject<TDbType, any, any, any, any, any> ?
     FRest extends readonly [any, ...any[]] ?
-    [...FFirst["cteObjectEntries"], FromToAllColumnsMapRecursively<TDbType, FRest>] :
+    [...FFirst["cteObjectEntries"], ...FromToAllColumnsMapRecursively<TDbType, FRest>] :
     [...FFirst["cteObjectEntries"]] :
     never :
     []

@@ -94,8 +94,8 @@ class QueryTable<
         [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>],
         undefined,
         undefined,
-        TFinalResult,
-        AccumulateColumnParams<undefined, TFinalResult>
+        TCbResult["length"] extends 0 ? SelectToAllColumnsMapRecursively<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>], undefined> : TFinalResult,
+        TCbResult["length"] extends 0 ? undefined : AccumulateColumnParams<undefined, TFinalResult>
     >
     select<
         const TCbResult extends readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, any>)[],

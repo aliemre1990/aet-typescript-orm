@@ -323,8 +323,8 @@ class QueryBuilder<
         TFrom,
         TJoinSpecs,
         TCTESpecs,
-        TFinalResult,
-        AccumulateColumnParams<TParams, TFinalResult>,
+        TCbResult["length"] extends 0 ? SelectToAllColumnsMapRecursively<TDbType, TFrom, TJoinSpecs> : TFinalResult,
+        TCbResult["length"] extends 0 ? TParams : AccumulateColumnParams<TParams, TFinalResult>,
         TAs
     >
     select<
@@ -344,7 +344,15 @@ class QueryBuilder<
         TCbResult["length"] extends 0 ? TParams : AccumulateColumnParams<TParams, TFinalResult>,
         TAs
     > {
-        if (isNullOrUndefined(cb)) {
+
+        let selectRes: readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, any>)[] = [];
+        if (!isNullOrUndefined(cb)) {
+            const columnsSelection = this.#getColumnsSelection() as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>;
+            const functions = this.#getDbFunctions();
+            selectRes = cb(columnsSelection, functions);
+        }
+
+        if (isNullOrUndefined(cb) || selectRes.length === 0) {
 
             let finalSelectRes: ResultShapeItem<TDbType>[] = [];
             if (this.fromSpecs !== undefined) {
@@ -401,10 +409,6 @@ class QueryBuilder<
                 });
 
         } else {
-            const columnsSelection = this.#getColumnsSelection() as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>;
-            const functions = this.#getDbFunctions();
-            const selectRes = cb(columnsSelection, functions);
-
             let finalSelectRes: ResultShapeItem<TDbType>[] = [];
             for (const it of selectRes) {
                 if (ColumnsSelectionQueryTableObjectSymbol in it) {
