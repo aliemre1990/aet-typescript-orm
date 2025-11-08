@@ -1,6 +1,6 @@
 import type { DbType } from "../db.js";
 import type { DbValueTypes } from "../table/column.js";
-import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
+import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, queryBuilderContextFactory, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
 import type { IName } from "./_interfaces/IName.js";
 import between from "./comparisons/between.js";
 import eq from "./comparisons/eq.js";
@@ -52,7 +52,11 @@ class CTEObjectEntry<
     }
 
     buildSQL(context?: QueryBuilderContext) {
-        return { query: `${this.ownerName}.${this.asName || this.defaultFieldKey}`, params: [...(context?.params || [])] };
+        if (context === undefined) {
+            context = queryBuilderContextFactory();
+        }
+
+        return { query: `${this.ownerName}.${this.asName || this.defaultFieldKey}`, params: context.params };
     }
 
     constructor(
@@ -92,7 +96,7 @@ class CTEObject<
 
     buildSQL(context?: QueryBuilderContext) {
         if (context === undefined) {
-            context = { params: [] };
+            context = queryBuilderContextFactory();
         }
 
         let query = this.qb.buildSQL(context);

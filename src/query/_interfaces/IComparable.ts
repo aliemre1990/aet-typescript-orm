@@ -7,6 +7,9 @@ import type sqlIn from "../comparisons/in.js";
 import type { IDbType } from "./IDbType.js";
 
 type QueryBuilderContext = { params: string[] }
+function queryBuilderContextFactory(): QueryBuilderContext {
+    return { params: [] }
+}
 
 const IComparableValueDummySymbol = Symbol();
 const IComparableFinalValueDummySymbol = Symbol();
@@ -44,5 +47,6 @@ export type {
 
 export {
     IComparableValueDummySymbol,
-    IComparableFinalValueDummySymbol
+    IComparableFinalValueDummySymbol,
+    queryBuilderContextFactory
 }

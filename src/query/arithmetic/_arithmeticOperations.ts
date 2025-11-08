@@ -43,7 +43,6 @@ class SQLArithmeticOperation<
     TDbType extends DbType,
     TArithmeticOperation extends ArithmeticOperation,
     TArgs extends (
-
         DbValueTypes | null |
         IComparable<TDbType, any, any, any, any, any>
     )[],

@@ -1,13 +1,44 @@
 import { dbTypes, type DbType, type PgDbType } from "../../../db.js";
 import type { DbValueTypes } from "../../../table/column.js";
 import type { RecordToTupleSafe } from "../../../utility/common.js";
-import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable, type QueryBuilderContext } from "../../_interfaces/IComparable.js";
+import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, queryBuilderContextFactory, type IComparable, type QueryBuilderContext } from "../../_interfaces/IComparable.js";
 import between from "../../comparisons/between.js";
 import eq from "../../comparisons/eq.js";
 import sqlIn from "../../comparisons/in.js";
 import type { InferReturnTypeFromJSONBuildObjectParam } from "../../_types/args.js";
 import type QueryParam from "../../param.js";
 
+type InferParamsFromJsonBuildObjectArg<TDbType extends DbType, TObj extends JSONBuildObjectParam<TDbType>> =
+    InferParamsFromObj<TDbType, TObj>["length"] extends 0 ? undefined :
+    InferParamsFromObj<TDbType, TObj>;
+
+type InferParamsFromObj<TDbType extends DbType, TObj extends JSONBuildObjectParam<TDbType>> =
+    RecordToTupleSafe<TObj> extends readonly [infer FirstKey, ...infer RestKeys] ?
+    RestKeys extends readonly any[] ?
+    FirstKey extends IComparable<TDbType, infer TParams, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams), ...InferParamsFromObjArr<TDbType, RestKeys>] :
+    FirstKey extends JSONBuildObjectParam<TDbType> ? [...InferParamsFromObj<TDbType, FirstKey>, ...InferParamsFromObjArr<TDbType, RestKeys>] :
+    [...InferParamsFromObjArr<TDbType, RestKeys>] :
+    FirstKey extends IComparable<TDbType, infer TParams, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams)] :
+    FirstKey extends JSONBuildObjectParam<TDbType> ? [...InferParamsFromObj<TDbType, FirstKey>] :
+    [] :
+    [];
+
+type InferParamsFromObjArr<TDbType extends DbType, TRest extends readonly any[]> =
+    TRest extends readonly [infer FirstKey, ...infer RestKeys] ?
+    RestKeys extends readonly any[] ?
+    FirstKey extends IComparable<TDbType, infer TParams, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams), ...InferParamsFromObjArr<TDbType, RestKeys>] :
+    FirstKey extends JSONBuildObjectParam<TDbType> ? [...InferParamsFromObj<TDbType, FirstKey>, ...InferParamsFromObjArr<TDbType, RestKeys>] :
+    [...InferParamsFromObjArr<TDbType, RestKeys>] :
+    FirstKey extends IComparable<TDbType, infer TParams, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams)] :
+    FirstKey extends JSONBuildObjectParam<TDbType> ? [...InferParamsFromObj<TDbType, FirstKey>] :
+    [] :
+    [];
+
+type JSONBuildObjectParam<TDbType extends DbType> = {
+    [key: string]:
+    IComparable<TDbType, any, any, any, any, any> |
+    JSONBuildObjectParam<TDbType>
+}
 
 class JSONBuildObjectFunction<
     TDbType extends PgDbType,
@@ -34,6 +65,10 @@ class JSONBuildObjectFunction<
     }
 
     buildSQL(context?: QueryBuilderContext) {
+        if (context === undefined) {
+            context = queryBuilderContextFactory();
+        }
+
         return { query: ``, params: [...(context?.params || [])] };
     }
 
@@ -75,38 +110,6 @@ class JSONBuildObjectFunction<
     between: typeof between = between;
 }
 
-type InferParamsFromJsonBuildObjectArg<TDbType extends DbType, TObj extends JSONBuildObjectParam<TDbType>> =
-    InferParamsFromObj<TDbType, TObj>["length"] extends 0 ? undefined :
-    InferParamsFromObj<TDbType, TObj>;
-
-type InferParamsFromObj<TDbType extends DbType, TObj extends JSONBuildObjectParam<TDbType>> =
-    RecordToTupleSafe<TObj> extends readonly [infer FirstKey, ...infer RestKeys] ?
-    RestKeys extends readonly any[] ?
-    FirstKey extends IComparable<TDbType, infer TParams, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams), ...InferParamsFromObjArr<TDbType, RestKeys>] :
-    FirstKey extends JSONBuildObjectParam<TDbType> ? [...InferParamsFromObj<TDbType, FirstKey>, ...InferParamsFromObjArr<TDbType, RestKeys>] :
-    [...InferParamsFromObjArr<TDbType, RestKeys>] :
-    FirstKey extends IComparable<TDbType, infer TParams, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams)] :
-    FirstKey extends JSONBuildObjectParam<TDbType> ? [...InferParamsFromObj<TDbType, FirstKey>] :
-    [] :
-    [];
-
-type InferParamsFromObjArr<TDbType extends DbType, TRest extends readonly any[]> =
-    TRest extends readonly [infer FirstKey, ...infer RestKeys] ?
-    RestKeys extends readonly any[] ?
-    FirstKey extends IComparable<TDbType, infer TParams, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams), ...InferParamsFromObjArr<TDbType, RestKeys>] :
-    FirstKey extends JSONBuildObjectParam<TDbType> ? [...InferParamsFromObj<TDbType, FirstKey>, ...InferParamsFromObjArr<TDbType, RestKeys>] :
-    [...InferParamsFromObjArr<TDbType, RestKeys>] :
-    FirstKey extends IComparable<TDbType, infer TParams, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams)] :
-    FirstKey extends JSONBuildObjectParam<TDbType> ? [...InferParamsFromObj<TDbType, FirstKey>] :
-    [] :
-    [];
-
-type JSONBuildObjectParam<TDbType extends DbType> = {
-    [key: string]:
-    IComparable<TDbType, any, any, any, any, any> |
-    JSONBuildObjectParam<TDbType>
-}
-
 function jsonBuildObjectFn<
     TObj extends JSONBuildObjectParam<PgDbType>
 >
@@ -131,6 +134,17 @@ function jsonbBuildObjectFn<
     >(
         dbTypes.postgresql, obj, true
     )
+}
+
+function buildJSONBuildObjectArgSQL(obj: JSONBuildObjectParam<any>, context?: QueryBuilderContext) {
+    if (context === undefined) {
+        context = queryBuilderContextFactory();
+    }
+
+    for (const k in obj) {
+
+    }
+
 }
 
 export default JSONBuildObjectFunction;

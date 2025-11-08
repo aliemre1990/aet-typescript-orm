@@ -19,7 +19,7 @@ import type { AccumulateColumnParams } from "./_types/paramAccumulationSelect.js
 import type ColumnsSelection from "./columnsSelection.js";
 import { columnsSelectionFactory, ColumnsSelectionQueryTableObjectSymbol } from "./columnsSelection.js";
 import { mysqlDbOperators, mysqlFunctions, pgDbOperators, pgFunctions } from "./dbOperations.js";
-import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
+import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, queryBuilderContextFactory, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
 import SubQueryObject from "./subQueryObject.js";
 import eq from "./comparisons/eq.js";
 import sqlIn from "./comparisons/in.js";
@@ -269,6 +269,10 @@ class QueryBuilder<
     }
 
     buildSQL(context?: QueryBuilderContext) {
+        if (context === undefined) {
+            context = queryBuilderContextFactory();
+        }
+        
         let result = '';
 
         if (this.queryType === queryTypes.SELECT) {

@@ -2,7 +2,7 @@ import type { DbType } from "../db.js";
 import QueryColumn from "../query/queryColumn.js";
 import type Column from "../table/column.js";
 import type Table from "../table/table.js";
-import type { IComparable, QueryBuilderContext } from "./_interfaces/IComparable.js";
+import { queryBuilderContextFactory, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
 import type { IDbType } from "./_interfaces/IDbType.js";
 import type { IName } from "./_interfaces/IName.js";
 import type { TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.js";
@@ -70,7 +70,11 @@ class QueryTable<
     }
 
     buildSQL(context?: QueryBuilderContext) {
-        return { query: this.name, params: [...(context?.params || [])] };
+        if (context === undefined) {
+            context = queryBuilderContextFactory();
+        }
+
+        return { query: this.name, params: context.params };
     }
 
     select(): QueryBuilder<

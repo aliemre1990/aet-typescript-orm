@@ -2,7 +2,7 @@ import type { DbType } from "../db.js";
 import eq from "./comparisons/eq.js";
 import between from "./comparisons/between.js";
 import sqlIn from "./comparisons/in.js";
-import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
+import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, queryBuilderContextFactory, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
 import type Column from "../table/column.js";
 import type { ColumnType, DbValueTypes } from "../table/column.js";
 
@@ -44,7 +44,11 @@ class QueryColumn<
     }
 
     buildSQL(context?: QueryBuilderContext) {
-        return { query: `${this.qTableSpecs.asTableName || this.qTableSpecs.tableName}.${this.asName || this.defaultFieldKey}`, params: [...(context?.params || [])] };
+        if (context === undefined) {
+            context = queryBuilderContextFactory();
+        }
+
+        return { query: `${this.qTableSpecs.asTableName || this.qTableSpecs.tableName}.${this.asName || this.defaultFieldKey}`, params: context.params };
     }
 }
 

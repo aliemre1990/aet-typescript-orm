@@ -1,6 +1,6 @@
 import { dbTypes, type DbType } from "../db.js";
 import type { DbValueTypes } from "../table/column.js";
-import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
+import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, queryBuilderContextFactory, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
 import between from "./comparisons/between.js";
 import eq from "./comparisons/eq.js";
 import sqlIn from "./comparisons/in.js";
@@ -46,22 +46,13 @@ class QueryParam<
     }
 
     buildSQL(context?: QueryBuilderContext) {
+        if (context === undefined) {
+            context = queryBuilderContextFactory();
+        }
 
-        let paramIndex;
-        if (context?.params === undefined) {
-            paramIndex = 0;
-            if (context === undefined) {
-                context = { params: [] };
-            } else {
-                context.params = [];
-            }
-            context.params.push(this.name)
-        } else {
-            paramIndex = context.params.indexOf(this.name);
-            if (paramIndex < 0) {
-                paramIndex = 0;
-            }
-            context.params.push(this.name);
+        let paramIndex = context.params.indexOf(this.name);
+        if (paramIndex < 0) {
+            paramIndex = context.params.push(this.name) - 1;
         }
 
         return { query: `$${paramIndex + 1}`, params: context.params };
