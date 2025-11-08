@@ -8,10 +8,11 @@ QueryBuilder,
     type JoinSpecsTableType,
     type JoinSpecsType,
     type JoinType,
-    type OrderBySpecs
+    type OrderBySpecs,
+    type ResultShape
 } from "../query/queryBuilder.js";
 import type { TablesToObject, TableToColumnsMap } from "../query/_types/miscellaneous.js";
-import type { ResultShape, SelectToAllColumnsMapRecursively, SelectToResultMapRecursively } from "../query/_types/result.js";
+import type { SelectToAllColumnsMapRecursively, SelectToResultMapRecursively } from "../query/_types/result.js";
 import Column from "./column.js";
 import QueryColumn from "../query/queryColumn.js";
 import QueryTable from "../query/queryTable.js";

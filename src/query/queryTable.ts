@@ -10,7 +10,7 @@ import type { DbFunctions, DbOperators } from "./_types/ops.js";
 import type { AccumulateComparisonParams } from "./_types/paramAccumulationComparison.js";
 import type { AccumulateOrderByParams } from "./_types/paramAccumulationOrderBy.js";
 import type { AccumulateColumnParams } from "./_types/paramAccumulationSelect.js";
-import type { ResultShape, SelectToAllColumnsMapRecursively, SelectToResultMapRecursively } from "./_types/result.js";
+import type { SelectToAllColumnsMapRecursively, SelectToResultMapRecursively } from "./_types/result.js";
 import type { AccumulateSubQueryParams, MapToSubQueryObject } from "./_types/subQueryUtility.js";
 import type ColumnsSelection from "./columnsSelection.js";
 import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
@@ -25,7 +25,8 @@ QueryBuilder,
     type JoinSpecsTableType,
     type JoinSpecsType,
     type JoinType,
-    type OrderBySpecs
+    type OrderBySpecs,
+    type ResultShape
 } from "./queryBuilder.js";
 
 type MapQueryColumnsToRecord<TColumns extends readonly QueryColumn<any, any, any, any, any, any, any>[]> = {

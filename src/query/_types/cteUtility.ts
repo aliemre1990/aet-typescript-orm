@@ -2,9 +2,8 @@ import type { DbType } from "../../db.js";
 import type { IComparable } from "../_interfaces/IComparable.js";
 import type { MapResultToCTEObjectEntry } from "../cteObject.js";
 import type CTEObject from "../cteObject.js";
-import type { CTEType } from "../queryBuilder.js";
+import type { CTEType, ResultShape } from "../queryBuilder.js";
 import type QueryBuilder from "../queryBuilder.js";
-import type { ResultShape } from "./result.js";
 
 type MapToCTEObjectForRecursive<
     TDbType extends DbType,

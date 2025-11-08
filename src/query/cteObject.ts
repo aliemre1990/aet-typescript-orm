@@ -2,12 +2,11 @@ import type { DbType } from "../db.js";
 import type { DbValueTypes } from "../table/column.js";
 import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
 import type { IName } from "./_interfaces/IName.js";
-import type { ResultShape } from "./_types/result.js";
 import between from "./comparisons/between.js";
 import eq from "./comparisons/eq.js";
 import sqlIn from "./comparisons/in.js";
 import type QueryParam from "./param.js";
-import type { CTEType } from "./queryBuilder.js";
+import type { CTEType, ResultShape } from "./queryBuilder.js";
 import type QueryBuilder from "./queryBuilder.js";
 
 type MapResultToCTEObjectEntry<TDbType extends DbType, TComparables extends ResultShape<TDbType>> =

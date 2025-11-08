@@ -5,7 +5,7 @@ import { isNullOrUndefined } from "../utility/guards.js";
 import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
 import type ColumnLogicalOperation from "./logicalOperations.js";
 import type { MapCtesToSelectionType, TablesToObject, TableToColumnsMap } from "./_types/miscellaneous.js";
-import type { ColumnsToResultMap, QueryParamsToObject, ResultShape, ResultShapeItem, SelectToAllColumnsMapRecursively, SelectToResultMapRecursively } from "./_types/result.js";
+import type { ColumnsToResultMap, QueryParamsToObject, SelectToAllColumnsMapRecursively, SelectToResultMapRecursively } from "./_types/result.js";
 import QueryTable from "./queryTable.js";
 import type Column from "../table/column.js";
 import type { DbFunctions, DbOperators } from "./_types/ops.js";
@@ -28,6 +28,10 @@ import CTEObject from "./cteObject.js";
 import { mapCTESpecsToSelection } from "./utility.js";
 import type { OverrideDuplicateCTESpec } from "./_types/cte.js";
 import type { MapToCTEObject } from "./_types/cteUtility.js";
+
+
+type ResultShapeItem<TDbType extends DbType> = IComparable<TDbType, any, any, any, any, any>;
+type ResultShape<TDbType extends DbType> = readonly ResultShapeItem<TDbType>[];
 
 type FromItemType<TDbType extends DbType> = QueryTable<TDbType, any, any, any, any, any> | SubQueryObject<TDbType, any, any, string> | CTEObject<TDbType, any, any, any, any, any>;
 type FromType<TDbType extends DbType> = readonly FromItemType<TDbType>[];
@@ -1119,6 +1123,8 @@ export {
 }
 
 export type {
+    ResultShape,
+    ResultShapeItem,
     JoinSpecsTableType,
     JoinSpecsItemType,
     JoinSpecsType,

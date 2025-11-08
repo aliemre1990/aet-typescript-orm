@@ -4,12 +4,10 @@ import type { IComparable } from "../_interfaces/IComparable.js";
 import type ColumnsSelection from "../columnsSelection.js";
 import type CTEObject from "../cteObject.js";
 import type QueryParam from "../param.js";
-import type { ComparisonType, FromType, JoinSpecsType, JoinType } from "../queryBuilder.js";
+import type { ComparisonType, FromType, JoinSpecsType, JoinType, ResultShape } from "../queryBuilder.js";
 import type QueryTable from "../queryTable.js";
 import type SubQueryObject from "../subQueryObject.js";
 
-type ResultShapeItem<TDbType extends DbType> = IComparable<TDbType, any, any, any, any, any>;
-type ResultShape<TDbType extends DbType> = readonly ResultShapeItem<TDbType>[];
 
 type ColumnsToResultMap<TDbType extends DbType, T extends ResultShape<TDbType> | undefined> =
     T extends undefined ? undefined :
@@ -132,8 +130,6 @@ type QueryParamsToObject<T extends readonly QueryParam<any, any, any, any, any>[
     : undefined;
 
 export type {
-    ResultShape,
-    ResultShapeItem,
     ColumnsToResultMap,
     QueryParamsToObject,
     SelectToResultMapRecursively,

@@ -4,12 +4,11 @@ import type Table from "../../table/table.js";
 import type { IDbType } from "../_interfaces/IDbType.js";
 import type CTEObject from "../cteObject.js";
 import type QueryParam from "../param.js";
-import type { FromType } from "../queryBuilder.js";
+import type { FromType, ResultShape } from "../queryBuilder.js";
 import type QueryBuilder from "../queryBuilder.js";
 import type QueryTable from "../queryTable.js";
 import type { MapResultToSubQueryEntry } from "../subQueryObject.js";
 import type SubQueryObject from "../subQueryObject.js";
-import type { ResultShape } from "./result.js";
 
 type MapToSubQueryObject<TDbType extends DbType, T> =
     T extends QueryBuilder<TDbType, any, any, any, infer TRes extends ResultShape<TDbType>, any, infer TAs extends string> ?
