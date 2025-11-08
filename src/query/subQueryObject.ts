@@ -100,8 +100,8 @@ class SubQueryObject<
         this.name = qb.asName as TName;
 
         let tmpEntries: readonly SubQueryEntry<TDbType, any, any, any, any, any>[] = [];
-        if (qb.resultSelection !== undefined) {
-            qb.resultSelection.forEach(res => {
+        if (qb.selectResult !== undefined) {
+            qb.selectResult.forEach(res => {
                 tmpEntries = [...tmpEntries, (new SubQueryEntry(dbType, res, undefined, qb.asName))];
             })
         }

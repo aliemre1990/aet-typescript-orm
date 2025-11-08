@@ -52,18 +52,18 @@ function withRecursiveAs<
     if (columnNames.length === 0) {
         cte = new CTEObject(anchorQb.dbType, anchorQb, cteName, cteTypes.RECURSIVE) as TFinalCTE;
     } else {
-        let resultSelection = anchorQb.resultSelection;
-        if (resultSelection === undefined) {
+        let selectResult = anchorQb.selectResult;
+        if (selectResult === undefined) {
             throw Error("Column list must match the selected columns.");
         }
 
-        if (resultSelection.length !== columnNames.length) {
+        if (selectResult.length !== columnNames.length) {
             throw Error("Column list must match the selected columns.");
         }
 
         for (let i = 0; i < columnNames.length; i++) {
             let currName = columnNames[i];
-            let currComp = resultSelection[i];
+            let currComp = selectResult[i];
 
             finalCTEentries.push(new CTEObjectEntry(anchorQb.dbType, currComp, undefined, cteName, currName));
         }

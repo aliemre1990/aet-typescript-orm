@@ -26,8 +26,6 @@ import sqlIn from "./comparisons/in.js";
 import between from "./comparisons/between.js";
 import CTEObject from "./cteObject.js";
 import { mapCTESpecsToSelection } from "./utility.js";
-import type { OverrideDuplicateCTESpec } from "./_types/cte.js";
-import type { MapToCTEObject } from "./_types/cteUtility.js";
 
 
 type ResultShapeItem<TDbType extends DbType> = IComparable<TDbType, any, any, any, any, any>;
@@ -149,7 +147,7 @@ class QueryBuilder<
     fromSpecs: TFrom;
     joinSpecs?: TJoinSpecs;
     whereComparison?: ComparisonType<TDbType>;
-    resultSelection?: TResult;
+    selectResult?: TResult;
     groupedColumns?: GroupBySpecs<TDbType>;
     havingSpec?: ComparisonType<TDbType>;
     orderBySpecs?: OrderBySpecs<TDbType>;
@@ -166,7 +164,7 @@ class QueryBuilder<
             cteSpecs?: TCTESpecs,
             joinSpecs?: TJoinSpecs,
             whereComparison?: ComparisonType<TDbType>,
-            resultSelection?: TResult,
+            selectResult?: TResult,
             groupedColumns?: GroupBySpecs<TDbType>,
             havingSpec?: ComparisonType<TDbType>,
             orderBySpecs?: OrderBySpecs<TDbType>,
@@ -179,7 +177,7 @@ class QueryBuilder<
         this.fromSpecs = fromSpecs;
         this.joinSpecs = data?.joinSpecs;
         this.whereComparison = data?.whereComparison;
-        this.resultSelection = data?.resultSelection;
+        this.selectResult = data?.selectResult;
         this.groupedColumns = data?.groupedColumns;
         this.havingSpec = data?.havingSpec;
         this.orderBySpecs = data?.orderBySpecs;
@@ -189,7 +187,7 @@ class QueryBuilder<
 
         this.queryType = data?.queryType;
 
-        this.defaultFieldKey = data?.resultSelection !== undefined && data.resultSelection.length > 0 ? data.resultSelection[0].defaultFieldKey : "";
+        this.defaultFieldKey = data?.selectResult !== undefined && data.selectResult.length > 0 ? data.selectResult[0].defaultFieldKey : "";
     }
 
     as<TAs extends string>(asName: TAs): QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, TParams, TAs> {
@@ -202,7 +200,7 @@ class QueryBuilder<
                 cteSpecs: this.cteSpecs,
                 joinSpecs: this.joinSpecs,
                 whereComparison: this.whereComparison,
-                resultSelection: this.resultSelection,
+                selectResult: this.selectResult,
                 groupedColumns: this.groupedColumns,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
@@ -270,7 +268,7 @@ class QueryBuilder<
 
         if (this.queryType === queryTypes.SELECT) {
 
-            if (this.resultSelection === undefined) {
+            if (this.selectResult === undefined) {
                 throw Error('Result not specified.');
             }
 
@@ -287,7 +285,7 @@ class QueryBuilder<
                 cteClause = `WITH ${cteQueries.map(qry => `${qry.name} AS ${qry.query.query}`).join(', ')}`
             }
 
-            let selectList = this.resultSelection.map(sl => sl.buildSQL()).join(' ,');
+            let selectList = this.selectResult.map(sl => sl.buildSQL()).join(' ,');
             let fromClause = this.fromSpecs.map(frm => {
                 if (frm instanceof QueryTable) {
                     return `${frm.name}${frm.asName === undefined ? '' : `AS ${frm.asName}`}`;
@@ -405,7 +403,7 @@ class QueryBuilder<
                     cteSpecs: this.cteSpecs,
                     joinSpecs: this.joinSpecs,
                     whereComparison: this.whereComparison,
-                    resultSelection: finalSelectRes as ResultShape<TDbType> as TCbResult["length"] extends 0 ? SelectToAllColumnsMapRecursively<TDbType, TFrom, TJoinSpecs> : TFinalResult,
+                    selectResult: finalSelectRes as ResultShape<TDbType> as TCbResult["length"] extends 0 ? SelectToAllColumnsMapRecursively<TDbType, TFrom, TJoinSpecs> : TFinalResult,
                     groupedColumns: this.groupedColumns,
                     havingSpec: this.havingSpec,
                     orderBySpecs: this.orderBySpecs,
@@ -442,7 +440,7 @@ class QueryBuilder<
                     cteSpecs: this.cteSpecs,
                     joinSpecs: this.joinSpecs,
                     whereComparison: this.whereComparison,
-                    resultSelection: finalSelectRes as ResultShape<TDbType> as TCbResult["length"] extends 0 ? SelectToAllColumnsMapRecursively<TDbType, TFrom, TJoinSpecs> : TFinalResult,
+                    selectResult: finalSelectRes as ResultShape<TDbType> as TCbResult["length"] extends 0 ? SelectToAllColumnsMapRecursively<TDbType, TFrom, TJoinSpecs> : TFinalResult,
                     groupedColumns: this.groupedColumns,
                     havingSpec: this.havingSpec,
                     orderBySpecs: this.orderBySpecs,
@@ -570,7 +568,7 @@ class QueryBuilder<
                 cteSpecs: this.cteSpecs,
                 joinSpecs: mergedJoinSpecs as TJoinAccumulated,
                 whereComparison: this.whereComparison,
-                resultSelection: this.resultSelection,
+                selectResult: this.selectResult,
                 groupedColumns: this.groupedColumns,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
@@ -617,7 +615,7 @@ class QueryBuilder<
                 cteSpecs: this.cteSpecs,
                 joinSpecs: this.joinSpecs,
                 whereComparison: comparison,
-                resultSelection: this.resultSelection,
+                selectResult: this.selectResult,
                 groupedColumns: this.groupedColumns,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
@@ -662,7 +660,7 @@ class QueryBuilder<
                 cteSpecs: this.cteSpecs,
                 joinSpecs: this.joinSpecs,
                 whereComparison: this.whereComparison,
-                resultSelection: this.resultSelection,
+                selectResult: this.selectResult,
                 groupedColumns: res,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
@@ -707,7 +705,7 @@ class QueryBuilder<
                 cteSpecs: this.cteSpecs,
                 joinSpecs: this.joinSpecs,
                 whereComparison: this.whereComparison,
-                resultSelection: this.resultSelection,
+                selectResult: this.selectResult,
                 groupedColumns: this.groupedColumns,
                 havingSpec: res,
                 orderBySpecs: this.orderBySpecs,
@@ -753,7 +751,7 @@ class QueryBuilder<
                 cteSpecs: this.cteSpecs,
                 joinSpecs: this.joinSpecs,
                 whereComparison: this.whereComparison,
-                resultSelection: this.resultSelection,
+                selectResult: this.selectResult,
                 groupedColumns: this.groupedColumns,
                 havingSpec: this.havingSpec,
                 orderBySpecs: res,
@@ -855,7 +853,7 @@ class QueryBuilder<
                 cteSpecs: this.cteSpecs,
                 joinSpecs: this.joinSpecs,
                 whereComparison: this.whereComparison,
-                resultSelection: this.resultSelection,
+                selectResult: this.selectResult,
                 groupedColumns: this.groupedColumns,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
@@ -931,7 +929,7 @@ class QueryBuilder<
                 cteSpecs: newCteSpecs as CTESpecsType<TDbType> as TFinalCTESpec,
                 joinSpecs: this.joinSpecs,
                 whereComparison: this.whereComparison,
-                resultSelection: this.resultSelection,
+                selectResult: this.selectResult,
                 groupedColumns: this.groupedColumns,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
@@ -994,7 +992,7 @@ class QueryBuilder<
                 cteSpecs: this.cteSpecs,
                 joinSpecs: this.joinSpecs,
                 whereComparison: this.whereComparison,
-                resultSelection: this.resultSelection,
+                selectResult: this.selectResult,
                 groupedColumns: this.groupedColumns,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
@@ -1061,7 +1059,7 @@ class QueryBuilder<
         never {
 
 
-        if (isNullOrUndefined(this?.resultSelection)) {
+        if (isNullOrUndefined(this?.selectResult)) {
             return {} as any;
         }
 
