@@ -31,6 +31,8 @@ import { mapCTESpecsToSelection } from "./utility.js";
 type ResultShapeItem<TDbType extends DbType> = IComparable<TDbType, any, any, any, any, any>;
 type ResultShape<TDbType extends DbType> = readonly ResultShapeItem<TDbType>[];
 
+type SelectSpecsType<TDbType extends DbType> = "*" | readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, any>)[]
+
 type FromItemType<TDbType extends DbType> = QueryTable<TDbType, any, any, any, any, any> | SubQueryObject<TDbType, any, any, string> | CTEObject<TDbType, any, any, any, any, any>;
 type FromType<TDbType extends DbType> = readonly FromItemType<TDbType>[];
 
@@ -148,6 +150,7 @@ class QueryBuilder<
     joinSpecs?: TJoinSpecs;
     whereComparison?: ComparisonType<TDbType>;
     selectResult?: TResult;
+    selectSpecs?: SelectSpecsType<TDbType>;
     groupedColumns?: GroupBySpecs<TDbType>;
     havingSpec?: ComparisonType<TDbType>;
     orderBySpecs?: OrderBySpecsType<TDbType>;
@@ -165,6 +168,7 @@ class QueryBuilder<
             joinSpecs?: TJoinSpecs,
             whereComparison?: ComparisonType<TDbType>,
             selectResult?: TResult,
+            selectSpecs?: SelectSpecsType<TDbType>,
             groupedColumns?: GroupBySpecs<TDbType>,
             havingSpec?: ComparisonType<TDbType>,
             orderBySpecs?: OrderBySpecsType<TDbType>,
@@ -178,6 +182,7 @@ class QueryBuilder<
         this.joinSpecs = data?.joinSpecs;
         this.whereComparison = data?.whereComparison;
         this.selectResult = data?.selectResult;
+        this.selectSpecs = data?.selectSpecs;
         this.groupedColumns = data?.groupedColumns;
         this.havingSpec = data?.havingSpec;
         this.orderBySpecs = data?.orderBySpecs;
@@ -404,6 +409,7 @@ class QueryBuilder<
                     joinSpecs: this.joinSpecs,
                     whereComparison: this.whereComparison,
                     selectResult: finalSelectRes as ResultShape<TDbType> as TCbResult["length"] extends 0 ? SelectToAllColumnsMapRecursively<TDbType, TFrom, TJoinSpecs> : TFinalResult,
+                    selectSpecs: "*",
                     groupedColumns: this.groupedColumns,
                     havingSpec: this.havingSpec,
                     orderBySpecs: this.orderBySpecs,
@@ -441,6 +447,7 @@ class QueryBuilder<
                     joinSpecs: this.joinSpecs,
                     whereComparison: this.whereComparison,
                     selectResult: finalSelectRes as ResultShape<TDbType> as TCbResult["length"] extends 0 ? SelectToAllColumnsMapRecursively<TDbType, TFrom, TJoinSpecs> : TFinalResult,
+                    selectSpecs: selectRes,
                     groupedColumns: this.groupedColumns,
                     havingSpec: this.havingSpec,
                     orderBySpecs: this.orderBySpecs,
@@ -569,6 +576,7 @@ class QueryBuilder<
                 joinSpecs: mergedJoinSpecs as TJoinAccumulated,
                 whereComparison: this.whereComparison,
                 selectResult: this.selectResult,
+                selectSpecs: this.selectSpecs,
                 groupedColumns: this.groupedColumns,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
@@ -616,6 +624,7 @@ class QueryBuilder<
                 joinSpecs: this.joinSpecs,
                 whereComparison: comparison,
                 selectResult: this.selectResult,
+                selectSpecs: this.selectSpecs,
                 groupedColumns: this.groupedColumns,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
@@ -661,6 +670,7 @@ class QueryBuilder<
                 joinSpecs: this.joinSpecs,
                 whereComparison: this.whereComparison,
                 selectResult: this.selectResult,
+                selectSpecs: this.selectSpecs,
                 groupedColumns: res,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
@@ -706,6 +716,7 @@ class QueryBuilder<
                 joinSpecs: this.joinSpecs,
                 whereComparison: this.whereComparison,
                 selectResult: this.selectResult,
+                selectSpecs: this.selectSpecs,
                 groupedColumns: this.groupedColumns,
                 havingSpec: res,
                 orderBySpecs: this.orderBySpecs,
@@ -752,6 +763,7 @@ class QueryBuilder<
                 joinSpecs: this.joinSpecs,
                 whereComparison: this.whereComparison,
                 selectResult: this.selectResult,
+                selectSpecs: this.selectSpecs,
                 groupedColumns: this.groupedColumns,
                 havingSpec: this.havingSpec,
                 orderBySpecs: res,
@@ -854,6 +866,7 @@ class QueryBuilder<
                 joinSpecs: this.joinSpecs,
                 whereComparison: this.whereComparison,
                 selectResult: this.selectResult,
+                selectSpecs: this.selectSpecs,
                 groupedColumns: this.groupedColumns,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
