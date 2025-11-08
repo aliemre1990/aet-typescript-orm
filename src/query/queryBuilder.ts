@@ -273,7 +273,7 @@ class QueryBuilder<
 
         if (this.queryType === queryTypes.SELECT) {
 
-            if (this.selectResult === undefined) {
+            if (this.selectSpecs === undefined || this.selectResult === undefined) {
                 throw Error('Result not specified.');
             }
 
@@ -290,7 +290,19 @@ class QueryBuilder<
                 cteClause = `WITH ${cteQueries.map(qry => `${qry.name} AS ${qry.query.query}`).join(', ')}`
             }
 
-            let selectList = this.selectResult.map(sl => sl.buildSQL()).join(' ,');
+            let selectList;
+            if (this.selectSpecs === "*") {
+                selectList = this.selectSpecs;
+            } else {
+                selectList = this.selectSpecs
+                    .map(sl => {
+                        if (ColumnsSelectionQueryTableObjectSymbol in sl) {
+                            return sl[ColumnsSelectionQueryTableObjectSymbol].name;
+                        }
+
+                        return sl.buildSQL().query;
+                    }).join(' ,');
+            }
             let fromClause = this.fromSpecs.map(frm => {
                 if (frm instanceof QueryTable) {
                     return `${frm.name}${frm.asName === undefined ? '' : `AS ${frm.asName}`}`;
@@ -298,7 +310,7 @@ class QueryBuilder<
                 else if (frm instanceof CTEObject) {
                     return frm.name;
                 } else {
-                    return frm.buildSQL();
+                    return frm.buildSQL().query;
                 }
             }).join(' ,');
 
