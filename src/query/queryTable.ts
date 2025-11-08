@@ -25,7 +25,7 @@ QueryBuilder,
     type JoinSpecsTableType,
     type JoinSpecsType,
     type JoinType,
-    type OrderBySpecs,
+    type OrderBySpecsType,
     type ResultShape
 } from "./queryBuilder.js";
 
@@ -202,7 +202,7 @@ class QueryTable<
     }
 
     orderBy<
-        const  TCbResult extends OrderBySpecs<TDbType>
+        const  TCbResult extends OrderBySpecsType<TDbType>
     >(
         cb: (
             tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, TTable, TQColumns, TAsName>]>>

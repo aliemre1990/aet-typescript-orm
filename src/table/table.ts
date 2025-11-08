@@ -8,7 +8,7 @@ QueryBuilder,
     type JoinSpecsTableType,
     type JoinSpecsType,
     type JoinType,
-    type OrderBySpecs,
+    type OrderBySpecsType,
     type ResultShape
 } from "../query/queryBuilder.js";
 import type { TablesToObject, TableToColumnsMap } from "../query/_types/miscellaneous.js";
@@ -239,7 +239,7 @@ class Table<
     }
 
     orderBy<
-        const TCbResult extends OrderBySpecs<TDbType>
+        const TCbResult extends OrderBySpecsType<TDbType>
     >(cb: (tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TTableName, TColumns>, undefined>]>>) => TCbResult):
         QueryBuilder<
             TDbType,

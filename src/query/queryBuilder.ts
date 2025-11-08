@@ -39,7 +39,7 @@ const orderTypes = {
     desc: 'DESC'
 } as const;
 type OrderType = typeof orderTypes[keyof typeof orderTypes];
-type OrderBySpecs<TDbType extends DbType> = readonly (IComparable<TDbType, any, any, any, any, any> | [IComparable<TDbType, any, any, any, any, any>, OrderType])[];
+type OrderBySpecsType<TDbType extends DbType> = readonly (IComparable<TDbType, any, any, any, any, any> | [IComparable<TDbType, any, any, any, any, any>, OrderType])[];
 
 const joinTypes = {
     inner: 'INNER',
@@ -150,7 +150,7 @@ class QueryBuilder<
     selectResult?: TResult;
     groupedColumns?: GroupBySpecs<TDbType>;
     havingSpec?: ComparisonType<TDbType>;
-    orderBySpecs?: OrderBySpecs<TDbType>;
+    orderBySpecs?: OrderBySpecsType<TDbType>;
     combineSpecs?: CombineSpecsType<TDbType>;
 
     queryType?: QUERY_TYPE;
@@ -167,7 +167,7 @@ class QueryBuilder<
             selectResult?: TResult,
             groupedColumns?: GroupBySpecs<TDbType>,
             havingSpec?: ComparisonType<TDbType>,
-            orderBySpecs?: OrderBySpecs<TDbType>,
+            orderBySpecs?: OrderBySpecsType<TDbType>,
             combineSpecs?: CombineSpecsType<TDbType>
         }
     ) {
@@ -714,7 +714,7 @@ class QueryBuilder<
     }
 
     orderBy<
-        const TCbResult extends OrderBySpecs<TDbType>
+        const TCbResult extends OrderBySpecsType<TDbType>
     >(
         cb: (
             tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>,
@@ -1131,7 +1131,7 @@ export type {
     ComparisonType,
     GroupBySpecs,
     JoinType,
-    OrderBySpecs,
+    OrderBySpecsType,
     OrderType,
     CTEType,
     CTESpecsType,
