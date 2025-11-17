@@ -54,9 +54,9 @@ class ColumnComparisonOperation<
 
         const appliedStrArr = convertArgsToQueryString(this.value, context);
         let appliedRes = '';
-        if (this.operation === comparisonOperations.in || this.operation === comparisonOperations.notIn) {
+        if ([comparisonOperations.in, comparisonOperations.notIn].some(op => op === this.operation)) {
             appliedRes = `(${appliedStrArr.join(', ')})`;
-        } else if (this.operation === comparisonOperations.between || this.operation === comparisonOperations.notBetween) {
+        } else if ([comparisonOperations.between, comparisonOperations.notBetween].some(op => op === this.operation)) {
             if (appliedStrArr.length !== 2) {
                 throw Error(`Invalid argument count for 'between' comparison.`);
             }
