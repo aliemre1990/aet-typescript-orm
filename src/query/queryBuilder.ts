@@ -272,7 +272,7 @@ class QueryBuilder<
         if (context === undefined) {
             context = queryBuilderContextFactory();
         }
-        
+
         let result = '';
 
         if (this.queryType === queryTypes.SELECT) {
@@ -287,7 +287,7 @@ class QueryBuilder<
 
             let cteQueries: { name: string, query: { query: string, params: string[] } }[] = [];
             if (this.cteSpecs !== undefined) {
-                cteQueries = this.cteSpecs.map(spec => ({ name: spec.name, query: spec.buildSQL() }));
+                cteQueries = this.cteSpecs.map(spec => ({ name: spec.name, query: spec.buildSQL(context) }));
             }
             let cteClause = '';
             if (cteQueries.length > 0) {
@@ -301,20 +301,17 @@ class QueryBuilder<
                 selectList = this.selectSpecs
                     .map(sl => {
                         if (ColumnsSelectionQueryTableObjectSymbol in sl) {
-                            return sl[ColumnsSelectionQueryTableObjectSymbol].name;
+                            return `${sl[ColumnsSelectionQueryTableObjectSymbol].name}.*`;
                         }
 
-                        return sl.buildSQL().query;
+                        return sl.buildSQL(context).query;
                     }).join(' ,');
             }
             let fromClause = this.fromSpecs.map(frm => {
-                if (frm instanceof QueryTable) {
+                if (frm instanceof QueryTable || frm instanceof CTEObject) {
                     return `${frm.name}${frm.asName === undefined ? '' : `AS ${frm.asName}`}`;
-                }
-                else if (frm instanceof CTEObject) {
-                    return frm.name;
                 } else {
-                    return frm.buildSQL().query;
+                    return frm.buildSQL(context).query;
                 }
             }).join(' ,');
 

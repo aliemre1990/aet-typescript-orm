@@ -1,11 +1,12 @@
 import { dbTypes, type DbType, type MySQLDbType, type PgDbType } from "../../db.js";
 import type { DbValueTypes } from "../../table/column.js";
-import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable, type QueryBuilderContext } from "../_interfaces/IComparable.js";
+import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, queryBuilderContextFactory, type IComparable, type QueryBuilderContext } from "../_interfaces/IComparable.js";
 import between from "../comparisons/between.js";
 import eq from "../comparisons/eq.js";
 import sqlIn from "../comparisons/in.js";
 import type { InferParamsFromFnArgs } from "../_types/inferParamsFromArgs.js";
 import type QueryParam from "../param.js";
+import { convertArgsToQueryString } from "../functions/_functions.js";
 
 
 const arithmeticOperations = {
@@ -72,7 +73,14 @@ class SQLArithmeticOperation<
     }
 
     buildSQL(context?: QueryBuilderContext) {
-        return { query: ``, params: [...(context?.params || [])] };
+        if (context === undefined) {
+            context = queryBuilderContextFactory();
+        }
+
+        const argsStrArr = convertArgsToQueryString(this.args, context);
+        const queryRes = argsStrArr.join(`${this.operation.symbol} `);
+
+        return { query: queryRes, params: [...(context?.params || [])] };
     }
 
     constructor(

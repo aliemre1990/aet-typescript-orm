@@ -69,7 +69,10 @@ class JSONBuildObjectFunction<
             context = queryBuilderContextFactory();
         }
 
-        return { query: ``, params: [...(context?.params || [])] };
+        const objStr = buildJSONBuildObjectArgSQL(this.obj, context);
+        const result = `JSON_BUILD_OBJECT(${objStr})`;
+
+        return { query: result, params: [...(context?.params || [])] };
     }
 
     constructor(
@@ -141,10 +144,21 @@ function buildJSONBuildObjectArgSQL(obj: JSONBuildObjectParam<any>, context?: Qu
         context = queryBuilderContextFactory();
     }
 
+    let results: string[] = [];
     for (const k in obj) {
-
+        let valueStr: string;
+        if ('buildSQL' in obj[k] && typeof obj[k]['buildSQL'] === 'function') {
+            const buildSQLRes = obj[k].buildSQL(context);
+            valueStr = buildSQLRes.query;
+        } else if (!('buildSQL' in obj[k])) {
+            valueStr = buildJSONBuildObjectArgSQL(obj[k], context);
+        } else {
+            throw Error(`Invalid object type in 'json_build_object' function.`);
+        }
+        results.push(`${k}, ${valueStr}`);
     }
 
+    return results.join(', ');
 }
 
 export default JSONBuildObjectFunction;

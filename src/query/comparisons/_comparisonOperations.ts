@@ -1,25 +1,27 @@
 import type { DbType } from "../../db.js";
 import type { DbValueTypes } from "../../table/column.js";
-import type { IComparable } from "../_interfaces/IComparable.js";
+import { queryBuilderContextFactory, type IComparable, type QueryBuilderContext } from "../_interfaces/IComparable.js";
 import type { InferParamsFromComparables } from "../_types/paramAccumulationComparison.js";
+import { convertArgsToQueryString } from "../functions/_functions.js";
 import type QueryParam from "../param.js";
 
 const comparisonOperations = {
-    eq: { name: 'EQ' },
-    neq: { name: 'NEQ' },
-    gt: { name: 'GT' },
-    gte: { name: 'GTE' },
-    lt: { name: 'LT' },
-    lte: { name: 'LTE' },
-    like: { name: 'LIKE' },
-    iLike: { name: 'ILIKE' },
-    in: { name: 'IN' },
-    notIn: { name: 'NOTIN' },
-    isNull: { name: 'ISNULL' },
-    isNotNull: { name: 'ISNOTNULL' },
-    between: { name: 'BETWEEN' },
-    exists: { name: 'EXISTS' },
-    notExists: { name: 'NOTEXISTS' }
+    eq: { name: 'EQ', symbol: "=" },
+    neq: { name: 'NEQ', symbol: "!=" },
+    gt: { name: 'GT', symbol: ">" },
+    gte: { name: 'GTE', symbol: ">=" },
+    lt: { name: 'LT', symbol: "<" },
+    lte: { name: 'LTE', symbol: "<=" },
+    like: { name: 'LIKE', symbol: "LIKE" },
+    iLike: { name: 'ILIKE', symbol: "ILIKE" },
+    in: { name: 'IN', symbol: "IN" },
+    notIn: { name: 'NOT_IN', symbol: "NOT IN" },
+    isNull: { name: 'IS_NULL', symbol: "IS NULL" },
+    isNotNull: { name: 'IS_NOT_NULL', symbol: "IS NOT NULL" },
+    between: { name: 'BETWEEN', symbol: "BETWEEN" },
+    notBetween: { name: 'NOT_BETWEEN', symbol: "NOT BETWEEN" },
+    exists: { name: 'EXISTS', symbol: "EXISTS" },
+    notExists: { name: 'NOT_EXISTS', symbol: "NOT EXISTS" }
 } as const;
 
 type ComparisonOperation = (typeof comparisonOperations)[keyof typeof comparisonOperations];
@@ -40,6 +42,35 @@ class ColumnComparisonOperation<
     value?: TApplied
 
     params?: QueryParam<TDbType, any, any, any, any>[];
+
+    buildSQL(context?: QueryBuilderContext) {
+        if (context === undefined) {
+            context = queryBuilderContextFactory();
+        }
+
+        if (this.value === undefined) {
+            throw Error('No applied value provided for comparison operation.');
+        }
+
+        const appliedStrArr = convertArgsToQueryString(this.value, context);
+        let appliedRes = '';
+        if (this.operation === comparisonOperations.in || this.operation === comparisonOperations.notIn) {
+            appliedRes = `(${appliedStrArr.join(', ')})`;
+        } else if (this.operation === comparisonOperations.between || this.operation === comparisonOperations.notBetween) {
+            if (appliedStrArr.length !== 2) {
+                throw Error(`Invalid argument count for 'between' comparison.`);
+            }
+
+            appliedRes = `${appliedStrArr[0]} AND ${appliedStrArr[1]}`;
+        } else {
+            appliedRes = appliedStrArr.join(', ');
+        }
+        const comparingStr = this.comparing.buildSQL(context);
+
+        const queryRes = `${comparingStr} ${this.operation.symbol} ${appliedRes}`;
+
+        return { query: queryRes, params: [...(context?.params || [])] };
+    }
 
     constructor(
         dbType: TDbType,

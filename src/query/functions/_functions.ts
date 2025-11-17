@@ -55,9 +55,11 @@ class ColumnSQLFunction<
             context = queryBuilderContextFactory();
         }
 
-        const argResult = convertArgsToQueryString(this.args, context);
+        const argsStrArr = convertArgsToQueryString(this.args, context);
+        const argsStrRes = argsStrArr.join(', ');
+        const queryRes = `${this.sqlFunction.name.toUpperCase()}(${argsStrRes})`;
 
-        return { query: `${this.sqlFunction.name.toUpperCase()}(${argResult.query})`, params: argResult.params };
+        return { query: queryRes, params: context.params };
     }
 
     constructor(
@@ -115,7 +117,7 @@ function convertArgsToQueryString(args: (DbValueTypes | null | IComparable<any, 
         }
     }
 
-    return { query: argQueries.join(', '), params: context.params };
+    return argQueries;
 }
 
 export default ColumnSQLFunction;
