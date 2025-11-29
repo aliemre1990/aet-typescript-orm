@@ -1,7 +1,7 @@
 import type { PgDbType } from "../../db.js";
 import type { AccumulateSubQueryParams } from "../../query/_types/subQueryUtility.js";
 import QueryBuilder, { from } from "../../query/queryBuilder.js";
-import { customersTable, employeesTable, ordersTable, shipmentsTable, usersTable } from "./_tables.js";
+import { customersTable, employeesTable, ordersTable, shipmentsTable, usersTable } from "../_tables.js";
 import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
 
 

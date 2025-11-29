@@ -1,5 +1,5 @@
 import type { IComparable } from "../../query/_interfaces/IComparable.js";
-import { customersTable, employeesTable, shipmentsTable, usersTable } from "./_tables.js";
+import { customersTable, employeesTable, shipmentsTable, usersTable } from "../_tables.js";
 import type { AssertEqual, AssertTrue } from "./_typeTestingUtilities.js";
 
 /**

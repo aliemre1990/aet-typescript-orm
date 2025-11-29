@@ -1,7 +1,7 @@
 import type { DbType } from "../../db.js";
 import type { DeepPrettify } from "../../utility/common.js";
 import type { IComparable } from "../_interfaces/IComparable.js";
-import type ColumnsSelection from "../columnsSelection.js";
+import type ColumnsSelection from "../ColumnsSelection.js";
 import type CTEObject from "../cteObject.js";
 import type QueryParam from "../param.js";
 import type { ComparisonType, FromType, JoinSpecsType, JoinType, ResultShape } from "../queryBuilder.js";

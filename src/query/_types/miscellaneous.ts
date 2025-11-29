@@ -1,5 +1,5 @@
 import type { DbType } from "../../db.js";
-import type ColumnsSelection from "../columnsSelection.js";
+import type ColumnsSelection from "../ColumnsSelection.js";
 import type CTEObject from "../cteObject.js";
 import type { CTESpecsType, FromItemType, FromType, JoinSpecsType } from "../queryBuilder.js";
 import type QueryTable from "../queryTable.js";

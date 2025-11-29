@@ -1,8 +1,5 @@
-import type ColumnsSelection from "../../query/columnsSelection.js";
 import { withAs, withRecursiveAs } from "../../query/cte.js";
-import type CTEObject from "../../query/cteObject.js";
-import QueryBuilder, { cteTypes } from "../../query/queryBuilder.js";
-import { customersTable, employeesTable, ordersTable } from "./_tables.js";
+import { customersTable, employeesTable, ordersTable } from "../_tables.js";
 
 const res = withAs("customerCte", customersTable.select((tables) => [tables.customers.id]))
     .from((cteSpecs) => [cteSpecs.customerCte])

@@ -1,5 +1,5 @@
 import type { IComparable } from "../../../query/_interfaces/IComparable.js";
-import { customersTable } from "../_tables.js";
+import { customersTable } from "../../_tables.js";
 
 const simpleJsonBuildObj = customersTable.select((cols, { jsonBuildObject }) => [
     cols.customers.id,

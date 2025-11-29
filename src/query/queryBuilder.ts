@@ -16,8 +16,8 @@ import type { AccumulateSubQueryParams, ConvertElementsToSubQueryCompliant, Infe
 import type { AccumulateComparisonParams } from "./_types/paramAccumulationComparison.js";
 import type { AccumulateOrderByParams } from "./_types/paramAccumulationOrderBy.js";
 import type { AccumulateColumnParams } from "./_types/paramAccumulationSelect.js";
-import type ColumnsSelection from "./columnsSelection.js";
-import { columnsSelectionFactory, ColumnsSelectionQueryTableObjectSymbol } from "./columnsSelection.js";
+import type ColumnsSelection from "./ColumnsSelection.js";
+import { columnsSelectionFactory, ColumnsSelectionQueryTableObjectSymbol } from "./ColumnsSelection.js";
 import { mysqlDbOperators, mysqlFunctions, pgDbOperators, pgFunctions } from "./dbOperations.js";
 import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, queryBuilderContextFactory, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
 import SubQueryObject from "./subQueryObject.js";
@@ -311,13 +311,13 @@ class QueryBuilder<
             }
             let fromClause = this.fromSpecs.map(frm => {
                 if (frm instanceof QueryTable || frm instanceof CTEObject) {
-                    return `${frm.name}${frm.asName === undefined ? '' : `AS ${frm.asName}`}`;
+                    return `"${frm.name}"${frm.asName === undefined ? '' : `AS "${frm.asName}"`}`;
                 } else {
                     return frm.buildSQL(context).query;
                 }
             }).join(' ,');
 
-            result = `${cteClause ? `${cteClause} ` : ''}${selectList} ${fromClause}`
+            result = `${cteClause ? `${cteClause} ` : ''}SELECT ${selectList} FROM ${fromClause}`
         }
 
         return { query: result, params: [...(context?.params || [])] };

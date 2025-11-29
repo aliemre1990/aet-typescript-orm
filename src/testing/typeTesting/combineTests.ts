@@ -1,4 +1,4 @@
-import { customersTable, employeesTable } from "./_tables.js";
+import { customersTable, employeesTable } from "../_tables.js";
 
 customersTable
     .select((tbls) => [tbls.customers])

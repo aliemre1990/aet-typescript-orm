@@ -1,6 +1,6 @@
-import { pgColumnTypes } from "../../table/columnTypes.js";
-import Column from "../../table/column.js";
-import { ForeignKey, pgColumn, pgTable } from "../../table/table.js";
+import { pgColumnTypes } from "../table/columnTypes.js";
+import Column from "../table/column.js";
+import { ForeignKey, pgColumn, pgTable } from "../table/table.js";
 
 const usersTable = pgTable(
     'users',

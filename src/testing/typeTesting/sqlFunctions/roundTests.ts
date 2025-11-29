@@ -1,6 +1,6 @@
 import type { IComparable } from "../../../query/_interfaces/IComparable.js";
 import type ColumnSQLFunction from "../../../query/functions/_functions.js";
-import { employeesTable } from "../_tables.js";
+import { employeesTable } from "../../_tables.js";
 
 const res = employeesTable.select((cols, { round }) => {
 

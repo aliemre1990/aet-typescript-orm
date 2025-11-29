@@ -6,7 +6,7 @@ import type ColumnSQLFunction from "../../../query/functions/_functions.js";
 import { generateCoalesceFn } from "../../../query/functions/coalesce.js";
 import QueryParam, { generateParamFn } from "../../../query/param.js";
 import QueryColumn from "../../../query/queryColumn.js";
-import { customersTable, employeesTable, ordersTable, usersTable } from "../_tables.js";
+import { customersTable, employeesTable, ordersTable, usersTable } from "../../_tables.js";
 import type { AssertEqual, AssertTrue } from "../_typeTestingUtilities.js";
 
 const customerIdQC = new QueryColumn<PgDbType, typeof customersTable.columns.id, NonNullable<typeof customersTable.columns.id.tableSpecs>, undefined>(dbTypes.postgresql, customersTable.columns.id, { tableName: customersTable.name });

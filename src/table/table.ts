@@ -25,7 +25,7 @@ import type CTEObject from "../query/cteObject.js";
 import type QueryParam from "../query/param.js";
 import type { AccumulateComparisonParams } from "../query/_types/paramAccumulationComparison.js";
 import type { IName } from "../query/_interfaces/IName.js";
-import type ColumnsSelection from "../query/columnsSelection.js";
+import type ColumnsSelection from "../query/ColumnsSelection.js";
 import type { IComparable } from "../query/_interfaces/IComparable.js";
 
 type TableSpecsType<TTableName extends string = string> = { tableName: TTableName }
