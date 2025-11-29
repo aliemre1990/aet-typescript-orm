@@ -26,6 +26,7 @@ import sqlIn from "./comparisons/in.js";
 import between from "./comparisons/between.js";
 import CTEObject from "./cteObject.js";
 import { mapCTESpecsToSelection } from "./utility.js";
+import notEq from "./comparisons/notEq.js";
 
 
 type ResultShapeItem<TDbType extends DbType> = IComparable<TDbType, any, any, any, any, any>;
@@ -142,6 +143,7 @@ class QueryBuilder<
     defaultFieldKey: GetFirstDefaultKeyFromResult<TDbType, TResult>;
 
     eq: typeof eq = eq;
+    notEq: typeof notEq = notEq;
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 

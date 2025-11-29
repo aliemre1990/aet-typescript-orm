@@ -5,6 +5,7 @@ import sqlIn from "./comparisons/in.js";
 import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, queryBuilderContextFactory, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
 import type Column from "../table/column.js";
 import type { ColumnType, DbValueTypes } from "../table/column.js";
+import notEq from "./comparisons/notEq.js";
 
 type QueryColumnsObjectType<TDbType extends DbType> = { [key: string]: QueryColumn<TDbType, any, any, any> }
 
@@ -29,6 +30,7 @@ class QueryColumn<
     defaultFieldKey: TDefaultFieldKey;
 
     eq: typeof eq = eq;
+    notEq: typeof notEq = notEq;
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 

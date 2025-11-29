@@ -5,6 +5,7 @@ import type { IName } from "./_interfaces/IName.js";
 import between from "./comparisons/between.js";
 import eq from "./comparisons/eq.js";
 import sqlIn from "./comparisons/in.js";
+import notEq from "./comparisons/notEq.js";
 import type QueryParam from "./param.js";
 import type { CTEType, ResultShape } from "./queryBuilder.js";
 import type QueryBuilder from "./queryBuilder.js";
@@ -39,6 +40,7 @@ class CTEObjectEntry<
     comparable: TComparable;
 
     eq: typeof eq = eq;
+    notEq: typeof notEq = notEq;
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 

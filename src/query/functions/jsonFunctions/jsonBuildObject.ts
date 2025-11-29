@@ -7,6 +7,7 @@ import eq from "../../comparisons/eq.js";
 import sqlIn from "../../comparisons/in.js";
 import type { InferReturnTypeFromJSONBuildObjectParam } from "../../_types/args.js";
 import type QueryParam from "../../param.js";
+import notEq from "../../comparisons/notEq.js";
 
 type InferParamsFromJsonBuildObjectArg<TDbType extends DbType, TObj extends JSONBuildObjectParam<TDbType>> =
     InferParamsFromObj<TDbType, TObj>["length"] extends 0 ? undefined :
@@ -109,6 +110,7 @@ class JSONBuildObjectFunction<
     }
 
     eq: typeof eq = eq;
+    notEq: typeof notEq = notEq;
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 }

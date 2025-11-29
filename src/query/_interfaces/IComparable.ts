@@ -5,6 +5,7 @@ import type between from "../comparisons/between.js";
 import type eq from "../comparisons/eq.js";
 import type sqlIn from "../comparisons/in.js";
 import type { IDbType } from "./IDbType.js";
+import type notEq from "../comparisons/notEq.js";
 
 type QueryBuilderContext = { params: string[] }
 function queryBuilderContextFactory(): QueryBuilderContext {
@@ -32,6 +33,7 @@ interface IComparable<
     defaultFieldKey: TDefaultFieldKey;
 
     eq: typeof eq;
+    notEq: typeof notEq;
     sqlIn: typeof sqlIn;
     between: typeof between;
 

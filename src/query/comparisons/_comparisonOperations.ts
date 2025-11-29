@@ -63,7 +63,7 @@ class ColumnComparisonOperation<
 
             appliedRes = `${appliedStrArr[0]} AND ${appliedStrArr[1]}`;
         } else {
-            appliedRes = appliedStrArr.join(', ');
+            appliedRes = appliedStrArr[0];
         }
         const comparingStr = this.comparing.buildSQL(context);
 

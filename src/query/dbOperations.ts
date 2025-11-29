@@ -7,7 +7,7 @@ import { generateArithmeticExponentiation } from "./arithmetic/exponentiation.js
 import { generateCoalesceFn } from "./functions/coalesce.js"
 import { jsonbBuildObjectFn, jsonBuildObjectFn } from "./functions/jsonFunctions/jsonBuildObject.js"
 import generateRoundFn from "./functions/round.js"
-import { generateAndFn } from "./logicalOperations.js"
+import { generateAndFn, generateOrFn } from "./logicalOperations.js"
 import { generateParamFn } from "./param.js"
 
 /**
@@ -87,7 +87,8 @@ const mysqlFunctions: DbFunctions<MySQLDbType> = {
  */
 function generateCommonLogicalOperators<TDbType extends DbType>(dbType: TDbType) {
     return {
-        and: generateAndFn(dbType)
+        and: generateAndFn(dbType),
+        or: generateOrFn(dbType)
     }
 }
 

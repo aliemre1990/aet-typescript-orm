@@ -4,6 +4,7 @@ import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, queryBui
 import between from "./comparisons/between.js";
 import eq from "./comparisons/eq.js";
 import sqlIn from "./comparisons/in.js";
+import notEq from "./comparisons/notEq.js";
 
 class QueryParam<
     TDbType extends DbType,
@@ -63,6 +64,7 @@ class QueryParam<
     }
 
     eq: typeof eq = eq;
+    notEq: typeof notEq = notEq;
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 }

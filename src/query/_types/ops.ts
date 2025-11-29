@@ -6,7 +6,7 @@ import type { generateArithmeticExponentiation } from "../arithmetic/exponentiat
 import type { generateCoalesceFn } from "../functions/coalesce.js"
 import type { jsonbBuildObjectFn, jsonBuildObjectFn } from "../functions/jsonFunctions/jsonBuildObject.js"
 import type generateRoundFn from "../functions/round.js"
-import type { generateAndFn, } from "../logicalOperations.js"
+import type { generateAndFn, generateOrFn, } from "../logicalOperations.js"
 import type { generateParamFn } from "../param.js"
 
 type PgArithmeticAddition = ReturnType<typeof generateArithmeticAddition<PgDbType>>;
@@ -36,8 +36,12 @@ type MySQLRoundFn = ReturnType<typeof generateRoundFn<MySQLDbType>>;
 type PgAndFn = ReturnType<typeof generateAndFn<PgDbType>>;
 type MySQLAndFn = ReturnType<typeof generateAndFn<MySQLDbType>>;
 
+type PgOrFn = ReturnType<typeof generateOrFn<PgDbType>>;
+type MySQLOrFn = ReturnType<typeof generateOrFn<MySQLDbType>>;
+
 type LogicalOperators<TDbType extends DbType> = {
-    and: TDbType extends PgDbType ? PgAndFn : TDbType extends MySQLDbType ? MySQLAndFn : never
+    and: TDbType extends PgDbType ? PgAndFn : TDbType extends MySQLDbType ? MySQLAndFn : never,
+    or: TDbType extends PgDbType ? PgOrFn : TDbType extends MySQLDbType ? MySQLOrFn : never;
 }
 
 /**

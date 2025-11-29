@@ -7,6 +7,7 @@ import sqlIn from "../comparisons/in.js";
 import type { InferParamsFromFnArgs } from "../_types/inferParamsFromArgs.js";
 import type QueryParam from "../param.js";
 import { convertArgsToQueryString } from "../functions/_functions.js";
+import notEq from "../comparisons/notEq.js";
 
 
 const aggregationOperations = {
@@ -67,6 +68,7 @@ class BasicColumnAggregationOperation<
     defaultFieldKey: TDefaultFieldKey;
 
     eq: typeof eq = eq;
+    notEq: typeof notEq = notEq;
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 

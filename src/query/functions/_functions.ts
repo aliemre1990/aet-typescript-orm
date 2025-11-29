@@ -6,6 +6,7 @@ import eq from "../comparisons/eq.js";
 import sqlIn from "../comparisons/in.js";
 import type { InferParamsFromFnArgs } from "../_types/inferParamsFromArgs.js";
 import type QueryParam from "../param.js";
+import notEq from "../comparisons/notEq.js";
 
 const sqlFunctions = {
     coalesce: { name: 'COALESCE' },
@@ -43,6 +44,7 @@ class ColumnSQLFunction<
     asName?: TAs;
 
     eq: typeof eq = eq;
+    notEq: typeof notEq = notEq;
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 

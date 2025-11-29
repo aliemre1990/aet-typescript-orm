@@ -13,9 +13,7 @@ import type { AccumulateColumnParams } from "./_types/paramAccumulationSelect.js
 import type { SelectToAllColumnsMapRecursively, SelectToResultMapRecursively } from "./_types/result.js";
 import type { AccumulateSubQueryParams, MapToSubQueryObject } from "./_types/subQueryUtility.js";
 import type ColumnsSelection from "./columnsSelection.js";
-import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
 import type CTEObject from "./cteObject.js";
-import type ColumnLogicalOperation from "./logicalOperations.js";
 import type QueryParam from "./param.js";
 import
 QueryBuilder,

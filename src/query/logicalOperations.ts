@@ -1,6 +1,7 @@
 import { type DbType } from "../db.js";
+import { queryBuilderContextFactory, type QueryBuilderContext } from "./_interfaces/IComparable.js";
 import type { InferParamsFromOpsArray } from "./_types/paramAccumulationComparison.js";
-import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
+import ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
 import type QueryParam from "./param.js";
 
 const logicalOperations = {
@@ -48,7 +49,15 @@ class ColumnLogicalOperation<
         }
     }
 
+    buildSQL(context?: QueryBuilderContext): { query: string, params: string[] } {
+        if (context === undefined) {
+            context = queryBuilderContextFactory();
+        }
 
+        let res = this.comparisons.map(comp => comp.buildSQL(context).query).join(` ${this.operator.name} `);
+
+        return { query: res, params: [...(context?.params || [])] };
+    }
 
 }
 
@@ -63,11 +72,22 @@ function generateAndFn<TDbType extends DbType>(
 }
 
 
+function generateOrFn<TDbType extends DbType>(
+    dbType: TDbType
+) {
+    return function <
+        TComparisons extends (ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>)[]
+    >(...ops: TComparisons) {
+        return new ColumnLogicalOperation<TDbType, TComparisons>(dbType, logicalOperations.or, ops);
+    }
+}
+
 export default ColumnLogicalOperation;
 
 export {
     logicalOperations,
-    generateAndFn
+    generateAndFn,
+    generateOrFn
 }
 
 export type {
