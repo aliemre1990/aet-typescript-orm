@@ -50,7 +50,7 @@ class QueryColumn<
             context = queryBuilderContextFactory();
         }
 
-        return { query: `${this.qTableSpecs.asTableName || this.qTableSpecs.tableName}.${this.asName || this.defaultFieldKey}`, params: context.params };
+        return { query: `"${this.qTableSpecs.asTableName || this.qTableSpecs.tableName}"."${this.asName || this.defaultFieldKey}"`, params: context.params };
     }
 }
 
