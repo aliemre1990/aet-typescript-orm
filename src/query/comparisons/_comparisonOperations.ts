@@ -52,22 +52,21 @@ class ColumnComparisonOperation<
             throw Error('No applied value provided for comparison operation.');
         }
 
+        const comparingStr = this.comparing.buildSQL(context);
+
         const appliedStrArr = convertArgsToQueryString(this.value, context);
-        let appliedRes = '';
+
+        let queryRes;
         if ([comparisonOperations.in, comparisonOperations.notIn].some(op => op === this.operation)) {
-            appliedRes = `(${appliedStrArr.join(', ')})`;
+            queryRes = `${comparingStr.query} ${this.operation.symbol} (${appliedStrArr.join(', ')})`;
         } else if ([comparisonOperations.between, comparisonOperations.notBetween].some(op => op === this.operation)) {
             if (appliedStrArr.length !== 2) {
                 throw Error(`Invalid argument count for 'between' comparison.`);
             }
-
-            appliedRes = `${appliedStrArr[0]} AND ${appliedStrArr[1]}`;
+            queryRes = `${comparingStr.query} ${this.operation.symbol} ${appliedStrArr[0]} AND ${appliedStrArr[1]}`;
         } else {
-            appliedRes = appliedStrArr[0];
+            queryRes = `${comparingStr.query}${this.operation.symbol}${appliedStrArr[0]}`;
         }
-        const comparingStr = this.comparing.buildSQL(context);
-
-        const queryRes = `${comparingStr} ${this.operation.symbol} ${appliedRes}`;
 
         return { query: queryRes, params: [...(context?.params || [])] };
     }

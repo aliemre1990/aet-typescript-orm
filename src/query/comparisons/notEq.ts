@@ -56,7 +56,7 @@ function notEq<
             TDbType,
             TParamName extends string ? TParamName : never,
             IsAny<TParamValue> extends true ? TValueType | null : TParamValue
-        >(value.name, value.dbType);
+        >(value.dbType, value.name);
 
         return new ColumnComparisonOperation(
             dbType,

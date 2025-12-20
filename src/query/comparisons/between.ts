@@ -156,14 +156,14 @@ function between<
             TDbType,
             TLParamName extends string ? TLParamName : never,
             IsAny<TLParamValue> extends true ? TValueType | null : TLParamValue
-        >(leftValue.name, leftValue.dbType);
+        >(leftValue.dbType, leftValue.name);
 
         if (rightValue instanceof QueryParam) {
             const rParam = new QueryParam<
                 TDbType,
                 TRParamName extends string ? TRParamName : never,
                 IsAny<TRParamValue> extends true ? TValueType | null : TRParamValue
-            >(rightValue.name, leftValue.dbType);
+            >(leftValue.dbType, rightValue.name);
 
             return new ColumnComparisonOperation(
                 dbType,
@@ -191,14 +191,14 @@ function between<
             TDbType,
             TRParamName extends string ? TRParamName : never,
             IsAny<TRParamValue> extends true ? TValueType | null : TRParamValue
-        >(rightValue.name, leftValue.dbType);
+        >(leftValue.dbType, rightValue.name);
 
         if (leftValue instanceof QueryParam) {
             const lParam = new QueryParam<
                 TDbType,
                 TLParamName extends string ? TLParamName : never,
                 IsAny<TLParamValue> extends true ? TValueType | null : TLParamValue
-            >(leftValue.name, leftValue.dbType);
+            >(leftValue.dbType, leftValue.name);
 
             return new ColumnComparisonOperation(
                 dbType,

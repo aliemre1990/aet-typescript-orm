@@ -309,6 +309,7 @@ class QueryBuilder<
                         return sl.buildSQL(context).query;
                     }).join(', ');
             }
+
             let fromClause = this.fromSpecs.map(frm => {
                 if (frm instanceof QueryTable) {
                     return `"${frm.table.name}"${frm.asName === undefined ? '' : ` AS "${frm.asName}"`}`;
@@ -320,7 +321,13 @@ class QueryBuilder<
                 }
             }).join(' ,');
 
-            result = `${cteClause ? `${cteClause} ` : ''}SELECT ${selectList} FROM ${fromClause}`
+
+            let whereClause;
+            if (this.whereComparison) {
+                whereClause = this.whereComparison?.buildSQL(context).query;
+            }
+
+            result = `${cteClause ? `${cteClause} ` : ''}SELECT ${selectList} FROM ${fromClause}${whereClause ? ` WHERE ${whereClause}` : ''}`;
         }
 
         return { query: result, params: [...(context?.params || [])] };
