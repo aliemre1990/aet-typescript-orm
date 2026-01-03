@@ -1,4 +1,5 @@
 import type { DbType, MySQLDbType, PgDbType } from "../../db.js"
+import type generateAvgFn from "../aggregation/avg.js"
 import type { jsonAggFn, jsonbAggFn } from "../aggregation/json/jsonAgg.js"
 import type generateSumFn from "../aggregation/sum.js"
 import type { generateArithmeticAddition } from "../arithmetic/addition.js"
@@ -54,9 +55,12 @@ type PgAggregationFunction = {
 
 type PgSumFn = ReturnType<typeof generateSumFn<PgDbType>>;
 type MySQLSumFn = ReturnType<typeof generateSumFn<MySQLDbType>>;
+type PgAvgFn = ReturnType<typeof generateAvgFn<PgDbType>>;
+type MySQLAvgFn = ReturnType<typeof generateAvgFn<MySQLDbType>>;
 
 type AggregationFunctions<TDbType extends DbType> = {
-    sum: TDbType extends PgDbType ? PgSumFn : TDbType extends MySQLDbType ? MySQLSumFn : never
+    sum: TDbType extends PgDbType ? PgSumFn : TDbType extends MySQLDbType ? MySQLSumFn : never,
+    avg: TDbType extends PgDbType ? PgAvgFn : TDbType extends MySQLDbType ? MySQLAvgFn : never,
 } &
     (TDbType extends PgDbType ? PgAggregationFunction : {})
 

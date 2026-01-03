@@ -283,19 +283,6 @@ class QueryBuilder<
                 throw Error('Result not specified.');
             }
 
-            if (this.fromSpecs === undefined) {
-                throw Error('From clause not specified.');
-            }
-
-            let cteQueries: { name: string, query: { query: string, params: string[] } }[] = [];
-            if (this.cteSpecs !== undefined) {
-                cteQueries = this.cteSpecs.map(spec => ({ name: spec.name, query: spec.buildSQL(context) }));
-            }
-            let cteClause = '';
-            if (cteQueries.length > 0) {
-                cteClause = `WITH ${cteQueries.map(qry => `"${qry.name}" AS (${qry.query.query})`).join(', ')}`
-            }
-
             let selectList;
             if (this.selectSpecs === "*") {
                 selectList = this.selectSpecs;
@@ -310,6 +297,10 @@ class QueryBuilder<
                     }).join(', ');
             }
 
+
+            if (this.fromSpecs === undefined) {
+                throw Error('From clause not specified.');
+            }
             let fromClause = this.fromSpecs.map(frm => {
                 if (frm instanceof QueryTable) {
                     return `"${frm.table.name}"${frm.asName === undefined ? '' : ` AS "${frm.asName}"`}`;
@@ -327,7 +318,26 @@ class QueryBuilder<
                 whereClause = this.whereComparison?.buildSQL(context).query;
             }
 
-            result = `${cteClause ? `${cteClause} ` : ''}SELECT ${selectList} FROM ${fromClause}${whereClause ? ` WHERE ${whereClause}` : ''}`;
+            let groupByClause;
+            if (this.groupedColumns) {
+                groupByClause = this.groupedColumns.map(grp => grp.buildSQL(context).query).join(', ');
+            }
+
+
+            let cteQueries: { name: string, query: { query: string, params: string[] } }[] = [];
+            if (this.cteSpecs !== undefined) {
+                cteQueries = this.cteSpecs.map(spec => ({ name: spec.name, query: spec.buildSQL(context) }));
+            }
+            let cteClause = '';
+            if (cteQueries.length > 0) {
+                cteClause = `WITH ${cteQueries.map(qry => `"${qry.name}" AS (${qry.query.query})`).join(', ')}`
+            }
+
+
+            result = `${cteClause ? `${cteClause} ` : ''}`;
+            result += `SELECT ${selectList} FROM ${fromClause}`;
+            result += `${whereClause ? ` WHERE ${whereClause}` : ''}`;
+            result += `${groupByClause ? ` GROUP BY ${groupByClause}` : ''}`;
         }
 
         return { query: result, params: [...(context?.params || [])] };
@@ -1031,6 +1041,7 @@ class QueryBuilder<
                 joinSpecs: this.joinSpecs,
                 whereComparison: this.whereComparison,
                 selectResult: this.selectResult,
+                selectSpecs: this.selectSpecs,
                 groupedColumns: this.groupedColumns,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
@@ -1153,6 +1164,7 @@ export default QueryBuilder;
 
 export {
     from,
+    joinTypes,
     cteTypes,
     unionTypes,
     combineTypes

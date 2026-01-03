@@ -46,8 +46,9 @@ type InferFirstTypeFromArgs<TDbType extends DbType, TArgs extends
 
 type IsContainsNonNull<TDbType extends DbType, TArgs extends
     (
-        IComparable<TDbType, any, any, any, any, any> |
-        DbValueTypes
+        DbValueTypes |
+        null |
+        IComparable<TDbType, any, any, any, any, any>
 
     )[]
 > = TArgs extends readonly [infer First, ...infer Rest] ?

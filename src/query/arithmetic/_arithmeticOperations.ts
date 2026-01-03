@@ -79,8 +79,14 @@ class SQLArithmeticOperation<
             context = queryBuilderContextFactory();
         }
 
+
+        let previousIsTopLevelVal = context.isTopLevel;
+        context.isTopLevel = false;
         const argsStrArr = convertArgsToQueryString(this.args, context);
-        const queryRes = argsStrArr.join(`${this.operation.symbol} `);
+        let queryRes = argsStrArr.join(`${this.operation.symbol}`);
+        context.isTopLevel = previousIsTopLevelVal;
+
+        queryRes = context.isTopLevel === false ? `(${queryRes})` : queryRes;
 
         return { query: queryRes, params: [...(context?.params || [])] };
     }

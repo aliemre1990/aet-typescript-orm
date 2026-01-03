@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert";
 
-import { customersTable } from "../_tables.js";
+import { customersTable, employeesTable } from "../_tables.js";
 
 test.suite("SIMPLE WHERE TESTS", () => {
     test("Select all from customers where customer id equals value query.", () => {
@@ -37,5 +37,32 @@ test.suite("SIMPLE WHERE TESTS", () => {
         const query = buildRes.query;
 
         assert.equal(`SELECT * FROM "customers" WHERE "customers"."id" IN (SELECT "customers"."id" FROM "customers")`, query);
+    });
+
+
+    test("Select all from customers using grouped comparisons in where -- 1.", () => {
+        const qb = customersTable.select().where((tables, { and, or }) => and(tables.customers.id.eq(1), or(tables.customers.id.eq(2), tables.customers.id.eq(3))));
+        const buildRes = qb.buildSQL();
+        const query = buildRes.query;
+
+        assert.equal(`SELECT * FROM "customers" WHERE "customers"."id"=1 AND ("customers"."id"=2 OR "customers"."id"=3)`, query);
+    });
+
+
+    test("Select all from customers using grouped comparisons in where. -- 2", () => {
+        const qb = customersTable.select().where(
+            (
+                tables,
+                { and, or }
+            ) => and(
+                tables.customers.id.eq(1),
+                or(tables.customers.id.eq(2), tables.customers.id.eq(3), or(tables.customers.id.eq(5), tables.customers.id.eq(6))),
+                tables.customers.id.eq(4),
+            )
+        );
+        const buildRes = qb.buildSQL();
+        const query = buildRes.query;
+
+        assert.equal(`SELECT * FROM "customers" WHERE "customers"."id"=1 AND ("customers"."id"=2 OR "customers"."id"=3 OR ("customers"."id"=5 OR "customers"."id"=6)) AND "customers"."id"=4`, query);
     });
 });

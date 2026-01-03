@@ -7,9 +7,9 @@ import type sqlIn from "../comparisons/in.js";
 import type { IDbType } from "./IDbType.js";
 import type notEq from "../comparisons/notEq.js";
 
-type QueryBuilderContext = { params: string[] }
+type QueryBuilderContext = { params: string[], isTopLevel: boolean }
 function queryBuilderContextFactory(): QueryBuilderContext {
-    return { params: [] }
+    return { params: [], isTopLevel: true }
 }
 
 const IComparableValueDummySymbol = Symbol();

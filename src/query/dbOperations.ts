@@ -1,5 +1,6 @@
 import { dbTypes, type DbType, type MySQLDbType, type PgDbType } from "../db.js"
 import type { AggregationFunctions, ArithmeticOperations, DbFunctions, DbOperators, LogicalOperators } from "./_types/ops.js"
+import generateAvgFn from "./aggregation/avg.js"
 import { jsonAggFn, jsonbAggFn } from "./aggregation/json/jsonAgg.js"
 import generateSumFn from "./aggregation/sum.js"
 import { generateArithmeticAddition } from "./arithmetic/addition.js"
@@ -15,7 +16,8 @@ import { generateParamFn } from "./param.js"
  */
 function generateCommonAggregationFunctions<TDbType extends DbType>(dbType: TDbType) {
     return {
-        sum: generateSumFn<TDbType>(dbType)
+        sum: generateSumFn<TDbType>(dbType),
+        avg: generateAvgFn<TDbType>(dbType)
     }
 }
 

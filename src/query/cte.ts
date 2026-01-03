@@ -42,7 +42,7 @@ function withRecursiveAs<
     columnNames: TColumnNames,
     anchorQb: TAnchorQb,
     unionType: UNION_TYPE,
-    recursivePart: (self: ColumnsSelection<TDbType, TFinalCTE, TFinalCTE["cteObjectEntries"]>) => TRecursivePartResult
+    recursivePart: (self: TFinalCTE) => TRecursivePartResult
 
 ) {
     // Map anchorqb to cte object with name TCTEName and columns are TColumnsList if specified, else TAnchorQb columns
@@ -71,8 +71,7 @@ function withRecursiveAs<
         cte = new CTEObject(anchorQb.dbType, anchorQb, cteName, cteTypes.RECURSIVE, finalCTEentries) as TFinalCTE;
     }
 
-    let self = columnsSelectionFactory(cte, cte.cteObjectEntries);
-    let recursiveQb = recursivePart(self);
+    let recursiveQb = recursivePart(cte);
 
     let finalQb: QueryBuilder<TDbType, any, any, any, any, any, any>;
     if (unionType === "UNION") {

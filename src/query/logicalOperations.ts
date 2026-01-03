@@ -54,8 +54,12 @@ class ColumnLogicalOperation<
             context = queryBuilderContextFactory();
         }
 
+        let previousIsTopLevelVal = context.isTopLevel;
+        context.isTopLevel = false;
         let res = this.comparisons.map(comp => comp.buildSQL(context).query).join(` ${this.operator.name} `);
+        context.isTopLevel = previousIsTopLevelVal;
 
+        res = context.isTopLevel === false ? `(${res})` : res;
         return { query: res, params: [...(context?.params || [])] };
     }
 
