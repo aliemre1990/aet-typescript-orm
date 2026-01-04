@@ -58,7 +58,7 @@ class CTEObjectEntry<
             context = queryBuilderContextFactory();
         }
 
-        return { query: `${this.ownerName}.${this.asName || this.defaultFieldKey}`, params: context.params };
+        return { query: `"${this.ownerName}"."${this.asName || this.defaultFieldKey}"`, params: context.params };
     }
 
     constructor(

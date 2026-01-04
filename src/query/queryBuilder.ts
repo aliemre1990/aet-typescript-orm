@@ -70,7 +70,7 @@ const cteTypes = {
     }
 } as const;
 type CTEType = (typeof cteTypes)[keyof typeof cteTypes];
-type CTESpecsType<TDbType extends DbType> = readonly CTEObject<TDbType, any, any, any, any, any>[];
+type CTESpecsType<TDbType extends DbType> = readonly CTEObject<TDbType, string, CTEType, any, any, any>[];
 
 type GetFirstTypeFromResult<TDbType extends DbType, TResult extends ResultShape<TDbType> | undefined> =
     TResult extends undefined ? never :
@@ -97,20 +97,20 @@ type GetFirstDefaultKeyFromResult<TDbType extends DbType, TResult extends Result
     never;
 
 const unionTypes = {
-    UNION: { name: 'UNION' },
-    UNION_ALL: { name: 'UNION_ALL' },
+    UNION: { name: 'UNION', query: 'UNION' },
+    UNION_ALL: { name: 'UNION_ALL', query: 'UNION ALL' },
 } as const;
 type UNION_TYPE = typeof unionTypes[keyof typeof unionTypes]["name"];
 
 const combineTypes = {
     ...unionTypes,
-    INTERSECT: { name: 'INTERSECT' },
-    INTERSECT_ALL: { name: 'INTERSECT_ALL' },
-    EXCEPT: { name: 'EXCEPT' },
-    EXCEPT_ALL: { name: 'EXCEPT_ALL' }
+    INTERSECT: { name: 'INTERSECT', query: 'INTERSECT' },
+    INTERSECT_ALL: { name: 'INTERSECT_ALL', query: 'INTERSECT ALL' },
+    EXCEPT: { name: 'EXCEPT', query: 'EXCEPT' },
+    EXCEPT_ALL: { name: 'EXCEPT_ALL', query: 'EXCEPT ALL' }
 } as const;
 type COMBINE_TYPE = typeof combineTypes[keyof typeof combineTypes]["name"];
-type CombineSpecsType<TDbType extends DbType> = readonly { type: COMBINE_TYPE, qb: QueryBuilder<TDbType, any, any, any, any, any, any> }[];
+type CombineSpecsType<TDbType extends DbType> = readonly { type: typeof combineTypes[keyof typeof combineTypes], qb: QueryBuilder<TDbType, any, any, any, any, any, any> }[];
 
 const queryTypes = {
     SELECT: 'SELECT',
@@ -312,6 +312,25 @@ class QueryBuilder<
                 }
             }).join(' ,');
 
+            let joinClauses;
+            if (this.joinSpecs) {
+                joinClauses = this.joinSpecs.map(spec => {
+                    let result = `${spec.joinType} JOIN `;
+
+                    if (spec.table instanceof QueryTable) {
+                        result += `"${spec.table.table.name}"${spec.table.asName === undefined ? '' : ` AS "${spec.table.asName}"`}`;
+                    } else if (spec.table instanceof CTEObject) {
+                        result += `"${spec.table.cteName}"${spec.table.asName === undefined ? '' : ` AS "${spec.table.asName}"`}`;
+                    } else {
+                        result += `${spec.table.buildSQL(context).query}`;
+                    }
+                    result += ` ON ${spec.comparison.buildSQL(context).query}`;
+
+                    return result;
+                })
+                    .join(' ');
+            }
+
 
             let whereClause;
             if (this.whereComparison) {
@@ -324,20 +343,38 @@ class QueryBuilder<
             }
 
 
-            let cteQueries: { name: string, query: { query: string, params: string[] } }[] = [];
+            let cteClause;
             if (this.cteSpecs !== undefined) {
-                cteQueries = this.cteSpecs.map(spec => ({ name: spec.name, query: spec.buildSQL(context) }));
-            }
-            let cteClause = '';
-            if (cteQueries.length > 0) {
-                cteClause = `WITH ${cteQueries.map(qry => `"${qry.name}" AS (${qry.query.query})`).join(', ')}`
+                const cteItems = this.cteSpecs.map(cte => {
+                    let qbResult = cte.buildSQL(context);
+                    let result = `${cte.cteType.name === 'RECURSIVE' ? 'RECURSIVE ' : ''}`;
+                    if (cte.cteType.name === 'RECURSIVE') {
+
+                    }
+
+                    result += `"${cte.cteName}" AS (${qbResult.query})`;
+
+                    return result;
+                }).join(', ');
+                cteClause = `WITH ${cteItems}`
             }
 
 
-            result = `${cteClause ? `${cteClause} ` : ''}`;
-            result += `SELECT ${selectList} FROM ${fromClause}`;
-            result += `${whereClause ? ` WHERE ${whereClause}` : ''}`;
-            result += `${groupByClause ? ` GROUP BY ${groupByClause}` : ''}`;
+            let unions;
+            if (this.combineSpecs) {
+                unions = this.combineSpecs
+                    .map(spec => `${spec.type.query} (${spec.qb.buildSQL(context).query})`
+                    )
+                    .join('');
+            }
+
+            result =
+                `${cteClause ? `${cteClause} ` : ''}` +
+                `SELECT ${selectList} FROM ${fromClause}` +
+                `${joinClauses ? ` ${joinClauses}` : ''}` +
+                `${whereClause ? ` WHERE ${whereClause}` : ''}` +
+                `${groupByClause ? ` GROUP BY ${groupByClause}` : ''}` +
+                `${unions ? ` ${unions}` : ''}`
         }
 
         return { query: result, params: [...(context?.params || [])] };
@@ -1016,7 +1053,12 @@ class QueryBuilder<
         }
         const res = cteSelectionCb(cteSpecs);
 
-        let newCombine = { type: combineType, qb: res };
+        let actualCombineType = Object.entries(combineTypes).find(ent => ent[1].name === combineType)?.[1];
+        if (isNullOrUndefined(actualCombineType)) {
+            throw Error('Invalid combine type.')
+        }
+
+        let newCombine = { type: actualCombineType, qb: res };
 
         let newCombineSpecs: CombineSpecsType<TDbType> = [newCombine];
         if (this.combineSpecs !== undefined) {
