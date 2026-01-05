@@ -92,6 +92,7 @@ class CTEObject<
     asName?: TAs;
     name: TAs extends undefined ? TCTEName : TAs;
     cteName: TCTEName;
+    isColumnListPresent?: boolean;
 
     cteType: TCTEType;
     cteObjectEntries: TEntries;
@@ -111,7 +112,8 @@ class CTEObject<
         cteName: TCTEName,
         cteType: TCTEType,
         entries?: TEntries,
-        asName?: TAs
+        asName?: TAs,
+        isColumnListPresent?: boolean
     ) {
         this.dbType = dbType;
         this.qb = qb;
@@ -119,6 +121,7 @@ class CTEObject<
         this.name = (asName || cteName) as TAs extends undefined ? TCTEName : TAs;
         this.asName = asName;
         this.cteType = cteType;
+        this.isColumnListPresent = isColumnListPresent;
 
         if (entries !== undefined) {
             this.cteObjectEntries = entries;

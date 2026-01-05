@@ -91,7 +91,9 @@ function withRecursiveAs<
         finalQb,
         cteName,
         cteTypes.RECURSIVE,
-        finalCTEentries.length === 0 ? undefined : finalCTEentries // Override entries from column list if specified
+        finalCTEentries.length === 0 ? undefined : finalCTEentries, // Override entries from column list if specified
+        undefined,
+        finalCTEentries.length === 0 ? false : true
     ) as TFinalCTE;
     const cteSpecs = [cteObject] as const;
 

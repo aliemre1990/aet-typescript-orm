@@ -24,7 +24,7 @@ import SubQueryObject from "./subQueryObject.js";
 import eq from "./comparisons/eq.js";
 import sqlIn from "./comparisons/in.js";
 import between from "./comparisons/between.js";
-import CTEObject from "./cteObject.js";
+import CTEObject, { type CTEObjectEntry } from "./cteObject.js";
 import { mapCTESpecsToSelection } from "./utility.js";
 import notEq from "./comparisons/notEq.js";
 
@@ -70,7 +70,7 @@ const cteTypes = {
     }
 } as const;
 type CTEType = (typeof cteTypes)[keyof typeof cteTypes];
-type CTESpecsType<TDbType extends DbType> = readonly CTEObject<TDbType, string, CTEType, any, any, any>[];
+type CTESpecsType<TDbType extends DbType> = readonly CTEObject<TDbType, string, CTEType, any, readonly CTEObjectEntry<TDbType, any, any, any, string, string | undefined>[], any>[];
 
 type GetFirstTypeFromResult<TDbType extends DbType, TResult extends ResultShape<TDbType> | undefined> =
     TResult extends undefined ? never :
@@ -318,13 +318,13 @@ class QueryBuilder<
                     let result = `${spec.joinType} JOIN `;
 
                     if (spec.table instanceof QueryTable) {
-                        result += `"${spec.table.table.name}"${spec.table.asName === undefined ? '' : ` AS "${spec.table.asName}"`}`;
+                        result = `${result}"${spec.table.table.name}"${spec.table.asName === undefined ? '' : ` AS "${spec.table.asName}"`}`;
                     } else if (spec.table instanceof CTEObject) {
-                        result += `"${spec.table.cteName}"${spec.table.asName === undefined ? '' : ` AS "${spec.table.asName}"`}`;
+                        result = `${result}"${spec.table.cteName}"${spec.table.asName === undefined ? '' : ` AS "${spec.table.asName}"`}`;
                     } else {
-                        result += `${spec.table.buildSQL(context).query}`;
+                        result = `${result}${spec.table.buildSQL(context).query}`;
                     }
-                    result += ` ON ${spec.comparison.buildSQL(context).query}`;
+                    result = `${result} ON ${spec.comparison.buildSQL(context).query}`;
 
                     return result;
                 })
@@ -352,7 +352,13 @@ class QueryBuilder<
 
                     }
 
-                    result += `"${cte.cteName}" AS (${qbResult.query})`;
+                    result = `${result}"${cte.cteName}"`;
+                    if (cte.isColumnListPresent === true) {
+                        const columnList = `(${cte.cteObjectEntries.map(ent => `"${ent.defaultFieldKey}"`).join(', ')})`;
+                        result = `${result}${columnList}`
+                    }
+
+                    result = `${result} AS (${qbResult.query})`;
 
                     return result;
                 }).join(', ');

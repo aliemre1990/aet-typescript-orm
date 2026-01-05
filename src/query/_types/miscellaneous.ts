@@ -7,9 +7,9 @@ import type SubQueryObject from "../subQueryObject.js";
 
 type MapCtesToSelectionType<TDbType extends DbType, TCTESpecs extends CTESpecsType<TDbType> | undefined> =
     TCTESpecs extends undefined ? {} :
-    TCTESpecs extends CTESpecsType<TDbType> ?
+    TCTESpecs extends readonly CTEObject<TDbType, any, any, any, any, any>[] ?
     {
-        [C in TCTESpecs[number]as C["name"]]: C
+        [C in TCTESpecs[number]as C extends { name: infer N extends string } ? N : never]: C
     } :
     never;
 
