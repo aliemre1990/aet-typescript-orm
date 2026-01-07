@@ -8,6 +8,10 @@ import sqlIn from "../../comparisons/in.js";
 import type { InferReturnTypeFromJSONBuildObjectParam } from "../../_types/args.js";
 import type QueryParam from "../../param.js";
 import notEq from "../../comparisons/notEq.js";
+import gt from "../../comparisons/gt.js";
+import gte from "../../comparisons/gte.js";
+import lt from "../../comparisons/lt.js";
+import lte from "../../comparisons/lte.js";
 
 type InferParamsFromJsonBuildObjectArg<TDbType extends DbType, TObj extends JSONBuildObjectParam<TDbType>> =
     InferParamsFromObj<TDbType, TObj>["length"] extends 0 ? undefined :
@@ -71,7 +75,7 @@ class JSONBuildObjectFunction<
         }
 
         const objStr = buildJSONBuildObjectArgSQL(this.obj, context);
-        const result = `JSON_BUILD_OBJECT(${objStr})`;
+        const result = `JSON_BUILD_OBJECT(${objStr})${this.asName ? ` AS ${this.asName}` : ''}`;
 
         return { query: result, params: [...(context?.params || [])] };
     }
@@ -111,6 +115,10 @@ class JSONBuildObjectFunction<
 
     eq: typeof eq = eq;
     notEq: typeof notEq = notEq;
+    gt: typeof gt = gt;
+    gte: typeof gte = gte;
+    lt: typeof lt = lt;
+    lte: typeof lte = lte;
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 }

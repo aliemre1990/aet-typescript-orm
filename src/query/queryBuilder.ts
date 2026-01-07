@@ -27,6 +27,10 @@ import between from "./comparisons/between.js";
 import CTEObject, { type CTEObjectEntry } from "./cteObject.js";
 import { mapCTESpecsToSelection } from "./utility.js";
 import notEq from "./comparisons/notEq.js";
+import gt from "./comparisons/gt.js";
+import gte from "./comparisons/gte.js";
+import lt from "./comparisons/lt.js";
+import lte from "./comparisons/lte.js";
 
 
 type ResultShapeItem<TDbType extends DbType> = IComparable<TDbType, any, any, any, any, any>;
@@ -144,6 +148,10 @@ class QueryBuilder<
 
     eq: typeof eq = eq;
     notEq: typeof notEq = notEq;
+    gt: typeof gt = gt;
+    gte: typeof gte = gte;
+    lt: typeof lt = lt;
+    lte: typeof lte = lte;
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 
@@ -208,6 +216,7 @@ class QueryBuilder<
                 joinSpecs: this.joinSpecs,
                 whereComparison: this.whereComparison,
                 selectResult: this.selectResult,
+                selectSpecs: this.selectSpecs,
                 groupedColumns: this.groupedColumns,
                 havingSpec: this.havingSpec,
                 orderBySpecs: this.orderBySpecs,
@@ -342,6 +351,11 @@ class QueryBuilder<
                 groupByClause = this.groupedColumns.map(grp => grp.buildSQL(context).query).join(', ');
             }
 
+            let havingClause;
+            if (this.havingSpec) {
+                havingClause = this.havingSpec.buildSQL(context).query;
+            }
+
 
             let cteClause;
             if (this.cteSpecs !== undefined) {
@@ -380,6 +394,7 @@ class QueryBuilder<
                 `${joinClauses ? ` ${joinClauses}` : ''}` +
                 `${whereClause ? ` WHERE ${whereClause}` : ''}` +
                 `${groupByClause ? ` GROUP BY ${groupByClause}` : ''}` +
+                `${havingClause ? ` HAVING ${havingClause}` : ''}` +
                 `${unions ? ` ${unions}` : ''}`
         }
 
@@ -581,7 +596,7 @@ class QueryBuilder<
         let joinTable: TJoinResult;
         if (table instanceof Table) {
             const queryColumns = table.columnsList.map((col: Column<TDbType, any, any, any, any, any, any>) => {
-                return new QueryColumn(table.dbType, col, { tableName: res.name });
+                return new QueryColumn(table.dbType, col, { tableName: table.name });
             }) as QueryColumn<TDbType, any, any, any, any, any, any>[];
 
             let res = new QueryTable(table.dbType, table, queryColumns);

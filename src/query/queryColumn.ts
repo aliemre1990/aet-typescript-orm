@@ -6,6 +6,10 @@ import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, queryBui
 import type Column from "../table/column.js";
 import type { ColumnType, DbValueTypes } from "../table/column.js";
 import notEq from "./comparisons/notEq.js";
+import gt from "./comparisons/gt.js";
+import gte from "./comparisons/gte.js";
+import lt from "./comparisons/lt.js";
+import lte from "./comparisons/lte.js";
 
 type QueryColumnsObjectType<TDbType extends DbType> = { [key: string]: QueryColumn<TDbType, any, any, any> }
 
@@ -31,6 +35,10 @@ class QueryColumn<
 
     eq: typeof eq = eq;
     notEq: typeof notEq = notEq;
+    gt: typeof gt = gt;
+    gte: typeof gte = gte;
+    lt: typeof lt = lt;
+    lte: typeof lte = lte;
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 

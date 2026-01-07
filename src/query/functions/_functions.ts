@@ -7,6 +7,10 @@ import sqlIn from "../comparisons/in.js";
 import type { InferParamsFromFnArgs } from "../_types/inferParamsFromArgs.js";
 import type QueryParam from "../param.js";
 import notEq from "../comparisons/notEq.js";
+import gt from "../comparisons/gt.js";
+import gte from "../comparisons/gte.js";
+import lt from "../comparisons/lt.js";
+import lte from "../comparisons/lte.js";
 
 const sqlFunctions = {
     coalesce: { name: 'COALESCE' },
@@ -45,6 +49,10 @@ class ColumnSQLFunction<
 
     eq: typeof eq = eq;
     notEq: typeof notEq = notEq;
+    gt: typeof gt = gt;
+    gte: typeof gte = gte;
+    lt: typeof lt = lt;
+    lte: typeof lte = lte;
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 
@@ -59,7 +67,7 @@ class ColumnSQLFunction<
 
         const argsStrArr = convertArgsToQueryString(this.args, context);
         const argsStrRes = argsStrArr.join(', ');
-        const queryRes = `${this.sqlFunction.name.toUpperCase()}(${argsStrRes})`;
+        const queryRes = `${this.sqlFunction.name.toUpperCase()}(${argsStrRes})${this.asName ? ` AS "${this.asName}"` : ''}`;
 
         return { query: queryRes, params: context.params };
     }

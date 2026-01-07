@@ -4,7 +4,11 @@ import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, queryBui
 import type { IName } from "./_interfaces/IName.js";
 import between from "./comparisons/between.js";
 import eq from "./comparisons/eq.js";
+import gt from "./comparisons/gt.js";
+import gte from "./comparisons/gte.js";
 import sqlIn from "./comparisons/in.js";
+import lt from "./comparisons/lt.js";
+import lte from "./comparisons/lte.js";
 import notEq from "./comparisons/notEq.js";
 import type QueryParam from "./param.js";
 import type { ResultShape } from "./queryBuilder.js";
@@ -41,6 +45,10 @@ class SubQueryEntry<
 
     eq: typeof eq = eq;
     notEq: typeof notEq = notEq;
+    gt: typeof gt = gt;
+    gte: typeof gte = gte;
+    lt: typeof lt = lt;
+    lte: typeof lte = lte;
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 
@@ -58,7 +66,7 @@ class SubQueryEntry<
             context = queryBuilderContextFactory();
         }
 
-        return { query: `${this.ownerName}.${this.asName || this.defaultFieldKey}`, params: context.params };
+        return { query: `"${this.ownerName}"."${this.asName || this.defaultFieldKey}"`, params: context.params };
     }
 
     constructor(
@@ -92,8 +100,9 @@ class SubQueryObject<
             context = queryBuilderContextFactory();
         }
 
-        let query = this.qb.buildSQL(context);
-        return { query: query.query, params: [...(query.params)] };
+        const qbBuildRes = this.qb.buildSQL(context);
+        let query = `(${qbBuildRes.query})${this.qb.asName ? ` AS "${this.qb.asName}"` : ''}`;
+        return { query, params: [...(qbBuildRes.params)] };
     }
 
 

@@ -3,7 +3,11 @@ import type { DbValueTypes } from "../table/column.js";
 import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, queryBuilderContextFactory, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
 import between from "./comparisons/between.js";
 import eq from "./comparisons/eq.js";
+import gt from "./comparisons/gt.js";
+import gte from "./comparisons/gte.js";
 import sqlIn from "./comparisons/in.js";
+import lt from "./comparisons/lt.js";
+import lte from "./comparisons/lte.js";
 import notEq from "./comparisons/notEq.js";
 
 class QueryParam<
@@ -65,6 +69,10 @@ class QueryParam<
 
     eq: typeof eq = eq;
     notEq: typeof notEq = notEq;
+    gt: typeof gt = gt;
+    gte: typeof gte = gte;
+    lt: typeof lt = lt;
+    lte: typeof lte = lte;
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 }

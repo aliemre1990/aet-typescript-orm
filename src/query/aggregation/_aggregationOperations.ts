@@ -8,6 +8,10 @@ import type { InferParamsFromFnArgs } from "../_types/inferParamsFromArgs.js";
 import type QueryParam from "../param.js";
 import { convertArgsToQueryString } from "../functions/_functions.js";
 import notEq from "../comparisons/notEq.js";
+import gt from "../comparisons/gt.js";
+import gte from "../comparisons/gte.js";
+import lt from "../comparisons/lt.js";
+import lte from "../comparisons/lte.js";
 
 
 const aggregationOperations = {
@@ -69,6 +73,10 @@ class BasicColumnAggregationOperation<
 
     eq: typeof eq = eq;
     notEq: typeof notEq = notEq;
+    gt: typeof gt = gt;
+    gte: typeof gte = gte;
+    lt: typeof lt = lt;
+    lte: typeof lte = lte;
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 
@@ -83,7 +91,7 @@ class BasicColumnAggregationOperation<
 
         const argsStrArr = convertArgsToQueryString(this.args, context);
         const argsRes = argsStrArr.join(`, `);
-        const queryRes = `${this.operation.name.toUpperCase()}(${argsRes})`;
+        const queryRes = `${this.operation.name.toUpperCase()}(${argsRes})${this.asName ? ` AS "${this.asName}"` : ''}`;
 
         return { query: queryRes, params: [...(context?.params || [])] };
     }

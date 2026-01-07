@@ -6,6 +6,10 @@ import type eq from "../comparisons/eq.js";
 import type sqlIn from "../comparisons/in.js";
 import type { IDbType } from "./IDbType.js";
 import type notEq from "../comparisons/notEq.js";
+import type gt from "../comparisons/gt.js";
+import type gte from "../comparisons/gte.js";
+import type lt from "../comparisons/lt.js";
+import type lte from "../comparisons/lte.js";
 
 type QueryBuilderContext = { params: string[], isTopLevel: boolean }
 function queryBuilderContextFactory(): QueryBuilderContext {
@@ -34,6 +38,10 @@ interface IComparable<
 
     eq: typeof eq;
     notEq: typeof notEq;
+    gt: typeof gt;
+    gte: typeof gte;
+    lt: typeof lt;
+    lte: typeof lte;
     sqlIn: typeof sqlIn;
     between: typeof between;
 

@@ -8,6 +8,10 @@ import type { InferParamsFromFnArgs } from "../_types/inferParamsFromArgs.js";
 import type QueryParam from "../param.js";
 import { convertArgsToQueryString } from "../functions/_functions.js";
 import notEq from "../comparisons/notEq.js";
+import gt from "../comparisons/gt.js";
+import gte from "../comparisons/gte.js";
+import lt from "../comparisons/lt.js";
+import lte from "../comparisons/lte.js";
 
 
 const arithmeticOperations = {
@@ -67,6 +71,10 @@ class SQLArithmeticOperation<
 
     eq: typeof eq = eq;
     notEq: typeof notEq = notEq;
+    gt: typeof gt = gt;
+    gte: typeof gte = gte;
+    lt: typeof lt = lt;
+    lte: typeof lte = lte;
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 
@@ -87,6 +95,7 @@ class SQLArithmeticOperation<
         context.isTopLevel = previousIsTopLevelVal;
 
         queryRes = context.isTopLevel === false ? `(${queryRes})` : queryRes;
+        queryRes = this.asName ? `${queryRes} AS "${this.asName}"` : queryRes;
 
         return { query: queryRes, params: [...(context?.params || [])] };
     }

@@ -42,12 +42,29 @@ const ordersTable = pgTable(
     [
         pgColumn('id', pgColumnTypes.serial, false),
         pgColumn('customerId', pgColumnTypes.int, false),
+        pgColumn('amount', pgColumnTypes.decimal, false),
         pgColumn('createdBy', pgColumnTypes.int, false)
     ],
     undefined,
     undefined,
     [
         new ForeignKey('customerId', { table: 'customers', column: 'id' }),
+        new ForeignKey('createdBy', { table: 'users', column: 'id' })
+    ]
+);
+
+const orderDetailsTable = pgTable(
+    'orderDetails',
+    [
+        pgColumn('id', pgColumnTypes.serial, false),
+        pgColumn('orderId', pgColumnTypes.int, false),
+        pgColumn('amount', pgColumnTypes.decimal, false),
+        pgColumn('createdBy', pgColumnTypes.int, false)
+    ],
+    undefined,
+    undefined,
+    [
+        new ForeignKey('orderId', { table: 'orders', column: 'id' }),
         new ForeignKey('createdBy', { table: 'users', column: 'id' })
     ]
 );
@@ -72,6 +89,7 @@ export {
     customersTable,
     usersTable,
     ordersTable,
+    orderDetailsTable,
     shipmentsTable,
     employeesTable
 }
