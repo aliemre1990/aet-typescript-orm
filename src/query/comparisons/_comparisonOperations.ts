@@ -4,6 +4,7 @@ import { queryBuilderContextFactory, type IComparable, type QueryBuilderContext 
 import type { InferParamsFromComparables } from "../_types/paramAccumulationComparison.js";
 import { convertArgsToQueryString } from "../functions/_functions.js";
 import type QueryParam from "../param.js";
+import QueryBuilder from "../queryBuilder.js";
 
 const comparisonOperations = {
     eq: { name: 'EQ', symbol: "=" },
@@ -52,20 +53,24 @@ class ColumnComparisonOperation<
             throw Error('No applied value provided for comparison operation.');
         }
 
-        const comparingStr = this.comparing.buildSQL(context);
+        let comparingStr = this.comparing.buildSQL(context).query;
+        if (this.comparing instanceof QueryBuilder) {
+            comparingStr = `(${comparingStr})`;
+        }
 
         const appliedStrArr = convertArgsToQueryString(this.value, context);
 
         let queryRes;
         if ([comparisonOperations.in, comparisonOperations.notIn].some(op => op === this.operation)) {
-            queryRes = `${comparingStr.query} ${this.operation.symbol} (${appliedStrArr.join(', ')})`;
+            queryRes = `${comparingStr} ${this.operation.symbol} (${appliedStrArr.join(', ')})`;
         } else if ([comparisonOperations.between, comparisonOperations.notBetween].some(op => op === this.operation)) {
             if (appliedStrArr.length !== 2) {
                 throw Error(`Invalid argument count for 'between' comparison.`);
             }
-            queryRes = `${comparingStr.query} ${this.operation.symbol} ${appliedStrArr[0]} AND ${appliedStrArr[1]}`;
+
+            queryRes = `${comparingStr} ${this.operation.symbol} ${this.value[0] instanceof QueryBuilder ? `(${appliedStrArr[0]})` : appliedStrArr[0]} AND ${this.value[1] instanceof QueryBuilder ? `(${appliedStrArr[1]})` : appliedStrArr[1]}`;
         } else {
-            queryRes = `${comparingStr.query}${this.operation.symbol}${appliedStrArr[0]}`;
+            queryRes = `${comparingStr}${this.operation.symbol}${this.value[0] instanceof QueryBuilder ? `(${appliedStrArr[0]})` : appliedStrArr[0]}`;
         }
 
         return { query: queryRes, params: [...(context?.params || [])] };

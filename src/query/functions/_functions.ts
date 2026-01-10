@@ -11,6 +11,7 @@ import gt from "../comparisons/gt.js";
 import gte from "../comparisons/gte.js";
 import lt from "../comparisons/lt.js";
 import lte from "../comparisons/lte.js";
+import QueryBuilder from "../queryBuilder.js";
 
 const sqlFunctions = {
     coalesce: { name: 'COALESCE' },
@@ -111,7 +112,7 @@ function convertArgsToQueryString(args: (DbValueTypes | null | IComparable<any, 
     let argQueries = [];
     for (const arg of args) {
         if (typeof arg === 'object' && arg !== null && 'buildSQL' in arg) {
-            argQueries.push(arg.buildSQL(context).query)
+            argQueries.push(arg.buildSQL(context).query);
         } else if (arg === null) {
             argQueries.push('NULL');
         } else if (typeof arg === "string") {

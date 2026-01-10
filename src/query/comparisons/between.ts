@@ -107,12 +107,19 @@ function between<
 
 
 // Column and value
+/**
+ * Notes: No infer is required on primitive value arguments. Because it infers literal type from that argument
+ * without NoInfer.
+ * @param this 
+ * @param leftValue 
+ * @param rightValue 
+ */
 function between<
     TComparing extends IComparable<TDbType, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TLApplied extends IComparable<TDbType, any, TValueType, any, any, any>,
     TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any> ? DbType : never
->(this: TComparing, leftValue: TLApplied, rightValue: TValueType | null): ColumnComparisonOperation<
+>(this: TComparing, leftValue: TLApplied, rightValue: NoInfer<TValueType | null>): ColumnComparisonOperation<
     TDbType,
     TComparing,
     [TLApplied, TValueType | null]
@@ -122,7 +129,7 @@ function between<
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TRApplied extends IComparable<TDbType, any, TValueType, any, any, any>,
     TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any> ? DbType : never
->(this: TComparing, leftValue: TValueType | null, rightValue: TRApplied): ColumnComparisonOperation<
+>(this: TComparing, leftValue: NoInfer<TValueType | null>, rightValue: TRApplied): ColumnComparisonOperation<
     TDbType,
     TComparing,
     [TValueType | null, TRApplied]
