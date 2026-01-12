@@ -23,7 +23,7 @@ test.suite("SIMPLE WHERE TESTS", () => {
     });
 
     test("Select all from customers where customer id in values query.", () => {
-        const qb = customersTable.select().where((tables) => tables.customers.id.sqlIn([1, 2, 3, 4]));
+        const qb = customersTable.select().where((tables) => tables.customers.id.sqlIn(1, 2, 3, 4));
         const buildRes = qb.buildSQL();
         const query = buildRes.query;
 

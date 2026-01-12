@@ -7,36 +7,9 @@ import type { IsAny, NullableArray } from "../../utility/common.js";
 import QueryParam from "../param.js";
 import QueryBuilder from "../queryBuilder.js";
 import type { DbValueTypes } from "../../table/column.js";
+import type { MapParamsToTypeRecursively } from "./in.js";
 
-// Helper type to extract only QueryColumns from the mixed tuple
-type ExtractComparables<T extends readonly unknown[]> =
-    T extends readonly [infer First, ...infer Rest] ?
-    First extends IComparable<any, any, any, any, any, any> ?
-    [First, ...ExtractComparables<Rest>] :
-    ExtractComparables<Rest> :
-    [];
-
-type MapParamsToTypeRecursively<
-    TValueType extends DbValueTypes,
-    T extends readonly (TValueType | IComparable<any, any, TValueType, any, any, any>)[]
-> =
-    T extends readonly [infer First, ...infer Rest] ?
-    First extends QueryParam<infer DbType, infer Name, infer ValueType, infer As, infer DefaultFieldKey> ?
-    IsAny<ValueType> extends true ?
-    Rest extends readonly [any, ...any[]] ?
-    [QueryParam<DbType, Name, TValueType | null, As, DefaultFieldKey>, ...MapParamsToTypeRecursively<TValueType, Rest>] :
-    [QueryParam<DbType, Name, TValueType | null, As, DefaultFieldKey>] :
-    Rest extends readonly [any, ...any[]] ?
-    [First, ...MapParamsToTypeRecursively<TValueType, Rest>] :
-    [First] :
-    Rest extends readonly [any, ...any[]] ?
-    [First, ...MapParamsToTypeRecursively<TValueType, Rest>] :
-    [First] :
-    []
-    ;
-
-
-function sqlIn<
+function sqlNotIn<
     TComparing extends IComparable<TDbType, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TQb extends QueryBuilder<TDbType, any, any, any, any, any, any>,
@@ -49,7 +22,7 @@ function sqlIn<
     TComparing,
     [TQb]
 >
-function sqlIn<
+function sqlNotIn<
     TComparing extends IComparable<TDbType, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     const TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any, any, any>)[],
@@ -65,7 +38,7 @@ function sqlIn<
 >
 
 
-function sqlIn<
+function sqlNotIn<
     TComparing extends IComparable<TDbType, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TQb extends QueryBuilder<TDbType, any, any, any, any, any, any>,
@@ -83,7 +56,7 @@ function sqlIn<
         // value is querybuilder
         return new ColumnComparisonOperation(
             dbType,
-            comparisonOperations.in,
+            comparisonOperations.notIn,
             this,
             [val[0]]
         );
@@ -91,15 +64,11 @@ function sqlIn<
 
     return new ColumnComparisonOperation(
         dbType,
-        comparisonOperations.in,
+        comparisonOperations.notIn,
         this,
         [...val]
     )
 
 }
 
-export default sqlIn;
-
-export type {
-    MapParamsToTypeRecursively
-}
+export default sqlNotIn;
