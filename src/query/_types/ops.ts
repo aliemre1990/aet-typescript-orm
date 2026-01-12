@@ -3,7 +3,11 @@ import type generateAvgFn from "../aggregation/avg.js"
 import type { jsonAggFn, jsonbAggFn } from "../aggregation/json/jsonAgg.js"
 import type generateSumFn from "../aggregation/sum.js"
 import type { generateArithmeticAddition } from "../arithmetic/addition.js"
+import type { generateArithmeticDivision } from "../arithmetic/division.js"
 import type { generateArithmeticExponentiation } from "../arithmetic/exponentiation.js"
+import type { generateArithmeticModulo } from "../arithmetic/modulo.js"
+import type { generateArithmeticMultiplication } from "../arithmetic/multiplication.js"
+import type { generateArithmeticSubtraction } from "../arithmetic/subtract.js"
 import type { generateCoalesceFn } from "../functions/coalesce.js"
 import type { jsonbBuildObjectFn, jsonBuildObjectFn } from "../functions/jsonFunctions/jsonBuildObject.js"
 import type generateRoundFn from "../functions/round.js"
@@ -11,12 +15,24 @@ import type { generateAndFn, generateOrFn, } from "../logicalOperations.js"
 import type { generateParamFn } from "../param.js"
 
 type PgArithmeticAddition = ReturnType<typeof generateArithmeticAddition<PgDbType>>;
-type MySqlArithmeticAddition = ReturnType<typeof generateArithmeticAddition<MySQLDbType>>;
+type MySQLArithmeticAddition = ReturnType<typeof generateArithmeticAddition<MySQLDbType>>;
+type PgArithmeticSubtraction = ReturnType<typeof generateArithmeticSubtraction<PgDbType>>;
+type MySQLArithmeticSubtraction = ReturnType<typeof generateArithmeticSubtraction<MySQLDbType>>;
+type PgArithmeticMultiplication = ReturnType<typeof generateArithmeticMultiplication<PgDbType>>;
+type MySQLArithmeticMultiplication = ReturnType<typeof generateArithmeticMultiplication<MySQLDbType>>;
+type PgArithmeticDivision = ReturnType<typeof generateArithmeticDivision<PgDbType>>;
+type MySQLArithmeticDivision = ReturnType<typeof generateArithmeticDivision<MySQLDbType>>;
+type PgArithmeticModulo = ReturnType<typeof generateArithmeticModulo<PgDbType>>;
+type MySQLArithmeticModulo = ReturnType<typeof generateArithmeticModulo<MySQLDbType>>;
 
 type PgArithmeticExponentiation = ReturnType<typeof generateArithmeticExponentiation<PgDbType>>;
 
 type ArithmeticOperations<TDbType extends DbType> = {
-    arithmeticAdd: TDbType extends PgDbType ? PgArithmeticAddition : MySqlArithmeticAddition
+    arithmeticAddition: TDbType extends PgDbType ? PgArithmeticAddition : MySQLArithmeticAddition,
+    arithmeticSubtraction: TDbType extends PgDbType ? PgArithmeticSubtraction : MySQLArithmeticSubtraction,
+    arithmeticMultiplication: TDbType extends PgDbType ? PgArithmeticMultiplication : MySQLArithmeticMultiplication,
+    arithmeticDivision: TDbType extends PgDbType ? PgArithmeticDivision : MySQLArithmeticDivision,
+    arithmeticModulo: TDbType extends PgDbType ? PgArithmeticModulo : MySQLArithmeticModulo
 } &
     (TDbType extends PgDbType ? { arithmeticExponentiation: PgArithmeticExponentiation } : {});
 

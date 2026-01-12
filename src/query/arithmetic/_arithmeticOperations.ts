@@ -31,8 +31,8 @@ const arithmeticOperations = {
         name: 'DIVISION',
         symbol: "/"
     },
-    module: {
-        name: 'MODULE',
+    modulo: {
+        name: 'MODULO',
         symbol: "%"
     },
     exponentiation: {

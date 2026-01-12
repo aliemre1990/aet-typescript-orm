@@ -22,8 +22,8 @@ test.suite("SIMPLE GROUP BY CLAUSE TESTS", () => {
 
     test("Select all from employees group by function.", () => {
         const qb = employeesTable
-            .select((tables, { arithmeticAdd }) => [arithmeticAdd(tables.employees.salary, 100)])
-            .groupBy((tables, { arithmeticAdd }) => [arithmeticAdd(tables.employees.salary, 100)]);
+            .select((tables, { arithmeticAddition }) => [arithmeticAddition(tables.employees.salary, 100)])
+            .groupBy((tables, { arithmeticAddition }) => [arithmeticAddition(tables.employees.salary, 100)]);
         const buildRes = qb.buildSQL();
         const query = buildRes.query;
 

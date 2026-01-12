@@ -4,7 +4,11 @@ import generateAvgFn from "./aggregation/avg.js"
 import { jsonAggFn, jsonbAggFn } from "./aggregation/json/jsonAgg.js"
 import generateSumFn from "./aggregation/sum.js"
 import { generateArithmeticAddition } from "./arithmetic/addition.js"
+import { generateArithmeticDivision } from "./arithmetic/division.js"
 import { generateArithmeticExponentiation } from "./arithmetic/exponentiation.js"
+import { generateArithmeticModulo } from "./arithmetic/modulo.js"
+import { generateArithmeticMultiplication } from "./arithmetic/multiplication.js"
+import { generateArithmeticSubtraction } from "./arithmetic/subtract.js"
 import { generateCoalesceFn } from "./functions/coalesce.js"
 import { jsonbBuildObjectFn, jsonBuildObjectFn } from "./functions/jsonFunctions/jsonBuildObject.js"
 import generateRoundFn from "./functions/round.js"
@@ -36,7 +40,11 @@ const mysqlAggregationFunctions: AggregationFunctions<MySQLDbType> = {
  */
 function generateCommonArithmeticOperations<TDbType extends DbType>(dbType: TDbType) {
     return {
-        arithmeticAdd: generateArithmeticAddition(dbType),
+        arithmeticAddition: generateArithmeticAddition(dbType),
+        arithmeticSubtraction: generateArithmeticSubtraction(dbType),
+        arithmeticMultiplication: generateArithmeticMultiplication(dbType),
+        arithmeticDivision: generateArithmeticDivision(dbType),
+        arithmeticModulo: generateArithmeticModulo(dbType)
     }
 }
 
