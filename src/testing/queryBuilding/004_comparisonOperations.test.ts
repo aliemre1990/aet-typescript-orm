@@ -108,6 +108,17 @@ test.suite("COMPARISON OPERATIONS TESTS", () => {
         assert.equal(`SELECT * FROM "customers" WHERE 1 IN ("customers"."id", 2, 3) OR "customers"."id" IN (3, 4)`, query);
     });
 
+
+    test("In comparison with literals and params", () => {
+        const qb = customersTable.select()
+            .where((tables, { literal, param }) => literal(1).sqlIn(tables.customers.id, literal(2), param("num")));
+        const buildRes = qb.buildSQL();
+        const query = buildRes.query;
+
+        assert.equal(`SELECT * FROM "customers" WHERE 1 IN ("customers"."id", 2, $1)`, query);
+        assert.equal(buildRes.params[0], "num")
+    });
+
     test("Query at left side of between comparison", () => {
         const qb = customersTable.select()
             .where((tables) => tables.customers.id.between(ordersTable.select((innerTables) => [innerTables.orders.customerId]), 100));
@@ -133,6 +144,6 @@ test.suite("COMPARISON OPERATIONS TESTS", () => {
         const buildRes = qb.buildSQL();
         const query = buildRes.query;
 
-        assert.equal(`SELECT * FROM "customers" WHERE "customers"."id" BETWEEN 50 AND 100`, query);
+        assert.equal(`SELECT * FROM "customers" WHERE 50 BETWEEN "customers"."id" AND 100`, query);
     });
 });
