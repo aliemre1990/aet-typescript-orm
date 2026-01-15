@@ -2,9 +2,9 @@ import type { DbType } from "../../db.js";
 import type { DbValueTypes } from "../../table/column.js";
 import { queryBuilderContextFactory, type IComparable, type QueryBuilderContext } from "../_interfaces/IComparable.js";
 import type { InferParamsFromComparables } from "../_types/paramAccumulationComparison.js";
-import { convertArgsToQueryString } from "../functions/_functions.js";
 import type QueryParam from "../param.js";
 import QueryBuilder from "../queryBuilder.js";
+import { convertArgsToQueryString } from "../uitlity/common.js";
 
 const comparisonOperations = {
     eq: { name: 'EQ', symbol: "=" },

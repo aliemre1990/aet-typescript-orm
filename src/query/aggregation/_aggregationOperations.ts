@@ -6,12 +6,12 @@ import eq from "../comparisons/eq.js";
 import sqlIn from "../comparisons/in.js";
 import type { InferParamsFromFnArgs } from "../_types/inferParamsFromArgs.js";
 import type QueryParam from "../param.js";
-import { convertArgsToQueryString } from "../functions/_functions.js";
 import notEq from "../comparisons/notEq.js";
 import gt from "../comparisons/gt.js";
 import gte from "../comparisons/gte.js";
 import lt from "../comparisons/lt.js";
 import lte from "../comparisons/lte.js";
+import { convertArgsToQueryString } from "../uitlity/common.js";
 
 
 const aggregationOperations = {

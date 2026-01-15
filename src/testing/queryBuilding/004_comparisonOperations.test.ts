@@ -5,6 +5,24 @@ import { customersTable, ordersTable } from "../_tables.js";
 import type { IComparable } from "../../query/_interfaces/IComparable.js";
 
 test.suite("COMPARISON OPERATIONS TESTS", () => {
+    test("Literal at left side of basic eq comparison.", () => {
+        const qb = customersTable.select()
+            .where((tables, { literal }) => literal(10).eq(tables.customers.id));
+        const buildRes = qb.buildSQL();
+        const query = buildRes.query;
+
+        assert.equal(`SELECT * FROM "customers" WHERE 10="customers"."id"`, query);
+    });
+
+    test("Literal at right side of basic eq comparison.", () => {
+        const qb = customersTable.select()
+            .where((tables, { literal }) => tables.customers.id.eq(literal(10)));
+        const buildRes = qb.buildSQL();
+        const query = buildRes.query;
+
+        assert.equal(`SELECT * FROM "customers" WHERE "customers"."id"=10`, query);
+    });
+
     test("Value at right side of basic eq comparison.", () => {
         const qb = customersTable.select()
             .where((tables) => tables.customers.id.eq(1));
@@ -72,6 +90,24 @@ test.suite("COMPARISON OPERATIONS TESTS", () => {
         assert.equal(params[2], "prm3");
     });
 
+    test("In comparison with literals simple", () => {
+        const qb = customersTable.select()
+            .where((tables, { literal, or }) => literal(1).sqlIn(tables.customers.id, literal(2), literal(3)));
+        const buildRes = qb.buildSQL();
+        const query = buildRes.query;
+
+        assert.equal(`SELECT * FROM "customers" WHERE 1 IN ("customers"."id", 2, 3)`, query);
+    });
+
+    test("In comparison with literals complex", () => {
+        const qb = customersTable.select()
+            .where((tables, { literal, or }) => or(literal(1).sqlIn(tables.customers.id, literal(2), literal(3)), tables.customers.id.sqlIn(literal(3), literal(4))));
+        const buildRes = qb.buildSQL();
+        const query = buildRes.query;
+
+        assert.equal(`SELECT * FROM "customers" WHERE 1 IN ("customers"."id", 2, 3) OR "customers"."id" IN (3, 4)`, query);
+    });
+
     test("Query at left side of between comparison", () => {
         const qb = customersTable.select()
             .where((tables) => tables.customers.id.between(ordersTable.select((innerTables) => [innerTables.orders.customerId]), 100));
@@ -79,5 +115,24 @@ test.suite("COMPARISON OPERATIONS TESTS", () => {
         const query = buildRes.query;
 
         assert.equal(`SELECT * FROM "customers" WHERE "customers"."id" BETWEEN (SELECT "orders"."customerId" FROM "orders") AND 100`, query);
+    });
+
+    test("Literal at left side of between comparison", () => {
+        const qb = customersTable.select()
+            .where((tables, { literal }) => tables.customers.id.between(literal(50), 100));
+        const buildRes = qb.buildSQL();
+        const query = buildRes.query;
+
+        assert.equal(`SELECT * FROM "customers" WHERE "customers"."id" BETWEEN 50 AND 100`, query);
+    });
+
+
+    test("Literal comparing with between", () => {
+        const qb = customersTable.select()
+            .where((tables, { literal }) => literal(50).between(tables.customers.id, 100));
+        const buildRes = qb.buildSQL();
+        const query = buildRes.query;
+
+        assert.equal(`SELECT * FROM "customers" WHERE "customers"."id" BETWEEN 50 AND 100`, query);
     });
 });

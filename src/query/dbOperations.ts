@@ -12,6 +12,7 @@ import { generateArithmeticSubtraction } from "./arithmetic/subtract.js"
 import { generateCoalesceFn } from "./functions/coalesce.js"
 import { jsonbBuildObjectFn, jsonBuildObjectFn } from "./functions/jsonFunctions/jsonBuildObject.js"
 import generateRoundFn from "./functions/round.js"
+import { generateLiteralValueFn } from "./literalValue.js"
 import { generateAndFn, generateOrFn } from "./logicalOperations.js"
 import { generateParamFn } from "./param.js"
 
@@ -65,6 +66,7 @@ const mysqlArithmeticOperations: ArithmeticOperations<MySQLDbType> = {
 function generateCommonFunctions<TDbType extends DbType>(dbType: TDbType) {
     return {
         param: generateParamFn(dbType),
+        literal: generateLiteralValueFn(dbType),
 
         coalesce: generateCoalesceFn(dbType),
         round: generateRoundFn(dbType),

@@ -3,7 +3,7 @@ import type { GetArrayEquivalentPgValueType } from "../../table/columnTypes.js";
 import { isNullOrUndefined } from "../../utility/guards.js";
 import ColumnComparisonOperation, { comparisonOperations, type InferValueTypeFromComparable } from "./_comparisonOperations.js";
 import type { IComparable } from "../_interfaces/IComparable.js";
-import type { IsAny, NullableArray } from "../../utility/common.js";
+import type { IsAny, LiteralToBase, NullableArray } from "../../utility/common.js";
 import QueryParam from "../param.js";
 import QueryBuilder from "../queryBuilder.js";
 import type { DbValueTypes } from "../../table/column.js";
@@ -52,8 +52,8 @@ function sqlIn<
 function sqlIn<
     TComparing extends IComparable<TDbType, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
-    const TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any, any, any>)[],
-    const TFinalValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any, any, any>)[] = MapParamsToTypeRecursively<TValueType, TValues>,
+    const TValues extends readonly (LiteralToBase<TValueType> | IComparable<TDbType, any, LiteralToBase<TValueType>, any, any, any>)[],
+    const TFinalValues extends readonly (LiteralToBase<TValueType> | IComparable<TDbType, any, LiteralToBase<TValueType>, any, any, any>)[] = MapParamsToTypeRecursively<LiteralToBase<TValueType>, TValues>,
     TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any> ? DbType : never
 >(
     this: TComparing,
@@ -69,7 +69,7 @@ function sqlIn<
     TComparing extends IComparable<TDbType, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
     TQb extends QueryBuilder<TDbType, any, any, any, any, any, any>,
-    TValues extends TValueType | IComparable<TDbType, any, TValueType, any, any, any>,
+    TValues extends LiteralToBase<TValueType> | IComparable<TDbType, any, LiteralToBase<TValueType>, any, any, any>,
     TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any> ? DbType : never
 >
     (

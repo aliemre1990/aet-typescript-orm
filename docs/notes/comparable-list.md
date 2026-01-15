@@ -1,0 +1,9 @@
+- QueryColumn - Represents a column in a query with type-safe comparisons
+- QueryParam - Represents a parameterized query parameter
+- QueryBuilder - The main query builder class for constructing SQL queries
+- ColumnSQLFunction - Represents SQL functions that can be used in comparisons
+- BasicColumnAggregationOperation - Represents aggregation functions (SUM, COUNT, AVG, MIN, MAX, etc.)
+- SQLArithmeticOperation - Represents arithmetic operations on columns
+- SubQueryEntry - Represents an entry in a subquery result
+- CTEObjectEntry - Represents an entry in a Common Table Expression (CTE)
+- LiteralValue - Used to represent literal value

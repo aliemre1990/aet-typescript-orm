@@ -91,5 +91,6 @@ export type {
     IsAny,
     NullableArray,
     NonNullableArray,
-    JoinTuple
+    JoinTuple,
+    LiteralToBase
 }
