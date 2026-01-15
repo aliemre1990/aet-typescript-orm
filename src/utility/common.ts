@@ -66,6 +66,20 @@ type JoinTuple<T extends readonly string[], Delimiter extends string> =
     : ""
     : "";
 
+
+type LiteralToBase<T> =
+    T extends null ? null :
+    T extends string ? string :
+    T extends number ? number :
+    T extends boolean ? boolean :
+    T extends bigint ? bigint :
+    T extends symbol ? symbol :
+    T extends readonly any[] ? Array<UnionLiteralToBase<T[number]>> :
+    T extends object ? object :
+    T;
+
+type UnionLiteralToBase<T> = T extends any ? LiteralToBase<T> : never;
+
 export type {
     UnionToTuple,
     RecordToTupleSafe,
