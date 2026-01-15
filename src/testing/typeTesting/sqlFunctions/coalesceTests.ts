@@ -6,14 +6,9 @@ import type ColumnSQLFunction from "../../../query/functions/_functions.js";
 import { generateCoalesceFn } from "../../../query/functions/coalesce.js";
 import QueryParam, { generateParamFn } from "../../../query/param.js";
 import QueryColumn from "../../../query/queryColumn.js";
+import { customerCreatedByQC, customerIdQC, customerNameQC, empSalaryQC } from "../../_columns.js";
 import { customersTable, employeesTable, ordersTable, usersTable } from "../../_tables.js";
 import type { AssertEqual, AssertTrue } from "../_typeTestingUtilities.js";
-
-const customerIdQC = new QueryColumn<PgDbType, typeof customersTable.columns.id, NonNullable<typeof customersTable.columns.id.tableSpecs>, undefined>(dbTypes.postgresql, customersTable.columns.id, { tableName: customersTable.name });
-const createdByQC = new QueryColumn<PgDbType, typeof customersTable.columns.createdBy, NonNullable<typeof customersTable.columns.createdBy.tableSpecs>, undefined>(dbTypes.postgresql, customersTable.columns.createdBy, { tableName: customersTable.name });
-const customerNameQC = new QueryColumn<PgDbType, typeof customersTable.columns.name, NonNullable<typeof customersTable.columns.name.tableSpecs>, undefined>(dbTypes.postgresql, customersTable.columns.name, { tableName: customersTable.name });
-const empSalaryQC = new QueryColumn<PgDbType, typeof employeesTable.columns.salary, NonNullable<typeof employeesTable.columns.salary.tableSpecs>, undefined>(dbTypes.postgresql, employeesTable.columns.salary, { tableName: employeesTable.name });
-
 
 const coalesce = generateCoalesceFn("postgresql");
 const param = generateParamFn("postgresql");
@@ -85,7 +80,7 @@ coalesce(customerNameQC).eq(1);
 
 coalesce(customerIdQC).eq(1);
 
-coalesce(customerIdQC).eq(createdByQC);
+coalesce(customerIdQC).eq(customerCreatedByQC);
 
 /**
  * 
