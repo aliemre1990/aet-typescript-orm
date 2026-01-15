@@ -2,6 +2,7 @@ import { dbTypes, type PgDbType } from "../../../db.js";
 import type ColumnComparisonOperation from "../../../query/comparisons/_comparisonOperations.js";
 import type QueryParam from "../../../query/param.js";
 import QueryColumn from "../../../query/queryColumn.js";
+import type { IsAny } from "../../../utility/common.js";
 import { customerIdQC, empSalaryQC } from "../../_columns.js";
 import { literalTester, paramTester } from "../../_functions.js";
 import { customersTable } from "../../_tables.js";
@@ -25,5 +26,7 @@ type eqToComparableTest = AssertTrue<typeofEqToComparableApplied[0] extends Quer
 const eqToLiteral = customerIdQC.eq(literalTester(1));
 type typeofEqToLiteral = typeof eqToLiteral;
 
-
-
+const eqToParamTyped = customerIdQC.eq(paramTester("num").type<number>());
+type typeofEqToParamTyped = typeof eqToParamTyped;
+type typeofEqToParamTypedApplied = typeofEqToParamTyped extends ColumnComparisonOperation<any, any, infer TApplied, any> ? TApplied : never;
+type EqToParamTypedTest = AssertTrue<AssertEqual<typeofEqToParamTypedApplied, [QueryParam<"postgresql", "num", number, any, any>]>>;
