@@ -8,7 +8,7 @@ import { convertArgsToQueryString } from "../uitlity/common.js";
 
 const comparisonOperations = {
     eq: { name: 'EQ', symbol: "=" },
-    neq: { name: 'NEQ', symbol: "!=" },
+    notEq: { name: 'NOT_EQ', symbol: "!=" },
     gt: { name: 'GT', symbol: ">" },
     gte: { name: 'GTE', symbol: ">=" },
     lt: { name: 'LT', symbol: "<" },
