@@ -9,6 +9,7 @@ import { generateArithmeticExponentiation } from "./arithmetic/exponentiation.js
 import { generateArithmeticModulo } from "./arithmetic/modulo.js"
 import { generateArithmeticMultiplication } from "./arithmetic/multiplication.js"
 import { generateArithmeticSubtraction } from "./arithmetic/subtract.js"
+import { generateSQLCaseFn } from "./caseExpression.js"
 import { generateCoalesceFn } from "./functions/coalesce.js"
 import { jsonbBuildObjectFn, jsonBuildObjectFn } from "./functions/jsonFunctions/jsonBuildObject.js"
 import generateRoundFn from "./functions/round.js"
@@ -67,6 +68,7 @@ function generateCommonFunctions<TDbType extends DbType>(dbType: TDbType) {
     return {
         param: generateParamFn(dbType),
         literal: generateLiteralValueFn(dbType),
+        sqlCase: generateSQLCaseFn(dbType),
 
         coalesce: generateCoalesceFn(dbType),
         round: generateRoundFn(dbType),

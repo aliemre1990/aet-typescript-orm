@@ -80,7 +80,10 @@ type LiteralToBase<T> =
 
 type UnionLiteralToBase<T> = T extends any ? LiteralToBase<T> : never;
 
+type UndefinedIfLengthZero<T extends any[]> = T["length"] extends 0 ? undefined : T;
+
 export type {
+    UndefinedIfLengthZero,
     UnionToTuple,
     RecordToTupleSafe,
     DeepPrettify,
