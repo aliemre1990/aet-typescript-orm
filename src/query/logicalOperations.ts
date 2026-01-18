@@ -1,6 +1,5 @@
 import { type DbType } from "../db.js";
 import { queryBuilderContextFactory, type QueryBuilderContext } from "./_interfaces/IComparable.js";
-import type { InferParamsFromOpsArray } from "./_types/paramAccumulationComparison.js";
 import ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
 import type QueryParam from "./param.js";
 
