@@ -146,8 +146,8 @@ type PgTypeToJsType<T extends PgColumnType> =
     T extends 'TSVECTOR' | 'TSQUERY' ? string :
     T extends 'UUID' ? string :
     T extends 'XML' ? string :
-    T extends 'JSON' | 'JSONB' ? any :
-    T extends 'ARRAY' ? any[] :
+    T extends 'JSON' | 'JSONB' ? object :
+    T extends 'ARRAY' ? object[] :
     T extends 'COMPOSITE' ? object :
     T extends 'INT4RANGE' | 'INT8RANGE' | 'NUMRANGE' | 'TSRANGE' | 'TSTZRANGE' | 'DATERANGE' ? object :
     T extends 'DOMAIN' ? any :
