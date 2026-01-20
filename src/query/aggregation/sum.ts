@@ -4,13 +4,13 @@ import BasicColumnAggregationOperation, { aggregationOperations } from "./_aggre
 
 function generateSumFn<TDbType extends DbType>(dbType: TDbType) {
     return <
-        TAggColumn extends IComparable<TDbType, any, number, any, any, any>
+        TAggColumn extends IComparable<TDbType, any, number, any, any, any, any>
     >(arg: TAggColumn) => {
         return new BasicColumnAggregationOperation<
             TDbType,
             typeof aggregationOperations.sum,
             [TAggColumn],
-            TAggColumn extends IComparable<TDbType, any, any, infer TFinalType, any, any> ? TFinalType : never
+            TAggColumn extends IComparable<TDbType, any, any, infer TFinalType, any, any, any> ? TFinalType : never
         >(dbType, [arg], aggregationOperations.sum);
 
     }

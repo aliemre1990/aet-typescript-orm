@@ -7,8 +7,8 @@ import ColumnSQLFunction, { sqlFunctions } from "./_functions.js";
 import type { InferFirstTypeFromArgs, IsContainsNonNull } from "../_types/args.js";
 
 type ConvertMedianToParam<T, TDbType extends DbType, TConvert extends DbValueTypes | null> =
-    T extends QueryParam<any, infer U, infer TValueType, infer TAs, infer TDefaultFieldKey>
-    ? QueryParam<TDbType, U, IsAny<TValueType> extends true ? TConvert : TValueType, TAs, TDefaultFieldKey>
+    T extends QueryParam<any, infer U, infer TValueType, infer TAs, infer TDefaultFieldKey, infer TCastType>
+    ? QueryParam<TDbType, U, IsAny<TValueType> extends true ? TConvert : TValueType, TAs, TDefaultFieldKey, TCastType>
     : T;
 
 type ConvertMediansInArray<T extends any[], TDbType extends DbType, TValueType extends DbValueTypes | null> = {
@@ -17,8 +17,8 @@ type ConvertMediansInArray<T extends any[], TDbType extends DbType, TValueType e
 
 type CoalesceArg<TDbType extends DbType, TValueType extends DbValueTypes> =
     | TValueType | null
-    | QueryParam<TDbType, string, TValueType | null,  any, any>
-    | IComparable<TDbType, any, TValueType, any, any, any>;
+    | QueryParam<TDbType, string, TValueType | null, any, any, any>
+    | IComparable<TDbType, any, TValueType, any, any, any, any>;
 
 
 function generateCoalesceFn<

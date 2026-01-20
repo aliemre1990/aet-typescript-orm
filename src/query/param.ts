@@ -1,6 +1,7 @@
 import { dbTypes, type DbType } from "../db.js";
 import type { DbValueTypes } from "../table/column.js";
-import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, queryBuilderContextFactory, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
+import type { PgColumnType } from "../table/columnTypes.js";
+import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, queryBuilderContextFactory, type DetermineFinalValueType, type DetermineValueType, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
 import between from "./comparisons/between.js";
 import eq from "./comparisons/eq.js";
 import gt from "./comparisons/gt.js";
@@ -15,39 +16,53 @@ class QueryParam<
     TName extends string,
     TValueType extends DbValueTypes | null,
     TAs extends string | undefined = undefined,
-    TDefaultFieldKey extends string = `$${TName}`
+    TDefaultFieldKey extends string = `$${TName}`,
+    TCastType extends PgColumnType | undefined = undefined
 >
-    implements IComparable<TDbType, [QueryParam<TDbType, TName, TValueType>], NonNullable<TValueType>, TValueType, TDefaultFieldKey, TAs> {
+    implements IComparable<
+        TDbType,
+        [QueryParam<TDbType, TName, TValueType>],
+        DetermineValueType<TCastType, NonNullable<TValueType>>,
+        DetermineFinalValueType<TValueType, DetermineValueType<TCastType, NonNullable<TValueType>>>,
+        TDefaultFieldKey,
+        TAs,
+        TCastType
+    > {
 
     dbType: TDbType;
 
     params?: [QueryParam<TDbType, TName, TValueType>];
-    [IComparableValueDummySymbol]?: NonNullable<TValueType>;
-    [IComparableFinalValueDummySymbol]?: TValueType;
+    [IComparableValueDummySymbol]?: DetermineValueType<TCastType, NonNullable<TValueType>>;
+    [IComparableFinalValueDummySymbol]?: DetermineFinalValueType<TValueType, DetermineValueType<TCastType, NonNullable<TValueType>>>;
     isAgg?: false;
 
     name: TName;
     asName?: TAs;
+    castType?: TCastType;
     defaultFieldKey: TDefaultFieldKey;
 
-    constructor(dbType: TDbType, name: TName, asName?: TAs, ownerName?: string) {
+    constructor(dbType: TDbType, name: TName, asName?: TAs, ownerName?: string, castType?: TCastType) {
         this.dbType = dbType;
         this.name = name;
         this.asName = asName;
+        this.castType = castType;
         this.ownerName = ownerName;
 
         this.defaultFieldKey = `$${name}` as TDefaultFieldKey;
 
-        this.params = [this] as [QueryParam<TDbType, TName, TValueType>];
+        this.params = [this] as [QueryParam<TDbType, TName, TValueType, any, any, any>];
     }
 
     as<TAs extends string>(asName: TAs) {
-        return new QueryParam<TDbType, TName, TValueType, TAs, TDefaultFieldKey>(this.dbType, this.name, asName, this.ownerName);
+        return new QueryParam<TDbType, TName, TValueType, TAs, TDefaultFieldKey, TCastType>(this.dbType, this.name, asName, this.ownerName, this.castType);
+    }
+    cast<TCastType extends PgColumnType>(type: TCastType) {
+        return new QueryParam<TDbType, TName, TValueType, TAs, TDefaultFieldKey, TCastType>(this.dbType, this.name, this.asName, this.ownerName, type);
     }
 
     ownerName?: string;
-    setOwnerName(val: string): QueryParam<TDbType, TName, TValueType, TAs, TDefaultFieldKey> {
-        return new QueryParam<TDbType, TName, TValueType, TAs, TDefaultFieldKey>(this.dbType, this.name, this.asName, val);
+    setOwnerName(val: string): QueryParam<TDbType, TName, TValueType, TAs, TDefaultFieldKey, TCastType> {
+        return new QueryParam<TDbType, TName, TValueType, TAs, TDefaultFieldKey, TCastType>(this.dbType, this.name, this.asName, val, this.castType);
     }
 
     buildSQL(context?: QueryBuilderContext) {
@@ -64,7 +79,7 @@ class QueryParam<
     }
 
     type<TValueType extends DbValueTypes | null>() {
-        return new QueryParam<TDbType, TName, TValueType, TAs, TDefaultFieldKey>(this.dbType, this.name, this.asName);
+        return new QueryParam<TDbType, TName, TValueType, TAs, TDefaultFieldKey, TCastType>(this.dbType, this.name, this.asName, this.ownerName, this.castType);
     }
 
     eq: typeof eq = eq;

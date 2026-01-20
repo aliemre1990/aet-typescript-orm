@@ -7,16 +7,16 @@ import type { JSONBuildObjectParam } from "../functions/jsonFunctions/jsonBuildO
 
 type InferFirstTypeFromArgs<TDbType extends DbType, TArgs extends
     (
-        IComparable<TDbType, any, any, any, any, any> |
+        IComparable<TDbType, any, any, any, any, any, any> |
         DbValueTypes
     )[]
 > =
     TArgs extends readonly [infer First, ...infer Rest] ?
-    First extends QueryParam<TDbType, string, infer TValueType, any, any> ?
+    First extends QueryParam<TDbType, string, infer TValueType, any, any, any> ?
 
     IsAny<TValueType> extends true ?
 
-    Rest extends (IComparable<TDbType, any, any, any, any, any> | DbValueTypes)[] ?
+    Rest extends (IComparable<TDbType, any, any, any, any, any, any> | DbValueTypes)[] ?
     InferFirstTypeFromArgs<TDbType, Rest> :
     DbValueTypes :
 
@@ -34,11 +34,11 @@ type InferFirstTypeFromArgs<TDbType extends DbType, TArgs extends
     First extends Date[] ? Date[] :
     First extends Buffer ? Buffer :
 
-    First extends IComparable<TDbType, any, infer TValType, any, any, any> ? TValType :
+    First extends IComparable<TDbType, any, infer TValType, any, any, any, any> ? TValType :
 
     First extends object[] ? First :
     First extends object ? First :
-    Rest extends (IComparable<TDbType, any, any, any, any, any> | DbValueTypes)[] ?
+    Rest extends (IComparable<TDbType, any, any, any, any, any, any> | DbValueTypes)[] ?
     InferFirstTypeFromArgs<TDbType, Rest> :
     DbValueTypes :
     DbValueTypes
@@ -48,20 +48,20 @@ type IsContainsNonNull<TDbType extends DbType, TArgs extends
     (
         DbValueTypes |
         null |
-        IComparable<TDbType, any, any, any, any, any>
+        IComparable<TDbType, any, any, any, any, any, any>
 
     )[]
 > = TArgs extends readonly [infer First, ...infer Rest] ?
 
-    First extends IComparable<TDbType, any, any, infer TFinalType, any, any> ?
+    First extends IComparable<TDbType, any, any, infer TFinalType, any, any, any> ?
     null extends TFinalType ?
-    Rest extends (IComparable<TDbType, any, any, any, any, any> | DbValueTypes)[] ?
+    Rest extends (IComparable<TDbType, any, any, any, any, any, any> | DbValueTypes)[] ?
     IsContainsNonNull<TDbType, Rest> :
     false :
     true :
 
     null extends First ?
-    Rest extends (IComparable<TDbType, any, any, any, any, any> | DbValueTypes)[] ?
+    Rest extends (IComparable<TDbType, any, any, any, any, any, any> | DbValueTypes)[] ?
     IsContainsNonNull<TDbType, Rest> :
     false :
     true :
@@ -75,7 +75,7 @@ type IsContainsNonNull<TDbType extends DbType, TArgs extends
 type InferReturnTypeFromJSONBuildObjectParam<TDbType extends DbType, TObj extends JSONBuildObjectParam<TDbType>> =
     DeepPrettify<{
         [K in keyof TObj as K extends string ? K : never]:
-        TObj[K] extends IComparable<TDbType, any, any, infer TFinalType, any, any> ? TFinalType :
+        TObj[K] extends IComparable<TDbType, any, any, infer TFinalType, any, any, any> ? TFinalType :
         TObj[K] extends JSONBuildObjectParam<TDbType> ? InferReturnTypeFromJSONBuildObjectParam<TDbType, TObj[K]> :
         never
     }>

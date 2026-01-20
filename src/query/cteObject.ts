@@ -1,6 +1,7 @@
 import type { DbType } from "../db.js";
 import type { DbValueTypes } from "../table/column.js";
-import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, queryBuilderContextFactory, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
+import type { PgColumnType } from "../table/columnTypes.js";
+import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, queryBuilderContextFactory, type DetermineFinalValueType, type DetermineValueType, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
 import type { IName } from "./_interfaces/IName.js";
 import between from "./comparisons/between.js";
 import eq from "./comparisons/eq.js";
@@ -16,7 +17,7 @@ import type QueryBuilder from "./queryBuilder.js";
 
 type MapResultToCTEObjectEntry<TDbType extends DbType, TComparables extends ResultShape<TDbType>> =
     TComparables extends readonly [infer First, ...infer Rest] ?
-    First extends IComparable<TDbType, any, any, any, any, any> ?
+    First extends IComparable<TDbType, any, any, any, any, any, any> ?
     Rest extends ResultShape<TDbType> ?
     [CTEObjectEntry<TDbType, First>, ...MapResultToCTEObjectEntry<TDbType, Rest>] :
     [CTEObjectEntry<TDbType, First>] :
@@ -26,20 +27,31 @@ type MapResultToCTEObjectEntry<TDbType extends DbType, TComparables extends Resu
 
 class CTEObjectEntry<
     TDbType extends DbType,
-    TComparable extends IComparable<TDbType, any, any, any, any, any>,
-    TValueType extends DbValueTypes = TComparable extends IComparable<TDbType, any, infer TValType, any, any, any> ? TValType : never,
-    TFinalValueType extends TValueType | null = TComparable extends IComparable<TDbType, any, any, infer TFinalType, any, any> ? TFinalType : never,
-    TDefaultFieldKey extends string = TComparable extends IComparable<TDbType, any, any, any, infer TDefaultFieldKey, infer TAs> ? TAs extends undefined ? TDefaultFieldKey : TAs : never,
-    TAsName extends string | undefined = undefined
-> implements IComparable<TDbType, undefined, TValueType, TFinalValueType, TDefaultFieldKey, TAsName> {
+    TComparable extends IComparable<TDbType, any, any, any, any, any, any>,
+    TValueType extends DbValueTypes = TComparable extends IComparable<TDbType, any, infer TValType, any, any, any, any> ? TValType : never,
+    TFinalValueType extends TValueType | null = TComparable extends IComparable<TDbType, any, any, infer TFinalType, any, any, any> ? TFinalType : never,
+    TDefaultFieldKey extends string = TComparable extends IComparable<TDbType, any, any, any, infer TDefaultFieldKey, infer TAs, any> ? TAs extends undefined ? TDefaultFieldKey : TAs : never,
+    TAsName extends string | undefined = undefined,
+    TCastType extends PgColumnType | undefined = undefined
+> implements IComparable<
+    TDbType,
+    undefined,
+    DetermineValueType<TCastType, TValueType>,
+    DetermineFinalValueType<TFinalValueType, DetermineValueType<TCastType, TValueType>>,
+    TDefaultFieldKey,
+    TAsName,
+    TCastType
+> {
     dbType: TDbType;
 
-    [IComparableValueDummySymbol]?: TValueType;
-    [IComparableFinalValueDummySymbol]?: TFinalValueType;
+    [IComparableValueDummySymbol]?: DetermineValueType<TCastType, TValueType>;
+    [IComparableFinalValueDummySymbol]?: DetermineFinalValueType<TFinalValueType, DetermineValueType<TCastType, TValueType>>;
+
 
     params?: undefined;
     asName?: TAsName;
     defaultFieldKey: TDefaultFieldKey;
+    castType?: TCastType;
 
     comparable: TComparable;
 
@@ -53,12 +65,15 @@ class CTEObjectEntry<
     between: typeof between = between;
 
     as<TAsName extends string>(val: TAsName) {
-        return new CTEObjectEntry<TDbType, TComparable, TValueType, TFinalValueType, TDefaultFieldKey, TAsName>(this.dbType, this.comparable, val, this.ownerName);
+        return new CTEObjectEntry<TDbType, TComparable, TValueType, TFinalValueType, TDefaultFieldKey, TAsName, TCastType>(this.dbType, this.comparable, val, this.ownerName, this.defaultFieldKey, this.castType);
+    }
+    cast<TCastType extends PgColumnType>(type: TCastType) {
+        return new CTEObjectEntry<TDbType, TComparable, TValueType, TFinalValueType, TDefaultFieldKey, TAsName, TCastType>(this.dbType, this.comparable, this.asName, this.ownerName, this.defaultFieldKey, type);
     }
 
     ownerName?: string;
-    setOwnerName(val: string): CTEObjectEntry<TDbType, TComparable, TValueType, TFinalValueType, TDefaultFieldKey, TAsName> {
-        return new CTEObjectEntry<TDbType, TComparable, TValueType, TFinalValueType, TDefaultFieldKey, TAsName>(this.dbType, this.comparable, this.asName, val);
+    setOwnerName(val: string) {
+        return new CTEObjectEntry<TDbType, TComparable, TValueType, TFinalValueType, TDefaultFieldKey, TAsName, TCastType>(this.dbType, this.comparable, this.asName, val);
     }
 
     buildSQL(context?: QueryBuilderContext) {
@@ -74,12 +89,14 @@ class CTEObjectEntry<
         comparable: TComparable,
         asName?: TAsName,
         ownerName?: string,
-        defaultFieldKey?: TDefaultFieldKey
+        defaultFieldKey?: TDefaultFieldKey,
+        castType?: TCastType
     ) {
         this.dbType = dbType;
         this.comparable = comparable;
         this.asName = asName;
         this.ownerName = ownerName;
+        this.castType = castType;
 
         this.defaultFieldKey = defaultFieldKey || (comparable.asName === undefined ? comparable.defaultFieldKey : comparable.asName);
     }
@@ -89,8 +106,8 @@ class CTEObject<
     TDbType extends DbType,
     TCTEName extends string,
     TCTEType extends CTEType,
-    TQb extends QueryBuilder<TDbType, any, any, any, ResultShape<TDbType>, any, any>,
-    TEntries extends readonly CTEObjectEntry<TDbType, any, any, any, any, any>[] = TQb extends QueryBuilder<TDbType, any, any, any, infer TRes, any, any> ? TRes extends ResultShape<TDbType> ? MapResultToCTEObjectEntry<TDbType, TRes> : never : never,
+    TQb extends QueryBuilder<TDbType, any, any, any, ResultShape<TDbType>, any, any, any>,
+    TEntries extends readonly CTEObjectEntry<TDbType, any, any, any, any, any, any>[] = TQb extends QueryBuilder<TDbType, any, any, any, infer TRes, any, any, any> ? TRes extends ResultShape<TDbType> ? MapResultToCTEObjectEntry<TDbType, TRes> : never : never,
     TAs extends string | undefined = undefined
 > implements IName<TAs extends undefined ? TCTEName : TAs> {
     dbType: TDbType;
@@ -134,7 +151,7 @@ class CTEObject<
         if (entries !== undefined) {
             this.cteObjectEntries = entries;
         } else {
-            let tmpEntries: readonly CTEObjectEntry<TDbType, any, any, any, any, any>[] = [];
+            let tmpEntries: readonly CTEObjectEntry<TDbType, any, any, any, any, any, any>[] = [];
             if (qb.selectResult !== undefined) {
                 qb.selectResult.forEach(res => {
                     tmpEntries = [...tmpEntries, (new CTEObjectEntry(dbType, res, undefined, this.cteName))];

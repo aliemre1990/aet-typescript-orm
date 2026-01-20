@@ -11,7 +11,7 @@ import type { MapResultToSubQueryEntry } from "../subQueryObject.js";
 import type SubQueryObject from "../subQueryObject.js";
 
 type MapToSubQueryObject<TDbType extends DbType, T> =
-    T extends QueryBuilder<TDbType, any, any, any, infer TRes extends ResultShape<TDbType>, any, infer TAs extends string> ?
+    T extends QueryBuilder<TDbType, any, any, any, infer TRes extends ResultShape<TDbType>, any, infer TAs extends string, any> ?
     SubQueryObject<TDbType, T, MapResultToSubQueryEntry<TDbType, TRes>, TAs> : never
     ;
 
@@ -28,7 +28,7 @@ type ConvertElementsToSubQueryCompliant<TDbType extends DbType, TFrom> =
     [QueryTable<TDbType, TColumns, TTableName, Table<TDbType, TColumns, TTableName>, MapToQueryColumns<TDbType, TDbType, TColumns>>, ...ConvertElementsToSubQueryCompliant<TDbType, Rest>] :
     First extends QueryTable<TDbType, any, any, any, any, any> ?
     [First, ...ConvertElementsToSubQueryCompliant<TDbType, Rest>] :
-    First extends QueryBuilder<TDbType, any, any, any, any, any, any> ?
+    First extends QueryBuilder<TDbType, any, any, any, any, any, any, any> ?
     [MapToSubQueryObject<TDbType, First>, ...ConvertElementsToSubQueryCompliant<TDbType, Rest>] :
     First extends CTEObject<TDbType, any, any, any, any, any> ?
     [First, ...ConvertElementsToSubQueryCompliant<TDbType, Rest>] :
@@ -38,11 +38,11 @@ type ConvertElementsToSubQueryCompliant<TDbType extends DbType, TFrom> =
 type AccumulateSubQueryParams<
     TDbType extends DbType,
     TFrom extends FromType<TDbType>,
-    TParams extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = undefined
+    TParams extends readonly QueryParam<TDbType, any, any, any, any, any>[] | undefined = undefined
 > =
     TFrom extends readonly [infer First, ...infer Rest] ?
     First extends SubQueryObject<TDbType, infer TQb, any, any> ?
-    TQb extends QueryBuilder<TDbType, any, any, any, any, infer TInnerParams, any> ?
+    TQb extends QueryBuilder<TDbType, any, any, any, any, infer TInnerParams, any, any> ?
     Rest extends FromType<TDbType> ?
     [...(TParams extends undefined ? [] : TParams), ...(TInnerParams extends undefined ? [] : TInnerParams), ...AccumulateSubQueryParams<TDbType, Rest>] :
     [...(TParams extends undefined ? [] : TParams), ...(TInnerParams extends undefined ? [] : TInnerParams)] :

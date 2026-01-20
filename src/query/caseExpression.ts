@@ -1,7 +1,8 @@
 import { type DbType } from "../db.js";
 import type { DbValueTypes } from "../table/column.js";
+import type { PgColumnType } from "../table/columnTypes.js";
 import type { UndefinedIfLengthZero } from "../utility/common.js";
-import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
+import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, type DetermineFinalValueType, type DetermineValueType, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
 import type ColumnComparisonOperation from "./comparisons/_comparisonOperations.js";
 import between from "./comparisons/between.js";
 import eq from "./comparisons/eq.js";
@@ -15,9 +16,9 @@ import type ColumnLogicalOperation from "./logicalOperations.js";
 import type QueryParam from "./param.js";
 
 type AccumulateCaseParams<
-    TParams extends QueryParam<any, any, any, any, any>[] | undefined = undefined,
-    TCaseParams extends QueryParam<any, any, any, any, any>[] | undefined = undefined,
-    TCaseResultParams extends QueryParam<any, any, any, any, any>[] | undefined = undefined
+    TParams extends QueryParam<any, any, any, any, any, any>[] | undefined = undefined,
+    TCaseParams extends QueryParam<any, any, any, any, any, any>[] | undefined = undefined,
+    TCaseResultParams extends QueryParam<any, any, any, any, any, any>[] | undefined = undefined
 > =
     [
         ...(TParams extends undefined ? [] : TParams),
@@ -31,25 +32,29 @@ type defaultCaseExpressionFieldNameType = typeof defaultCaseExpressionFieldName;
 class SQLCaseExpression<
     TDbType extends DbType,
     TResult extends DbValueTypes | null = never,
-    TMainExpression extends IComparable<TDbType, any, any, any, any, any> | undefined = undefined,
-    TParams extends QueryParam<TDbType, string, any, any, any>[] | undefined = undefined,
+    TMainExpression extends IComparable<TDbType, any, any, any, any, any, any> | undefined = undefined,
+    TParams extends QueryParam<TDbType, string, any, any, any, any>[] | undefined = undefined,
     TAs extends string | undefined = undefined,
+    TCastType extends PgColumnType | undefined = undefined,
 > implements IComparable<
     TDbType,
     TParams,
-    NonNullable<TResult>,
-    TResult,
+    DetermineValueType<TCastType, NonNullable<TResult>>,
+    DetermineFinalValueType<TResult, DetermineValueType<TCastType, NonNullable<TResult>>>,
     defaultCaseExpressionFieldNameType,
-    TAs
+    TAs,
+    TCastType
 > {
-    [IComparableValueDummySymbol]?: NonNullable<TResult>;
-    [IComparableFinalValueDummySymbol]?: TResult;
+    [IComparableValueDummySymbol]?: DetermineValueType<TCastType, NonNullable<TResult>>;
+    [IComparableFinalValueDummySymbol]?: DetermineFinalValueType<TResult, DetermineValueType<TCastType, NonNullable<TResult>>>;
+
 
     defaultFieldKey: defaultCaseExpressionFieldNameType;
 
     dbType: TDbType;
     params?: TParams | undefined;
     asName?: TAs | undefined;
+    castType?: TCastType;
 
     eq: typeof eq = eq;
     notEq: typeof notEq = notEq;
@@ -60,20 +65,24 @@ class SQLCaseExpression<
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 
-    as<TAs extends string>(asName: TAs): IComparable<TDbType, TParams, NonNullable<TResult>, TResult, defaultCaseExpressionFieldNameType, TAs> {
-        return new SQLCaseExpression(this.dbType, asName, this.mainExpression);
+    as<TAs extends string>(asName: TAs) {
+        return new SQLCaseExpression<TDbType, TResult, TMainExpression, TParams, TAs, TCastType>(this.dbType, asName, this.castType, this.mainExpression);
+    }
+    cast<TCastType extends PgColumnType>(type: TCastType) {
+        return new SQLCaseExpression<TDbType, TResult, TMainExpression, TParams, TAs, TCastType>(this.dbType, this.asName, type, this.mainExpression);
     }
     buildSQL(context?: QueryBuilderContext): { query: string; params: string[]; } {
         throw new Error("Method not implemented.");
     }
 
     mainExpression?: TMainExpression;
-    elseVal?: IComparable<TDbType, any, any, any, any, any> | DbValueTypes | null;
+    elseVal?: IComparable<TDbType, any, any, any, any, any, any> | DbValueTypes | null;
 
-    constructor(dbType: TDbType, asName?: TAs, mainExpression?: TMainExpression, elseVal?: typeof this.elseVal) {
+    constructor(dbType: TDbType, asName?: TAs, castType?: TCastType, mainExpression?: TMainExpression, elseVal?: typeof this.elseVal) {
         this.dbType = dbType;
         this.asName = asName;
         this.defaultFieldKey = defaultCaseExpressionFieldName;
+        this.castType = castType;
 
         this.mainExpression = mainExpression;
         this.elseVal = elseVal;
@@ -100,19 +109,19 @@ function generateSQLCaseFn<
     TDbType extends DbType
 >(dbType: TDbType) {
 
-    function sqlCase<TExpression extends IComparable<TDbType, any, any, any, any, any>>(expression: TExpression):
-        SQLCaseExpression<TDbType, never, TExpression, TExpression extends IComparable<TDbType, infer TParams, any, any, any, any> ? TParams : never>
+    function sqlCase<TExpression extends IComparable<TDbType, any, any, any, any, any, any>>(expression: TExpression):
+        SQLCaseExpression<TDbType, never, TExpression, TExpression extends IComparable<TDbType, infer TParams, any, any, any, any, any> ? TParams : never>
     function sqlCase():
         SQLCaseExpression<TDbType, never, undefined, undefined>
     function sqlCase<
-        TExpression extends IComparable<TDbType, any, any, any, any, any> | undefined
+        TExpression extends IComparable<TDbType, any, any, any, any, any, any> | undefined
     >(expression?: TExpression) {
         return new SQLCaseExpression<
             TDbType,
             never,
             TExpression,
-            TExpression extends undefined ? undefined : (TExpression extends IComparable<TDbType, infer TParams, any, any, any, any> ? TParams : never)
-        >(dbType, undefined, expression);
+            TExpression extends undefined ? undefined : (TExpression extends IComparable<TDbType, infer TParams, any, any, any, any, any> ? TParams : never)
+        >(dbType, undefined, undefined, expression);
     }
 
     return sqlCase;

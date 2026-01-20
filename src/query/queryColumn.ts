@@ -2,7 +2,7 @@ import type { DbType } from "../db.js";
 import eq from "./comparisons/eq.js";
 import between from "./comparisons/between.js";
 import sqlIn from "./comparisons/in.js";
-import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, queryBuilderContextFactory, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
+import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, queryBuilderContextFactory, type DetermineFinalValueType, type DetermineValueType, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
 import type Column from "../table/column.js";
 import type { ColumnType, DbValueTypes } from "../table/column.js";
 import notEq from "./comparisons/notEq.js";
@@ -10,8 +10,7 @@ import gt from "./comparisons/gt.js";
 import gte from "./comparisons/gte.js";
 import lt from "./comparisons/lt.js";
 import lte from "./comparisons/lte.js";
-
-type QueryColumnsObjectType<TDbType extends DbType> = { [key: string]: QueryColumn<TDbType, any, any, any> }
+import type { PgColumnType } from "../table/columnTypes.js";
 
 class QueryColumn<
     TDbType extends DbType,
@@ -19,18 +18,28 @@ class QueryColumn<
     TQTableSpecs extends { tableName: string, asTableName?: string },
     TAsName extends string | undefined = undefined,
     TDefaultFieldKey extends string = TColumn["name"],
+    TCastType extends PgColumnType | undefined = undefined,
     TValueType extends DbValueTypes = TColumn extends Column<TDbType, any, any, any, any, infer TValType> ? TValType : never,
     TFinalValueType extends TValueType | null = TColumn extends Column<TDbType, any, any, any, any, any, infer TFinalValType> ? TFinalValType : never
-> implements IComparable<TDbType, undefined, TValueType, TFinalValueType, TDefaultFieldKey, TAsName> {
+> implements IComparable<
+    TDbType,
+    undefined,
+    DetermineValueType<TCastType, TValueType>,
+    DetermineFinalValueType<TFinalValueType, DetermineValueType<TCastType, TValueType>>,
+    TDefaultFieldKey,
+    TAsName,
+    TCastType
+> {
+    [IComparableValueDummySymbol]?: DetermineValueType<TCastType, TValueType>;
+    [IComparableFinalValueDummySymbol]?: DetermineFinalValueType<TFinalValueType, DetermineValueType<TCastType, TValueType>>
+
     qTableSpecs: TQTableSpecs;
 
     dbType: TDbType;
-
     asName?: TAsName;
+    castType?: TCastType;
+
     params?: undefined;
-    [IComparableValueDummySymbol]?: TValueType;
-    [IComparableFinalValueDummySymbol]?: TFinalValueType;
-    isAgg?: false;
     defaultFieldKey: TDefaultFieldKey;
 
     eq: typeof eq = eq;
@@ -42,15 +51,19 @@ class QueryColumn<
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 
-    constructor(dbType: TDbType, public column: TColumn, qTableSpecs: TQTableSpecs, asName?: TAsName) {
+    constructor(dbType: TDbType, public column: TColumn, qTableSpecs: TQTableSpecs, asName?: TAsName, castType?: TCastType) {
         this.asName = asName;
         this.dbType = dbType;
         this.qTableSpecs = qTableSpecs;
         this.defaultFieldKey = column.name as TDefaultFieldKey;
+        this.castType = castType;
     }
 
     as<TAsName extends string>(val: TAsName) {
-        return new QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName, TDefaultFieldKey>(this.dbType, this.column, this.qTableSpecs, val);
+        return new QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName, TDefaultFieldKey, TCastType>(this.dbType, this.column, this.qTableSpecs, val, this.castType);
+    }
+    cast<TCastType extends PgColumnType>(type: TCastType) {
+        return new QueryColumn<TDbType, TColumn, TQTableSpecs, TAsName, TDefaultFieldKey, TCastType>(this.dbType, this.column, this.qTableSpecs, this.asName, type);
     }
 
     buildSQL(context?: QueryBuilderContext) {
@@ -64,7 +77,3 @@ class QueryColumn<
 
 
 export default QueryColumn;
-
-export type {
-    QueryColumnsObjectType
-}

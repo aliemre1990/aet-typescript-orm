@@ -18,7 +18,7 @@ class ColumnLogicalOperation<
     operator: LogicalOperation;
     comparisons: TComparisons;
 
-    params?: QueryParam<TDbType, any, any, any, any>[];
+    params?: QueryParam<TDbType, any, any, any, any, any>[];
 
     constructor(
         dbType: TDbType,
@@ -30,7 +30,7 @@ class ColumnLogicalOperation<
         this.comparisons = comparisons;
 
 
-        const tmpParams: QueryParam<TDbType, any, any, any, any>[] = [];
+        const tmpParams: QueryParam<TDbType, any, any, any, any, any>[] = [];
 
         comparisons.forEach(comp => {
             if (

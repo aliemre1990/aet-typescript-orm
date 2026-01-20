@@ -8,7 +8,7 @@ function generateArithmeticMultiplication<
     TDbType extends DbType
 >(dbType: TDbType) {
     return <
-        TArgs extends (DbValueTypes | null | IComparable<TDbType, any, any, any, any, any>)[]
+        TArgs extends (DbValueTypes | null | IComparable<TDbType, any, any, any, any, any, any>)[]
     >
         (...args: TArgs) => {
 

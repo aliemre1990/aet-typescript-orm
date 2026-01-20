@@ -1,6 +1,6 @@
 import { dbTypes, type DbType, type MySQLDbType, type PgDbType } from "../../db.js";
 import type { DbValueTypes } from "../../table/column.js";
-import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, queryBuilderContextFactory, type IComparable, type QueryBuilderContext } from "../_interfaces/IComparable.js";
+import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, queryBuilderContextFactory, type DetermineFinalValueType, type DetermineValueType, type IComparable, type QueryBuilderContext } from "../_interfaces/IComparable.js";
 import between from "../comparisons/between.js";
 import eq from "../comparisons/eq.js";
 import sqlIn from "../comparisons/in.js";
@@ -12,6 +12,7 @@ import gte from "../comparisons/gte.js";
 import lt from "../comparisons/lt.js";
 import lte from "../comparisons/lte.js";
 import { convertArgsToQueryString } from "../uitlity/common.js";
+import type { PgColumnType } from "../../table/columnTypes.js";
 
 
 const arithmeticOperations = {
@@ -50,23 +51,33 @@ class SQLArithmeticOperation<
     TArithmeticOperation extends ArithmeticOperation,
     TArgs extends (
         DbValueTypes | null |
-        IComparable<TDbType, any, any, any, any, any>
+        IComparable<TDbType, any, any, any, any, any, any>
     )[],
     TReturnType extends DbValueTypes | null,
     TAs extends string | undefined = undefined,
     TDefaultFieldKey extends string = `${TArithmeticOperation["name"]}()`,
-    TParams extends QueryParam<TDbType, string, any, any, any>[] | undefined = InferParamsFromFnArgs<TArgs>
-> implements IComparable<TDbType, TParams, NonNullable<TReturnType>, TReturnType, TDefaultFieldKey, TAs> {
+    TParams extends QueryParam<TDbType, string, any, any, any, any>[] | undefined = InferParamsFromFnArgs<TArgs>,
+    TCastType extends PgColumnType | undefined = undefined
+> implements IComparable<
+    TDbType,
+    TParams,
+    DetermineValueType<TCastType, NonNullable<TReturnType>>,
+    DetermineFinalValueType<TReturnType, DetermineValueType<TCastType, NonNullable<TReturnType>>>,
+    TDefaultFieldKey,
+    TAs,
+    TCastType
+> {
 
     dbType: TDbType;
     args: TArgs;
     operation: TArithmeticOperation;
 
-    [IComparableValueDummySymbol]?: NonNullable<TReturnType>;
-    [IComparableFinalValueDummySymbol]?: TReturnType;
+    [IComparableValueDummySymbol]?: DetermineValueType<TCastType, NonNullable<TReturnType>>;
+    [IComparableFinalValueDummySymbol]?: DetermineFinalValueType<TReturnType, DetermineValueType<TCastType, NonNullable<TReturnType>>>;
 
     params?: TParams;
     asName?: TAs;
+    castType?: TCastType;
     defaultFieldKey: TDefaultFieldKey;
 
     eq: typeof eq = eq;
@@ -79,7 +90,10 @@ class SQLArithmeticOperation<
     between: typeof between = between;
 
     as<TAs extends string>(asName: TAs) {
-        return new SQLArithmeticOperation<TDbType, TArithmeticOperation, TArgs, TReturnType, TAs, TDefaultFieldKey, TParams>(this.dbType, this.args, this.operation, asName);
+        return new SQLArithmeticOperation<TDbType, TArithmeticOperation, TArgs, TReturnType, TAs, TDefaultFieldKey, TParams, TCastType>(this.dbType, this.args, this.operation, asName, this.castType);
+    }
+    cast<TCastType extends PgColumnType>(type: TCastType) {
+        return new SQLArithmeticOperation<TDbType, TArithmeticOperation, TArgs, TReturnType, TAs, TDefaultFieldKey, TParams, TCastType>(this.dbType, this.args, this.operation, this.asName, type);
     }
 
     buildSQL(context?: QueryBuilderContext) {
@@ -104,13 +118,15 @@ class SQLArithmeticOperation<
         dbType: TDbType,
         args: TArgs,
         operation: TArithmeticOperation,
-        asName?: TAs
+        asName?: TAs,
+        castType?: TCastType
     ) {
         this.dbType = dbType;
         this.args = args;
         this.operation = operation;
         this.asName = asName;
         this.defaultFieldKey = `${operation.name}()` as TDefaultFieldKey;
+        this.castType = castType;
     }
 }
 

@@ -1,7 +1,7 @@
 import { dbTypes, type DbType, type PgDbType } from "../../../db.js";
 import type { DbValueTypes } from "../../../table/column.js";
 import type { RecordToTupleSafe } from "../../../utility/common.js";
-import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, queryBuilderContextFactory, type IComparable, type QueryBuilderContext } from "../../_interfaces/IComparable.js";
+import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, queryBuilderContextFactory, type DetermineFinalValueType, type DetermineValueType, type IComparable, type QueryBuilderContext } from "../../_interfaces/IComparable.js";
 import between from "../../comparisons/between.js";
 import eq from "../../comparisons/eq.js";
 import sqlIn from "../../comparisons/in.js";
@@ -12,6 +12,7 @@ import gt from "../../comparisons/gt.js";
 import gte from "../../comparisons/gte.js";
 import lt from "../../comparisons/lt.js";
 import lte from "../../comparisons/lte.js";
+import type { PgColumnType } from "../../../table/columnTypes.js";
 
 type InferParamsFromJsonBuildObjectArg<TDbType extends DbType, TObj extends JSONBuildObjectParam<TDbType>> =
     InferParamsFromObj<TDbType, TObj>["length"] extends 0 ? undefined :
@@ -20,10 +21,10 @@ type InferParamsFromJsonBuildObjectArg<TDbType extends DbType, TObj extends JSON
 type InferParamsFromObj<TDbType extends DbType, TObj extends JSONBuildObjectParam<TDbType>> =
     RecordToTupleSafe<TObj> extends readonly [infer FirstKey, ...infer RestKeys] ?
     RestKeys extends readonly any[] ?
-    FirstKey extends IComparable<TDbType, infer TParams, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams), ...InferParamsFromObjArr<TDbType, RestKeys>] :
+    FirstKey extends IComparable<TDbType, infer TParams, any, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams), ...InferParamsFromObjArr<TDbType, RestKeys>] :
     FirstKey extends JSONBuildObjectParam<TDbType> ? [...InferParamsFromObj<TDbType, FirstKey>, ...InferParamsFromObjArr<TDbType, RestKeys>] :
     [...InferParamsFromObjArr<TDbType, RestKeys>] :
-    FirstKey extends IComparable<TDbType, infer TParams, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams)] :
+    FirstKey extends IComparable<TDbType, infer TParams, any, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams)] :
     FirstKey extends JSONBuildObjectParam<TDbType> ? [...InferParamsFromObj<TDbType, FirstKey>] :
     [] :
     [];
@@ -31,17 +32,17 @@ type InferParamsFromObj<TDbType extends DbType, TObj extends JSONBuildObjectPara
 type InferParamsFromObjArr<TDbType extends DbType, TRest extends readonly any[]> =
     TRest extends readonly [infer FirstKey, ...infer RestKeys] ?
     RestKeys extends readonly any[] ?
-    FirstKey extends IComparable<TDbType, infer TParams, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams), ...InferParamsFromObjArr<TDbType, RestKeys>] :
+    FirstKey extends IComparable<TDbType, infer TParams, any, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams), ...InferParamsFromObjArr<TDbType, RestKeys>] :
     FirstKey extends JSONBuildObjectParam<TDbType> ? [...InferParamsFromObj<TDbType, FirstKey>, ...InferParamsFromObjArr<TDbType, RestKeys>] :
     [...InferParamsFromObjArr<TDbType, RestKeys>] :
-    FirstKey extends IComparable<TDbType, infer TParams, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams)] :
+    FirstKey extends IComparable<TDbType, infer TParams, any, any, any, any, any> ? [...(TParams extends undefined ? [] : TParams)] :
     FirstKey extends JSONBuildObjectParam<TDbType> ? [...InferParamsFromObj<TDbType, FirstKey>] :
     [] :
     [];
 
 type JSONBuildObjectParam<TDbType extends DbType> = {
     [key: string]:
-    IComparable<TDbType, any, any, any, any, any> |
+    IComparable<TDbType, any, any, any, any, any, any> |
     JSONBuildObjectParam<TDbType>
 }
 
@@ -49,24 +50,36 @@ class JSONBuildObjectFunction<
     TDbType extends PgDbType,
     TObj extends JSONBuildObjectParam<TDbType>,
     TReturnType extends DbValueTypes | null = TDbType extends PgDbType ? InferReturnTypeFromJSONBuildObjectParam<TDbType, TObj> : never,
-    TParams extends QueryParam<TDbType, string, any, any, any>[] | undefined = InferParamsFromJsonBuildObjectArg<TDbType, TObj>,
+    TParams extends QueryParam<TDbType, string, any, any, any, any>[] | undefined = InferParamsFromJsonBuildObjectArg<TDbType, TObj>,
     TAs extends string | undefined = undefined,
-    TDefaultFieldKey extends string = 'json_build_object'
-> implements IComparable<TDbType, TParams, NonNullable<TReturnType>, TReturnType, TDefaultFieldKey, TAs> {
+    TDefaultFieldKey extends string = 'json_build_object',
+    TCastType extends PgColumnType | undefined = undefined
+> implements IComparable<
+    TDbType,
+    TParams,
+    DetermineValueType<TCastType, NonNullable<TReturnType>>,
+    DetermineFinalValueType<TReturnType, DetermineValueType<TCastType, NonNullable<TReturnType>>>,
+    TDefaultFieldKey,
+    TAs,
+    TCastType
+> {
+    [IComparableValueDummySymbol]?: DetermineValueType<TCastType, NonNullable<TReturnType>>;
+    [IComparableFinalValueDummySymbol]?: DetermineFinalValueType<TReturnType, DetermineValueType<TCastType, NonNullable<TReturnType>>>;
 
     dbType: TDbType;
     obj: TObj;
     isJsonB: boolean;
 
-    [IComparableValueDummySymbol]?: NonNullable<TReturnType>;
-    [IComparableFinalValueDummySymbol]?: TReturnType;
     params?: TParams;
-
     asName?: TAs;
+    castType?: TCastType;
     defaultFieldKey: TDefaultFieldKey;
 
     as<TAs extends string>(asName: TAs) {
-        return new JSONBuildObjectFunction<TDbType, TObj, TReturnType, TParams, TAs, TDefaultFieldKey>(this.dbType, this.obj, this.isJsonB, asName);
+        return new JSONBuildObjectFunction<TDbType, TObj, TReturnType, TParams, TAs, TDefaultFieldKey, TCastType>(this.dbType, this.obj, this.isJsonB, asName, this.castType);
+    }
+    cast<TCastType extends PgColumnType>(type: TCastType) {
+        return new JSONBuildObjectFunction<TDbType, TObj, TReturnType, TParams, TAs, TDefaultFieldKey, TCastType>(this.dbType, this.obj, this.isJsonB, this.asName, type);
     }
 
     buildSQL(context?: QueryBuilderContext) {
@@ -85,15 +98,17 @@ class JSONBuildObjectFunction<
         obj: TObj,
         isJsonB: boolean,
         asName?: TAs,
+        castType?: TCastType
     ) {
         this.dbType = dbType;
         this.obj = obj;
         this.isJsonB = isJsonB;
         this.asName = asName;
         this.defaultFieldKey = 'json_build_object' as TDefaultFieldKey;
+        this.castType = castType;
 
 
-        const tmpParams: QueryParam<TDbType, any, any, any, any>[] = [];
+        const tmpParams: QueryParam<TDbType, any, any, any, any, any>[] = [];
         let entries = Object.entries(this.obj);
 
         for (const entry of entries) {

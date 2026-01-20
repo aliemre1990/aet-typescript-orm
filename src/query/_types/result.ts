@@ -21,7 +21,7 @@ type ColumnsToResultMapRecursively<
     Acc extends { [key: string]: any } = {}
 > =
     T extends readonly [infer First, ...infer Rest] ?
-    First extends IComparable<TDbType, any, any, infer TFinalType, infer TDefaultKey, infer TAs> ?
+    First extends IComparable<TDbType, any, any, infer TFinalType, infer TDefaultKey, infer TAs, any> ?
 
     TAs extends undefined ?
 
@@ -43,10 +43,10 @@ type ColumnsToResultMapRecursively<
 
 type SelectToResultMapRecursively<
     TDbType extends DbType,
-    TSelect extends readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, any>)[]
+    TSelect extends readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, any, any>)[]
 > =
     TSelect extends readonly [infer First, ...infer Rest] ?
-    First extends IComparable<TDbType, any, any, any, any, any> ?
+    First extends IComparable<TDbType, any, any, any, any, any, any> ?
     Rest extends readonly [any, ...any[]] ?
     [First, ...SelectToResultMapRecursively<TDbType, Rest>] :
     [First] :
@@ -118,13 +118,13 @@ type FromToAllColumnsMapRecursively<
     ;
 
 // Convert array of QueryParam to object type
-type QueryParamsToObject<T extends readonly QueryParam<any, any, any, any, any>[] | undefined> =
+type QueryParamsToObject<T extends readonly QueryParam<any, any, any, any, any, any>[] | undefined> =
     T extends undefined ? undefined :
-    T extends QueryParam<any, any, any, any, any>[] ?
+    T extends QueryParam<any, any, any, any, any, any>[] ?
     T["length"] extends 0 ? undefined :
-    T extends readonly QueryParam<any, any, any, any, any>[] ? {
-        [K in T[number]as K extends QueryParam<any, infer Name, any, any, any> ? Name : never]:
-        K extends QueryParam<any, any, infer ValueType, any, any> ? ValueType : never
+    T extends readonly QueryParam<any, any, any, any, any, any>[] ? {
+        [K in T[number]as K extends QueryParam<any, infer Name, any, any, any, any> ? Name : never]:
+        K extends QueryParam<any, any, infer ValueType, any, any, any> ? ValueType : never
     }
     : never
     : undefined;

@@ -7,7 +7,7 @@ function generateArithmeticExponentiation<
     TDbType extends DbType
 >(dbType: TDbType) {
     return <
-        TArgs extends IComparable<TDbType, any, number, any, any, any>[]
+        TArgs extends IComparable<TDbType, any, number, any, any, any, any>[]
     >
         (...args: TArgs) => {
 

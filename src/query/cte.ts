@@ -11,11 +11,11 @@ import QueryBuilder from "./queryBuilder.js";
 
 function withAs<
     TCTEName extends string,
-    TQb extends QueryBuilder<TDbType, any, any, any, any, any, any>,
+    TQb extends QueryBuilder<TDbType, any, any, any, any, any, any, any>,
     TDbType extends DbType = TQb extends IDbType<infer TDbTypeInner> ? TDbTypeInner : never
 >(as: TCTEName, qb: TQb) {
     type TCTEObject = MapToCTEObject<TDbType, TCTEName, typeof cteTypes.NON_RECURSIVE, TQb>;
-    type TParams = TQb extends QueryBuilder<TDbType, any, any, any, any, infer TParams, any> ? TParams : never;
+    type TParams = TQb extends QueryBuilder<TDbType, any, any, any, any, infer TParams, any, any> ? TParams : never;
 
     const cteObject = new CTEObject(qb.dbType, qb, as, cteTypes.NON_RECURSIVE) as TCTEObject;
     const cteSpecs = [cteObject] as const;
@@ -33,8 +33,8 @@ function withAs<
 function withRecursiveAs<
     TCTEName extends string,
     const TColumnNames extends readonly string[],
-    TAnchorQb extends QueryBuilder<TDbType, any, any, any, ResultShape<TDbType> | undefined, any, any>,
-    TRecursivePartResult extends QueryBuilder<TDbType, any, any, any, any, any, any>,
+    TAnchorQb extends QueryBuilder<TDbType, any, any, any, ResultShape<TDbType> | undefined, any, any, any>,
+    TRecursivePartResult extends QueryBuilder<TDbType, any, any, any, any, any, any, any>,
     TDbType extends DbType = TAnchorQb extends IDbType<infer TDbTypeInner> ? TDbTypeInner : never,
     TFinalCTE extends CTEObject<TDbType, any, any, any, any, any> = MapToCTEObjectForRecursive<TDbType, TCTEName, typeof cteTypes.RECURSIVE, TColumnNames, TAnchorQb>
 >(
@@ -48,7 +48,7 @@ function withRecursiveAs<
     // Map anchorqb to cte object with name TCTEName and columns are TColumnsList if specified, else TAnchorQb columns
     // Pass the cte object to recursive part
     let cte: TFinalCTE;
-    let finalCTEentries: CTEObjectEntry<TDbType, any, any, any, any>[] = [];
+    let finalCTEentries: CTEObjectEntry<TDbType, any, any, any, any, any, any>[] = [];
     if (columnNames.length === 0) {
         cte = new CTEObject(anchorQb.dbType, anchorQb, cteName, cteTypes.RECURSIVE) as TFinalCTE;
     } else {
@@ -73,15 +73,15 @@ function withRecursiveAs<
 
     let recursiveQb = recursivePart(cte);
 
-    let finalQb: QueryBuilder<TDbType, any, any, any, any, any, any>;
+    let finalQb: QueryBuilder<TDbType, any, any, any, any, any, any, any>;
     if (unionType === "UNION") {
         finalQb = anchorQb.union(() => recursiveQb);
     } else {
         finalQb = anchorQb.unionAll(() => recursiveQb);
     }
 
-    type TAnchorParams = TAnchorQb extends QueryBuilder<TDbType, any, any, any, any, infer TParams, any> ? TParams : never;
-    type TRecursiveParams = TRecursivePartResult extends QueryBuilder<TDbType, any, any, any, any, infer TParams, any> ? TParams : never;
+    type TAnchorParams = TAnchorQb extends QueryBuilder<TDbType, any, any, any, any, infer TParams, any, any> ? TParams : never;
+    type TRecursiveParams = TRecursivePartResult extends QueryBuilder<TDbType, any, any, any, any, infer TParams, any, any> ? TParams : never;
     type TParams = [...(TAnchorParams extends undefined ? [] : TAnchorParams), ...(TRecursiveParams extends undefined ? [] : TRecursiveParams)];
     type TParamsResult = TParams["length"] extends 0 ? undefined : TParams;
 

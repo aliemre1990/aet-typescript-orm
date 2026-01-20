@@ -28,12 +28,12 @@ const comparisonOperations = {
 type ComparisonOperation = (typeof comparisonOperations)[keyof typeof comparisonOperations];
 
 type InferValueTypeFromComparable<TDbType extends DbType, T> =
-    T extends IComparable<TDbType, any, infer TValueType, any, any, any> ? TValueType : never;
+    T extends IComparable<TDbType, any, infer TValueType, any, any, any, any> ? TValueType : never;
 
 class ColumnComparisonOperation<
     TDbType extends DbType,
-    TComparing extends IComparable<TDbType, any, any, any, any, any>,
-    TApplied extends (TValueType | null | IComparable<TDbType, any, any, any, any, any>)[] | undefined,
+    TComparing extends IComparable<TDbType, any, any, any, any, any, any>,
+    TApplied extends (TValueType | null | IComparable<TDbType, any, any, any, any, any, any>)[] | undefined,
     TValueType extends DbValueTypes = InferValueTypeFromComparable<TDbType, TComparing>
 > {
 
@@ -42,7 +42,7 @@ class ColumnComparisonOperation<
     comparing: TComparing;
     value?: TApplied
 
-    params?: QueryParam<TDbType, any, any, any, any>[];
+    params?: QueryParam<TDbType, any, any, any, any, any>[];
 
     buildSQL(context?: QueryBuilderContext) {
         if (context === undefined) {
@@ -87,7 +87,7 @@ class ColumnComparisonOperation<
         this.comparing = comparing;
         this.value = value;
 
-        const tmpParams: QueryParam<TDbType, any, any, any, any>[] = [];
+        const tmpParams: QueryParam<TDbType, any, any, any, any, any>[] = [];
         if (comparing.params !== undefined && comparing.params.length > 0) {
             tmpParams.push(...comparing.params);
         }

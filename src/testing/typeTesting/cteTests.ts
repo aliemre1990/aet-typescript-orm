@@ -22,7 +22,7 @@ const chain = withAs(
     .select((tbls) => [tbls.customers, tbls.employeesCTE, tbls.employees])
     .exec;
 
-// type tp1 = typeof chain extends QueryBuilder<any, any, any, infer cte, any, any, any> ? cte : never;
+// type tp1 = typeof chain extends QueryBuilder<any, any, any, infer cte, any, any, any, any> ? cte : never;
 // type cst = tp1[1];
 // type entries = cst["cteObjectEntries"];
 

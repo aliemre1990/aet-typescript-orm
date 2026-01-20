@@ -1,9 +1,12 @@
 import type { DbType } from "../db.js";
 import type { DbValueTypes } from "../table/column.js";
+import type { PgColumnType } from "../table/columnTypes.js";
 import {
     IComparableFinalValueDummySymbol,
     IComparableValueDummySymbol,
     queryBuilderContextFactory,
+    type DetermineFinalValueType,
+    type DetermineValueType,
     type IComparable,
     type QueryBuilderContext
 } from "./_interfaces/IComparable.js";
@@ -23,16 +26,26 @@ type TLiteralValueColumnName = typeof literalValueColumnName;
 class LiteralValue<
     TDbType extends DbType,
     TValue extends DbValueTypes | null,
-    TAs extends string | undefined = undefined
-> implements IComparable<TDbType, undefined, NonNullable<TValue>, TValue, TLiteralValueColumnName, TAs> {
-    [IComparableValueDummySymbol]?: NonNullable<TValue>;
-    [IComparableFinalValueDummySymbol]?: TValue;
+    TAs extends string | undefined = undefined,
+    TCastType extends PgColumnType | undefined = undefined
+> implements IComparable<
+    TDbType,
+    undefined,
+    DetermineValueType<TCastType, NonNullable<TValue>>,
+    DetermineFinalValueType<TValue, DetermineValueType<TCastType, NonNullable<TValue>>>,
+    TLiteralValueColumnName,
+    TAs,
+    TCastType
+> {
+    [IComparableValueDummySymbol]?: DetermineValueType<TCastType, NonNullable<TValue>>;
+    [IComparableFinalValueDummySymbol]?: DetermineFinalValueType<TValue, DetermineValueType<TCastType, NonNullable<TValue>>>;
 
 
     dbType: TDbType;
     defaultFieldKey: TLiteralValueColumnName;
     params?: undefined;
     asName?: TAs;
+    castType?: TCastType;
 
     value: TValue;
 
@@ -45,9 +58,13 @@ class LiteralValue<
     sqlIn: typeof sqlIn = sqlIn;
     between: typeof between = between;
 
-    as<TAs extends string>(asName: TAs): IComparable<TDbType, undefined, NonNullable<TValue>, TValue, TLiteralValueColumnName, TAs> {
-        return new LiteralValue<TDbType, TValue, TAs>(this.dbType, this.value, asName);
+    as<TAs extends string>(asName: TAs) {
+        return new LiteralValue<TDbType, TValue, TAs, TCastType>(this.dbType, this.value, asName, this.castType);
     }
+    cast<TCastType extends PgColumnType>(type: TCastType) {
+        return new LiteralValue<TDbType, TValue, TAs, TCastType>(this.dbType, this.value, this.asName, type);
+    }
+
     buildSQL(context?: QueryBuilderContext): { query: string; params: string[]; } {
         if (context === undefined) {
             context = queryBuilderContextFactory();
@@ -59,11 +76,12 @@ class LiteralValue<
         return { query, params: context.params };
     }
 
-    constructor(dbType: TDbType, value: TValue, asName?: TAs) {
+    constructor(dbType: TDbType, value: TValue, asName?: TAs, castType?: TCastType) {
         this.dbType = dbType;
         this.value = value;
         this.defaultFieldKey = literalValueColumnName;
         this.asName = asName;
+        this.castType = castType;
     }
 }
 

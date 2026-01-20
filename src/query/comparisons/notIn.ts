@@ -10,10 +10,10 @@ import type { DbValueTypes } from "../../table/column.js";
 import type { MapParamsToTypeRecursively } from "./in.js";
 
 function sqlNotIn<
-    TComparing extends IComparable<TDbType, any, any, any, any, any>,
+    TComparing extends IComparable<TDbType, any, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
-    TQb extends QueryBuilder<TDbType, any, any, any, any, any, any>,
-    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any> ? DbType : never
+    TQb extends QueryBuilder<TDbType, any, any, any, any, any, any, any>,
+    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any, any> ? DbType : never
 >(
     this: TComparing,
     val: TQb
@@ -23,11 +23,11 @@ function sqlNotIn<
     [TQb]
 >
 function sqlNotIn<
-    TComparing extends IComparable<TDbType, any, any, any, any, any>,
+    TComparing extends IComparable<TDbType, any, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
-    const TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any, any, any>)[],
-    const TFinalValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any, any, any>)[] = MapParamsToTypeRecursively<TValueType, TValues>,
-    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any> ? DbType : never
+    const TValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any, any, any, any>)[],
+    const TFinalValues extends readonly (TValueType | IComparable<TDbType, any, TValueType, any, any, any, any>)[] = MapParamsToTypeRecursively<TValueType, TValues>,
+    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any, any> ? DbType : never
 >(
     this: TComparing,
     ...val: TValues
@@ -39,11 +39,11 @@ function sqlNotIn<
 
 
 function sqlNotIn<
-    TComparing extends IComparable<TDbType, any, any, any, any, any>,
+    TComparing extends IComparable<TDbType, any, any, any, any, any, any>,
     TValueType extends InferValueTypeFromComparable<TDbType, TComparing>,
-    TQb extends QueryBuilder<TDbType, any, any, any, any, any, any>,
-    TValues extends TValueType | IComparable<TDbType, any, TValueType, any, any, any>,
-    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any> ? DbType : never
+    TQb extends QueryBuilder<TDbType, any, any, any, any, any, any, any>,
+    TValues extends TValueType | IComparable<TDbType, any, TValueType, any, any, any, any>,
+    TDbType extends DbType = TComparing extends IComparable<infer DbType, any, any, any, any, any, any> ? DbType : never
 >
     (
         this: TComparing,

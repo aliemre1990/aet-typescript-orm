@@ -19,7 +19,7 @@ import type { AccumulateColumnParams } from "./_types/paramAccumulationSelect.js
 import type ColumnsSelection from "./ColumnsSelection.js";
 import { columnsSelectionFactory, ColumnsSelectionQueryTableObjectSymbol } from "./ColumnsSelection.js";
 import { mysqlDbOperators, mysqlFunctions, pgDbOperators, pgFunctions } from "./dbOperations.js";
-import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, queryBuilderContextFactory, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
+import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, queryBuilderContextFactory, type DetermineFinalValueType, type DetermineValueType, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
 import SubQueryObject from "./subQueryObject.js";
 import eq from "./comparisons/eq.js";
 import sqlIn from "./comparisons/in.js";
@@ -31,12 +31,13 @@ import gt from "./comparisons/gt.js";
 import gte from "./comparisons/gte.js";
 import lt from "./comparisons/lt.js";
 import lte from "./comparisons/lte.js";
+import type { PgColumnType } from "../table/columnTypes.js";
 
 
-type ResultShapeItem<TDbType extends DbType> = IComparable<TDbType, any, any, any, any, any>;
+type ResultShapeItem<TDbType extends DbType> = IComparable<TDbType, any, any, any, any, any, any>;
 type ResultShape<TDbType extends DbType> = readonly ResultShapeItem<TDbType>[];
 
-type SelectSpecsType<TDbType extends DbType> = "*" | readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, any>)[]
+type SelectSpecsType<TDbType extends DbType> = "*" | readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, any, any>)[]
 
 type FromItemType<TDbType extends DbType> = QueryTable<TDbType, any, any, any, any, any> | SubQueryObject<TDbType, any, any, string> | CTEObject<TDbType, any, any, any, any, any>;
 type FromType<TDbType extends DbType> = readonly FromItemType<TDbType>[];
@@ -46,7 +47,7 @@ const orderTypes = {
     desc: 'DESC'
 } as const;
 type OrderType = typeof orderTypes[keyof typeof orderTypes];
-type OrderBySpecsType<TDbType extends DbType> = readonly (IComparable<TDbType, any, any, any, any, any> | [IComparable<TDbType, any, any, any, any, any>, OrderType])[];
+type OrderBySpecsType<TDbType extends DbType> = readonly (IComparable<TDbType, any, any, any, any, any, any> | [IComparable<TDbType, any, any, any, any, any, any>, OrderType])[];
 
 const joinTypes = {
     inner: 'INNER',
@@ -59,7 +60,7 @@ type JoinSpecsTableType<TDbType extends DbType> = FromItemType<TDbType>;
 type JoinSpecsItemType<TDbType extends DbType> = { joinType: JoinType, table: JoinSpecsTableType<TDbType>, comparison: ComparisonType<TDbType> }
 type JoinSpecsType<TDbType extends DbType> = readonly JoinSpecsItemType<TDbType>[]
 
-type GroupBySpecs<TDbType extends DbType> = readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, any>)[];
+type GroupBySpecs<TDbType extends DbType> = readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, any, any>)[];
 
 type ColumnsSelectionListType<TDbType extends DbType> = { [key: string]: ColumnsSelection<TDbType, any, any> }
 type ComparisonType<TDbType extends DbType> = ColumnComparisonOperation<TDbType, any, any, any> | ColumnLogicalOperation<TDbType, any>;
@@ -74,13 +75,13 @@ const cteTypes = {
     }
 } as const;
 type CTEType = (typeof cteTypes)[keyof typeof cteTypes];
-type CTESpecsType<TDbType extends DbType> = readonly CTEObject<TDbType, string, CTEType, any, readonly CTEObjectEntry<TDbType, any, any, any, string, string | undefined>[], any>[];
+type CTESpecsType<TDbType extends DbType> = readonly CTEObject<TDbType, string, CTEType, any, readonly CTEObjectEntry<TDbType, any, any, any, string, string | undefined, any>[], any>[];
 
 type GetFirstTypeFromResult<TDbType extends DbType, TResult extends ResultShape<TDbType> | undefined> =
     TResult extends undefined ? never :
     TResult extends ResultShape<TDbType> ?
     TResult[0] extends never ? never :
-    TResult[0] extends IComparable<TDbType, any, infer TValueType, any, any, any> ? TValueType :
+    TResult[0] extends IComparable<TDbType, any, infer TValueType, any, any, any, any> ? TValueType :
     never :
     never;
 
@@ -88,7 +89,7 @@ type GetFirstFinalTypeFromResult<TDbType extends DbType, TResult extends ResultS
     TResult extends undefined ? never :
     TResult extends ResultShape<TDbType> ?
     TResult[0] extends never ? never :
-    TResult[0] extends IComparable<TDbType, any, any, infer TFinalValueType, any, any> ? TFinalValueType :
+    TResult[0] extends IComparable<TDbType, any, any, infer TFinalValueType, any, any, any> ? TFinalValueType :
     never :
     never;
 
@@ -96,7 +97,7 @@ type GetFirstDefaultKeyFromResult<TDbType extends DbType, TResult extends Result
     TResult extends undefined ? never :
     TResult extends ResultShape<TDbType> ?
     TResult[0] extends never ? never :
-    TResult[0] extends IComparable<TDbType, any, any, any, infer TDefaultFieldKey, any> ? TDefaultFieldKey :
+    TResult[0] extends IComparable<TDbType, any, any, any, infer TDefaultFieldKey, any, any> ? TDefaultFieldKey :
     never :
     never;
 
@@ -130,12 +131,21 @@ class QueryBuilder<
     TJoinSpecs extends JoinSpecsType<TDbType> | undefined,
     TCTESpecs extends CTESpecsType<TDbType> | undefined,
     TResult extends ResultShape<TDbType> | undefined = undefined,
-    TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null, any, any>[] | undefined = undefined,
+    TParams extends readonly QueryParam<TDbType, string, DbValueTypes | null, any, any, any>[] | undefined = undefined,
     TAs extends string | undefined = undefined,
+    TCastType extends PgColumnType | undefined = undefined
 >
     implements
     IDbType<TDbType>,
-    IComparable<TDbType, TParams, GetFirstTypeFromResult<TDbType, TResult>, GetFirstFinalTypeFromResult<TDbType, TResult>, GetFirstDefaultKeyFromResult<TDbType, TResult>, TAs> {
+    IComparable<
+        TDbType,
+        TParams,
+        DetermineValueType<TCastType, GetFirstTypeFromResult<TDbType, TResult>>,
+        DetermineFinalValueType<GetFirstFinalTypeFromResult<TDbType, TResult>, DetermineValueType<TCastType, GetFirstTypeFromResult<TDbType, TResult>>>,
+        GetFirstDefaultKeyFromResult<TDbType, TResult>,
+        TAs,
+        TCastType
+    > {
 
     dbType: TDbType;
 
@@ -144,6 +154,7 @@ class QueryBuilder<
 
     params?: TParams;
     asName?: TAs;
+    castType?: TCastType;
     defaultFieldKey: GetFirstDefaultKeyFromResult<TDbType, TResult>;
 
     eq: typeof eq = eq;
@@ -172,6 +183,7 @@ class QueryBuilder<
         dbType: TDbType,
         fromSpecs: TFrom,
         data?: {
+            castType?: TCastType,
             asName?: TAs,
             queryType?: QUERY_TYPE,
             cteSpecs?: TCTESpecs,
@@ -199,18 +211,39 @@ class QueryBuilder<
         this.combineSpecs = data?.combineSpecs;
 
         this.asName = data?.asName;
+        this.castType = data?.castType;
 
         this.queryType = data?.queryType;
 
         this.defaultFieldKey = data?.selectResult !== undefined && data.selectResult.length > 0 ? data.selectResult[0].defaultFieldKey : "";
     }
 
-    as<TAs extends string>(asName: TAs): QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, TParams, TAs> {
-        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, TParams, TAs>(
+    as<TAs extends string>(asName: TAs) {
+        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, TParams, TAs, TCastType>(
             this.dbType,
             this.fromSpecs,
             {
                 asName,
+                castType: this.castType,
+                queryType: this.queryType,
+                cteSpecs: this.cteSpecs,
+                joinSpecs: this.joinSpecs,
+                whereComparison: this.whereComparison,
+                selectResult: this.selectResult,
+                selectSpecs: this.selectSpecs,
+                groupedColumns: this.groupedColumns,
+                havingSpec: this.havingSpec,
+                orderBySpecs: this.orderBySpecs,
+                combineSpecs: this.combineSpecs
+            });
+    }
+    cast<TCastType extends PgColumnType>(type: TCastType) {
+        return new QueryBuilder<TDbType, TFrom, TJoinSpecs, TCTESpecs, TResult, TParams, TAs, TCastType>(
+            this.dbType,
+            this.fromSpecs,
+            {
+                asName: this.asName,
+                castType: type,
                 queryType: this.queryType,
                 cteSpecs: this.cteSpecs,
                 joinSpecs: this.joinSpecs,
@@ -408,10 +441,11 @@ class QueryBuilder<
         TCTESpecs,
         SelectToAllColumnsMapRecursively<TDbType, TFrom, TJoinSpecs>,
         TParams,
-        TAs
+        TAs,
+        TCastType
     >
     select<
-        const TCbResult extends readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, any>)[],
+        const TCbResult extends readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, any, any>)[],
         TFinalResult extends ResultShape<TDbType> = SelectToResultMapRecursively<TDbType, TCbResult>
     >(
         cb: (
@@ -425,10 +459,11 @@ class QueryBuilder<
         TCTESpecs,
         TCbResult["length"] extends 0 ? SelectToAllColumnsMapRecursively<TDbType, TFrom, TJoinSpecs> : TFinalResult,
         TCbResult["length"] extends 0 ? TParams : AccumulateColumnParams<TParams, TFinalResult>,
-        TAs
+        TAs,
+        TCastType
     >
     select<
-        const TCbResult extends readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, any>)[],
+        const TCbResult extends readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, any, any>)[],
         TFinalResult extends ResultShape<TDbType> = SelectToResultMapRecursively<TDbType, TCbResult>
     >(
         cb?: (
@@ -442,10 +477,11 @@ class QueryBuilder<
         TCTESpecs,
         TCbResult["length"] extends 0 ? SelectToAllColumnsMapRecursively<TDbType, TFrom, TJoinSpecs> : TFinalResult,
         TCbResult["length"] extends 0 ? TParams : AccumulateColumnParams<TParams, TFinalResult>,
-        TAs
+        TAs,
+        TCastType
     > {
 
-        let selectRes: readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, any>)[] = [];
+        let selectRes: readonly (ColumnsSelection<TDbType, any, any> | IComparable<TDbType, any, any, any, any, any, any>)[] = [];
         if (!isNullOrUndefined(cb)) {
             const columnsSelection = this.#getColumnsSelection() as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>;
             const functions = this.#getDbFunctions();
@@ -491,12 +527,14 @@ class QueryBuilder<
                 TCTESpecs,
                 TCbResult["length"] extends 0 ? SelectToAllColumnsMapRecursively<TDbType, TFrom, TJoinSpecs> : TFinalResult,
                 TCbResult["length"] extends 0 ? TParams : AccumulateColumnParams<TParams, TFinalResult>,
-                TAs
+                TAs,
+                TCastType
             >(
                 this.dbType,
                 this.fromSpecs,
                 {
                     asName: this.asName,
+                    castType: this.castType,
                     queryType: queryTypes.SELECT,
                     cteSpecs: this.cteSpecs,
                     joinSpecs: this.joinSpecs,
@@ -514,7 +552,7 @@ class QueryBuilder<
             for (const it of selectRes) {
                 if (ColumnsSelectionQueryTableObjectSymbol in it) {
                     for (const k in it) {
-                        let comparable = it[k] as IComparable<TDbType, any, any, any, any, any>;
+                        let comparable = it[k] as IComparable<TDbType, any, any, any, any, any, any>;
                         finalSelectRes.push(comparable);
                     }
                 } else {
@@ -529,12 +567,14 @@ class QueryBuilder<
                 TCTESpecs,
                 TCbResult["length"] extends 0 ? SelectToAllColumnsMapRecursively<TDbType, TFrom, TJoinSpecs> : TFinalResult,
                 TCbResult["length"] extends 0 ? TParams : AccumulateColumnParams<TParams, TFinalResult>,
-                TAs
+                TAs,
+                TCastType
             >(
                 this.dbType,
                 this.fromSpecs,
                 {
                     asName: this.asName,
+                    castType: this.castType,
                     queryType: queryTypes.SELECT,
                     cteSpecs: this.cteSpecs,
                     joinSpecs: this.joinSpecs,
@@ -553,7 +593,7 @@ class QueryBuilder<
 
     join<
         TJoinType extends JoinType,
-        TJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, string> | CTEObject<TDbType, any, any, any, any, any>,
+        TJoinTable extends Table<TDbType, any, any> | QueryTable<TDbType, any, any, any, any, any> | QueryBuilder<TDbType, any, any, any, any, any, string, any> | CTEObject<TDbType, any, any, any, any, any>,
         TCbResult extends ComparisonType<TDbType>,
         TJoinResult extends JoinSpecsTableType<TDbType> =
         TJoinTable extends Table<TDbType, infer TJoinCols, infer TJoinTableName> ?
@@ -564,11 +604,11 @@ class QueryBuilder<
             Table<TDbType, TJoinCols, TJoinTableName>,
             MapToQueryColumns<TDbType, TDbType, TJoinCols>
         > :
-        TJoinTable extends QueryBuilder<TDbType, any, any, any, any, any, string> ? MapToSubQueryObject<TDbType, TJoinTable> :
+        TJoinTable extends QueryBuilder<TDbType, any, any, any, any, any, string, any> ? MapToSubQueryObject<TDbType, TJoinTable> :
         TJoinTable extends CTEObject<TDbType, any, any, any, any, any> ? TJoinTable :
         TJoinTable,
-        TJoinParams extends readonly QueryParam<TDbType, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, [TJoinResult], AccumulateComparisonParams<TParams, TCbResult>>,
-        TJoinParamsResult extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = TJoinParams["length"] extends 0 ? undefined : TJoinParams,
+        TJoinParams extends readonly QueryParam<TDbType, any, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, [TJoinResult], AccumulateComparisonParams<TParams, TCbResult>>,
+        TJoinParamsResult extends readonly QueryParam<TDbType, any, any, any, any, any>[] | undefined = TJoinParams["length"] extends 0 ? undefined : TJoinParams,
         const TJoinAccumulated extends JoinSpecsType<TDbType> = readonly [...(TJoinSpecs extends undefined ? [] : TJoinSpecs), { joinType: TJoinType, table: TJoinResult, comparison: ComparisonType<TDbType> }]
     >(
         type: TJoinType,
@@ -577,7 +617,7 @@ class QueryBuilder<
             tables: TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinAccumulated>>,
             ops: DbOperators<TDbType>
         ) => TCbResult
-    ): QueryBuilder<TDbType, TFrom, TJoinAccumulated, TCTESpecs, TResult, TJoinParamsResult, TAs> {
+    ): QueryBuilder<TDbType, TFrom, TJoinAccumulated, TCTESpecs, TResult, TJoinParamsResult, TAs, TCastType> {
 
         let table;
 
@@ -597,7 +637,7 @@ class QueryBuilder<
         if (table instanceof Table) {
             const queryColumns = table.columnsList.map((col: Column<TDbType, any, any, any, any, any, any>) => {
                 return new QueryColumn(table.dbType, col, { tableName: table.name });
-            }) as QueryColumn<TDbType, any, any, any, any, any, any>[];
+            }) as QueryColumn<TDbType, any, any, any, any, any, any, any>[];
 
             let res = new QueryTable(table.dbType, table, queryColumns);
             let ownerName = res.name;
@@ -659,11 +699,12 @@ class QueryBuilder<
             mergedJoinSpecs = existingIndex >= 0 ? [...this.joinSpecs.toSpliced(existingIndex, 1), newJoinSpec] : [...this.joinSpecs, newJoinSpec];
         }
 
-        return new QueryBuilder<TDbType, TFrom, TJoinAccumulated, TCTESpecs, TResult, TJoinParamsResult, TAs>(
+        return new QueryBuilder<TDbType, TFrom, TJoinAccumulated, TCTESpecs, TResult, TJoinParamsResult, TAs, TCastType>(
             this.dbType,
             this.fromSpecs,
             {
                 asName: this.asName,
+                castType: this.castType,
                 queryType: this.queryType,
                 cteSpecs: this.cteSpecs,
                 joinSpecs: mergedJoinSpecs as TJoinAccumulated,
@@ -692,7 +733,8 @@ class QueryBuilder<
             TCTESpecs,
             TResult,
             AccumulateComparisonParams<TParams, TCbResult>,
-            TAs
+            TAs,
+            TCastType
         > {
         const columnsSelection = this.#getColumnsSelection() as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs>>;
         const ops = this.#getDbOperators();
@@ -706,12 +748,14 @@ class QueryBuilder<
             TCTESpecs,
             TResult,
             AccumulateComparisonParams<TParams, TCbResult>,
-            TAs
+            TAs,
+            TCastType
         >(
             this.dbType,
             this.fromSpecs,
             {
                 asName: this.asName,
+                castType: this.castType,
                 queryType: this.queryType,
                 cteSpecs: this.cteSpecs,
                 joinSpecs: this.joinSpecs,
@@ -738,7 +782,8 @@ class QueryBuilder<
             TCTESpecs,
             TResult,
             AccumulateColumnParams<TParams, TCbResult>,
-            TAs
+            TAs,
+            TCastType
         > {
 
         const columnsSelection = this.#getColumnsSelection() as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs, TCTESpecs>>;
@@ -752,12 +797,14 @@ class QueryBuilder<
             TCTESpecs,
             TResult,
             AccumulateColumnParams<TParams, TCbResult>,
-            TAs
+            TAs,
+            TCastType
         >(
             this.dbType,
             this.fromSpecs,
             {
                 asName: this.asName,
+                castType: this.castType,
                 queryType: this.queryType,
                 cteSpecs: this.cteSpecs,
                 joinSpecs: this.joinSpecs,
@@ -785,7 +832,8 @@ class QueryBuilder<
         TCTESpecs,
         TResult,
         AccumulateComparisonParams<TParams, TCbResult>,
-        TAs
+        TAs,
+        TCastType
     > {
         const columnsSelection = this.#getColumnsSelection() as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs, TCTESpecs>>;
         const operators = this.#getDbOperators();
@@ -798,12 +846,14 @@ class QueryBuilder<
             TCTESpecs,
             TResult,
             AccumulateComparisonParams<TParams, TCbResult>,
-            TAs
+            TAs,
+            TCastType
         >(
             this.dbType,
             this.fromSpecs,
             {
                 asName: this.asName,
+                castType: this.castType,
                 queryType: this.queryType,
                 cteSpecs: this.cteSpecs,
                 joinSpecs: this.joinSpecs,
@@ -832,7 +882,8 @@ class QueryBuilder<
             TCTESpecs,
             TResult,
             AccumulateOrderByParams<TDbType, TParams, TCbResult>,
-            TAs
+            TAs,
+            TCastType
         > {
         const columnsSelection = this.#getColumnsSelection() as TableToColumnsMap<TDbType, TablesToObject<TDbType, TFrom, TJoinSpecs, TCTESpecs>>;
         const functions = this.#getDbFunctions();
@@ -845,12 +896,14 @@ class QueryBuilder<
             TCTESpecs,
             TResult,
             AccumulateOrderByParams<TDbType, TParams, TCbResult>,
-            TAs
+            TAs,
+            TCastType
         >(
             this.dbType,
             this.fromSpecs,
             {
                 asName: this.asName,
+                castType: this.castType,
                 queryType: this.queryType,
                 cteSpecs: this.cteSpecs,
                 joinSpecs: this.joinSpecs,
@@ -868,12 +921,12 @@ class QueryBuilder<
         const TSelected extends readonly (
             Table<TDbType, any, any> |
             QueryTable<TDbType, any, any, any, any, any> |
-            QueryBuilder<TDbType, any, any, any, any, any, string> |
+            QueryBuilder<TDbType, any, any, any, any, any, string, any> |
             CTEObject<TDbType, any, any, any, any, any>
         )[],
         TFromRes extends FromType<TDbType> = ConvertElementsToSubQueryCompliant<TDbType, TSelected>,
-        AccumulatedParams extends readonly QueryParam<TDbType, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, TFromRes, TParams>,
-        AccumulatedParamsResult extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = AccumulatedParams["length"] extends 0 ? undefined : AccumulatedParams
+        AccumulatedParams extends readonly QueryParam<TDbType, any, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, TFromRes, TParams>,
+        AccumulatedParamsResult extends readonly QueryParam<TDbType, any, any, any, any, any>[] | undefined = AccumulatedParams["length"] extends 0 ? undefined : AccumulatedParams
 
     >(
         ...tables: TSelected
@@ -885,18 +938,19 @@ class QueryBuilder<
             TCTESpecs,
             TResult,
             AccumulatedParamsResult,
-            TAs
+            TAs,
+            TCastType
         >
     from<
         const TSelected extends readonly (
             Table<TDbType, any, any> |
             QueryTable<TDbType, any, any, any, any, any> |
-            QueryBuilder<TDbType, any, any, any, any, any, string> |
+            QueryBuilder<TDbType, any, any, any, any, any, string, any> |
             CTEObject<TDbType, any, any, any, any, any>
         )[],
         TFromRes extends FromType<TDbType> = ConvertElementsToSubQueryCompliant<TDbType, TSelected>,
-        AccumulatedParams extends readonly QueryParam<TDbType, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, TFromRes, TParams>,
-        AccumulatedParamsResult extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = AccumulatedParams["length"] extends 0 ? undefined : AccumulatedParams
+        AccumulatedParams extends readonly QueryParam<TDbType, any, any, any, any, any>[] = AccumulateSubQueryParams<TDbType, TFromRes, TParams>,
+        AccumulatedParamsResult extends readonly QueryParam<TDbType, any, any, any, any, any>[] | undefined = AccumulatedParams["length"] extends 0 ? undefined : AccumulatedParams
 
     >(
         cteSelection: ((ctes: MapCtesToSelectionType<TDbType, TCTESpecs>) => TSelected)
@@ -908,7 +962,8 @@ class QueryBuilder<
             TCTESpecs,
             TResult,
             AccumulatedParamsResult,
-            TAs
+            TAs,
+            TCastType
         >
     from(
         ...args: any
@@ -917,7 +972,7 @@ class QueryBuilder<
         let res: (
             Table<TDbType, any, any> |
             QueryTable<TDbType, any, any, any, any, any> |
-            QueryBuilder<TDbType, any, any, any, any, any, string> |
+            QueryBuilder<TDbType, any, any, any, any, any, string, any> |
             CTEObject<TDbType, any, any, any, any, any>
         )[];
 
@@ -937,7 +992,7 @@ class QueryBuilder<
             if (item instanceof Table) {
                 const queryColumns = item.columnsList.map((col: Column<TDbType, any, any, any, any, any, any>) => {
                     return new QueryColumn(item.dbType, col, { tableName: item.name });
-                }) as QueryColumn<TDbType, any, any, any, any, any, any>[];
+                }) as QueryColumn<TDbType, any, any, any, any, any, any, any>[];
 
                 return new QueryTable(item.dbType, item, queryColumns);
             } if (item instanceof QueryBuilder) {
@@ -949,11 +1004,12 @@ class QueryBuilder<
         });
 
 
-        return new QueryBuilder<TDbType, any, any, any, any, any, any>(
+        return new QueryBuilder<TDbType, any, any, any, any, any, any, any>(
             this.dbType,
             fromResult,
             {
                 asName: this.asName,
+                castType: this.castType,
                 queryType: this.queryType,
                 cteSpecs: this.cteSpecs,
                 joinSpecs: this.joinSpecs,
@@ -969,17 +1025,17 @@ class QueryBuilder<
 
     withAs<
         TCTEName extends string,
-        TQb extends QueryBuilder<TDbType, any, any, any, any, any, any>,
+        TQb extends QueryBuilder<TDbType, any, any, any, any, any, any, any>,
         // TCTEObject extends CTEObject<TDbType, any, any, any, any, any> = MapToCTEObject<TDbType, TCTEName, typeof cteTypes.NON_RECURSIVE, TQb>,
         TCTEObject extends CTEObject<TDbType, any, any, any, any, any> = CTEObject<TDbType, TCTEName, typeof cteTypes.NON_RECURSIVE, TQb>,
         TFinalCTESpec extends CTESpecsType<TDbType> = readonly [...(TCTESpecs extends CTESpecsType<TDbType> ? TCTESpecs : []), TCTEObject],
-        TCTEParams extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = TQb extends QueryBuilder<TDbType, any, any, any, any, infer TParams, any> ? TParams : never,
-        TParamsAccumulated extends readonly QueryParam<TDbType, any, any, any, any>[] =
+        TCTEParams extends readonly QueryParam<TDbType, any, any, any, any, any>[] | undefined = TQb extends QueryBuilder<TDbType, any, any, any, any, infer TParams, any, any> ? TParams : never,
+        TParamsAccumulated extends readonly QueryParam<TDbType, any, any, any, any, any>[] =
         [
-            ...(TParams extends readonly QueryParam<TDbType, any, any, any, any>[] ? TParams : []),
-            ...(TCTEParams extends readonly QueryParam<TDbType, any, any, any, any>[] ? TCTEParams : [])
+            ...(TParams extends readonly QueryParam<TDbType, any, any, any, any, any>[] ? TParams : []),
+            ...(TCTEParams extends readonly QueryParam<TDbType, any, any, any, any, any>[] ? TCTEParams : [])
         ],
-        TFinalParamsAccumulated extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = TParamsAccumulated["length"] extends 0 ? undefined : TParamsAccumulated
+        TFinalParamsAccumulated extends readonly QueryParam<TDbType, any, any, any, any, any>[] | undefined = TParamsAccumulated["length"] extends 0 ? undefined : TParamsAccumulated
     >(
         as: TCTEName,
         pick: TQb | ((ctes: MapCtesToSelectionType<TDbType, TCTESpecs>) => TQb)
@@ -991,7 +1047,8 @@ class QueryBuilder<
             TFinalCTESpec,
             TResult,
             TFinalParamsAccumulated,
-            TAs
+            TAs,
+            TCastType
         > {
 
         let res;
@@ -1025,12 +1082,14 @@ class QueryBuilder<
             TFinalCTESpec,
             TResult,
             TFinalParamsAccumulated,
-            TAs
+            TAs,
+            TCastType
         >(
             this.dbType,
             this.fromSpecs,
             {
                 asName: this.asName,
+                castType: this.castType,
                 queryType: this.queryType,
                 cteSpecs: newCteSpecs as CTESpecsType<TDbType> as TFinalCTESpec,
                 joinSpecs: this.joinSpecs,
@@ -1045,14 +1104,14 @@ class QueryBuilder<
 
     #combine <
         TCombineType extends COMBINE_TYPE,
-        TQbResult extends QueryBuilder<TDbType, any, any, any, any, any, any>,
-        TCombineParams extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = TQbResult extends QueryBuilder<TDbType, any, any, any, any, infer TParams, any> ? TParams : never,
-        TParamsAccumulated extends readonly QueryParam<TDbType, any, any, any, any>[] =
+        TQbResult extends QueryBuilder<TDbType, any, any, any, any, any, any, any>,
+        TCombineParams extends readonly QueryParam<TDbType, any, any, any, any, any>[] | undefined = TQbResult extends QueryBuilder<TDbType, any, any, any, any, infer TParams, any, any> ? TParams : never,
+        TParamsAccumulated extends readonly QueryParam<TDbType, any, any, any, any, any>[] =
         [
-            ...(TParams extends readonly QueryParam<TDbType, any, any, any, any>[] ? TParams : []),
-            ...(TCombineParams extends readonly QueryParam<TDbType, any, any, any, any>[] ? TCombineParams : [])
+            ...(TParams extends readonly QueryParam<TDbType, any, any, any, any, any>[] ? TParams : []),
+            ...(TCombineParams extends readonly QueryParam<TDbType, any, any, any, any, any>[] ? TCombineParams : [])
         ],
-        TFinalParamsAccumulated extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = TParamsAccumulated["length"] extends 0 ? undefined : TParamsAccumulated
+        TFinalParamsAccumulated extends readonly QueryParam<TDbType, any, any, any, any, any>[] | undefined = TParamsAccumulated["length"] extends 0 ? undefined : TParamsAccumulated
 
     >(
         combineType: TCombineType,
@@ -1064,7 +1123,8 @@ class QueryBuilder<
         TCTESpecs,
         TResult,
         TFinalParamsAccumulated,
-        TAs
+        TAs,
+        TCastType
     > {
         let cteSpecs: MapCtesToSelectionType<TDbType, TCTESpecs>;
         if (this.cteSpecs === undefined) {
@@ -1093,12 +1153,14 @@ class QueryBuilder<
             TCTESpecs,
             TResult,
             TFinalParamsAccumulated,
-            TAs
+            TAs,
+            TCastType
         >(
             this.dbType,
             this.fromSpecs,
             {
                 asName: this.asName,
+                castType: this.castType,
                 queryType: this.queryType,
                 cteSpecs: this.cteSpecs,
                 joinSpecs: this.joinSpecs,
@@ -1114,14 +1176,14 @@ class QueryBuilder<
 
 
     union<
-        TQbResult extends QueryBuilder<TDbType, any, any, any, any, any, any>,
-        TCombineParams extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = TQbResult extends QueryBuilder<TDbType, any, any, any, any, infer TParams, any> ? TParams : never,
-        TParamsAccumulated extends readonly QueryParam<TDbType, any, any, any, any>[] =
+        TQbResult extends QueryBuilder<TDbType, any, any, any, any, any, any, any>,
+        TCombineParams extends readonly QueryParam<TDbType, any, any, any, any, any>[] | undefined = TQbResult extends QueryBuilder<TDbType, any, any, any, any, infer TParams, any, any> ? TParams : never,
+        TParamsAccumulated extends readonly QueryParam<TDbType, any, any, any, any, any>[] =
         [
-            ...(TParams extends readonly QueryParam<TDbType, any, any, any, any>[] ? TParams : []),
-            ...(TCombineParams extends readonly QueryParam<TDbType, any, any, any, any>[] ? TCombineParams : [])
+            ...(TParams extends readonly QueryParam<TDbType, any, any, any, any, any>[] ? TParams : []),
+            ...(TCombineParams extends readonly QueryParam<TDbType, any, any, any, any, any>[] ? TCombineParams : [])
         ],
-        TFinalParamsAccumulated extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = TParamsAccumulated["length"] extends 0 ? undefined : TParamsAccumulated
+        TFinalParamsAccumulated extends readonly QueryParam<TDbType, any, any, any, any, any>[] | undefined = TParamsAccumulated["length"] extends 0 ? undefined : TParamsAccumulated
     >(
         cb: (ctes: MapCtesToSelectionType<TDbType, TCTESpecs>) => TQbResult
     ): QueryBuilder<
@@ -1131,21 +1193,22 @@ class QueryBuilder<
         TCTESpecs,
         TResult,
         TFinalParamsAccumulated,
-        TAs
+        TAs,
+        TCastType
     > {
         return this.#combine(combineTypes.UNION.name, cb);
     }
 
 
     unionAll<
-        TQbResult extends QueryBuilder<TDbType, any, any, any, any, any, any>,
-        TCombineParams extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = TQbResult extends QueryBuilder<TDbType, any, any, any, any, infer TParams, any> ? TParams : never,
-        TParamsAccumulated extends readonly QueryParam<TDbType, any, any, any, any>[] =
+        TQbResult extends QueryBuilder<TDbType, any, any, any, any, any, any, any>,
+        TCombineParams extends readonly QueryParam<TDbType, any, any, any, any, any>[] | undefined = TQbResult extends QueryBuilder<TDbType, any, any, any, any, infer TParams, any, any> ? TParams : never,
+        TParamsAccumulated extends readonly QueryParam<TDbType, any, any, any, any, any>[] =
         [
-            ...(TParams extends readonly QueryParam<TDbType, any, any, any, any>[] ? TParams : []),
-            ...(TCombineParams extends readonly QueryParam<TDbType, any, any, any, any>[] ? TCombineParams : [])
+            ...(TParams extends readonly QueryParam<TDbType, any, any, any, any, any>[] ? TParams : []),
+            ...(TCombineParams extends readonly QueryParam<TDbType, any, any, any, any, any>[] ? TCombineParams : [])
         ],
-        TFinalParamsAccumulated extends readonly QueryParam<TDbType, any, any, any, any>[] | undefined = TParamsAccumulated["length"] extends 0 ? undefined : TParamsAccumulated
+        TFinalParamsAccumulated extends readonly QueryParam<TDbType, any, any, any, any, any>[] | undefined = TParamsAccumulated["length"] extends 0 ? undefined : TParamsAccumulated
     >(
         cb: (ctes: MapCtesToSelectionType<TDbType, TCTESpecs>) => TQbResult
     ): QueryBuilder<
@@ -1155,7 +1218,8 @@ class QueryBuilder<
         TCTESpecs,
         TResult,
         TFinalParamsAccumulated,
-        TAs
+        TAs,
+        TCastType
     > {
         return this.#combine(combineTypes.UNION_ALL.name, cb);
     }
@@ -1185,7 +1249,7 @@ function from<
     TFrom extends readonly (
         Table<TDbType, any, any> |
         QueryTable<TDbType, any, any, any, any, any> |
-        QueryBuilder<TDbType, any, any, any, any, any, string>
+        QueryBuilder<TDbType, any, any, any, any, any, string, any>
     )[],
     TDbType extends DbType = InferDbTypeFromFromFirstIDbType<TFrom>
 >(...from: TFrom) {
@@ -1199,7 +1263,7 @@ function from<
 
             const queryColumns = item.columnsList.map((col: Column<TDbType, any, any, any, any, any, any>) => {
                 return new QueryColumn(item.dbType, col, { tableName: item.name });
-            }) as QueryColumn<TDbType, any, any, any, any, any, any>[];
+            }) as QueryColumn<TDbType, any, any, any, any, any, any, any>[];
 
             return new QueryTable(item.dbType, item, queryColumns);
         } if (item instanceof QueryBuilder) {

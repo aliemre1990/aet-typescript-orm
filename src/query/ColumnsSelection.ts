@@ -6,7 +6,7 @@ const ColumnsSelectionQueryTableObjectSymbol = Symbol();
 type ColumnsSelection<
     TDbType extends DbType,
     TQItem extends FromItemType<TDbType>,
-    TColumns extends readonly IComparable<TDbType, any, any, any, any, any>[]
+    TColumns extends readonly IComparable<TDbType, any, any, any, any, any, any>[]
 > =
     {
         [ColumnsSelectionQueryTableObjectSymbol]: TQItem;
@@ -17,7 +17,7 @@ type ColumnsSelection<
 
 function columnsSelectionFactory<TDbType extends DbType>(
     queryObject: FromItemType<TDbType>,
-    columns: readonly IComparable<TDbType, any, any, any, string, any>[]
+    columns: readonly IComparable<TDbType, any, any, any, string, any, any>[]
 ): ColumnsSelection<TDbType, any, any> {
 
     let res: ColumnsSelection<TDbType, any, any> = {
