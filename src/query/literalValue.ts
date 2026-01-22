@@ -20,8 +20,8 @@ import lte from "./comparisons/lte.js";
 import notEq from "./comparisons/notEq.js";
 import { convertValueToQueryString } from "./uitlity/common.js";
 
-const literalValueColumnName = '?column?';
-type TLiteralValueColumnName = typeof literalValueColumnName;
+const literalValueDefaultColumnName = '?column?';
+type TLiteralValueDefaultColumnName = typeof literalValueDefaultColumnName;
 
 class LiteralValue<
     TDbType extends DbType,
@@ -31,18 +31,18 @@ class LiteralValue<
 > implements IComparable<
     TDbType,
     undefined,
-    DetermineValueType<TCastType, NonNullable<TValue>>,
-    DetermineFinalValueType<TValue, DetermineValueType<TCastType, NonNullable<TValue>>>,
-    TLiteralValueColumnName,
+    DetermineValueType<TCastType, TValue>,
+    DetermineFinalValueType<TValue, DetermineValueType<TCastType, TValue>>,
+    TLiteralValueDefaultColumnName,
     TAs,
     TCastType
 > {
-    [IComparableValueDummySymbol]?: DetermineValueType<TCastType, NonNullable<TValue>>;
-    [IComparableFinalValueDummySymbol]?: DetermineFinalValueType<TValue, DetermineValueType<TCastType, NonNullable<TValue>>>;
+    [IComparableValueDummySymbol]?: DetermineValueType<TCastType, TValue>;
+    [IComparableFinalValueDummySymbol]?: DetermineFinalValueType<TValue, DetermineValueType<TCastType, TValue>>;
 
 
     dbType: TDbType;
-    defaultFieldKey: TLiteralValueColumnName;
+    defaultFieldKey: TLiteralValueDefaultColumnName;
     params?: undefined;
     asName?: TAs;
     castType?: TCastType;
@@ -79,7 +79,7 @@ class LiteralValue<
     constructor(dbType: TDbType, value: TValue, asName?: TAs, castType?: TCastType) {
         this.dbType = dbType;
         this.value = value;
-        this.defaultFieldKey = literalValueColumnName;
+        this.defaultFieldKey = literalValueDefaultColumnName;
         this.asName = asName;
         this.castType = castType;
     }
@@ -90,7 +90,7 @@ class LiteralValue<
  * This causes infinite loop
  */
 function generateLiteralValueFn<TDbType extends DbType>(dbType: TDbType) {
-    return <TValue extends DbValueTypes>(
+    return <const TValue extends DbValueTypes | null>(
         value: TValue
     ) => {
         return new LiteralValue<TDbType, TValue>(dbType, value);

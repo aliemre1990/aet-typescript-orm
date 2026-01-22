@@ -69,6 +69,31 @@ type IsContainsNonNull<TDbType extends DbType, TArgs extends
     false
     ;
 
+type IsContainsNull<TDbType extends DbType, TArgs extends
+    (
+        DbValueTypes |
+        null |
+        IComparable<TDbType, any, any, any, any, any, any>
+
+    )[]
+> = TArgs extends readonly [infer First, ...infer Rest] ?
+
+    First extends IComparable<TDbType, any, any, infer TFinalType, any, any, any> ?
+    null extends TFinalType ?
+    true :
+    Rest extends (IComparable<TDbType, any, any, any, any, any, any> | DbValueTypes | null)[] ?
+    IsContainsNull<TDbType, Rest> :
+    false :
+
+    null extends First ?
+    true :
+    Rest extends (IComparable<TDbType, any, any, any, any, any, any> | DbValueTypes)[] ?
+    IsContainsNull<TDbType, Rest> :
+    false :
+
+    false
+    ;
+
 /**
  * 
  */
@@ -83,5 +108,6 @@ type InferReturnTypeFromJSONBuildObjectParam<TDbType extends DbType, TObj extend
 export type {
     InferFirstTypeFromArgs,
     IsContainsNonNull,
+    IsContainsNull,
     InferReturnTypeFromJSONBuildObjectParam
 }

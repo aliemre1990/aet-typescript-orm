@@ -15,7 +15,20 @@ const client = new Client({
 
 // console.log(res.rows);
 
-let query = `SELECT 1,2`;
+// let query = `SELECT 1,2`;
+// await client.connect();
+
+// const res = await client.query(query);
+// console.log(res.rows);
+
+// let query = `SELECT $1`;
+// await client.connect();
+
+// const res = await client.query(query, [1]);
+// console.log(res.rows);
+
+
+let query = `SELECT 1+1`;
 await client.connect();
 
 const res = await client.query(query);

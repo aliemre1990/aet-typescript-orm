@@ -1,6 +1,7 @@
 import { dbTypes, type DbType } from "../db.js";
 import type { DbValueTypes } from "../table/column.js";
 import type { PgColumnType } from "../table/columnTypes.js";
+import type { IsAny } from "../utility/common.js";
 import { IComparableFinalValueDummySymbol, IComparableValueDummySymbol, queryBuilderContextFactory, type DetermineFinalValueType, type DetermineValueType, type IComparable, type QueryBuilderContext } from "./_interfaces/IComparable.js";
 import between from "./comparisons/between.js";
 import eq from "./comparisons/eq.js";
@@ -11,19 +12,22 @@ import lt from "./comparisons/lt.js";
 import lte from "./comparisons/lte.js";
 import notEq from "./comparisons/notEq.js";
 
+const paramDefaultColumnName = '?column?';
+type TParameDefaultColumnName = typeof paramDefaultColumnName;
+
 class QueryParam<
     TDbType extends DbType,
     TName extends string,
     TValueType extends DbValueTypes | null,
     TAs extends string | undefined = undefined,
-    TDefaultFieldKey extends string = `$${TName}`,
+    TDefaultFieldKey extends string = TParameDefaultColumnName,
     TCastType extends PgColumnType | undefined = undefined
 >
     implements IComparable<
         TDbType,
         [QueryParam<TDbType, TName, TValueType>],
         DetermineValueType<TCastType, NonNullable<TValueType>>,
-        DetermineFinalValueType<TValueType, DetermineValueType<TCastType, NonNullable<TValueType>>>,
+        DetermineFinalValueType<IsAny<TValueType> extends true ? DetermineValueType<TCastType, TValueType> | null : TValueType, DetermineValueType<TCastType, NonNullable<TValueType>>>,
         TDefaultFieldKey,
         TAs,
         TCastType
@@ -33,8 +37,7 @@ class QueryParam<
 
     params?: [QueryParam<TDbType, TName, TValueType>];
     [IComparableValueDummySymbol]?: DetermineValueType<TCastType, NonNullable<TValueType>>;
-    [IComparableFinalValueDummySymbol]?: DetermineFinalValueType<TValueType, DetermineValueType<TCastType, NonNullable<TValueType>>>;
-    isAgg?: false;
+    [IComparableFinalValueDummySymbol]?: DetermineFinalValueType<IsAny<TValueType> extends true ? DetermineValueType<TCastType, TValueType> | null : TValueType, DetermineValueType<TCastType, NonNullable<TValueType>>>;
 
     name: TName;
     asName?: TAs;
@@ -48,7 +51,7 @@ class QueryParam<
         this.castType = castType;
         this.ownerName = ownerName;
 
-        this.defaultFieldKey = `$${name}` as TDefaultFieldKey;
+        this.defaultFieldKey = paramDefaultColumnName as TDefaultFieldKey;
 
         this.params = [this] as [QueryParam<TDbType, TName, TValueType, any, any, any>];
     }

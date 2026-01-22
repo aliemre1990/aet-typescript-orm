@@ -11,11 +11,14 @@ import type gte from "../comparisons/gte.js";
 import type lt from "../comparisons/lt.js";
 import type lte from "../comparisons/lte.js";
 import type { PgColumnType, PgTypeToJsType } from "../../table/columnTypes.js";
+import type { IsAny } from "../../utility/common.js";
 
 type DetermineValueType<TCastType extends PgColumnType | undefined, TValueType extends DbValueTypes | null> =
     TCastType extends undefined ?
     TValueType :
     TCastType extends PgColumnType ?
+    IsAny<TValueType> extends true ? PgTypeToJsType<TCastType> :
+    TValueType extends null ? TValueType :
     object extends PgTypeToJsType<TCastType> ?
     TValueType :
     PgTypeToJsType<TCastType> :
@@ -45,7 +48,7 @@ interface IComparable<
 
     [IComparableValueDummySymbol]?: TValueType;
     [IComparableFinalValueDummySymbol]?: TFinalValueType;
-    
+
     params?: TParams;
     asName?: TAs;
     castType?: TCastType;

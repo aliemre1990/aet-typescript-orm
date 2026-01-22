@@ -45,6 +45,8 @@ const arithmeticOperations = {
 
 type ArithmeticOperation = typeof arithmeticOperations[keyof typeof arithmeticOperations];
 
+const arithmeticDefaultColumnName = '?column?';
+type TArithmeticDefaultColumnName = typeof arithmeticDefaultColumnName;
 
 class SQLArithmeticOperation<
     TDbType extends DbType,
@@ -55,7 +57,7 @@ class SQLArithmeticOperation<
     )[],
     TReturnType extends DbValueTypes | null,
     TAs extends string | undefined = undefined,
-    TDefaultFieldKey extends string = `${TArithmeticOperation["name"]}()`,
+    TDefaultFieldKey extends string = TArithmeticDefaultColumnName,
     TParams extends QueryParam<TDbType, string, any, any, any, any>[] | undefined = InferParamsFromFnArgs<TArgs>,
     TCastType extends PgColumnType | undefined = undefined
 > implements IComparable<
@@ -125,7 +127,7 @@ class SQLArithmeticOperation<
         this.args = args;
         this.operation = operation;
         this.asName = asName;
-        this.defaultFieldKey = `${operation.name}()` as TDefaultFieldKey;
+        this.defaultFieldKey = arithmeticDefaultColumnName as TDefaultFieldKey;
         this.castType = castType;
     }
 }

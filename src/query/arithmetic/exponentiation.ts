@@ -1,6 +1,6 @@
 import type { DbType } from "../../db.js";
 import type { IComparable } from "../_interfaces/IComparable.js";
-import type { IsContainsNonNull } from "../_types/args.js";
+import type { IsContainsNull } from "../_types/args.js";
 import SQLArithmeticOperation, { arithmeticOperations } from "./_arithmeticOperations.js";
 
 function generateArithmeticExponentiation<
@@ -15,7 +15,7 @@ function generateArithmeticExponentiation<
             TDbType,
             typeof arithmeticOperations.exponentiation,
             TArgs,
-            IsContainsNonNull<TDbType, TArgs> extends true ? number : number | null
+            IsContainsNull<TDbType, TArgs> extends true ? number | null : number
         >(dbType, args, arithmeticOperations.exponentiation);
     }
 }
